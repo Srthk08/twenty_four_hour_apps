@@ -1,0 +1,505 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getProductBySlug, getProducts, getProductPlans } from '../../lib/products-data';
+
+export async function getStaticPaths() {
+  const products = await getProducts();
+  
+  const paths = await Promise.all(products.map(async (product) => ({
+    params: { slug: product.slug },
+    props: { product, productPlans: await getProductPlans(product.id) }
+  })));
+  
+  return paths;
+}
+
+const { product, productPlans } = Astro.props;
+const { slug } = Astro.params;
+
+if (!product) {
+  return Astro.redirect('/products');
+}
+
+const categoryStyles = {
+  restaurant: {
+    gradient: 'from-green-500 to-emerald-600',
+    bg: 'bg-green-50',
+    text: 'text-green-700',
+    icon: '🍽️'
+  },
+  mobile: {
+    gradient: 'from-blue-500 to-indigo-600',
+    bg: 'bg-blue-50',
+    text: 'text-blue-700',
+    icon: '📱'
+  },
+  tv: {
+    gradient: 'from-purple-500 to-violet-600',
+    bg: 'bg-purple-50',
+    text: 'text-purple-700',
+    icon: '📺'
+  },
+  web: {
+    gradient: 'from-orange-500 to-red-600',
+    bg: 'bg-orange-50',
+    text: 'text-orange-700',
+    icon: '🌐'
+  }
+};
+
+const style = categoryStyles[product.category];
+---
+
+<Layout title={`${product.name} - DevExpress`} description={product.description}>
+  <!-- Hero Section -->
+  <section class={`bg-gradient-to-br ${style.gradient} text-white py-20`}>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <div class="flex items-center space-x-2 mb-4">
+            <span class="text-2xl">{style.icon}</span>
+            <span class="text-lg opacity-90 capitalize">{product.category} Solution</span>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-bold mb-6">{product.name}</h1>
+          <p class="text-xl text-gray-100 mb-8">{product.description}</p>
+          <div class="flex items-center space-x-6">
+            <div class="text-center">
+              <div class="text-3xl font-bold">24hrs</div>
+              <div class="text-sm opacity-90">Delivery Time</div>
+            </div>
+            <div class="text-center">
+              <div class="text-3xl font-bold">100%</div>
+              <div class="text-sm opacity-90">Custom Built</div>
+            </div>
+            <div class="text-center">
+              <div class="text-3xl font-bold">30d</div>
+              <div class="text-sm opacity-90">Free Support</div>
+            </div>
+          </div>
+        </div>
+        <div class="relative">
+          <img src={product.featured_image} alt={product.name} class="rounded-lg shadow-2xl" />
+          <div class="absolute -bottom-6 -right-6 bg-white p-4 rounded-lg shadow-lg">
+            <div class="text-2xl font-bold text-gray-900">₹{product.base_price.toLocaleString()}</div>
+            <div class="text-sm text-gray-600">Starting Price</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">What's Included</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {product.features.map((feature, index) => (
+          <div class={`${style.bg} p-6 rounded-lg animate-fade-in`} style={`animation-delay: ${index * 0.1}s;`}>
+            <div class="flex items-center space-x-3">
+              <div class={`w-8 h-8 bg-gradient-to-r ${style.gradient} rounded-full flex items-center justify-center`}>
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <span class={`font-medium ${style.text}`}>{feature}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Cuisine Type Section (Only for Restaurant Products) -->
+  {product.category === 'restaurant' && (
+    <section class="py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-bold text-gray-900 mb-4">Perfect for Any Cuisine</h2>
+          <p class="text-xl text-gray-600">Our restaurant solutions work beautifully for all types of cuisines</p>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div class={`${style.bg} p-4 rounded-lg text-center hover:shadow-md transition-shadow`}>
+            <div class="text-2xl mb-2">🍛</div>
+            <div class={`font-medium ${style.text} text-sm`}>Indian</div>
+          </div>
+          <div class={`${style.bg} p-4 rounded-lg text-center hover:shadow-md transition-shadow`}>
+            <div class="text-2xl mb-2">🥢</div>
+            <div class={`font-medium ${style.text} text-sm`}>Chinese</div>
+          </div>
+          <div class={`${style.bg} p-4 rounded-lg text-center hover:shadow-md transition-shadow`}>
+            <div class="text-2xl mb-2">🍝</div>
+            <div class={`font-medium ${style.text} text-sm`}>Italian</div>
+          </div>
+          <div class={`${style.bg} p-4 rounded-lg text-center hover:shadow-md transition-shadow`}>
+            <div class="text-2xl mb-2">🍣</div>
+            <div class={`font-medium ${style.text} text-sm`}>Japanese</div>
+          </div>
+          <div class={`${style.bg} p-4 rounded-lg text-center hover:shadow-md transition-shadow`}>
+            <div class="text-2xl mb-2">🌮</div>
+            <div class={`font-medium ${style.text} text-sm`}>Mexican</div>
+          </div>
+          <div class={`${style.bg} p-4 rounded-lg text-center hover:shadow-md transition-shadow`}>
+            <div class="text-2xl mb-2">🍕</div>
+            <div class={`font-medium ${style.text} text-sm`}>Pizza</div>
+          </div>
+        </div>
+        
+        <div class="mt-8 text-center">
+          <p class="text-gray-600 mb-4">Don't see your cuisine type? No problem!</p>
+          <p class="text-sm text-white">We customize our solutions to perfectly match your restaurant's unique style and cuisine</p>
+        </div>
+      </div>
+    </section>
+  )}
+
+
+
+  <!-- Process Section -->
+  <section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Development Process</h2>
+        <p class="text-xl text-gray-600">Here's how we deliver your {product.name.toLowerCase()} in 24 hours</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div class="text-center">
+          <div class={`w-16 h-16 bg-gradient-to-r ${style.gradient} rounded-full flex items-center justify-center mx-auto mb-4`}>
+            <span class="text-white font-bold text-xl">1</span>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Requirements</h3>
+          <p class="text-gray-600 text-sm">You provide project details and requirements through our smart forms</p>
+        </div>
+
+        <div class="text-center">
+          <div class={`w-16 h-16 bg-gradient-to-r ${style.gradient} rounded-full flex items-center justify-center mx-auto mb-4`}>
+            <span class="text-white font-bold text-xl">2</span>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Design</h3>
+          <p class="text-gray-600 text-sm">Our team creates custom designs based on your brand and preferences</p>
+        </div>
+
+        <div class="text-center">
+          <div class={`w-16 h-16 bg-gradient-to-r ${style.gradient} rounded-full flex items-center justify-center mx-auto mb-4`}>
+            <span class="text-white font-bold text-xl">3</span>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Development</h3>
+          <p class="text-gray-600 text-sm">Rapid development using proven frameworks and best practices</p>
+        </div>
+
+        <div class="text-center">
+          <div class={`w-16 h-16 bg-gradient-to-r ${style.gradient} rounded-full flex items-center justify-center mx-auto mb-4`}>
+            <span class="text-white font-bold text-xl">4</span>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Delivery</h3>
+          <p class="text-gray-600 text-sm">Complete solution delivered with documentation and support</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Product Plans Section -->
+  <section class="py-16">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Choose Your Plan</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {productPlans.map((plan) => (
+          <div class={`bg-white rounded-xl shadow-lg p-8 ${plan.is_popular ? 'ring-2 ring-primary-500 relative' : ''}`}>
+            {plan.is_popular && (
+              <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                <span class="bg-primary-500 text-white px-4 py-2 rounded-full text-sm font-medium">Most Popular</span>
+              </div>
+            )}
+            
+            <div class="text-center mb-6">
+              <h3 class="text-xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+              <p class="text-gray-600 text-sm mb-4">{plan.description}</p>
+              <div class="text-3xl font-bold text-primary-600">₹{plan.price.toLocaleString()}</div>
+              <div class="text-sm text-gray-500">Delivery in {plan.delivery_days} day{plan.delivery_days > 1 ? 's' : ''}</div>
+            </div>
+            
+            <ul class="space-y-3 mb-8">
+              {plan.features.map((feature) => (
+                <li class="flex items-center">
+                  <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span class="text-gray-700">{feature}</span>
+                </li>
+              ))}
+            </ul>
+            
+            <button 
+              onclick={`redirectToCart('${product.id}', ${plan.price})`}
+              class={`w-full py-3 px-6 rounded-lg font-medium transition-all ${
+                plan.is_popular 
+                  ? 'bg-primary-600 hover:bg-primary-700 text-white' 
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+              }`}
+            >
+              Choose {plan.name}
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Frequently Asked Questions</h2>
+      
+      <div class="space-y-6">
+        <div class="bg-white rounded-lg shadow-sm">
+          <button class="faq-button w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 transition-colors">
+            <span class="font-semibold text-gray-900">How can you deliver in just 24 hours?</span>
+            <svg class="w-5 h-5 text-gray-500 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="faq-content hidden px-6 pb-4">
+            <p class="text-gray-600">We use proven templates, pre-built components, and streamlined development processes. Our experienced team works around the clock to ensure rapid delivery without compromising quality.</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm">
+          <button class="faq-button w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 transition-colors">
+            <span class="font-semibold text-gray-900">What if I need revisions?</span>
+            <svg class="w-5 h-5 text-gray-500 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="faq-content hidden px-6 pb-4">
+            <p class="text-gray-600">All plans include 30 days of free support and minor revisions. Major changes can be handled through our revision packages at affordable rates.</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm">
+          <button class="faq-button w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 transition-colors">
+            <span class="font-semibold text-gray-900">Do you provide source code?</span>
+            <svg class="w-5 h-5 text-gray-500 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="faq-content hidden px-6 pb-4">
+            <p class="text-gray-600">Yes, you receive complete source code, documentation, and deployment instructions. You own the code and can modify it as needed.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class={`py-16 bg-gradient-to-r ${style.gradient} text-white`}>
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold mb-4">Ready to Get Started?</h2>
+      <p class="text-xl mb-8 opacity-90">
+        Join hundreds of satisfied clients who got their {product.name.toLowerCase()} delivered in just 24 hours.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <button 
+          id="add-to-cart-btn"
+          onclick={`redirectToCart('${product.id}', '${productPlans[0]?.price}')`}
+          class="bg-white text-gray-900 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-colors"
+        >
+          Add to Cart - ₹{productPlans[0]?.price.toLocaleString()}
+        </button>
+        <a href={`/contact?product=${encodeURIComponent(product.name)}&project_type=${product.category}&project_details=${encodeURIComponent(`I'm interested in the ${product.name}. ${product.description}`)}&price=${productPlans[0]?.price || product.base_price}`} class="contact-us-btn border-2 border-white text-white hover:bg-white hover:text-black px-8 py-3 rounded-lg font-semibold transition-all">
+          Contact Us
+        </a>
+      </div>
+      
+      <!-- Login Prompt for Unauthenticated Users -->
+      <div id="login-prompt" class="hidden mt-6 p-4 bg-white bg-opacity-20 rounded-lg">
+        <p class="text-white mb-3">Please sign in to add items to your cart</p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <a href="/login?redirect=/products/${product.slug}" class="bg-white text-gray-900 hover:bg-gray-100 px-6 py-2 rounded-lg font-medium transition-colors">
+            Sign In
+          </a>
+          <a href="/signup?redirect=/products/${product.slug}" class="border border-white text-white hover:bg-white hover:text-gray-900 px-6 py-2 rounded-lg font-medium transition-all">
+            Create Account
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  // Declare global types
+  declare global {
+    interface Window {
+      addToCart: (productId: string, planId: string, planName: string) => Promise<void>;
+    }
+  }
+
+  // FAQ functionality
+  document.querySelectorAll('.faq-button').forEach(button => {
+    button.addEventListener('click', () => {
+      const content = button.nextElementSibling;
+      const icon = button.querySelector('svg');
+      
+      content.classList.toggle('hidden');
+      icon.classList.toggle('rotate-180');
+    });
+  });
+
+  // Redirect to cart functionality
+  window.redirectToCart = function(productId: string, price: number) {
+    console.log('🛒 redirectToCart called with:', { productId, price });
+    
+    // Check if user is authenticated using global auth manager
+    const authManager = window.globalAuthManager || window.simpleAuthManager;
+    console.log('🔍 Auth manager found:', !!authManager);
+    
+    if (authManager && authManager.isUserLoggedIn()) {
+      // User is authenticated, redirect to cart
+      console.log('✅ User authenticated, redirecting to cart');
+      const cartUrl = `/cart?product=${productId}&price=${price}`;
+      console.log('🔗 Redirecting to:', cartUrl);
+      window.location.href = cartUrl;
+    } else {
+      // User is not authenticated, redirect to login with return URL
+      console.log('❌ User not authenticated, redirecting to login');
+      const loginUrl = `/login?redirect=/cart?product=${productId}&price=${price}`;
+      console.log('🔗 Redirecting to:', loginUrl);
+      window.location.href = loginUrl;
+    }
+  };
+
+  // Check authentication status on page load
+  function checkAuthenticationStatus() {
+    console.log('Checking authentication status...');
+    
+    // Wait for global auth manager to be ready
+    const checkAuth = () => {
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      
+      if (authManager) {
+        console.log('✅ Auth manager found, checking status...');
+        
+        if (authManager.isUserLoggedIn()) {
+          console.log('✅ User is authenticated, hiding login prompt');
+          
+          // User is authenticated, hide login prompt
+          const loginPrompt = document.getElementById('login-prompt');
+          if (loginPrompt) {
+            loginPrompt.classList.add('hidden');
+            console.log('Login prompt hidden');
+          }
+          
+          // Show authenticated user options
+          const addToCartBtn = document.getElementById('add-to-cart-btn');
+          if (addToCartBtn) {
+            addToCartBtn.classList.remove('hidden');
+            console.log('Add to cart button shown');
+          }
+        } else {
+          console.log('❌ User is not authenticated, showing login prompt');
+          
+          // User is not authenticated, show login prompt
+          const loginPrompt = document.getElementById('login-prompt');
+          if (loginPrompt) {
+            loginPrompt.classList.remove('hidden');
+            console.log('Login prompt shown');
+          }
+          
+          // Hide authenticated user options
+          const addToCartBtn = document.getElementById('add-to-cart-btn');
+          if (addToCartBtn) {
+            addToCartBtn.classList.add('hidden');
+            console.log('Add to cart button hidden');
+          }
+        }
+      } else {
+        // Auth manager not ready yet, retry after a short delay
+        console.log('⏳ Auth manager not ready, retrying...');
+        setTimeout(checkAuth, 100);
+      }
+    };
+    
+    checkAuth();
+  }
+
+  // Check authentication when page loads
+  document.addEventListener('DOMContentLoaded', checkAuthenticationStatus);
+
+  // Listen for authentication state changes
+  window.addEventListener('user-logged-in', (e) => {
+    console.log('✅ User logged in event received, updating UI...');
+    checkAuthenticationStatus();
+  });
+
+  window.addEventListener('user-logged-out', () => {
+    console.log('❌ User logged out event received, updating UI...');
+    checkAuthenticationStatus();
+  });
+
+  // Animation on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate-fade-in');
+      }
+    });
+  });
+
+  document.querySelectorAll('.animate-fade-in').forEach(el => {
+    observer.observe(el);
+  });
+
+  // Ensure Contact Us button text visibility
+  document.addEventListener('DOMContentLoaded', () => {
+    const contactButtons = document.querySelectorAll('.contact-us-btn');
+    contactButtons.forEach(button => {
+      button.addEventListener('mouseenter', function() {
+        this.style.color = '#000000';
+        this.style.backgroundColor = 'white';
+      });
+      button.addEventListener('mouseleave', function() {
+        this.style.color = 'white';
+        this.style.backgroundColor = 'transparent';
+      });
+    });
+  });
+</script>
+
+<style>
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .rotate-180 {
+    transform: rotate(180deg);
+  }
+
+  /* Contact Us button text visibility - More specific selectors */
+  a.contact-us-btn {
+    color: white !important;
+  }
+  
+  a.contact-us-btn:hover {
+    color: #000000 !important; /* Black text on white background */
+    background-color: white !important;
+  }
+  
+  a.contact-us-btn:focus {
+    color: #000000 !important; /* Black text on focus */
+    background-color: white !important;
+  }
+  
+  /* Additional specificity for hover state */
+  .contact-us-btn:hover span,
+  .contact-us-btn:hover {
+    color: #000000 !important;
+  }
+</style>

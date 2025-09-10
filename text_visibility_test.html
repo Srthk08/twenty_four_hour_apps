@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Visibility Test</title>
+    <style>
+        /* Global Text Visibility Fixes */
+        * {
+            color: #1f2937 !important; /* Dark gray for all text */
+        }
+        
+        /* Ensure all text is visible */
+        body, html {
+            background-color: #f8fafc !important; /* Light gray background */
+            color: #1f2937 !important;
+        }
+        
+        /* Fix white text on white background issues */
+        .text-white {
+            color: #1f2937 !important; /* Change white text to dark */
+            background-color: #f8fafc !important; /* Add light background */
+            padding: 2px 4px !important;
+            border-radius: 4px !important;
+        }
+        
+        /* Fix placeholder text visibility */
+        ::placeholder {
+            color: #6b7280 !important; /* Darker gray for placeholders */
+            opacity: 1 !important;
+        }
+        
+        /* Fix input field text visibility */
+        input, textarea, select {
+            color: #1f2937 !important;
+            background-color: #ffffff !important;
+            border: 2px solid #d1d5db !important;
+        }
+        
+        /* Fix form labels */
+        label {
+            color: #374151 !important;
+            font-weight: 600 !important;
+        }
+        
+        /* Fix headings */
+        h1, h2, h3, h4, h5, h6 {
+            color: #111827 !important;
+            font-weight: 700 !important;
+        }
+        
+        /* Fix paragraph text */
+        p {
+            color: #374151 !important;
+            line-height: 1.6 !important;
+        }
+        
+        /* Fix links */
+        a {
+            color: #2563eb !important;
+            text-decoration: underline !important;
+        }
+        
+        /* Fix buttons */
+        button {
+            color: #ffffff !important;
+            background-color: #2563eb !important;
+            border: 2px solid #1d4ed8 !important;
+        }
+        
+        /* Fix cards and containers */
+        .card, .container, .panel {
+            background-color: #ffffff !important;
+            border: 1px solid #e5e7eb !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        .test-section {
+            background: #ffffff;
+            padding: 20px;
+            margin: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Text Visibility Test Page</h1>
+        
+        <div class="test-section">
+            <h2>Profile Information</h2>
+            <p><strong>Name:</strong> John Doe</p>
+            <p><strong>Email:</strong> john@example.com</p>
+            <p><strong>Phone:</strong> +1 (555) 123-4567</p>
+            <p><strong>Company:</strong> Tech Solutions Inc.</p>
+            <a href="#">Edit Profile →</a>
+            <a href="#">Refresh Data</a>
+        </div>
+        
+        <div class="test-section">
+            <h2>Contact Form</h2>
+            <form>
+                <label for="firstName">Your first name *</label>
+                <input type="text" id="firstName" placeholder="Your first name">
+                
+                <label for="lastName">Your last name *</label>
+                <input type="text" id="lastName" placeholder="Your last name">
+                
+                <label for="email">Email Address *</label>
+                <input type="email" id="email" placeholder="your@example.com">
+                
+                <label for="phone">Phone Number *</label>
+                <input type="tel" id="phone" placeholder="+1 (555) 123-4567">
+                
+                <label for="message">Message *</label>
+                <textarea id="message" placeholder="Tell us about your project requirements, timeline, and any specific needs..."></textarea>
+                
+                <button type="submit">Send Message</button>
+            </form>
+        </div>
+        
+        <div class="test-section">
+            <h2>Contact Information</h2>
+            <p><strong>Email:</strong> hello@devexpress.com</p>
+            <p>We typically respond within 24 hours</p>
+            
+            <p><strong>Phone:</strong> +1 (555) 123-4567</p>
+            <p>Mon-Fri 9AM-6PM EST</p>
+            
+            <p><strong>Address:</strong> 123 Innovation Drive</p>
+            <p>Tech City, TC 12345</p>
+            <p>By appointment only</p>
+            
+            <p><strong>Response Time:</strong> Within 24 hours</p>
+            <p>We pride ourselves on quick responses</p>
+        </div>
+        
+        <div class="test-section">
+            <h2>Product Customization</h2>
+            <p>Enter your project name *</p>
+            <input type="text" placeholder="Enter your project name">
+            
+            <p>Enter your app name</p>
+            <input type="text" placeholder="Enter your app name">
+            
+            <p>Your full name *</p>
+            <input type="text" placeholder="Your full name">
+            
+            <p>Describe your product requirements and features</p>
+            <textarea placeholder="Describe your product requirements and features"></textarea>
+            
+            <p>Color Palette:</p>
+            <p>Primary: Blue</p>
+            <p>Secondary: Black</p>
+            <p>Accent: Orange</p>
+            <p>Text: Black</p>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test Results</h2>
+            <p>✅ All text should now be clearly visible</p>
+            <p>✅ No white text on white background</p>
+            <p>✅ Placeholder text is readable</p>
+            <p>✅ Form labels are bold and visible</p>
+            <p>✅ Headings are dark and prominent</p>
+            <p>✅ Links are blue and underlined</p>
+            <p>✅ Buttons have proper contrast</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Profile Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+        button { padding: 12px 24px; margin: 8px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; }
+        button:hover { background: #0056b3; }
+        .admin-btn { background: #dc3545; }
+        .admin-btn:hover { background: #c82333; }
+        .test-btn { background: #28a745; }
+        .test-btn:hover { background: #218838; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 12px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Simple Profile Page Test</h1>
+        
+        <div class="section info">
+            <h3>📋 Test Status</h3>
+            <div id="test-status">Ready to test profile page...</div>
+        </div>
+
+        <div class="section">
+            <h3>🔧 Quick Tests</h3>
+            <button onclick="testServer()" class="test-btn">Test Server</button>
+            <button onclick="testProfilePage()" class="test-btn">Test Profile Page</button>
+            <button onclick="goToProfile()" class="admin-btn">Go to Profile</button>
+        </div>
+
+        <div class="section">
+            <h3>📊 Test Results</h3>
+            <div id="results"></div>
+        </div>
+
+        <div class="section">
+            <h3>🎯 Direct Links</h3>
+            <button onclick="window.open('http://localhost:4321/admin/profile', '_blank')">Open Admin Profile</button>
+            <button onclick="window.open('http://localhost:4321/admin', '_blank')">Open Admin Dashboard</button>
+            <button onclick="window.open('http://localhost:4321', '_blank')">Open Home Page</button>
+        </div>
+    </div>
+
+    <script>
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `section ${type}`;
+            div.innerHTML = `<pre>${message}</pre>`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('test-status');
+            status.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        async function testServer() {
+            updateStatus('🔄 Testing server...', 'info');
+            
+            try {
+                const response = await fetch('http://localhost:4321');
+                
+                if (response.ok) {
+                    updateStatus('✅ Server is running!', 'success');
+                    addResult('✅ Server is running and responding', 'success');
+                } else {
+                    updateStatus('❌ Server error', 'error');
+                    addResult(`❌ Server error: ${response.status}`, 'error');
+                }
+            } catch (err) {
+                updateStatus('❌ Server not running', 'error');
+                addResult(`❌ Server not running: ${err.message}`, 'error');
+            }
+        }
+
+        async function testProfilePage() {
+            updateStatus('🔄 Testing profile page...', 'info');
+            
+            try {
+                const response = await fetch('http://localhost:4321/admin/profile');
+                
+                if (response.ok) {
+                    updateStatus('✅ Profile page loads!', 'success');
+                    addResult('✅ Admin profile page loads successfully', 'success');
+                } else {
+                    updateStatus('❌ Profile page error', 'error');
+                    addResult(`❌ Profile page error: ${response.status}`, 'error');
+                }
+            } catch (err) {
+                updateStatus('❌ Profile page failed', 'error');
+                addResult(`❌ Profile page failed: ${err.message}`, 'error');
+            }
+        }
+
+        function goToProfile() {
+            window.open('http://localhost:4321/admin/profile', '_blank');
+        }
+
+        // Auto-test on load
+        window.onload = function() {
+            updateStatus('🔄 Auto-testing server...', 'info');
+            testServer();
+        };
+    </script>
+</body>
+</html>

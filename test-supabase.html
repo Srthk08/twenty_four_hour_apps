@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Test</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+        }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Supabase Integration Test</h1>
+    
+    <div class="test-section info">
+        <h3>Configuration</h3>
+        <p>Make sure you have set up your .env file with:</p>
+        <ul>
+            <li>VITE_SUPABASE_URL</li>
+            <li>VITE_SUPABASE_ANON_KEY</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h3>Connection Test</h3>
+        <button onclick="testConnection()">Test Supabase Connection</button>
+        <div id="connection-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Authentication Test</h3>
+        <div>
+            <input type="email" id="email" placeholder="Email" value="test@example.com">
+            <input type="password" id="password" placeholder="Password" value="password123">
+        </div>
+        <button onclick="testSignUp()">Test Sign Up</button>
+        <button onclick="testSignIn()">Test Sign In</button>
+        <button onclick="testSignOut()">Test Sign Out</button>
+        <button onclick="getCurrentUser()">Get Current User</button>
+        <div id="auth-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Database Test</h3>
+        <button onclick="testDatabase()">Test Database Access</button>
+        <div id="database-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Logs</h3>
+        <div id="logs" class="log"></div>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        function log(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logs.textContent += logEntry;
+            console.log(message);
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').textContent = '';
+        }
+
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.className = `test-section ${type}`;
+            element.innerHTML = `<h3>${element.querySelector('h3').textContent}</h3>${element.querySelector('h3').nextElementSibling ? element.querySelector('h3').nextElementSibling.outerHTML : ''}<p>${message}</p>`;
+        }
+
+        async function testConnection() {
+            try {
+                log('Testing Supabase connection...');
+                const { data, error } = await supabase.from('profiles').select('count').limit(1);
+                
+                if (error) {
+                    log(`Connection failed: ${error.message}`, 'error');
+                    showResult('connection-result', `Connection failed: ${error.message}`, 'error');
+                } else {
+                    log('✅ Connection successful!', 'success');
+                    showResult('connection-result', '✅ Connection successful!', 'success');
+                }
+            } catch (error) {
+                log(`Connection error: ${error.message}`, 'error');
+                showResult('connection-result', `Connection error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testSignUp() {
+            try {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                log(`Testing sign up for: ${email}`);
+                const { data, error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            full_name: 'Test User',
+                            company_name: 'Test Company'
+                        }
+                    }
+                });
+                
+                if (error) {
+                    log(`Sign up failed: ${error.message}`, 'error');
+                    showResult('auth-result', `Sign up failed: ${error.message}`, 'error');
+                } else {
+                    log(`✅ Sign up successful! User ID: ${data.user?.id}`, 'success');
+                    showResult('auth-result', `✅ Sign up successful! User ID: ${data.user?.id}`, 'success');
+                }
+            } catch (error) {
+                log(`Sign up error: ${error.message}`, 'error');
+                showResult('auth-result', `Sign up error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testSignIn() {
+            try {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                log(`Testing sign in for: ${email}`);
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                
+                if (error) {
+                    log(`Sign in failed: ${error.message}`, 'error');
+                    showResult('auth-result', `Sign in failed: ${error.message}`, 'error');
+                } else {
+                    log(`✅ Sign in successful! User: ${data.user?.email}`, 'success');
+                    showResult('auth-result', `✅ Sign in successful! User: ${data.user?.email}`, 'success');
+                }
+            } catch (error) {
+                log(`Sign in error: ${error.message}`, 'error');
+                showResult('auth-result', `Sign in error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testSignOut() {
+            try {
+                log('Testing sign out...');
+                const { error } = await supabase.auth.signOut();
+                
+                if (error) {
+                    log(`Sign out failed: ${error.message}`, 'error');
+                    showResult('auth-result', `Sign out failed: ${error.message}`, 'error');
+                } else {
+                    log('✅ Sign out successful!', 'success');
+                    showResult('auth-result', '✅ Sign out successful!', 'success');
+                }
+            } catch (error) {
+                log(`Sign out error: ${error.message}`, 'error');
+                showResult('auth-result', `Sign out error: ${error.message}`, 'error');
+            }
+        }
+
+        async function getCurrentUser() {
+            try {
+                log('Getting current user...');
+                const { data: { user }, error } = await supabase.auth.getUser();
+                
+                if (error) {
+                    log(`Get user failed: ${error.message}`, 'error');
+                    showResult('auth-result', `Get user failed: ${error.message}`, 'error');
+                } else if (user) {
+                    log(`✅ Current user: ${user.email} (ID: ${user.id})`, 'success');
+                    showResult('auth-result', `✅ Current user: ${user.email} (ID: ${user.id})`, 'success');
+                } else {
+                    log('ℹ️ No user currently signed in', 'info');
+                    showResult('auth-result', 'ℹ️ No user currently signed in', 'info');
+                }
+            } catch (error) {
+                log(`Get user error: ${error.message}`, 'error');
+                showResult('auth-result', `Get user error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testDatabase() {
+            try {
+                log('Testing database access...');
+                
+                // Test reading from profiles
+                const { data: profiles, error: profilesError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .limit(5);
+                
+                if (profilesError) {
+                    log(`Database read failed: ${profilesError.message}`, 'error');
+                    showResult('database-result', `Database read failed: ${profilesError.message}`, 'error');
+                    return;
+                }
+                
+                log(`✅ Database read successful! Found ${profiles?.length || 0} profiles`, 'success');
+                showResult('database-result', `✅ Database read successful! Found ${profiles?.length || 0} profiles`, 'success');
+                
+                // Log profile data
+                if (profiles && profiles.length > 0) {
+                    log('Sample profile data:');
+                    profiles.forEach((profile, index) => {
+                        log(`  ${index + 1}. ${profile.email} (${profile.role})`);
+                    });
+                }
+                
+            } catch (error) {
+                log(`Database test error: ${error.message}`, 'error');
+                showResult('database-result', `Database test error: ${error.message}`, 'error');
+            }
+        }
+
+        // Listen for auth state changes
+        supabase.auth.onAuthStateChange((event, session) => {
+            log(`Auth state changed: ${event} - User: ${session?.user?.email || 'None'}`);
+        });
+
+        // Initial log
+        log('🚀 Supabase test page loaded. Update the URL and key above to test your connection.');
+    </script>
+</body>
+</html>

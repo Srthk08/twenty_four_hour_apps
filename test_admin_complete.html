@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Admin Panel Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; color: #856404; }
+        button { padding: 12px 24px; margin: 8px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; }
+        button:hover { background: #0056b3; }
+        .admin-btn { background: #dc3545; }
+        .admin-btn:hover { background: #c82333; }
+        .test-btn { background: #28a745; }
+        .test-btn:hover { background: #218838; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 12px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Complete Admin Panel Test</h1>
+        
+        <div class="section info">
+            <h3>📋 Test Status</h3>
+            <div id="test-status">Running comprehensive admin panel tests...</div>
+        </div>
+
+        <div class="section">
+            <h3>🔧 Admin Panel Tests</h3>
+            <button onclick="testAllAdminPages()" class="test-btn">Test All Admin Pages</button>
+            <button onclick="testDatabaseConnection()">Test Database</button>
+            <button onclick="testAdminAuth()">Test Admin Auth</button>
+            <button onclick="goToAdminDashboard()" class="admin-btn">Go to Admin Dashboard</button>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h4>📊 Admin Dashboard</h4>
+                <button onclick="testPage('/admin')">Test Dashboard</button>
+                <div id="dashboard-status">Not tested</div>
+            </div>
+            
+            <div class="card">
+                <h4>👤 Admin Profile</h4>
+                <button onclick="testPage('/admin/profile')">Test Profile</button>
+                <div id="profile-status">Not tested</div>
+            </div>
+            
+            <div class="card">
+                <h4>⚙️ Admin Settings</h4>
+                <button onclick="testPage('/admin/settings')">Test Settings</button>
+                <div id="settings-status">Not tested</div>
+            </div>
+            
+            <div class="card">
+                <h4>👥 Users Page</h4>
+                <button onclick="testPage('/admin/users')">Test Users</button>
+                <div id="users-status">Not tested</div>
+            </div>
+            
+            <div class="card">
+                <h4>📦 Orders Page</h4>
+                <button onclick="testPage('/admin/orders')">Test Orders</button>
+                <div id="orders-status">Not tested</div>
+            </div>
+            
+            <div class="card">
+                <h4>🎫 Support Page</h4>
+                <button onclick="testPage('/admin/support')">Test Support</button>
+                <div id="support-status">Not tested</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>📊 Test Results</h3>
+            <div id="results"></div>
+        </div>
+
+        <div class="section">
+            <h3>🎯 Quick Actions</h3>
+            <button onclick="window.open('http://localhost:4321/admin', '_blank')">Open Admin Dashboard</button>
+            <button onclick="window.open('http://localhost:4321/admin/profile', '_blank')">Open Admin Profile</button>
+            <button onclick="window.open('http://localhost:4321/admin/settings', '_blank')">Open Admin Settings</button>
+            <button onclick="window.open('http://localhost:4321/test_admin_panel.html', '_blank')">Open Admin Panel Test</button>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `section ${type}`;
+            div.innerHTML = `<pre>${message}</pre>`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('test-status');
+            status.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function updatePageStatus(page, message, type = 'info') {
+            const statusElement = document.getElementById(`${page}-status`);
+            if (statusElement) {
+                statusElement.innerHTML = `<div class="status ${type}">${message}</div>`;
+            }
+        }
+
+        async function testDatabaseConnection() {
+            try {
+                addResult('🔄 Testing database connection...', 'info');
+                
+                const { data, error } = await supabase
+                    .from('user_profiles')
+                    .select('count', { count: 'exact', head: true });
+                
+                if (error) {
+                    addResult(`❌ Database connection failed: ${error.message}`, 'error');
+                    updateStatus('❌ Database connection failed', 'error');
+                } else {
+                    addResult(`✅ Database connected successfully! Found ${data} user profiles.`, 'success');
+                    updateStatus('✅ Database connection successful', 'success');
+                }
+            } catch (err) {
+                addResult(`❌ Database test failed: ${err.message}`, 'error');
+                updateStatus('❌ Database test failed', 'error');
+            }
+        }
+
+        async function testAdminAuth() {
+            try {
+                addResult('🔄 Testing admin authentication...', 'info');
+                
+                const { data: { user }, error } = await supabase.auth.getUser();
+                
+                if (error) {
+                    addResult(`❌ Auth error: ${error.message}`, 'error');
+                    updateStatus('❌ Authentication failed', 'error');
+                    return;
+                }
+                
+                if (!user) {
+                    addResult('❌ No user logged in', 'error');
+                    updateStatus('❌ No user logged in', 'error');
+                    return;
+                }
+                
+                // Check if user has admin role
+                const { data: profile, error: profileError } = await supabase
+                    .from('user_profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+                
+                if (profileError) {
+                    addResult(`❌ Profile error: ${profileError.message}`, 'error');
+                    updateStatus('❌ Profile check failed', 'error');
+                    return;
+                }
+                
+                if (profile.role !== 'admin') {
+                    addResult(`❌ User is not admin. Role: ${profile.role}`, 'error');
+                    updateStatus('❌ User is not admin', 'error');
+                    return;
+                }
+                
+                addResult(`✅ Admin authentication successful! User: ${user.email}`, 'success');
+                updateStatus('✅ Admin authentication successful', 'success');
+                
+            } catch (err) {
+                addResult(`❌ Auth test failed: ${err.message}`, 'error');
+                updateStatus('❌ Auth test failed', 'error');
+            }
+        }
+
+        async function testPage(path) {
+            try {
+                const pageName = path.split('/').pop() || 'dashboard';
+                updatePageStatus(pageName, 'Testing...', 'info');
+                
+                const response = await fetch(`http://localhost:4321${path}`);
+                
+                if (response.ok) {
+                    updatePageStatus(pageName, '✅ Page loads successfully', 'success');
+                    addResult(`✅ ${path} - Page loads successfully (${response.status})`, 'success');
+                } else {
+                    updatePageStatus(pageName, `❌ Error: ${response.status}`, 'error');
+                    addResult(`❌ ${path} - Error: ${response.status}`, 'error');
+                }
+            } catch (err) {
+                const pageName = path.split('/').pop() || 'dashboard';
+                updatePageStatus(pageName, `❌ Failed: ${err.message}`, 'error');
+                addResult(`❌ ${path} - Failed: ${err.message}`, 'error');
+            }
+        }
+
+        async function testAllAdminPages() {
+            updateStatus('🔄 Testing all admin pages...', 'info');
+            
+            const pages = [
+                { path: '/admin', name: 'dashboard' },
+                { path: '/admin/profile', name: 'profile' },
+                { path: '/admin/settings', name: 'settings' },
+                { path: '/admin/users', name: 'users' },
+                { path: '/admin/orders', name: 'orders' },
+                { path: '/admin/support', name: 'support' }
+            ];
+            
+            for (const page of pages) {
+                await testPage(page.path);
+                // Small delay between tests
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            updateStatus('✅ All admin page tests completed', 'success');
+        }
+
+        function goToAdminDashboard() {
+            window.open('http://localhost:4321/admin', '_blank');
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            updateStatus('🔄 Initializing complete admin panel tests...', 'info');
+            testDatabaseConnection();
+            testAdminAuth();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Client Test</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Supabase Client Test</h1>
+    <p>This page tests the Supabase client initialization and functionality.</p>
+    
+    <div id="status" class="test-section info">Initializing...</div>
+    
+    <div class="test-section">
+        <h3>Test 1: Supabase Library Loading</h3>
+        <button onclick="testLibraryLoading()">Test Library Loading</button>
+        <div id="library-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 2: Client Initialization</h3>
+        <button onclick="testClientInit()">Test Client Initialization</button>
+        <div id="client-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 3: Database Connection</h3>
+        <button onclick="testDatabaseConnection()">Test Database Connection</button>
+        <div id="db-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 4: Insert Test Data</h3>
+        <button onclick="testInsertData()">Test Insert Data</button>
+        <div id="insert-result"></div>
+    </div>
+
+    <script>
+        let supabase = null;
+        
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `test-section ${type}`;
+        }
+        
+        function updateResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="test-section ${type}">${message}</div>`;
+        }
+        
+        function testLibraryLoading() {
+            try {
+                updateResult('library-result', 'Testing library loading...', 'info');
+                
+                console.log('Testing Supabase library...');
+                console.log('window.supabase available:', !!window.supabase);
+                console.log('typeof window.supabase:', typeof window.supabase);
+                
+                if (window.supabase) {
+                    console.log('window.supabase methods:', Object.keys(window.supabase));
+                    console.log('createClient available:', typeof window.supabase.createClient);
+                    
+                    updateResult('library-result', '✅ Supabase library loaded successfully!<br>Methods available: ' + Object.keys(window.supabase).join(', '), 'success');
+                } else {
+                    updateResult('library-result', '❌ Supabase library not loaded', 'error');
+                }
+            } catch (err) {
+                console.error('Library loading test error:', err);
+                updateResult('library-result', '❌ Error: ' + err.message, 'error');
+            }
+        }
+        
+        function testClientInit() {
+            try {
+                updateResult('client-result', 'Testing client initialization...', 'info');
+                
+                const supabaseUrl = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+                const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+                
+                if (window.supabase && typeof window.supabase.createClient === 'function') {
+                    supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+                    console.log('Supabase client created:', !!supabase);
+                    console.log('Client methods:', Object.keys(supabase));
+                    console.log('from method available:', typeof supabase.from);
+                    
+                    updateResult('client-result', '✅ Supabase client initialized successfully!<br>Methods available: ' + Object.keys(supabase).join(', '), 'success');
+                } else {
+                    updateResult('client-result', '❌ Cannot create Supabase client - library not available', 'error');
+                }
+            } catch (err) {
+                console.error('Client initialization error:', err);
+                updateResult('client-result', '❌ Error: ' + err.message, 'error');
+            }
+        }
+        
+        async function testDatabaseConnection() {
+            try {
+                updateResult('db-result', 'Testing database connection...', 'info');
+                
+                if (!supabase) {
+                    updateResult('db-result', '❌ Supabase client not initialized. Run Test 2 first.', 'error');
+                    return;
+                }
+                
+                const { data, error } = await supabase
+                    .from('contact_submissions')
+                    .select('id')
+                    .limit(1);
+                
+                if (error) {
+                    console.error('Database connection failed:', error);
+                    updateResult('db-result', '❌ Database connection failed: ' + error.message, 'error');
+                } else {
+                    console.log('Database connection successful:', data);
+                    updateResult('db-result', '✅ Database connection successful! Found ' + data.length + ' records.', 'success');
+                }
+            } catch (err) {
+                console.error('Database connection error:', err);
+                updateResult('db-result', '❌ Error: ' + err.message, 'error');
+            }
+        }
+        
+        async function testInsertData() {
+            try {
+                updateResult('insert-result', 'Testing data insertion...', 'info');
+                
+                if (!supabase) {
+                    updateResult('insert-result', '❌ Supabase client not initialized. Run Test 2 first.', 'error');
+                    return;
+                }
+                
+                const testData = {
+                    first_name: 'Test',
+                    last_name: 'User',
+                    email: 'test@example.com',
+                    phone: '+1234567890',
+                    company_name: 'Test Company',
+                    project_type: 'custom-app',
+                    project_details: 'This is a test submission from the Supabase client test.',
+                    message: 'This is a test submission from the Supabase client test.'
+                };
+                
+                const { data, error } = await supabase
+                    .from('contact_submissions')
+                    .insert([testData])
+                    .select();
+                
+                if (error) {
+                    console.error('Insert failed:', error);
+                    updateResult('insert-result', '❌ Insert failed: ' + error.message, 'error');
+                } else {
+                    console.log('Insert successful:', data);
+                    updateResult('insert-result', '✅ Data inserted successfully! ID: ' + data[0].id, 'success');
+                }
+            } catch (err) {
+                console.error('Insert error:', err);
+                updateResult('insert-result', '❌ Error: ' + err.message, 'error');
+            }
+        }
+        
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            console.log('🚀 Page loaded, testing Supabase...');
+            updateStatus('Ready for testing - Click the test buttons above', 'info');
+            
+            // Auto-run first test
+            setTimeout(() => {
+                testLibraryLoading();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

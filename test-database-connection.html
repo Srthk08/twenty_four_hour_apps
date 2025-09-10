@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Connection Test</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Database Connection Test</h1>
+    <p>This page tests the Supabase connection and database operations.</p>
+    
+    <div id="status" class="test-section info">Initializing...</div>
+    
+    <div class="test-section">
+        <h3>Test 1: Supabase Connection</h3>
+        <button onclick="testConnection()">Test Connection</button>
+        <div id="connection-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 2: Table Structure</h3>
+        <button onclick="testTableStructure()">Check Table Structure</button>
+        <div id="table-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 3: Insert Test Data</h3>
+        <button onclick="testInsert()">Insert Test Data</button>
+        <div id="insert-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 4: View All Data</h3>
+        <button onclick="viewAllData()">View All Data</button>
+        <div id="view-result"></div>
+    </div>
+
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        
+        let supabase;
+        
+        // Initialize Supabase client
+        function initSupabase() {
+            if (typeof window.supabase !== 'undefined') {
+                supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+                console.log('✅ Supabase client initialized');
+                updateStatus('✅ Supabase client initialized successfully', 'success');
+                return true;
+            } else {
+                console.log('⏳ Supabase library not loaded yet, retrying...');
+                setTimeout(initSupabase, 100);
+                return false;
+            }
+        }
+        
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `test-section ${type}`;
+        }
+        
+        function updateResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="test-section ${type}">${message}</div>`;
+        }
+        
+        async function testConnection() {
+            try {
+                updateResult('connection-result', 'Testing connection...', 'info');
+                
+                const { data, error } = await supabase
+                    .from('contact_submissions')
+                    .select('id')
+                    .limit(1);
+                
+                if (error) {
+                    console.error('Connection test failed:', error);
+                    updateResult('connection-result', `❌ Connection failed: ${error.message}`, 'error');
+                } else {
+                    console.log('Connection test successful:', data);
+                    updateResult('connection-result', `✅ Connection successful! Found ${data.length} records`, 'success');
+                }
+            } catch (err) {
+                console.error('Connection test error:', err);
+                updateResult('connection-result', `❌ Connection error: ${err.message}`, 'error');
+            }
+        }
+        
+        async function testTableStructure() {
+            try {
+                updateResult('table-result', 'Checking table structure...', 'info');
+                
+                const { data, error } = await supabase
+                    .from('contact_submissions')
+                    .select('*')
+                    .limit(1);
+                
+                if (error) {
+                    console.error('Table structure check failed:', error);
+                    updateResult('table-result', `❌ Table check failed: ${error.message}`, 'error');
+                } else {
+                    console.log('Table structure check successful:', data);
+                    const columns = data.length > 0 ? Object.keys(data[0]) : ['No data to check structure'];
+                    updateResult('table-result', `✅ Table exists! Columns: ${columns.join(', ')}`, 'success');
+                }
+            } catch (err) {
+                console.error('Table structure check error:', err);
+                updateResult('table-result', `❌ Table check error: ${err.message}`, 'error');
+            }
+        }
+        
+        async function testInsert() {
+            try {
+                updateResult('insert-result', 'Inserting test data...', 'info');
+                
+                const testData = {
+                    first_name: 'Test',
+                    last_name: 'User',
+                    email: 'test@example.com',
+                    phone: '+1234567890',
+                    company_name: 'Test Company',
+                    project_type: 'custom-app',
+                    project_details: 'This is a test submission from the database connection test.',
+                    message: 'This is a test submission from the database connection test.'
+                };
+                
+                const { data, error } = await supabase
+                    .from('contact_submissions')
+                    .insert([testData])
+                    .select();
+                
+                if (error) {
+                    console.error('Insert test failed:', error);
+                    updateResult('insert-result', `❌ Insert failed: ${error.message}`, 'error');
+                } else {
+                    console.log('Insert test successful:', data);
+                    updateResult('insert-result', `✅ Insert successful! ID: ${data[0].id}`, 'success');
+                }
+            } catch (err) {
+                console.error('Insert test error:', err);
+                updateResult('insert-result', `❌ Insert error: ${err.message}`, 'error');
+            }
+        }
+        
+        async function viewAllData() {
+            try {
+                updateResult('view-result', 'Fetching all data...', 'info');
+                
+                const { data, error } = await supabase
+                    .from('contact_submissions')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) {
+                    console.error('View data failed:', error);
+                    updateResult('view-result', `❌ View failed: ${error.message}`, 'error');
+                } else {
+                    console.log('View data successful:', data);
+                    const dataHtml = data.length > 0 
+                        ? `<pre>${JSON.stringify(data, null, 2)}</pre>`
+                        : 'No data found';
+                    updateResult('view-result', `✅ Found ${data.length} records:<br>${dataHtml}`, 'success');
+                }
+            } catch (err) {
+                console.error('View data error:', err);
+                updateResult('view-result', `❌ View error: ${err.message}`, 'error');
+            }
+        }
+        
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            console.log('🚀 Page loaded, initializing Supabase...');
+            initSupabase();
+        });
+    </script>
+</body>
+</html>

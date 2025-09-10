@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Pre-fill Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px; }
+        button:hover { background: #0056b3; }
+        .message { margin-top: 15px; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .debug { background: #f8f9fa; color: #495057; border: 1px solid #dee2e6; font-family: monospace; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>User Pre-fill Test</h1>
+    <p>This tests the user pre-filling functionality for the contact form.</p>
+    
+    <div id="status" class="message info">Initializing...</div>
+    
+    <h3>Test Form</h3>
+    <form id="test-form">
+        <div class="form-group">
+            <label for="first_name">First Name:</label>
+            <input type="text" id="first_name" name="first_name" placeholder="Will be auto-filled if user is logged in">
+        </div>
+        
+        <div class="form-group">
+            <label for="last_name">Last Name:</label>
+            <input type="text" id="last_name" name="last_name" placeholder="Will be auto-filled if user is logged in">
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email Address:</label>
+            <input type="email" id="email" name="email" placeholder="Will be auto-filled if user is logged in">
+        </div>
+        
+        <div class="form-group">
+            <label for="phone">Phone Number:</label>
+            <input type="tel" id="phone" name="phone" placeholder="Will be auto-filled if user is logged in">
+        </div>
+        
+        <div class="form-group">
+            <label for="company">Company Name:</label>
+            <input type="text" id="company" name="company" placeholder="Will be auto-filled if user is logged in">
+        </div>
+        
+        <button type="button" onclick="testPrefill()">Test Pre-fill</button>
+        <button type="button" onclick="clearForm()">Clear Form</button>
+        <button type="button" onclick="simulateLogin()">Simulate Login</button>
+    </form>
+    
+    <div id="result"></div>
+    <div id="debug" class="message debug" style="display: none;"></div>
+
+    <script>
+        // Mock global auth manager for testing
+        window.globalAuthManager = {
+            isUserLoggedIn: function() {
+                return !!localStorage.getItem('test-user');
+            },
+            getCurrentUser: function() {
+                const userData = localStorage.getItem('test-user');
+                return userData ? JSON.parse(userData) : null;
+            }
+        };
+        
+        // Mock Supabase for testing
+        window.supabase = {
+            auth: {
+                getUser: async function() {
+                    return { data: { user: null } };
+                }
+            }
+        };
+        
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `message ${type}`;
+        }
+        
+        function updateDebug(message) {
+            const debugDiv = document.getElementById('debug');
+            debugDiv.style.display = 'block';
+            debugDiv.innerHTML += message + '<br>';
+        }
+        
+        function clearForm() {
+            document.getElementById('first_name').value = '';
+            document.getElementById('last_name').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('phone').value = '';
+            document.getElementById('company').value = '';
+            updateStatus('Form cleared', 'info');
+        }
+        
+        function simulateLogin() {
+            // Simulate a logged-in user
+            const mockUser = {
+                email: 'john.doe@example.com',
+                full_name: 'John Doe',
+                phone: '+1 (555) 123-4567',
+                company_name: 'Tech Solutions Inc'
+            };
+            
+            localStorage.setItem('test-user', JSON.stringify(mockUser));
+            updateStatus('✅ Simulated login - User: ' + mockUser.email, 'success');
+            updateDebug('Mock user data stored: ' + JSON.stringify(mockUser, null, 2));
+        }
+        
+        function testPrefill() {
+            updateDebug('🔄 Starting pre-fill test...');
+            
+            // Simulate the prefillForm function from contact.astro
+            console.log('🔍 Checking for logged in user using global auth manager...');
+            updateDebug('🔍 Checking for logged in user using global auth manager...');
+            
+            const authManager = window.globalAuthManager || window.simpleAuthManager;
+            if (authManager && authManager.isUserLoggedIn()) {
+                const currentUser = authManager.getCurrentUser();
+                console.log('👤 User found via global auth manager:', currentUser?.email);
+                updateDebug('👤 User found via global auth manager: ' + (currentUser?.email || 'No email'));
+                
+                // Pre-fill form fields with user data
+                const firstNameInput = document.getElementById('first_name');
+                const lastNameInput = document.getElementById('last_name');
+                const emailInput = document.getElementById('email');
+                const phoneInput = document.getElementById('phone');
+                const companyInput = document.getElementById('company');
+
+                // Pre-fill first name and last name
+                if (currentUser && currentUser.full_name) {
+                    const names = currentUser.full_name.split(' ');
+                    if (firstNameInput) {
+                        firstNameInput.value = names[0] || '';
+                        console.log('✅ Pre-filled first name:', names[0]);
+                        updateDebug('✅ Pre-filled first name: ' + names[0]);
+                    }
+                    if (lastNameInput && names.length > 1) {
+                        lastNameInput.value = names.slice(1).join(' ');
+                        console.log('✅ Pre-filled last name:', names.slice(1).join(' '));
+                        updateDebug('✅ Pre-filled last name: ' + names.slice(1).join(' '));
+                    }
+                }
+
+                // Pre-fill email
+                if (emailInput && currentUser.email) {
+                    emailInput.value = currentUser.email;
+                    console.log('✅ Pre-filled email:', currentUser.email);
+                    updateDebug('✅ Pre-filled email: ' + currentUser.email);
+                }
+
+                // Pre-fill phone
+                if (phoneInput && currentUser.phone) {
+                    phoneInput.value = currentUser.phone;
+                    console.log('✅ Pre-filled phone:', currentUser.phone);
+                    updateDebug('✅ Pre-filled phone: ' + currentUser.phone);
+                }
+
+                // Pre-fill company
+                if (companyInput && currentUser.company_name) {
+                    companyInput.value = currentUser.company_name;
+                    console.log('✅ Pre-filled company:', currentUser.company_name);
+                    updateDebug('✅ Pre-filled company: ' + currentUser.company_name);
+                }
+
+                console.log('✅ Form pre-filled successfully with global auth manager data');
+                updateDebug('✅ Form pre-filled successfully with global auth manager data');
+                updateStatus('✅ Form pre-filled successfully!', 'success');
+            } else {
+                console.log('ℹ️ No user logged in');
+                updateDebug('ℹ️ No user logged in');
+                updateStatus('ℹ️ No user logged in - Click "Simulate Login" first', 'info');
+            }
+        }
+        
+        // Test on page load
+        window.addEventListener('load', () => {
+            updateStatus('Ready for testing - Click "Simulate Login" then "Test Pre-fill"', 'info');
+            
+            // Check if user is already logged in
+            if (window.globalAuthManager.isUserLoggedIn()) {
+                updateStatus('✅ User already logged in - Click "Test Pre-fill"', 'success');
+            }
+        });
+    </script>
+</body>
+</html>

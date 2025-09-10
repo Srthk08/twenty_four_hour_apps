@@ -1,0 +1,185 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Order Flow Test - DevExpress">
+  <div class="min-h-screen bg-gray-50 py-12">
+    <div class="max-w-4xl mx-auto px-4">
+      <h1 class="text-3xl font-bold text-gray-900 mb-8">🛒 Order Flow Authentication Test</h1>
+      
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Current Authentication Status</h2>
+        <div id="auth-status" class="space-y-2">
+          <p><strong>Status:</strong> <span id="status-text">Loading...</span></p>
+          <p><strong>User:</strong> <span id="user-info">Loading...</span></p>
+          <p><strong>Auth Manager:</strong> <span id="auth-manager-status">Loading...</span></p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Test Order Flow</h2>
+        <div class="space-y-4">
+          <button id="test-product-redirect-btn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            Test Product Redirect to Cart
+          </button>
+          <button id="test-cart-access-btn" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+            Test Cart Page Access
+          </button>
+          <button id="test-plan-selection-btn" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+            Test Plan Selection
+          </button>
+          <button id="simulate-login-btn" class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">
+            Simulate Login
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold mb-4">Test Results</h2>
+        <div id="test-results" class="bg-gray-100 p-4 rounded text-sm font-mono max-h-64 overflow-y-auto">
+          <p>Test results will appear here...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  console.log('Order flow test page loaded');
+
+  // Function to add test results
+  function addResult(message) {
+    const resultsDiv = document.getElementById('test-results');
+    if (resultsDiv) {
+      const resultEntry = document.createElement('p');
+      resultEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      resultsDiv.appendChild(resultEntry);
+      resultsDiv.scrollTop = resultsDiv.scrollHeight;
+    }
+  }
+
+  // Function to update authentication status
+  function updateAuthStatus() {
+    const statusText = document.getElementById('status-text');
+    const userInfo = document.getElementById('user-info');
+    const authManagerStatus = document.getElementById('auth-manager-status');
+
+    const authManager = window.globalAuthManager || window.simpleAuthManager;
+    
+    if (authManager) {
+      authManagerStatus.textContent = '✅ Available';
+      
+      if (authManager.isUserLoggedIn()) {
+        const user = authManager.getCurrentUser();
+        statusText.textContent = '✅ Authenticated';
+        userInfo.textContent = user ? `${user.email} (${user.full_name || 'No name'})` : 'User data missing';
+      } else {
+        statusText.textContent = '❌ Not authenticated';
+        userInfo.textContent = 'No user logged in';
+      }
+    } else {
+      authManagerStatus.textContent = '⚠️ Not available';
+      statusText.textContent = '⚠️ Auth manager not loaded';
+      userInfo.textContent = 'Manager not loaded';
+    }
+  }
+
+  // Test product redirect to cart
+  document.getElementById('test-product-redirect-btn')?.addEventListener('click', () => {
+    addResult('Testing product redirect to cart...');
+    
+    // Simulate the redirectToCart function from product page
+    const authManager = window.globalAuthManager || window.simpleAuthManager;
+    
+    if (authManager && authManager.isUserLoggedIn()) {
+      addResult('✅ User authenticated, would redirect to cart');
+      addResult(`Would redirect to: /cart?product=test-product&price=1000`);
+    } else {
+      addResult('❌ User not authenticated, would redirect to login');
+      addResult(`Would redirect to: /login?redirect=/cart?product=test-product&price=1000`);
+    }
+  });
+
+  // Test cart page access
+  document.getElementById('test-cart-access-btn')?.addEventListener('click', () => {
+    addResult('Testing cart page access...');
+    
+    // Check if user can access cart
+    const authManager = window.globalAuthManager || window.simpleAuthManager;
+    
+    if (authManager && authManager.isUserLoggedIn()) {
+      addResult('✅ User can access cart page');
+      addResult('AuthGuard would allow access');
+    } else {
+      addResult('❌ User cannot access cart page');
+      addResult('AuthGuard would redirect to login');
+    }
+  });
+
+  // Test plan selection
+  document.getElementById('test-plan-selection-btn')?.addEventListener('click', () => {
+    addResult('Testing plan selection...');
+    
+    // Simulate plan selection flow
+    const authManager = window.globalAuthManager || window.simpleAuthManager;
+    
+    if (authManager && authManager.isUserLoggedIn()) {
+      addResult('✅ User can select plans and add to cart');
+      addResult('Product page would show authenticated options');
+    } else {
+      addResult('❌ User cannot select plans');
+      addResult('Product page would show login prompt');
+    }
+  });
+
+  // Simulate login
+  document.getElementById('simulate-login-btn')?.addEventListener('click', () => {
+    addResult('Simulating login...');
+    
+    const testUser = {
+      id: 'test-user-123',
+      email: 'test@example.com',
+      full_name: 'Test User',
+      phone: '123-456-7890',
+      company_name: 'Test Company',
+      role: 'customer'
+    };
+
+    // Trigger login event
+    window.dispatchEvent(new CustomEvent('user-logged-in', {
+      detail: testUser
+    }));
+
+    addResult('✅ Login event triggered for: ' + testUser.email);
+    
+    // Update status after a short delay
+    setTimeout(() => {
+      updateAuthStatus();
+      addResult('Status updated after login event');
+    }, 100);
+  });
+
+  // Update status when page loads
+  document.addEventListener('DOMContentLoaded', () => {
+    addResult('Page loaded, checking authentication...');
+    
+    // Wait for auth manager to be ready
+    setTimeout(() => {
+      updateAuthStatus();
+      addResult('Initial authentication check complete');
+    }, 500);
+  });
+
+  // Listen for auth state changes
+  window.addEventListener('user-logged-in', (e) => {
+    addResult('User logged in event received: ' + e.detail.email);
+    updateAuthStatus();
+  });
+
+  window.addEventListener('user-logged-out', () => {
+    addResult('User logged out event received');
+    updateAuthStatus();
+  });
+
+  addResult('Order flow test page script initialized');
+</script>

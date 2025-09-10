@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Current Status Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; color: #856404; }
+        button { padding: 12px 24px; margin: 8px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; }
+        button:hover { background: #0056b3; }
+        .google-btn { background: #4285f4; }
+        .google-btn:hover { background: #3367d6; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 12px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Current Status Test</h1>
+        
+        <div class="section info">
+            <h3>📋 Development Server Status</h3>
+            <div id="server-status">Checking...</div>
+        </div>
+
+        <div class="section">
+            <h3>🔧 Quick Tests</h3>
+            <button onclick="testServer()">Test Development Server</button>
+            <button onclick="testSupabase()">Test Supabase Connection</button>
+            <button onclick="testGoogleProvider()" class="google-btn">Test Google Provider</button>
+        </div>
+
+        <div class="section">
+            <h3>📊 Test Results</h3>
+            <div id="results"></div>
+        </div>
+
+        <div class="section warning">
+            <h3>🚨 Next Steps</h3>
+            <p>If Google Provider test fails, you need to:</p>
+            <ol>
+                <li>Run <code>google_auth_setup.sql</code> in Supabase SQL Editor</li>
+                <li>Enable Google provider in Supabase Dashboard</li>
+                <li>Configure Google OAuth credentials</li>
+                <li>Set Site URLs in Supabase</li>
+            </ol>
+            <p>See <code>GOOGLE_AUTH_STEP_BY_STEP.md</code> for detailed instructions.</p>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `section ${type}`;
+            div.innerHTML = `<pre>${message}</pre>`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function updateServerStatus(message, type = 'info') {
+            const status = document.getElementById('server-status');
+            status.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        async function testServer() {
+            try {
+                addResult('🔄 Testing development server...', 'info');
+                
+                const response = await fetch('http://localhost:4321');
+                if (response.ok) {
+                    addResult('✅ Development server is running on http://localhost:4321', 'success');
+                    updateServerStatus('✅ Development server is running', 'success');
+                } else {
+                    addResult(`❌ Server responded with status: ${response.status}`, 'error');
+                    updateServerStatus('❌ Server not responding properly', 'error');
+                }
+            } catch (err) {
+                addResult(`❌ Server test failed: ${err.message}`, 'error');
+                updateServerStatus('❌ Server not accessible', 'error');
+            }
+        }
+
+        async function testSupabase() {
+            try {
+                addResult('🔄 Testing Supabase connection...', 'info');
+                
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('count', { count: 'exact', head: true });
+                
+                if (error) {
+                    addResult(`❌ Supabase connection error: ${error.message}`, 'error');
+                } else {
+                    addResult(`✅ Supabase connected successfully! Found ${data} profiles.`, 'success');
+                }
+            } catch (err) {
+                addResult(`❌ Supabase test failed: ${err.message}`, 'error');
+            }
+        }
+
+        async function testGoogleProvider() {
+            try {
+                addResult('🔄 Testing Google provider configuration...', 'info');
+                
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: `${window.location.origin}/auth/callback`,
+                        skipBrowserRedirect: true
+                    }
+                });
+
+                if (error) {
+                    if (error.message.includes('Provider not found') || error.message.includes('not configured')) {
+                        addResult('❌ Google provider not configured in Supabase', 'error');
+                        addResult('🔧 SOLUTION: Enable Google provider in Supabase Dashboard → Authentication → Providers', 'warning');
+                    } else {
+                        addResult(`❌ Google provider error: ${error.message}`, 'error');
+                    }
+                } else {
+                    addResult('✅ Google provider is configured correctly!', 'success');
+                }
+            } catch (err) {
+                addResult(`❌ Google provider test failed: ${err.message}`, 'error');
+            }
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            updateServerStatus('🔄 Initializing tests...', 'info');
+            testServer();
+            testSupabase();
+        };
+    </script>
+</body>
+</html>

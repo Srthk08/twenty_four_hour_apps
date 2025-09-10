@@ -1,0 +1,163 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Debug Profile Data">
+  <div class="max-w-4xl mx-auto py-8 px-4">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Debug Profile Data</h1>
+    
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <h2 class="text-xl font-semibold mb-4">Test Supabase Profiles Table</h2>
+      <button id="test-profiles" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        Test Profiles Table
+      </button>
+      
+      <div id="profiles-result" class="mt-4 p-4 bg-gray-100 rounded hidden">
+        <h3 class="font-semibold mb-2">Profiles Table Result:</h3>
+        <pre id="profiles-data" class="text-sm bg-white p-3 rounded border overflow-auto"></pre>
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <h2 class="text-xl font-semibold mb-4">Test Current User</h2>
+      <button id="test-current-user" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+        Test Current User
+      </button>
+      
+      <div id="user-result" class="mt-4 p-4 bg-gray-100 rounded hidden">
+        <h3 class="font-semibold mb-2">Current User Result:</h3>
+        <pre id="user-data" class="text-sm bg-white p-3 rounded border overflow-auto"></pre>
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-xl font-semibold mb-4">Test Admin Access</h2>
+      <button id="test-admin-access" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+        Test Admin Access
+      </button>
+      
+      <div id="admin-result" class="mt-4 p-4 bg-gray-100 rounded hidden">
+        <h3 class="font-semibold mb-2">Admin Access Result:</h3>
+        <pre id="admin-data" class="text-sm bg-white p-3 rounded border overflow-auto"></pre>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import { supabase } from '../lib/supabase';
+  
+  // Test Profiles Table
+  document.getElementById('test-profiles')?.addEventListener('click', async () => {
+    try {
+      console.log('🔍 Testing profiles table...');
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .limit(10);
+      
+      if (error) {
+        throw error;
+      }
+      
+      console.log('✅ Profiles data:', data);
+      
+      const resultDiv = document.getElementById('profiles-result');
+      const dataPre = document.getElementById('profiles-data');
+      
+      if (resultDiv && dataPre) {
+        dataPre.textContent = JSON.stringify(data, null, 2);
+        resultDiv.classList.remove('hidden');
+      }
+      
+    } catch (error) {
+      console.error('❌ Error testing profiles:', error);
+      alert('Error testing profiles: ' + error.message);
+    }
+  });
+  
+  // Test Current User
+  document.getElementById('test-current-user')?.addEventListener('click', async () => {
+    try {
+      console.log('🔍 Testing current user...');
+      
+      const { data: { user }, error } = await supabase.auth.getUser();
+      
+      if (error) {
+        throw error;
+      }
+      
+      console.log('✅ Current user:', user);
+      
+      const resultDiv = document.getElementById('user-result');
+      const dataPre = document.getElementById('user-data');
+      
+      if (resultDiv && dataPre) {
+        dataPre.textContent = JSON.stringify(user, null, 2);
+        resultDiv.classList.remove('hidden');
+      }
+      
+    } catch (error) {
+      console.error('❌ Error testing current user:', error);
+      alert('Error testing current user: ' + error.message);
+    }
+  });
+  
+  // Test Admin Access
+  document.getElementById('test-admin-access')?.addEventListener('click', async () => {
+    try {
+      console.log('🔍 Testing admin access...');
+      
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        throw userError;
+      }
+      
+      if (!user) {
+        throw new Error('No user logged in');
+      }
+      
+      console.log('✅ User found:', user);
+      
+      // Get user profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      if (profileError) {
+        throw profileError;
+      }
+      
+      console.log('✅ Profile found:', profile);
+      
+      // Check admin access
+      const isAdmin = profile.role === 'admin' || profile.role === 'developer' || profile.role === 'support';
+      const adminResult = {
+        user: user,
+        profile: profile,
+        isAdmin: isAdmin,
+        canAccessAdmin: isAdmin,
+        redirectUrl: isAdmin ? '/admin' : '/dashboard'
+      };
+      
+      console.log('✅ Admin access result:', adminResult);
+      
+      const resultDiv = document.getElementById('admin-result');
+      const dataPre = document.getElementById('admin-data');
+      
+      if (resultDiv && dataPre) {
+        dataPre.textContent = JSON.stringify(adminResult, null, 2);
+        resultDiv.classList.remove('hidden');
+      }
+      
+    } catch (error) {
+      console.error('❌ Error testing admin access:', error);
+      alert('Error testing admin access: ' + error.message);
+    }
+  });
+</script>

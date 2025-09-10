@@ -1,0 +1,259 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AuthGuard from '../../components/AuthGuard.astro';
+
+// Generate static paths for build
+export async function getStaticPaths() {
+  // Return empty array for now - this page will be generated dynamically
+  return [];
+}
+
+const { orderId } = Astro.params;
+
+// Mock order data for testing
+const mockOrder = {
+  id: orderId || 'test-order-123',
+  order_number: 'ORD-2024-003',
+  status: 'pending',
+  total_amount: 90000,
+  payment_status: 'pending',
+  created_at: new Date().toISOString(),
+  order_items: [
+    {
+      id: 'item-1',
+      product: {
+        name: 'Restaurant Menu System',
+        featured_image: 'https://images.pexels.com/photos/1267320/pexels-photo-1267320.jpeg'
+      },
+      plan: {
+        name: 'Professional',
+        description: 'Advanced menu with ordering',
+        price: 25000,
+        delivery_days: 1
+      },
+      quantity: 1,
+      unit_price: 25000,
+      total_price: 25000
+    },
+    {
+      id: 'item-2',
+      product: {
+        name: 'Android TV App Development',
+        featured_image: 'https://images.pexels.com/photos/1201996/pexels-photo-1201996.jpeg'
+      },
+      plan: {
+        name: 'Professional',
+        description: 'Advanced TV app with CMS',
+        price: 65000,
+        delivery_days: 1
+      },
+      quantity: 1,
+      unit_price: 65000,
+      total_price: 65000
+    }
+  ]
+};
+
+const subtotal = mockOrder.order_items.reduce((sum, item) => sum + item.total_price, 0);
+const tax = subtotal * 0.18; // 18% GST
+const total = subtotal + tax;
+---
+
+<Layout title="Checkout - DevExpress">
+  <section class="py-12 bg-gray-50 min-h-screen">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Checkout</h1>
+        <p class="text-gray-600">Order #{mockOrder.order_number}</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Order Summary -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-6">Order Summary</h2>
+          
+          <div class="space-y-4 mb-6">
+            {mockOrder.order_items.map((item) => (
+              <div class="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
+                <img src={item.product.featured_image} alt={item.product.name} class="w-16 h-16 object-cover rounded-lg" />
+                <div class="flex-1">
+                  <h3 class="font-semibold text-gray-900">{item.product.name}</h3>
+                  <p class="text-sm text-gray-600">{item.plan.name}</p>
+                  <p class="text-xs text-gray-500">{item.plan.description}</p>
+                </div>
+                <div class="text-right">
+                  <div class="text-lg font-semibold text-gray-900">₹{item.total_price.toLocaleString()}</div>
+                  <div class="text-sm text-gray-500">Qty: {item.quantity}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div class="border-t pt-4 space-y-2">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Subtotal</span>
+              <span class="font-medium">₹{subtotal.toLocaleString()}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">GST (18%)</span>
+              <span class="font-medium">₹{tax.toLocaleString()}</span>
+            </div>
+            <div class="border-t pt-2">
+              <div class="flex justify-between">
+                <span class="text-lg font-semibold">Total</span>
+                <span class="text-lg font-semibold">₹{total.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Form -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-6">Payment Details</h2>
+          
+          <form id="payment-form" class="space-y-6">
+            <!-- Contact Information -->
+            <div>
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Contact Information</h3>
+              <div class="grid grid-cols-1 gap-4">
+                <div>
+                  <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                  <input type="email" id="email" name="email" value="test@example.com" required 
+                         class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500" />
+                </div>
+                <div>
+                  <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
+                  <input type="tel" id="phone" name="phone" value="+91 9876543210" required 
+                         class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Project Requirements -->
+            <div>
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Project Requirements</h3>
+              <div class="space-y-4">
+                <div>
+                  <label for="project_name" class="block text-sm font-medium text-gray-700">Project Name</label>
+                  <input type="text" id="project_name" name="project_name" placeholder="Enter your project name" required 
+                         class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500" />
+                </div>
+                <div>
+                  <label for="requirements" class="block text-sm font-medium text-gray-700">Special Requirements</label>
+                  <textarea id="requirements" name="requirements" rows="4" 
+                            placeholder="Describe any specific requirements, features, or customizations you need..."
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment Method -->
+            <div>
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Payment Method</h3>
+              <div class="space-y-3">
+                <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                  <input type="radio" name="payment_method" value="razorpay" checked class="text-primary-600 focus:ring-primary-500" />
+                  <div class="ml-3 flex-1">
+                    <div class="flex items-center justify-between">
+                      <span class="font-medium text-gray-900">Credit/Debit Card</span>
+                      <div class="flex space-x-2">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Visa" class="h-6" />
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" class="h-6" />
+                      </div>
+                    </div>
+                    <p class="text-sm text-gray-600">Secure payment via Razorpay</p>
+                  </div>
+                </label>
+                
+                <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                  <input type="radio" name="payment_method" value="upi" class="text-primary-600 focus:ring-primary-500" />
+                  <div class="ml-3 flex-1">
+                    <div class="flex items-center justify-between">
+                      <span class="font-medium text-gray-900">UPI</span>
+                      <span class="text-sm text-gray-600">GPay, PhonePe, Paytm</span>
+                    </div>
+                    <p class="text-sm text-gray-600">Pay using your UPI ID</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Terms -->
+            <div class="flex items-start">
+              <input type="checkbox" id="terms" name="terms" required 
+                     class="mt-1 h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded" />
+              <label for="terms" class="ml-2 text-sm text-gray-600">
+                I agree to the <a href="/terms" class="text-primary-600 hover:text-primary-500">Terms of Service</a> 
+                and understand that development will begin immediately after payment confirmation.
+              </label>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" 
+                    class="w-full bg-primary-600 hover:bg-primary-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors">
+              Pay ₹{total.toLocaleString()} & Start Development
+            </button>
+          </form>
+
+          <!-- Security Notice -->
+          <div class="mt-6 p-4 bg-green-50 rounded-lg">
+            <div class="flex items-center space-x-2">
+              <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+              </svg>
+              <span class="text-sm font-medium text-green-800">Secure Payment</span>
+            </div>
+            <p class="text-sm text-green-700 mt-1">
+              Your payment information is encrypted and secure. We never store your card details.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const form = document.getElementById('payment-form') as HTMLFormElement;
+  
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Show loading state
+    const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const originalText = submitButton.textContent;
+    submitButton.disabled = true;
+    submitButton.innerHTML = `
+      <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Processing Payment...
+    `;
+
+    // Simulate payment processing
+    setTimeout(() => {
+      // Show success message
+      const successDiv = document.createElement('div');
+      successDiv.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+      successDiv.innerHTML = `
+        <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
+          <div class="text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Payment Successful!</h3>
+            <p class="text-gray-600 mb-6">Your order has been confirmed and development will begin immediately.</p>
+            <button onclick="window.location.href='/dashboard'" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+              Go to Dashboard
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(successDiv);
+    }, 2000);
+  });
+</script>

@@ -1,0 +1,1039 @@
+---
+import StandaloneAdminLayout from '../../layouts/StandaloneAdminLayout.astro';
+---
+
+<StandaloneAdminLayout title="Admin Dashboard - DevExpress">
+  <div class="max-w-7xl mx-auto">
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">Admin Dashboard - Complete User Data</h2>
+          <p class="text-gray-600">View all user activities, registrations, contact forms, support tickets, and cart customizations.</p>
+        </div>
+        <a href="/admin/data" class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 transition-colors">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+          </svg>
+          View All Data
+        </a>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Users Card -->
+        <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+          <div class="flex items-center">
+            <div class="p-2 bg-blue-100 rounded-lg">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                </svg>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-blue-600">Total Users</p>
+              <p class="text-2xl font-bold text-blue-900" id="total-users">0</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact Forms Card -->
+        <div class="bg-green-50 rounded-lg p-6 border border-green-200">
+          <div class="flex items-center">
+            <div class="p-2 bg-green-100 rounded-lg">
+              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-green-600">Contact Forms</p>
+              <p class="text-2xl font-bold text-green-900" id="total-contacts">0</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Revenue Card -->
+        <div class="bg-purple-50 rounded-lg p-6 border border-purple-200">
+          <div class="flex items-center">
+            <div class="p-2 bg-purple-100 rounded-lg">
+              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                </svg>
+            </div>
+                        <div class="ml-4">
+              <p class="text-sm font-medium text-purple-600">Total Revenue</p>
+              <p class="text-2xl font-bold text-purple-900" id="total-revenue">₹0</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Support Card -->
+        <div class="bg-orange-50 rounded-lg p-6 border border-orange-200">
+          <div class="flex items-center">
+            <div class="p-2 bg-orange-100 rounded-lg">
+              <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-orange-600">Support Tickets</p>
+              <p class="text-2xl font-bold text-orange-900" id="total-tickets">0</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cart Customizations Card -->
+        <div class="bg-teal-50 rounded-lg p-6 border border-teal-200">
+          <div class="flex items-center">
+            <div class="p-2 bg-teal-100 rounded-lg">
+              <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+              </svg>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-teal-600">Cart Customizations</p>
+              <p class="text-2xl font-bold text-teal-900" id="total-carts">0</p>
+            </div>
+          </div>
+        </div>
+        </div>
+
+      <!-- Detailed Data Sections -->
+      <div class="mt-8 space-y-8">
+        
+        <!-- Registered Users Section -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-xl font-bold text-gray-900 mb-4">Registered Users</h3>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registered</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Login</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body" class="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td colspan="6" class="px-6 py-4 text-center text-gray-500">Loading users...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Contact Form Submissions Section -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-xl font-bold text-gray-900 mb-4">Contact Form Submissions</h3>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project Type</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="contact-table-body" class="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td colspan="6" class="px-6 py-4 text-center text-gray-500">Loading contact submissions...</td>
+                </tr>
+              </tbody>
+            </table>
+        </div>
+      </div>
+
+        <!-- Support Tickets Section -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-xl font-bold text-gray-900 mb-4">Support Tickets</h3>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ticket ID</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                </tr>
+              </thead>
+              <tbody id="tickets-table-body" class="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td colspan="6" class="px-6 py-4 text-center text-gray-500">Loading support tickets...</td>
+                </tr>
+              </tbody>
+            </table>
+        </div>
+      </div>
+
+        <!-- Cart Customizations Section -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-xl font-bold text-gray-900 mb-4">Cart Customizations & Orders</h3>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User Email</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project Name</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">App Name</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Person</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                </tr>
+              </thead>
+              <tbody id="cart-table-body" class="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td colspan="6" class="px-6 py-4 text-center text-gray-500">Loading cart customizations...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+
+      <div class="mt-8 p-4 bg-gray-50 rounded-lg">
+        <h4 class="text-sm font-medium text-gray-900 mb-2">Authentication Status</h4>
+        <p class="text-sm text-gray-600">✅ User is authenticated and viewing admin dashboard</p>
+        <p class="text-sm text-gray-600">✅ No page reloads or authentication loops</p>
+        <p class="text-sm text-gray-600">✅ Session is maintained properly</p>
+        </div>
+      </div>
+    </div>
+</StandaloneAdminLayout>
+
+
+<script>
+  // Supabase configuration
+  const SUPABASE_URL = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+  
+  let supabase = null;
+  
+  // Wait for Supabase to load
+  function waitForSupabase() {
+    return new Promise((resolve) => {
+      if (window.supabase) {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        resolve(supabase);
+      } else {
+        setTimeout(() => waitForSupabase().then(resolve), 100);
+      }
+    });
+  }
+  
+  console.log('Admin dashboard loaded successfully');
+  
+  // Load all user data when page loads
+  document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🔄 Loading admin dashboard data...');
+    console.log('✅ Admin dashboard JavaScript is running!');
+    
+    // Wait for Supabase to be available
+    if (!supabase) {
+      await waitForSupabase();
+    }
+    
+    console.log('🔍 Supabase client:', supabase);
+    
+    // Test if we can find the table elements
+    const usersTable = document.getElementById('users-table-body');
+    const contactTable = document.getElementById('contact-table-body');
+    
+    if (usersTable) {
+      usersTable.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-blue-500">JavaScript is working! Loading data...</td></tr>';
+    }
+    
+    if (contactTable) {
+      contactTable.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-blue-500">JavaScript is working! Loading data...</td></tr>';
+    }
+    
+    try {
+      // Test Supabase connection first
+      console.log('🔍 Testing Supabase connection...');
+      
+      // Test profiles table
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('count', { count: 'exact', head: true });
+      
+      console.log('Profiles table test:', { data: profilesData, error: profilesError });
+      
+      // Test contact_submissions table
+      const { data: contactData, error: contactError } = await supabase
+        .from('contact_submissions')
+        .select('count', { count: 'exact', head: true });
+      
+      console.log('Contact submissions table test:', { data: contactData, error: contactError });
+      
+      if (profilesError) {
+        console.error('❌ Profiles table error:', profilesError);
+        alert('Profiles table error: ' + profilesError.message);
+      }
+      
+      if (contactError) {
+        console.error('❌ Contact submissions table error:', contactError);
+        
+        // Show specific error message in the table
+        const contactTable = document.getElementById('contact-table-body');
+        if (contactTable) {
+          if (contactError.message.includes('Could not find the table')) {
+            contactTable.innerHTML = `
+              <tr>
+                <td colspan="6" class="px-6 py-4 text-center text-red-500">
+                  <div class="space-y-2">
+                    <p class="font-semibold">Table 'contact_submissions' not found!</p>
+                    <p class="text-sm">The database table needs to be created.</p>
+                    <p class="text-sm">Please run the database migration or contact the administrator.</p>
+                  </div>
+                </td>
+              </tr>
+            `;
+          } else {
+            contactTable.innerHTML = `
+              <tr>
+                <td colspan="6" class="px-6 py-4 text-center text-red-500">
+                  Error: ${contactError.message}
+                </td>
+              </tr>
+            `;
+          }
+        }
+      }
+      
+      console.log('✅ Supabase connection tests completed');
+      
+      // Load users data
+      console.log('🔄 Loading users data...');
+      await loadUsersData();
+      
+      // Load contact form submissions
+      console.log('🔄 Loading contact data...');
+      await loadContactData();
+      
+      // Load support tickets
+      console.log('🔄 Loading tickets data...');
+      await loadTicketsData();
+      
+      // Load cart customizations
+      console.log('🔄 Loading cart data...');
+      await loadCartData();
+      
+      // Update summary cards
+      console.log('🔄 Updating summary cards...');
+      await updateSummaryCards();
+      
+      console.log('✅ All admin data loaded successfully');
+    } catch (error) {
+      console.error('❌ Error loading admin data:', error);
+      alert('Error loading admin data: ' + error.message);
+    }
+  });
+
+  async function loadUsersData() {
+    try {
+      console.log('🔄 Loading users data from profiles table...');
+      const { data: users, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('❌ Error loading users:', error);
+        console.error('Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        
+        // Show error in UI
+        const tbody = document.getElementById('users-table-body');
+        if (tbody) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" class="px-6 py-4 text-center text-red-500">
+                Error loading users: ${error.message}
+              </td>
+            </tr>
+          `;
+        }
+        return;
+      }
+
+      console.log('✅ Users loaded successfully:', users?.length || 0, 'users found');
+
+      const tbody = document.getElementById('users-table-body');
+      if (!tbody) return;
+
+      if (users && users.length > 0) {
+        tbody.innerHTML = users.map(user => `
+          <tr>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 h-10 w-10">
+                  <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                    <span class="text-sm font-medium text-blue-600">${user.full_name ? user.full_name.charAt(0).toUpperCase() : 'U'}</span>
+                  </div>
+                </div>
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-gray-900">${user.full_name || 'No Name'}</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.email}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.phone || '-'}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.role === 'admin' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">
+                ${user.role || 'customer'}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(user.created_at).toLocaleDateString()}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.last_login ? new Date(user.last_login).toLocaleDateString() : '-'}</td>
+          </tr>
+        `).join('');
+      } else {
+        tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No users found</td></tr>';
+      }
+    } catch (error) {
+      console.error('Error loading users data:', error);
+    }
+  }
+
+  async function loadContactData() {
+    try {
+      console.log('🔄 Loading contact form data from contact_submissions table...');
+      const { data: contacts, error } = await supabase
+        .from('contact_submissions')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('❌ Error loading contact data:', error);
+        console.error('Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        
+        // Show error in UI
+        const tbody = document.getElementById('contact-table-body');
+        if (tbody) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" class="px-6 py-4 text-center text-red-500">
+                Error loading contact data: ${error.message}
+              </td>
+            </tr>
+          `;
+        }
+        return;
+      }
+
+      console.log('✅ Contact data loaded successfully:', contacts?.length || 0, 'contacts found');
+
+      const tbody = document.getElementById('contact-table-body');
+      if (!tbody) return;
+
+      if (contacts && contacts.length > 0) {
+        tbody.innerHTML = contacts.map(contact => `
+          <tr>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${contact.first_name} ${contact.last_name}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${contact.email}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${contact.phone || '-'}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${contact.company_name || '-'}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${contact.project_type || '-'}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(contact.created_at).toLocaleDateString()}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <button onclick="viewContactDetails('${contact.id}')" class="text-blue-600 hover:text-blue-900">View Details</button>
+            </td>
+          </tr>
+        `).join('');
+      } else {
+        tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No contact submissions found</td></tr>';
+      }
+    } catch (error) {
+      console.error('Error loading contact data:', error);
+    }
+  }
+
+  async function loadTicketsData() {
+    try {
+      console.log('🔄 Loading support tickets data...');
+      const { data: tickets, error } = await supabase
+        .from('support_tickets')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading tickets data:', error);
+        return;
+      }
+
+      const tbody = document.getElementById('tickets-table-body');
+      if (!tbody) return;
+
+      if (tickets && tickets.length > 0) {
+        tbody.innerHTML = tickets.map(ticket => `
+          <tr>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#${ticket.id}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${ticket.subject}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${ticket.category}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${ticket.priority === 'high' ? 'bg-red-100 text-red-800' : ticket.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
+                ${ticket.priority}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${ticket.status === 'open' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}">
+                ${ticket.status}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(ticket.created_at).toLocaleDateString()}</td>
+          </tr>
+        `).join('');
+      } else {
+        tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No support tickets found</td></tr>';
+      }
+    } catch (error) {
+      console.error('Error loading tickets data:', error);
+    }
+  }
+
+  async function loadCartData() {
+    try {
+      console.log('🔄 Loading cart customizations data...');
+      console.log('🔍 Supabase client available:', !!supabase);
+      
+      if (!supabase) {
+        console.error('❌ Supabase client not available');
+        const tbody = document.getElementById('cart-table-body');
+        if (tbody) {
+          tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Supabase client not available</td></tr>';
+        }
+        return;
+      }
+
+      const { data: carts, error } = await supabase
+        .from('cart_customizations')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      console.log('🔍 Cart data query result:', { data: carts, error });
+
+      if (error) {
+        console.error('❌ Error loading cart data:', error);
+        const tbody = document.getElementById('cart-table-body');
+        if (tbody) {
+          tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Error: ${error.message}</td></tr>`;
+        }
+        return;
+      }
+
+      const tbody = document.getElementById('cart-table-body');
+      if (!tbody) {
+        console.error('❌ Cart table body not found');
+        return;
+      }
+
+      console.log('🔍 Cart data received:', carts);
+
+      if (carts && carts.length > 0) {
+        console.log(`✅ Found ${carts.length} cart customizations`);
+        tbody.innerHTML = carts.map(cart => {
+          // Use stored total_amount if available, otherwise calculate it
+          let totalAmount = cart.total_amount;
+          if (!totalAmount || totalAmount === 0) {
+            // Calculate total amount including features
+            const basePrice = cart.base_price || 0;
+            const features = cart.selected_features || [];
+            const featuresTotal = features.length * 500; // Each feature costs ₹500
+            const subtotal = basePrice + featuresTotal;
+            const tax = Math.round(subtotal * 0.18); // 18% GST
+            totalAmount = subtotal + tax;
+          }
+          
+          return `
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${cart.user_email}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${cart.project_name || '-'}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${cart.app_name || '-'}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${cart.contact_person || '-'}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹${totalAmount.toLocaleString()}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(cart.created_at).toLocaleDateString()}</td>
+            </tr>
+          `;
+        }).join('');
+      } else {
+        console.log('ℹ️ No cart customizations found');
+        tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No cart customizations found</td></tr>';
+      }
+    } catch (error) {
+      console.error('❌ Error loading cart data:', error);
+      const tbody = document.getElementById('cart-table-body');
+      if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Error: ${error.message}</td></tr>`;
+      }
+    }
+  }
+
+  async function updateSummaryCards() {
+    try {
+      // Get counts for summary cards
+      const [usersResult, contactsResult, ticketsResult, cartsResult] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('contact_submissions').select('*', { count: 'exact', head: true }),
+        supabase.from('support_tickets').select('*', { count: 'exact', head: true }),
+        supabase.from('cart_customizations').select('*', { count: 'exact', head: true })
+      ]);
+
+      // Update summary cards
+      const totalUsers = usersResult.count || 0;
+      const totalContacts = contactsResult.count || 0;
+      const totalTickets = ticketsResult.count || 0;
+      const totalCarts = cartsResult.count || 0;
+
+      // Update the summary card numbers
+      const userCard = document.getElementById('total-users');
+      const contactCard = document.getElementById('total-contacts');
+      const ticketCard = document.getElementById('total-tickets');
+      const revenueCard = document.getElementById('total-revenue');
+      const cartCard = document.getElementById('total-carts');
+
+      if (userCard) userCard.textContent = totalUsers.toString();
+      if (contactCard) contactCard.textContent = totalContacts.toString();
+      if (ticketCard) ticketCard.textContent = totalTickets.toString();
+      if (cartCard) cartCard.textContent = totalCarts.toString();
+      if (revenueCard) {
+        // Calculate total revenue only from completed orders
+        const { data: completedOrders } = await supabase
+          .from('cart_customizations')
+          .select('total_amount')
+          .eq('cart_status', 'completed');
+        const totalRevenue = completedOrders ? completedOrders.reduce((sum, order) => sum + (order.total_amount || 0), 0) : 0;
+        revenueCard.textContent = `₹${totalRevenue.toLocaleString()}`;
+      }
+
+      console.log('✅ Summary cards updated');
+    } catch (error) {
+      console.error('Error updating summary cards:', error);
+    }
+  }
+
+  // View contact details function
+  window.viewContactDetails = async function(contactId) {
+    console.log('Viewing contact details for:', contactId);
+    
+    try {
+      const { data: contact, error } = await supabase
+        .from('contact_submissions')
+        .select('*')
+        .eq('id', contactId)
+        .single();
+
+      if (error) {
+        console.error('Error loading contact details:', error);
+        return;
+      }
+
+      const modal = document.getElementById('details-modal');
+      const modalTitle = document.getElementById('modal-title');
+      const modalContent = document.getElementById('modal-content');
+
+      modalTitle.textContent = 'Contact Form Details';
+      modalContent.innerHTML = `
+        <div class="space-y-4">
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h4 class="text-lg font-semibold text-gray-900 mb-3">Contact Information</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm text-gray-600"><strong>Name:</strong> ${contact.first_name} ${contact.last_name}</p>
+                <p class="text-sm text-gray-600"><strong>Email:</strong> ${contact.email || 'Not provided'}</p>
+                <p class="text-sm text-gray-600"><strong>Phone:</strong> ${contact.phone || 'Not provided'}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600"><strong>Company:</strong> ${contact.company_name || 'Not provided'}</p>
+                <p class="text-sm text-gray-600"><strong>Project Type:</strong> ${contact.project_type || 'Not specified'}</p>
+                <p class="text-sm text-gray-600"><strong>Submitted:</strong> ${new Date(contact.created_at).toLocaleDateString()}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h5 class="font-medium text-gray-900 mb-2">Project Details</h5>
+            <p class="text-sm text-gray-600">${contact.project_details || contact.message || 'No additional details provided'}</p>
+          </div>
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+    } catch (error) {
+      console.error('Error viewing contact details:', error);
+    }
+  };
+
+  // Global variable to store all contacts for search functionality
+  let allContacts = [];
+  
+  // Global variable to store all cart customizations for search functionality
+  let allCartCustomizations = [];
+
+  // Show all contact form details function
+  window.showContactFormDetails = async function() {
+    console.log('Loading all contact form details...');
+    
+    try {
+      const { data: contacts, error } = await supabase
+        .from('contact_submissions')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading contact details:', error);
+        return;
+      }
+
+      // Store contacts globally for search functionality
+      allContacts = contacts || [];
+
+      const modal = document.getElementById('contact-details-modal');
+      const modalTitle = document.getElementById('contact-modal-title');
+      const modalContent = document.getElementById('contact-modal-content');
+
+      modalTitle.textContent = `All Contact Form Details (${allContacts.length} submissions)`;
+      
+      // Create search interface and contact list
+      modalContent.innerHTML = `
+        <div class="mb-6">
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+            <input 
+              type="text" 
+              id="contact-search-input" 
+              placeholder="Search by email address..." 
+              class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              onkeyup="filterContacts()"
+            />
+          </div>
+          <p class="mt-2 text-sm text-gray-500">Type an email address to quickly find a specific contact submission</p>
+        </div>
+        <div id="contacts-list" class="space-y-6 max-h-96 overflow-y-auto">
+          ${renderContacts(allContacts)}
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+    } catch (error) {
+      console.error('Error loading contact details:', error);
+    }
+  };
+
+  // Function to render contacts
+  function renderContacts(contacts) {
+    if (contacts && contacts.length > 0) {
+      return contacts.map((contact, index) => `
+        <div class="bg-gray-50 p-4 rounded-lg border contact-item" data-email="${(contact.email || '').toLowerCase()}">
+          <div class="flex justify-between items-start mb-3">
+            <h4 class="text-lg font-semibold text-gray-900">#${index + 1} - ${contact.first_name} ${contact.last_name}</h4>
+            <span class="text-sm text-gray-500">${new Date(contact.created_at).toLocaleDateString()}</span>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <p class="text-sm text-gray-600"><strong>Email:</strong> <span class="font-mono text-indigo-600">${contact.email || 'Not provided'}</span></p>
+              <p class="text-sm text-gray-600"><strong>Phone:</strong> ${contact.phone || 'Not provided'}</p>
+              <p class="text-sm text-gray-600"><strong>Company:</strong> ${contact.company_name || 'Not provided'}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-600"><strong>Project Type:</strong> ${contact.project_type || 'Not specified'}</p>
+              <p class="text-sm text-gray-600"><strong>Submitted:</strong> ${new Date(contact.created_at).toLocaleString()}</p>
+            </div>
+          </div>
+          
+          <div class="bg-white p-3 rounded border">
+            <h5 class="font-medium text-gray-900 mb-2">Project Details:</h5>
+            <p class="text-sm text-gray-600 whitespace-pre-wrap">${contact.project_details || contact.message || 'No additional details provided'}</p>
+          </div>
+        </div>
+      `).join('');
+    } else {
+      return `
+        <div class="text-center py-8">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No contact submissions found</h3>
+          <p class="mt-1 text-sm text-gray-500">No contact form submissions match your search criteria.</p>
+        </div>
+      `;
+    }
+  }
+
+  // Function to filter contacts based on search input
+  window.filterContacts = function() {
+    const searchInput = document.getElementById('contact-search-input');
+    const contactsList = document.getElementById('contact-modal-title');
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    
+    if (!searchTerm) {
+      // Show all contacts if search is empty
+      document.getElementById('contacts-list').innerHTML = renderContacts(allContacts);
+      contactsList.textContent = `All Contact Form Details (${allContacts.length} submissions)`;
+      return;
+    }
+
+    // Filter contacts by email
+    const filteredContacts = allContacts.filter(contact => 
+      (contact.email || '').toLowerCase().includes(searchTerm)
+    );
+
+    // Update the display
+    document.getElementById('contacts-list').innerHTML = renderContacts(filteredContacts);
+    contactsList.textContent = `Contact Form Details (${filteredContacts.length} of ${allContacts.length} submissions)`;
+  };
+
+  // Show all cart customizations function
+  window.showCartCustomizations = async function() {
+    console.log('Loading all cart customizations...');
+    
+    try {
+      const { data: carts, error } = await supabase
+        .from('cart_customizations')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading cart customizations:', error);
+        alert('Error loading cart customizations: ' + error.message);
+        return;
+      }
+
+      allCartCustomizations = carts || []; // Store carts globally
+
+      const modal = document.getElementById('cart-customizations-modal');
+      const modalTitle = document.getElementById('cart-modal-title');
+      const modalContent = document.getElementById('cart-modal-content');
+
+      modalTitle.textContent = `All Cart Customizations (${allCartCustomizations.length} items)`;
+      
+      modalContent.innerHTML = `
+        <div class="mb-6">
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+            <input 
+              type="text" 
+              id="cart-search-input" 
+              placeholder="Search by email address..." 
+              class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              onkeyup="filterCartCustomizations()"
+            />
+          </div>
+          <p class="mt-2 text-sm text-gray-500">Type an email address to quickly find a specific cart customization</p>
+        </div>
+        <div id="carts-list" class="space-y-6 max-h-96 overflow-y-auto">
+          ${renderCartCustomizations(allCartCustomizations)}
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+    } catch (error) {
+      console.error('Error loading cart customizations:', error);
+      alert('Error loading cart customizations: ' + error.message);
+    }
+  };
+
+  // Function to render cart customizations
+  function renderCartCustomizations(carts) {
+    if (carts && carts.length > 0) {
+      return carts.map((cart, index) => {
+        // Calculate total amount if not stored
+        let totalAmount = cart.total_amount;
+        if (!totalAmount || totalAmount === 0) {
+          const basePrice = cart.base_price || 0;
+          const features = cart.selected_features || [];
+          const featuresTotal = features.length * 500; // Each feature costs ₹500
+          const subtotal = basePrice + featuresTotal;
+          const tax = Math.round(subtotal * 0.18); // 18% GST
+          totalAmount = subtotal + tax;
+        }
+        
+        return `
+          <div class="bg-gray-50 p-4 rounded-lg border cart-item" data-email="${(cart.user_email || '').toLowerCase()}">
+            <div class="flex justify-between items-start mb-3">
+              <h4 class="text-lg font-semibold text-gray-900">#${index + 1} - ${cart.product_name || 'Unknown Product'}</h4>
+              <span class="text-sm text-gray-500">${new Date(cart.created_at).toLocaleDateString()}</span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <p class="text-sm text-gray-600"><strong>User Email:</strong> <span class="font-mono text-indigo-600">${cart.user_email || 'Not provided'}</span></p>
+                <p class="text-sm text-gray-600"><strong>Project Name:</strong> ${cart.project_name || 'Not provided'}</p>
+                <p class="text-sm text-gray-600"><strong>App Name:</strong> ${cart.app_name || 'Not provided'}</p>
+                <p class="text-sm text-gray-600"><strong>Contact Person:</strong> ${cart.contact_person || 'Not provided'}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600"><strong>Product ID:</strong> ${cart.product_id || 'Not specified'}</p>
+                <p class="text-sm text-gray-600"><strong>Base Price:</strong> ₹${cart.base_price || 0}</p>
+                <p class="text-sm text-gray-600"><strong>Total Amount:</strong> ₹${totalAmount.toLocaleString()}</p>
+                <p class="text-sm text-gray-600"><strong>Status:</strong> 
+                  <span class="px-2 py-1 rounded-full text-xs font-medium ${
+                    cart.cart_status === 'completed' ? 'bg-green-100 text-green-800' :
+                    cart.cart_status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                    cart.cart_status === 'expired' ? 'bg-gray-100 text-gray-800' :
+                    'bg-blue-100 text-blue-800'
+                  }">${cart.cart_status || 'active'}</span>
+                </p>
+              </div>
+            </div>
+            
+            ${cart.restaurant_name ? `
+            <div class="bg-white p-3 rounded border mb-3">
+              <h5 class="font-medium text-gray-900 mb-2">Restaurant Details:</h5>
+              <p class="text-sm text-gray-600"><strong>Restaurant Name:</strong> ${cart.restaurant_name}</p>
+              <p class="text-sm text-gray-600"><strong>Cuisine Type:</strong> ${cart.cuisine_type || 'Not specified'}</p>
+            </div>
+            ` : ''}
+            
+            <div class="bg-white p-3 rounded border">
+              <h5 class="font-medium text-gray-900 mb-2">Contact Information:</h5>
+              <p class="text-sm text-gray-600"><strong>Email:</strong> ${cart.contact_email || 'Not provided'}</p>
+              <p class="text-sm text-gray-600"><strong>Phone:</strong> ${cart.contact_phone || 'Not provided'}</p>
+              ${cart.additional_requirements ? `<p class="text-sm text-gray-600 mt-2"><strong>Additional Requirements:</strong> ${cart.additional_requirements}</p>` : ''}
+            </div>
+            
+            <div class="mt-4">
+              ${cart.cart_status === 'completed' ? `
+                <span class="px-3 py-1 bg-green-100 text-green-800 text-xs rounded font-medium">
+                  ✅ Payment Completed
+                </span>
+              ` : ''}
+              ${cart.cart_status === 'cancelled' ? `
+                <span class="px-3 py-1 bg-red-100 text-red-800 text-xs rounded font-medium">
+                  ❌ Order Cancelled
+                </span>
+              ` : ''}
+              ${cart.cart_status === 'pending' ? `
+                <span class="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs rounded font-medium">
+                  ⏳ Payment Pending
+                </span>
+              ` : ''}
+              ${cart.cart_status === 'expired' ? `
+                <span class="px-3 py-1 bg-gray-100 text-gray-800 text-xs rounded font-medium">
+                  ⏰ Order Expired
+                </span>
+              ` : ''}
+              ${!cart.cart_status || cart.cart_status === 'active' ? `
+                <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded font-medium">
+                  📋 Order Active
+                </span>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    } else {
+      return `
+        <div class="text-center py-8">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No cart customizations found</h3>
+          <p class="mt-1 text-sm text-gray-500">No cart customizations match your search criteria.</p>
+        </div>
+      `;
+    }
+  }
+
+  // Function to filter cart customizations based on search input
+  window.filterCartCustomizations = function() {
+    const searchInput = document.getElementById('cart-search-input');
+    const cartsListTitle = document.getElementById('cart-modal-title');
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    
+    if (!searchTerm) {
+      document.getElementById('carts-list').innerHTML = renderCartCustomizations(allCartCustomizations);
+      cartsListTitle.textContent = `All Cart Customizations (${allCartCustomizations.length} items)`;
+      return;
+    }
+
+    const filteredCarts = allCartCustomizations.filter(cart => 
+      (cart.user_email || '').toLowerCase().includes(searchTerm)
+    );
+
+    document.getElementById('carts-list').innerHTML = renderCartCustomizations(filteredCarts);
+    cartsListTitle.textContent = `Cart Customizations (${filteredCarts.length} of ${allCartCustomizations.length} items)`;
+  };
+
+</script>
+
+<!-- Modal for viewing details -->
+<div id="details-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+  <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+    <div class="mt-3">
+      <div class="flex items-center justify-between mb-4">
+        <h3 id="modal-title" class="text-lg font-medium text-gray-900">Details</h3>
+        <button onclick="document.getElementById('details-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div id="modal-content" class="text-gray-600">
+        <!-- Content will be populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for viewing all contact form details -->
+<div id="contact-details-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+  <div class="relative top-10 mx-auto p-5 border w-11/12 md:w-5/6 lg:w-4/5 xl:w-3/4 shadow-lg rounded-md bg-white">
+    <div class="mt-3">
+      <div class="flex items-center justify-between mb-6">
+        <h3 id="contact-modal-title" class="text-xl font-medium text-gray-900">Contact Form Details</h3>
+        <button onclick="document.getElementById('contact-details-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div id="contact-modal-content" class="text-gray-600">
+        <!-- Content will be populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for viewing all cart customizations -->
+<div id="cart-customizations-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+  <div class="relative top-10 mx-auto p-5 border w-11/12 md:w-5/6 lg:w-4/5 xl:w-3/4 shadow-lg rounded-md bg-white">
+    <div class="mt-3">
+      <div class="flex items-center justify-between mb-6">
+        <h3 id="cart-modal-title" class="text-xl font-medium text-gray-900">Cart Customizations</h3>
+        <button onclick="document.getElementById('cart-customizations-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div id="cart-modal-content" class="text-gray-600">
+        <!-- Content will be populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+</div>

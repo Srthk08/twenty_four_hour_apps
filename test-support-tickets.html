@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Support Tickets</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Test Support Tickets Connection</h1>
+    <div id="results"></div>
+
+    <script>
+        const SUPABASE_URL = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        async function testSupportTickets() {
+            const resultsDiv = document.getElementById('results');
+            
+            try {
+                console.log('Testing support tickets connection...');
+                
+                // Test 1: Check if table exists
+                const { data: tickets, error } = await supabase
+                    .from('support_tickets')
+                    .select('*')
+                    .limit(5);
+                
+                if (error) {
+                    resultsDiv.innerHTML = `
+                        <h2 style="color: red;">❌ Error: ${error.message}</h2>
+                        <p><strong>Code:</strong> ${error.code}</p>
+                        <p><strong>Details:</strong> ${error.details || 'None'}</p>
+                        <p><strong>Hint:</strong> ${error.hint || 'None'}</p>
+                        <p><strong>Action:</strong> Run the create-support-tickets-table.sql script in your Supabase SQL Editor</p>
+                    `;
+                    return;
+                }
+                
+                console.log('✅ Tickets loaded:', tickets);
+                
+                if (!tickets || tickets.length === 0) {
+                    resultsDiv.innerHTML = `
+                        <h2 style="color: orange;">⚠️ No tickets found</h2>
+                        <p>The support_tickets table exists but has no data.</p>
+                        <p><strong>Action:</strong> Run the create-support-tickets-table.sql script to add sample data</p>
+                    `;
+                    return;
+                }
+                
+                // Display tickets
+                let html = `
+                    <h2 style="color: green;">✅ Success! Found ${tickets.length} tickets</h2>
+                    <table border="1" style="border-collapse: collapse; width: 100%; margin-top: 20px;">
+                        <thead>
+                            <tr style="background-color: #f0f0f0;">
+                                <th style="padding: 10px;">Ticket Number</th>
+                                <th style="padding: 10px;">Customer Name</th>
+                                <th style="padding: 10px;">Customer Email</th>
+                                <th style="padding: 10px;">Subject</th>
+                                <th style="padding: 10px;">Priority</th>
+                                <th style="padding: 10px;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                tickets.forEach(ticket => {
+                    html += `
+                        <tr>
+                            <td style="padding: 10px;">${ticket.ticket_number || ticket.id}</td>
+                            <td style="padding: 10px;">${ticket.customer_name || 'No Name'}</td>
+                            <td style="padding: 10px;">${ticket.customer_email || 'No Email'}</td>
+                            <td style="padding: 10px;">${ticket.subject || 'No Subject'}</td>
+                            <td style="padding: 10px;">${ticket.priority || 'medium'}</td>
+                            <td style="padding: 10px;">${ticket.status || 'open'}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                        </tbody>
+                    </table>
+                    <p style="margin-top: 20px; color: green;">
+                        <strong>✅ The support tickets table is working correctly!</strong><br>
+                        You can now go to the admin support page to see these tickets.
+                    </p>
+                `;
+                
+                resultsDiv.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Test failed:', error);
+                resultsDiv.innerHTML = `
+                    <h2 style="color: red;">❌ Test Failed</h2>
+                    <p>Error: ${error.message}</p>
+                `;
+            }
+        }
+        
+        // Run test when page loads
+        window.addEventListener('load', testSupportTickets);
+    </script>
+</body>
+</html>

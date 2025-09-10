@@ -1,0 +1,35 @@
+/* Global Override for Tailwind text-white class */
+/* This file overrides the Tailwind CSS generated text-white rule */
+
+.text-white {
+  --tw-text-opacity: 1 !important;
+  color: rgb(21 17 17) !important;
+}
+
+/* Additional overrides for any variations */
+.text-white[style*="color: rgb(255 255 255"] {
+  color: rgb(21 17 17) !important;
+}
+
+.text-white[style*="color: white"] {
+  color: rgb(21 17 17) !important;
+}
+
+.text-white[style*="color: #ffffff"] {
+  color: rgb(21 17 17) !important;
+}
+
+.text-white[style*="color: #fff"] {
+  color: rgb(21 17 17) !important;
+}
+
+/* Override any inline styles that might be setting white color */
+*[class*="text-white"] {
+  color: rgb(21 17 17) !important;
+}
+
+/* Force override for any element with text-white class */
+.text-white,
+.text-white * {
+  color: rgb(21 17 17) !important;
+}

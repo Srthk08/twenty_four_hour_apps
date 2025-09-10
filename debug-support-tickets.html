@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Support Tickets</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .error { color: red; background: #ffe6e6; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .success { color: green; background: #e6ffe6; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .warning { color: orange; background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .info { color: blue; background: #e6f3ff; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .raw-data { background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Support Tickets Connection</h1>
+    <div id="status"></div>
+    <div id="results"></div>
+
+    <script>
+        const SUPABASE_URL = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        async function debugSupportTickets() {
+            const statusDiv = document.getElementById('status');
+            const resultsDiv = document.getElementById('results');
+            
+            statusDiv.innerHTML = '<div class="info">🔄 Testing connection to Supabase...</div>';
+            
+            try {
+                // Test 1: Check if table exists and get structure
+                statusDiv.innerHTML = '<div class="info">🔄 Checking table structure...</div>';
+                
+                const { data: tickets, error } = await supabase
+                    .from('support_tickets')
+                    .select('*')
+                    .limit(1);
+                
+                if (error) {
+                    statusDiv.innerHTML = `<div class="error">❌ Table Error: ${error.message}</div>`;
+                    resultsDiv.innerHTML = `
+                        <h2>Error Details:</h2>
+                        <div class="raw-data">${JSON.stringify(error, null, 2)}</div>
+                        <h3>Solutions:</h3>
+                        <ol>
+                            <li>Run the <code>create-support-tickets-table.sql</code> script in Supabase SQL Editor</li>
+                            <li>Or run the <code>insert-test-support-tickets.sql</code> script which includes table creation</li>
+                        </ol>
+                    `;
+                    return;
+                }
+                
+                statusDiv.innerHTML = '<div class="success">✅ Table exists and accessible!</div>';
+                
+                // Test 2: Get all tickets
+                const { data: allTickets, error: allError } = await supabase
+                    .from('support_tickets')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (allError) {
+                    statusDiv.innerHTML = `<div class="error">❌ Data Error: ${allError.message}</div>`;
+                    return;
+                }
+                
+                if (!allTickets || allTickets.length === 0) {
+                    statusDiv.innerHTML = '<div class="warning">⚠️ Table exists but no data found</div>';
+                    resultsDiv.innerHTML = `
+                        <h2>No Data Found</h2>
+                        <p>The support_tickets table exists but contains no data.</p>
+                        <h3>Solution:</h3>
+                        <p>Run the <code>insert-test-support-tickets.sql</code> script in Supabase SQL Editor to add sample data.</p>
+                    `;
+                    return;
+                }
+                
+                statusDiv.innerHTML = `<div class="success">✅ Found ${allTickets.length} tickets!</div>`;
+                
+                // Test 3: Show raw data structure
+                resultsDiv.innerHTML = `
+                    <h2>Raw Data from Supabase:</h2>
+                    <div class="raw-data">${JSON.stringify(allTickets, null, 2)}</div>
+                    
+                    <h2>Processed Data (as used in admin panel):</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ticket Number</th>
+                                <th>Customer Name</th>
+                                <th>Customer Email</th>
+                                <th>Subject</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${allTickets.map(ticket => {
+                                const processedTicket = {
+                                    id: ticket.id,
+                                    ticketNumber: ticket.ticket_number || ticket.ticketNumber || ticket.id,
+                                    customerName: ticket.customer_name || ticket.customerName || 'No Name',
+                                    customerEmail: ticket.customer_email || ticket.customerEmail || 'No Email',
+                                    subject: ticket.subject || 'No Subject',
+                                    priority: ticket.priority || 'medium',
+                                    status: ticket.status || 'open'
+                                };
+                                
+                                return `
+                                    <tr>
+                                        <td>${processedTicket.ticketNumber}</td>
+                                        <td>${processedTicket.customerName}</td>
+                                        <td>${processedTicket.customerEmail}</td>
+                                        <td>${processedTicket.subject}</td>
+                                        <td>${processedTicket.priority}</td>
+                                        <td>${processedTicket.status}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                    
+                    <h2>Field Mapping Analysis:</h2>
+                    <div class="info">
+                        <strong>Database Fields Found:</strong><br>
+                        ${Object.keys(allTickets[0] || {}).join(', ')}
+                    </div>
+                    
+                    <h2>Next Steps:</h2>
+                    <ol>
+                        <li>If you see "No Name" and "No Email" above, the field names in the database don't match what the code expects</li>
+                        <li>Check the raw data above to see the actual field names</li>
+                        <li>Update the field mapping in the support.astro file if needed</li>
+                    </ol>
+                `;
+                
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error">❌ Connection Error: ${error.message}</div>`;
+                resultsDiv.innerHTML = `
+                    <div class="raw-data">${error.stack}</div>
+                `;
+            }
+        }
+        
+        // Run debug when page loads
+        window.addEventListener('load', debugSupportTickets);
+    </script>
+</body>
+</html>

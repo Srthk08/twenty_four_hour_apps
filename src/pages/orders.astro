@@ -1,0 +1,345 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AuthGuard from '../components/AuthGuard.astro';
+---
+
+<Layout title="My Orders - DevExpress">
+  <AuthGuard>
+    <section class="py-12 bg-gray-50 min-h-screen">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
+        <div class="mb-8">
+          <h1 class="text-3xl font-bold text-gray-900">My Orders</h1>
+          <p class="text-gray-600 mt-2">View your order history and track your projects</p>
+        </div>
+
+        <!-- Orders Content -->
+        <div id="orders-content">
+          <!-- Loading State -->
+          <div id="loading-orders" class="text-center py-16">
+            <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8 text-primary-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+            </div>
+            <p class="text-gray-600">Loading your orders...</p>
+          </div>
+
+          <!-- Empty Orders State -->
+          <div id="empty-orders" class="hidden text-center py-16">
+            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">No orders yet</h2>
+            <p class="text-gray-600 mb-6">Start shopping to see your orders here</p>
+            <a href="/products" class="inline-block bg-primary-600 hover:bg-primary-700 text-white font-medium px-8 py-3 rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
+              Browse Products
+            </a>
+          </div>
+
+          <!-- Orders List -->
+          <div id="orders-list" class="hidden space-y-6">
+            <!-- Order Template -->
+            <div id="order-template" class="hidden bg-white rounded-xl shadow-lg overflow-hidden">
+              <div class="p-6">
+                <!-- Order Header -->
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+                  <div>
+                    <h3 class="text-xl font-bold text-gray-900 order-project-name">Project Name</h3>
+                    <p class="text-gray-600 order-project-description">Project description</p>
+                  </div>
+                  <div class="mt-4 sm:mt-0 text-right">
+                    <div class="text-2xl font-bold text-primary-600 order-total">₹0</div>
+                    <div class="text-sm text-gray-500 order-date">Order Date</div>
+                    <div class="text-xs text-gray-400 order-id">Order ID: -</div>
+                    <div class="mt-2">
+                      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        ✓ Order Confirmed
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Order Details -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <h4 class="text-lg font-semibold text-gray-800 mb-3">Project Details</h4>
+                    <div class="space-y-2">
+                      <div class="flex justify-between">
+                        <span class="text-gray-600">Project Name:</span>
+                        <span class="font-medium order-custom-name">-</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-gray-600">Contact Person:</span>
+                        <span class="font-medium order-contact-person">-</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-gray-600">Restaurant Name:</span>
+                        <span class="font-medium order-restaurant-name">-</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-gray-600">Cuisine Type:</span>
+                        <span class="font-medium order-cuisine-type">-</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 class="text-lg font-semibold text-gray-800 mb-3">Contact Information</h4>
+                    <div class="space-y-2">
+                      <div class="flex justify-between">
+                        <span class="text-gray-600">Email:</span>
+                        <span class="font-medium order-email">-</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-gray-600">Phone:</span>
+                        <span class="font-medium order-phone">-</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Customization Details -->
+                <div class="mb-6">
+                  <h4 class="text-lg font-semibold text-gray-800 mb-3">Customization</h4>
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-gray-50 rounded-lg p-4">
+                      <h5 class="font-medium text-gray-700 mb-2">Selected Colors</h5>
+                      <div class="flex space-x-2">
+                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 order-primary-color" style="background-color: #3B82F6;"></div>
+                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 order-secondary-color" style="background-color: #A5CF6;"></div>
+                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 order-accent-color" style="background-color: #F59E0B;"></div>
+                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 order-text-color" style="background-color: #1F2937;"></div>
+                      </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-4">
+                      <h5 class="font-medium text-gray-700 mb-2">Additional Features</h5>
+                      <div class="space-y-1 order-features">
+                        <span class="text-sm text-gray-600">No features selected</span>
+                      </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-4">
+                      <h5 class="font-medium text-gray-700 mb-2">Logo Uploaded</h5>
+                      <div class="order-logo-status text-sm text-gray-600">No logo</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Additional Requirements -->
+                <div class="mb-6">
+                  <h4 class="text-lg font-semibold text-gray-800 mb-3">Additional Requirements</h4>
+                  <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-gray-700 order-additional-requirements">No additional requirements specified</p>
+                  </div>
+                </div>
+
+                <!-- Order Status -->
+                <div class="border-t border-gray-200 pt-6">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <span class="text-green-700 font-medium">Order Completed</span>
+                    </div>
+                    <div class="text-sm text-gray-500">Order ID: <span class="order-id">-</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </AuthGuard>
+</Layout>
+
+<script>
+  import { simpleAuth } from '../lib/simple-auth';
+
+  // Orders functionality
+  class Orders {
+    constructor() {
+      this.orders = [];
+      this.init();
+    }
+
+    init() {
+      this.loadOrders();
+      this.renderOrders();
+    }
+
+    loadOrders() {
+      // Load orders from localStorage (simulating database)
+      const ordersData = localStorage.getItem('user-orders');
+      console.log('Raw orders data:', ordersData);
+      
+      if (ordersData) {
+        const allOrders = JSON.parse(ordersData);
+        const currentUser = simpleAuth.getCurrentUser();
+        
+        console.log('All orders:', allOrders);
+        console.log('Current user:', currentUser);
+        
+        // Filter orders for current user only
+        if (currentUser) {
+          this.orders = allOrders.filter(order => order.userId === currentUser.email);
+          console.log('Filtered orders for user:', this.orders);
+        } else {
+          this.orders = [];
+          console.log('No current user found');
+        }
+      } else {
+        console.log('No orders data found in localStorage');
+      }
+    }
+
+    renderOrders() {
+      const loadingOrders = document.getElementById('loading-orders');
+      const emptyOrders = document.getElementById('empty-orders');
+      const ordersList = document.getElementById('orders-list');
+
+      console.log('Rendering orders. Orders count:', this.orders.length);
+
+      // Hide loading after a short delay
+      setTimeout(() => {
+        loadingOrders?.classList.add('hidden');
+
+        if (this.orders.length === 0) {
+          console.log('No orders found, showing empty state');
+          emptyOrders?.classList.remove('hidden');
+          ordersList?.classList.add('hidden');
+          return;
+        }
+
+        console.log('Orders found, showing orders list');
+        emptyOrders?.classList.add('hidden');
+        ordersList?.classList.remove('hidden');
+
+        this.renderOrdersList();
+      }, 1000);
+    }
+
+    renderOrdersList() {
+      const ordersListContainer = document.getElementById('orders-list');
+      if (!ordersListContainer) return;
+
+      ordersListContainer.innerHTML = '';
+      
+      this.orders.forEach((order, index) => {
+        const orderElement = this.createOrderElement(order, index);
+        ordersListContainer.appendChild(orderElement);
+      });
+    }
+
+    createOrderElement(order, index) {
+      const template = document.getElementById('order-template');
+      if (!template) return document.createElement('div');
+
+      const clone = template.cloneNode(true);
+      clone.classList.remove('hidden');
+      clone.id = `order-${index}`;
+
+      // Set order details
+      clone.querySelector('.order-project-name').textContent = order.projectName || 'Custom Project';
+      clone.querySelector('.order-project-description').textContent = order.description || 'Professional digital solution';
+      clone.querySelector('.order-total').textContent = `₹${order.total?.toLocaleString() || '0'}`;
+      clone.querySelector('.order-date').textContent = this.formatDate(order.orderDate);
+      clone.querySelector('.order-id').textContent = order.orderId || `ORD-${Date.now()}`;
+
+      // Set project details
+      clone.querySelector('.order-custom-name').textContent = order.requirements?.projectName || '-';
+      clone.querySelector('.order-contact-person').textContent = order.requirements?.contactPerson || '-';
+      clone.querySelector('.order-restaurant-name').textContent = order.requirements?.restaurantName || '-';
+      clone.querySelector('.order-cuisine-type').textContent = order.requirements?.cuisineType || '-';
+
+      // Set contact information
+      clone.querySelector('.order-email').textContent = order.requirements?.email || '-';
+      clone.querySelector('.order-phone').textContent = order.requirements?.phone || '-';
+
+      // Set colors
+      if (order.requirements?.primaryColor) {
+        clone.querySelector('.order-primary-color').style.backgroundColor = order.requirements.primaryColor;
+      }
+      if (order.requirements?.secondaryColor) {
+        clone.querySelector('.order-secondary-color').style.backgroundColor = order.requirements.secondaryColor;
+      }
+      if (order.requirements?.accentColor) {
+        clone.querySelector('.order-accent-color').style.backgroundColor = order.requirements.accentColor;
+      }
+      if (order.requirements?.textColor) {
+        clone.querySelector('.order-text-color').style.backgroundColor = order.requirements.textColor;
+      }
+
+      // Set features
+      const featuresContainer = clone.querySelector('.order-features');
+      if (order.features && order.features.length > 0) {
+        featuresContainer.innerHTML = order.features.map(feature => 
+          `<span class="inline-block bg-primary-100 text-primary-800 text-xs px-2 py-1 rounded-full mr-2 mb-1">${feature}</span>`
+        ).join('');
+      }
+
+      // Set logo status
+      const logoStatus = clone.querySelector('.order-logo-status');
+      if (order.logo) {
+        logoStatus.innerHTML = '<span class="text-green-600">✓ Logo uploaded</span>';
+      }
+
+      // Set additional requirements
+      const additionalReq = clone.querySelector('.order-additional-requirements');
+      if (order.requirements?.additionalRequirements) {
+        additionalReq.textContent = order.requirements.additionalRequirements;
+      }
+
+      return clone;
+    }
+
+    formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+  }
+
+  // Initialize orders when page loads
+  document.addEventListener('DOMContentLoaded', () => {
+    new Orders();
+    
+    // Show success message if redirected from payment
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('order') === 'success') {
+      showSuccessMessage();
+      // Clear the URL parameter
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  });
+
+  function showSuccessMessage() {
+    // Create success message
+    const successDiv = document.createElement('div');
+    successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300';
+    successDiv.innerHTML = `
+      <div class="flex items-center space-x-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+        <span>Order placed successfully! 🎉</span>
+      </div>
+    `;
+    
+    document.body.appendChild(successDiv);
+    
+    // Remove after 5 seconds
+    setTimeout(() => {
+      successDiv.remove();
+    }, 5000);
+  }
+</script>

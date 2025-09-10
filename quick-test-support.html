@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quick Support Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Quick Support Tickets Test</h1>
+    <div id="output"></div>
+
+    <script>
+        const SUPABASE_URL = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        async function testSupport() {
+            try {
+                console.log('Testing support tickets...');
+                
+                const { data, error } = await supabase
+                    .from('support_tickets')
+                    .select('*')
+                    .limit(3);
+                
+                if (error) {
+                    document.getElementById('output').innerHTML = `<h2 style="color:red;">Error: ${error.message}</h2>`;
+                    return;
+                }
+                
+                console.log('Raw data:', data);
+                
+                let html = '<h2>Raw Data from Database:</h2>';
+                html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                if (data && data.length > 0) {
+                    html += '<h2>Field Analysis:</h2>';
+                    const firstTicket = data[0];
+                    html += '<ul>';
+                    for (const key in firstTicket) {
+                        html += `<li><strong>${key}:</strong> ${firstTicket[key]}</li>`;
+                    }
+                    html += '</ul>';
+                }
+                
+                document.getElementById('output').innerHTML = html;
+                
+            } catch (err) {
+                document.getElementById('output').innerHTML = `<h2 style="color:red;">Error: ${err.message}</h2>`;
+            }
+        }
+        
+        testSupport();
+    </script>
+</body>
+</html>

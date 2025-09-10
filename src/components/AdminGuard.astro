@@ -1,0 +1,112 @@
+---
+// AdminGuard component - protects admin routes
+---
+
+<div id="admin-guard" class="min-h-screen bg-gray-50 flex items-center justify-center">
+  <div class="text-center">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+    <p class="text-gray-600">Checking admin access...</p>
+  </div>
+</div>
+
+<script>
+  // AdminGuard - Check if user has admin role
+  async function checkAdminAccess() {
+    try {
+      console.log('🔒 AdminGuard: Checking admin access...');
+      
+      // Wait for global auth manager to be ready
+      let attempts = 0;
+      const maxAttempts = 100; // Wait up to 10 seconds
+      
+      while (!window.globalAuthManager && attempts < maxAttempts) {
+        console.log(`⏳ AdminGuard: Waiting for global auth manager... (${attempts + 1}/${maxAttempts})`);
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
+      
+      if (!window.globalAuthManager) {
+        console.error('❌ AdminGuard: Global auth manager not found after waiting');
+        showAccessDenied('Authentication system not available. Please refresh the page.');
+        return;
+      }
+      
+      console.log('✅ AdminGuard: Global auth manager found');
+      
+      // Check if user is logged in
+      const currentUser = window.globalAuthManager.getCurrentUser();
+      if (!currentUser) {
+        console.log('❌ AdminGuard: No user logged in');
+        showAccessDenied('Please login to access admin panel');
+        return;
+      }
+      
+      console.log('✅ AdminGuard: User found:', currentUser);
+      
+      // Check if user has admin role
+      if (currentUser.role !== 'admin') {
+        console.log('❌ AdminGuard: User does not have admin role. Role:', currentUser.role);
+        showAccessDenied('Access denied. Admin privileges required.');
+        return;
+      }
+      
+      console.log('✅ AdminGuard: Admin access granted for user:', currentUser.username || currentUser.email);
+      
+      // Show admin content
+      showAdminContent();
+      
+    } catch (error) {
+      console.error('❌ AdminGuard: Error checking admin access:', error);
+      showAccessDenied('Error checking admin access. Please try again.');
+    }
+  }
+  
+  function showAccessDenied(message) {
+    const guardElement = document.getElementById('admin-guard');
+    if (guardElement) {
+      guardElement.innerHTML = `
+        <div class="text-center">
+          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+            <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Access Denied</h3>
+          <p class="text-gray-600 mb-6">${message}</p>
+          <div class="space-x-3">
+            <a href="/login" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+              Go to Login
+            </a>
+            <a href="/" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+              Back to Home
+            </a>
+          </div>
+        </div>
+      `;
+    }
+  }
+  
+  function showAdminContent() {
+    const guardElement = document.getElementById('admin-guard');
+    if (guardElement) {
+      // Hide the guard and show the actual admin content
+      guardElement.style.display = 'none';
+      
+      // Dispatch event that admin content is ready
+      window.dispatchEvent(new CustomEvent('admin-access-granted'));
+    }
+  }
+  
+  // Start checking admin access when page loads
+  document.addEventListener('DOMContentLoaded', checkAdminAccess);
+  
+  // Also check when auth state changes
+  window.addEventListener('auth-state-changed', checkAdminAccess);
+  
+  // Check immediately if already loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', checkAdminAccess);
+  } else {
+    checkAdminAccess();
+  }
+</script>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Navigation Test</title>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 20px auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
+        .nav-item { 
+            display: inline-flex; 
+            align-items: center; 
+            padding: 8px 16px; 
+            margin: 4px; 
+            background: #f8f9fa; 
+            border: 1px solid #dee2e6; 
+            border-radius: 4px; 
+            text-decoration: none; 
+            color: #495057; 
+            transition: all 0.2s;
+        }
+        .nav-item:hover { background: #e9ecef; color: #212529; }
+        .nav-active { background: #007bff; color: white; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Dashboard Navigation Test</h1>
+    <p>This page tests if the dashboard navigation buttons work properly.</p>
+    
+    <div id="status" class="test-section info">Initializing...</div>
+    
+    <div class="test-section">
+        <h3>Test 1: Alpine.js Loading</h3>
+        <div id="alpine-status">Checking...</div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 2: Navigation Links</h3>
+        <div x-data="{ currentPage: 'dashboard' }">
+            <!-- Simulate navbar dashboard button -->
+            <a href="/admin" 
+               class="nav-item" 
+               :class="currentPage === 'dashboard' ? 'nav-active' : ''"
+               @click="console.log('🖱️ Navbar Dashboard clicked'); currentPage = 'dashboard'"
+               onclick="console.log('🖱️ Navbar Dashboard onclick triggered'); return true;"
+               id="navbar-dashboard-link">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                </svg>
+                <span>Dashboard</span>
+            </a>
+            
+            <!-- Simulate dropdown dashboard button -->
+            <a href="/admin" 
+               class="nav-item" 
+               @click="console.log('🖱️ Dropdown Dashboard clicked'); currentPage = 'dashboard'"
+               onclick="console.log('🖱️ Dropdown Dashboard onclick triggered')">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                </svg>
+                <span>Dashboard (Dropdown)</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 3: JavaScript Event Handlers</h3>
+        <button onclick="testNavigation()">Test Navigation</button>
+        <div id="navigation-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 4: Console Logs</h3>
+        <p>Check the browser console (F12) for detailed logs when clicking the buttons above.</p>
+        <div id="console-logs"></div>
+    </div>
+
+    <script>
+        // Test navigation function
+        function testNavigation() {
+            console.log('🧪 Testing navigation...');
+            const result = document.getElementById('navigation-result');
+            result.innerHTML = '<div class="test-section info">Testing navigation... Check console for logs.</div>';
+            
+            // Test the navigation function
+            if (window.navigateToDashboard) {
+                console.log('✅ navigateToDashboard function exists');
+                result.innerHTML = '<div class="test-section success">✅ Navigation function is available</div>';
+            } else {
+                console.log('❌ navigateToDashboard function not found');
+                result.innerHTML = '<div class="test-section error">❌ Navigation function not found</div>';
+            }
+        }
+        
+        // Function to handle dashboard navigation
+        window.navigateToDashboard = function() {
+            console.log('🚀 Navigating to dashboard...');
+            alert('Navigation test successful! (In real app, this would go to /admin)');
+        };
+        
+        // Check Alpine.js loading
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔍 Checking Alpine.js availability...');
+            const alpineStatus = document.getElementById('alpine-status');
+            
+            setTimeout(() => {
+                if (window.Alpine) {
+                    console.log('✅ Alpine.js is loaded');
+                    alpineStatus.innerHTML = '<div class="test-section success">✅ Alpine.js is loaded and working</div>';
+                } else {
+                    console.error('❌ Alpine.js is not loaded after timeout');
+                    alpineStatus.innerHTML = '<div class="test-section error">❌ Alpine.js failed to load</div>';
+                }
+            }, 1000);
+            
+            // Add click handlers to all dashboard links
+            const dashboardLinks = document.querySelectorAll('a[href="/admin"]');
+            dashboardLinks.forEach((link, index) => {
+                console.log(`🔗 Found dashboard link ${index + 1}:`, link);
+                link.addEventListener('click', function(e) {
+                    console.log('🖱️ Dashboard link clicked:', e.target);
+                    // Let the default behavior happen (navigation)
+                });
+            });
+            
+            // Specific handler for navbar dashboard button
+            const navbarDashboardLink = document.getElementById('navbar-dashboard-link');
+            if (navbarDashboardLink) {
+                console.log('🔧 Setting up specific navbar dashboard handler...');
+                navbarDashboardLink.addEventListener('click', function(e) {
+                    console.log('🖱️ Navbar Dashboard button clicked!');
+                    e.preventDefault();
+                    alert('Navbar Dashboard button clicked! (In real app, this would go to /admin)');
+                });
+            }
+            
+            console.log(`✅ Found ${dashboardLinks.length} dashboard links`);
+            
+            // Update status
+            const status = document.getElementById('status');
+            status.innerHTML = '<div class="test-section success">✅ Test page loaded successfully. Click the buttons above to test navigation.</div>';
+        });
+    </script>
+</body>
+</html>

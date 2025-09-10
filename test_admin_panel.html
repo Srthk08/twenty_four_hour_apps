@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; color: #856404; }
+        button { padding: 12px 24px; margin: 8px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; }
+        button:hover { background: #0056b3; }
+        .admin-btn { background: #dc3545; }
+        .admin-btn:hover { background: #c82333; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 12px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Admin Panel Test</h1>
+        
+        <div class="section info">
+            <h3>📋 Current Status</h3>
+            <div id="current-status">Testing admin panel functionality...</div>
+        </div>
+
+        <div class="section">
+            <h3>🔧 Admin Panel Tests</h3>
+            <button onclick="testDatabaseTables()">Test Database Tables</button>
+            <button onclick="testUserData()">Test User Data</button>
+            <button onclick="testContactData()">Test Contact Data</button>
+            <button onclick="testSupportData()">Test Support Data</button>
+            <button onclick="testCartData()">Test Cart Data</button>
+            <button onclick="goToAdminPanel()" class="admin-btn">Go to Admin Panel</button>
+        </div>
+
+        <div class="section">
+            <h3>📊 Test Results</h3>
+            <div id="results"></div>
+        </div>
+
+        <div class="section">
+            <h3>👥 User Data</h3>
+            <div id="user-data"></div>
+        </div>
+
+        <div class="section">
+            <h3>📞 Contact Data</h3>
+            <div id="contact-data"></div>
+        </div>
+
+        <div class="section">
+            <h3>🎫 Support Data</h3>
+            <div id="support-data"></div>
+        </div>
+
+        <div class="section">
+            <h3>🛒 Cart Data</h3>
+            <div id="cart-data"></div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `section ${type}`;
+            div.innerHTML = `<pre>${message}</pre>`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('current-status');
+            status.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function displayTableData(containerId, data, columns) {
+            const container = document.getElementById(containerId);
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p>No data found</p>';
+                return;
+            }
+
+            let html = '<table><thead><tr>';
+            columns.forEach(col => {
+                html += `<th>${col}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            data.forEach(row => {
+                html += '<tr>';
+                columns.forEach(col => {
+                    const value = row[col] || '-';
+                    html += `<td>${value}</td>`;
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        async function testDatabaseTables() {
+            try {
+                addResult('🔄 Testing database tables...', 'info');
+                
+                const tables = ['user_profiles', 'contact_submissions', 'support_tickets', 'cart_customizations'];
+                const results = {};
+
+                for (const table of tables) {
+                    try {
+                        const { data, error } = await supabase
+                            .from(table)
+                            .select('count', { count: 'exact', head: true });
+                        
+                        if (error) {
+                            results[table] = { error: error.message };
+                            addResult(`❌ ${table}: ${error.message}`, 'error');
+                        } else {
+                            results[table] = { count: data };
+                            addResult(`✅ ${table}: ${data} records found`, 'success');
+                        }
+                    } catch (err) {
+                        results[table] = { error: err.message };
+                        addResult(`❌ ${table}: ${err.message}`, 'error');
+                    }
+                }
+
+                updateStatus('✅ Database table tests completed', 'success');
+                return results;
+            } catch (err) {
+                addResult(`❌ Database test failed: ${err.message}`, 'error');
+                updateStatus('❌ Database test failed', 'error');
+            }
+        }
+
+        async function testUserData() {
+            try {
+                addResult('🔄 Loading user data...', 'info');
+                
+                const { data: users, error } = await supabase
+                    .from('user_profiles')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+
+                if (error) {
+                    addResult(`❌ User data error: ${error.message}`, 'error');
+                    return;
+                }
+
+                addResult(`✅ Loaded ${users?.length || 0} users`, 'success');
+                displayTableData('user-data', users, ['full_name', 'email', 'phone', 'role', 'created_at']);
+            } catch (err) {
+                addResult(`❌ User data test failed: ${err.message}`, 'error');
+            }
+        }
+
+        async function testContactData() {
+            try {
+                addResult('🔄 Loading contact data...', 'info');
+                
+                const { data: contacts, error } = await supabase
+                    .from('contact_submissions')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+
+                if (error) {
+                    addResult(`❌ Contact data error: ${error.message}`, 'error');
+                    return;
+                }
+
+                addResult(`✅ Loaded ${contacts?.length || 0} contact submissions`, 'success');
+                displayTableData('contact-data', contacts, ['first_name', 'last_name', 'email', 'phone', 'company_name', 'project_type', 'created_at']);
+            } catch (err) {
+                addResult(`❌ Contact data test failed: ${err.message}`, 'error');
+            }
+        }
+
+        async function testSupportData() {
+            try {
+                addResult('🔄 Loading support data...', 'info');
+                
+                const { data: tickets, error } = await supabase
+                    .from('support_tickets')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+
+                if (error) {
+                    addResult(`❌ Support data error: ${error.message}`, 'error');
+                    return;
+                }
+
+                addResult(`✅ Loaded ${tickets?.length || 0} support tickets`, 'success');
+                displayTableData('support-data', tickets, ['id', 'subject', 'category', 'priority', 'status', 'created_at']);
+            } catch (err) {
+                addResult(`❌ Support data test failed: ${err.message}`, 'error');
+            }
+        }
+
+        async function testCartData() {
+            try {
+                addResult('🔄 Loading cart data...', 'info');
+                
+                const { data: carts, error } = await supabase
+                    .from('cart_customizations')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+
+                if (error) {
+                    addResult(`❌ Cart data error: ${error.message}`, 'error');
+                    return;
+                }
+
+                addResult(`✅ Loaded ${carts?.length || 0} cart customizations`, 'success');
+                displayTableData('cart-data', carts, ['user_email', 'project_name', 'app_name', 'contact_person', 'total_amount', 'created_at']);
+            } catch (err) {
+                addResult(`❌ Cart data test failed: ${err.message}`, 'error');
+            }
+        }
+
+        function goToAdminPanel() {
+            window.open('http://localhost:4321/admin', '_blank');
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            updateStatus('🔄 Initializing admin panel tests...', 'info');
+            testDatabaseTables();
+        };
+    </script>
+</body>
+</html>

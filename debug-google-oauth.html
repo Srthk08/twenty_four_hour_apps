@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google OAuth Debug Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .error {
+            background: #fee2e2;
+            border: 1px solid #f87171;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .success {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+            color: #065f46;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .warning {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .code {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+        .button {
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 16px;
+        }
+        .button:hover {
+            background: #2563eb;
+        }
+        .button.danger {
+            background: #ef4444;
+        }
+        .button.danger:hover {
+            background: #dc2626;
+        }
+        .step {
+            margin: 20px 0;
+            padding: 20px;
+            border-left: 4px solid #3b82f6;
+            background: #f8fafc;
+        }
+        .step h3 {
+            margin-top: 0;
+            color: #1e40af;
+        }
+        .copy-btn {
+            background: #6b7280;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .copy-btn:hover {
+            background: #4b5563;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Google OAuth Debug Tool</h1>
+        <p>This tool will help you identify and fix the exact URI mismatch issue.</p>
+
+        <div id="currentInfo" class="step">
+            <h3>📋 Current Environment Information</h3>
+            <div id="envInfo"></div>
+        </div>
+
+        <div class="step">
+            <h3>🧪 Test Google OAuth</h3>
+            <p>Click the button below to test Google OAuth and see the exact error:</p>
+            <button class="button" onclick="testGoogleAuth()">Test Google Authentication</button>
+            <button class="button danger" onclick="testAllUris()">Test All Possible URIs</button>
+        </div>
+
+        <div id="testResults"></div>
+
+        <div class="step">
+            <h3>🔧 Configuration Steps</h3>
+            <p>Based on the test results above, follow these steps:</p>
+            <div id="configSteps"></div>
+        </div>
+
+        <div class="step">
+            <h3>📋 Quick Copy-Paste Configuration</h3>
+            <p>Copy these exact URIs to your Google Cloud Console and Supabase:</p>
+            <div id="quickConfig"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Display current environment info
+        function displayEnvironmentInfo() {
+            const origin = window.location.origin;
+            const protocol = window.location.protocol;
+            const hostname = window.location.hostname;
+            const port = window.location.port;
+            
+            const envInfo = document.getElementById('envInfo');
+            envInfo.innerHTML = `
+                <p><strong>Current Origin:</strong> ${origin}</p>
+                <p><strong>Protocol:</strong> ${protocol}</p>
+                <p><strong>Hostname:</strong> ${hostname}</p>
+                <p><strong>Port:</strong> ${port || 'default'}</p>
+                <p><strong>Full URL:</strong> ${window.location.href}</p>
+            `;
+        }
+
+        // Test Google OAuth
+        async function testGoogleAuth() {
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.innerHTML = '<div class="warning">🔄 Testing Google OAuth...</div>';
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: `${window.location.origin}/auth/callback`
+                    }
+                });
+                
+                if (error) {
+                    resultsDiv.innerHTML = `
+                        <div class="error">
+                            <h4>❌ Google OAuth Error</h4>
+                            <p><strong>Error Message:</strong> ${error.message}</p>
+                            <p><strong>Error Code:</strong> ${error.status || 'Unknown'}</p>
+                            <p><strong>Attempted URI:</strong> ${window.location.origin}/auth/callback</p>
+                        </div>
+                    `;
+                    generateConfigSteps(error);
+                } else {
+                    resultsDiv.innerHTML = '<div class="success">✅ Google OAuth initiated successfully!</div>';
+                }
+            } catch (err) {
+                resultsDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Exception Error</h4>
+                        <p><strong>Error:</strong> ${err.message}</p>
+                        <p><strong>Attempted URI:</strong> ${window.location.origin}/auth/callback</p>
+                    </div>
+                `;
+                generateConfigSteps({ message: err.message });
+            }
+        }
+
+        // Test all possible URIs
+        async function testAllUris() {
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.innerHTML = '<div class="warning">🔄 Testing all possible URIs...</div>';
+            
+            const testUris = [
+                `${window.location.origin}/auth/callback`,
+                `${window.location.origin}/`,
+                `${window.location.origin}/dashboard`,
+                `${window.location.origin}/login`,
+                `${window.location.origin}/signup`,
+                `${window.location.origin}/callback`,
+                `${window.location.origin}/auth/callback/`,
+                `${window.location.origin}/auth/callback?`,
+                `http://localhost:4321/auth/callback`,
+                `https://localhost:4321/auth/callback`
+            ];
+            
+            let results = '<div class="warning"><h4>🧪 Testing Multiple URIs</h4>';
+            
+            for (const uri of testUris) {
+                try {
+                    const { error } = await supabase.auth.signInWithOAuth({
+                        provider: 'google',
+                        options: {
+                            redirectTo: uri
+                        }
+                    });
+                    
+                    if (error) {
+                        results += `<p>❌ <strong>${uri}</strong> - ${error.message}</p>`;
+                    } else {
+                        results += `<p>✅ <strong>${uri}</strong> - SUCCESS!</p>`;
+                    }
+                } catch (err) {
+                    results += `<p>💥 <strong>${uri}</strong> - ${err.message}</p>`;
+                }
+            }
+            
+            results += '</div>';
+            resultsDiv.innerHTML = results;
+            generateConfigSteps({ message: 'Multiple URI test completed' });
+        }
+
+        // Generate configuration steps based on error
+        function generateConfigSteps(error) {
+            const configDiv = document.getElementById('configSteps');
+            const origin = window.location.origin;
+            
+            let steps = `
+                <h4>🔧 Google Cloud Console Configuration</h4>
+                <ol>
+                    <li>Go to <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a></li>
+                    <li>Navigate to <strong>APIs & Services → Credentials</strong></li>
+                    <li>Find your OAuth 2.0 Client ID and click on it</li>
+                    <li>In <strong>Authorized redirect URIs</strong>, add these EXACT URIs:</li>
+                </ol>
+                <div class="code" id="googleUris">
+${origin}/auth/callback
+${origin}/
+${origin}/dashboard
+${origin}/login
+${origin}/signup
+                </div>
+                <button class="copy-btn" onclick="copyToClipboard('googleUris')">Copy URIs</button>
+                
+                <h4>🔧 Supabase Configuration</h4>
+                <ol>
+                    <li>Go to <a href="https://supabase.com/dashboard" target="_blank">Supabase Dashboard</a></li>
+                    <li>Navigate to <strong>Authentication → URL Configuration</strong></li>
+                    <li>Set <strong>Site URL</strong> to: <code>${origin}</code></li>
+                    <li>Add these <strong>Redirect URLs</strong>:</li>
+                </ol>
+                <div class="code" id="supabaseUris">
+${origin}/auth/callback
+${origin}/
+${origin}/dashboard
+${origin}/login
+${origin}/signup
+                </div>
+                <button class="copy-btn" onclick="copyToClipboard('supabaseUris')">Copy URIs</button>
+            `;
+            
+            if (error.message && error.message.includes('mismatch')) {
+                steps += `
+                    <div class="error">
+                        <h4>🚨 URI Mismatch Detected</h4>
+                        <p>The error indicates a redirect URI mismatch. Make sure:</p>
+                        <ul>
+                            <li>No extra spaces in the URIs</li>
+                            <li>Exact protocol match (http vs https)</li>
+                            <li>Exact port number match</li>
+                            <li>No trailing slashes unless specified</li>
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            configDiv.innerHTML = steps;
+        }
+
+        // Generate quick config
+        function generateQuickConfig() {
+            const origin = window.location.origin;
+            const quickDiv = document.getElementById('quickConfig');
+            
+            quickDiv.innerHTML = `
+                <h4>Google Cloud Console - Authorized redirect URIs:</h4>
+                <div class="code" id="googleConfig">
+${origin}/auth/callback
+${origin}/
+${origin}/dashboard
+${origin}/login
+${origin}/signup
+                </div>
+                <button class="copy-btn" onclick="copyToClipboard('googleConfig')">Copy</button>
+                
+                <h4>Supabase - Site URL:</h4>
+                <div class="code">${origin}</div>
+                
+                <h4>Supabase - Redirect URLs:</h4>
+                <div class="code" id="supabaseConfig">
+${origin}/auth/callback
+${origin}/
+${origin}/dashboard
+${origin}/login
+${origin}/signup
+                </div>
+                <button class="copy-btn" onclick="copyToClipboard('supabaseConfig')">Copy</button>
+            `;
+        }
+
+        // Copy to clipboard
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            displayEnvironmentInfo();
+            generateQuickConfig();
+        });
+    </script>
+</body>
+</html>

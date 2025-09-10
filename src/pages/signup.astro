@@ -1,0 +1,665 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Sign Up - DevExpress">
+  <section class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+      <div class="flex justify-center">
+        <div class="w-12 h-12 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center">
+          <span class="text-white font-bold text-xl">24</span>
+        </div>
+      </div>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        Create your account
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-600">
+        Or{' '}
+        <a href="/login" class="font-medium text-primary-600 hover:text-primary-500 transition-colors">
+          sign in to your existing account
+        </a>
+      </p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+      <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <form id="signup-form" class="space-y-6">
+          <!-- Error Message -->
+          <div id="error-message" class="hidden p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div class="flex">
+              <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+              </svg>
+              <span id="error-text" class="text-red-800">An error occurred during account creation.</span>
+            </div>
+          </div>
+
+          <!-- Full Name -->
+          <div>
+            <label for="full_name" class="block text-sm font-medium text-gray-700">
+              Full Name *
+            </label>
+            <div class="mt-1">
+              <input
+                id="full_name"
+                name="full_name"
+                type="text"
+                required
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                placeholder="Enter your full name"
+              />
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700">
+              Email Address *
+            </label>
+            <div class="mt-1">
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                autocomplete="off"
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                placeholder="your@email.com"
+              />
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700">
+              Password *
+            </label>
+            <div class="mt-1">
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                minlength="6"
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                placeholder="Create a password (min 6 characters)"
+              />
+            </div>
+          </div>
+
+          <!-- Confirm Password -->
+          <div>
+            <label for="confirm_password" class="block text-sm font-medium text-gray-700">
+              Confirm Password *
+            </label>
+            <div class="mt-1">
+              <input
+                id="confirm_password"
+                name="confirm_password"
+                type="password"
+                required
+                minlength="6"
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                placeholder="Confirm your password"
+              />
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div>
+            <label for="phone" class="block text-sm font-medium text-gray-700">
+              Phone Number
+            </label>
+            <div class="mt-1">
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                placeholder="+91 98765 43210"
+              />
+            </div>
+          </div>
+
+          <!-- Company Name -->
+          <div>
+            <label for="company_name" class="block text-sm font-medium text-gray-700">
+              Company Name
+            </label>
+            <div class="mt-1">
+              <input
+                id="company_name"
+                name="company_name"
+                type="text"
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                placeholder="Your company name (optional)"
+              />
+            </div>
+          </div>
+
+          <!-- Google Authentication -->
+          <div class="google-auth-section">
+            <div class="google-auth-container">
+              <button id="google-signup-btn" class="google-btn signup">
+                <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                <span>Sign up with Google</span>
+              </button>
+            </div>
+            
+            <div class="divider">
+              <span>or</span>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+            <button
+              type="submit"
+            id="signup-btn"
+            class="w-full bg-primary-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+            >
+              Create Account
+            </button>
+
+          <!-- Login Link -->
+          <div class="text-center text-sm text-gray-600">
+            Already have an account?
+            <a href="/login" class="text-primary-600 hover:text-primary-500 font-medium transition-colors">
+              Sign in here
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .google-auth-section {
+    margin: 1.5rem 0;
+  }
+
+  .google-auth-container {
+    width: 100%;
+  }
+
+  .google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.5rem;
+    background: white;
+    color: #374151;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .google-btn:hover {
+    border-color: #d1d5db;
+    background: #f9fafb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .google-btn:active {
+    transform: translateY(0);
+  }
+
+  .google-btn.signup {
+    background: #4285f4;
+    border-color: #4285f4;
+    color: white;
+  }
+
+  .google-btn.signup:hover {
+    background: #3367d6;
+    border-color: #3367d6;
+  }
+
+  .google-icon {
+    flex-shrink: 0;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin: 1rem 0;
+  }
+
+  .divider::before,
+  .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e5e7eb;
+  }
+
+  .divider span {
+    padding: 0 1rem;
+    background: white;
+  }
+
+  .auth-status {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    font-size: 0.875rem;
+  }
+
+  .auth-status.success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+  }
+
+  .auth-status.error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+  }
+
+  .auth-status.loading {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #93c5fd;
+  }
+
+  .hidden {
+    display: none;
+  }
+  
+  /* Prevent autofill styling */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: #374151 !important;
+    background-color: white !important;
+  }
+  
+  /* Ensure form fields start empty */
+  #email, #full_name, #password, #confirm_password, #phone, #company_name {
+    background-color: white !important;
+    color: #374151 !important;
+  }
+</style>
+
+<script>
+  import { supabase } from '../lib/supabase';
+
+  const form = document.getElementById('signup-form') as HTMLFormElement;
+  const errorMessage = document.getElementById('error-message');
+  const errorText = document.getElementById('error-text');
+  const googleSignupBtn = document.getElementById('google-signup-btn');
+
+  // Show status message
+  function showStatus(message, type = 'info') {
+    if (errorText) {
+      errorText.textContent = message;
+    }
+    errorMessage?.classList.remove('hidden');
+    errorMessage?.classList.add(type);
+    
+    if (type === 'success') {
+      setTimeout(() => {
+        errorMessage?.classList.add('hidden');
+      }, 3000);
+    }
+  }
+
+  // Handle Google authentication
+  async function handleGoogleAuth() {
+    try {
+      showStatus('Connecting to Google...', 'loading');
+      
+      // Use the standard Supabase redirect URI
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
+        }
+      });
+
+      if (error) {
+        console.error('Google auth error:', error);
+        
+        // Provide specific error messages and solutions
+        let errorMessage = error.message;
+        if (error.message.includes('Provider not found') || error.message.includes('not configured')) {
+          errorMessage = 'Google provider not configured. Please contact administrator.';
+        } else if (error.message.includes('redirect_uri_mismatch') || error.message.includes('mismatch')) {
+          errorMessage = `Redirect URI mismatch. Please add this exact URI to Google Cloud Console: ${window.location.origin}/auth/callback`;
+          console.error('URI Mismatch Details:', {
+            currentOrigin: window.location.origin,
+            expectedRedirect: `${window.location.origin}/auth/callback`,
+            error: error.message,
+            fixInstructions: 'Add the exact URI above to Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client ID → Authorized redirect URIs'
+          });
+        } else if (error.message.includes('access_denied')) {
+          errorMessage = 'Access denied. Please try again.';
+        }
+        
+        showStatus(`Authentication failed: ${errorMessage}`, 'error');
+        return;
+      }
+
+      showStatus('Redirecting to Google...', 'loading');
+      
+    } catch (err) {
+      console.error('Google auth error:', err);
+      showStatus(`Authentication failed: ${err.message}`, 'error');
+    }
+  }
+
+  // Handle Google user data sync
+  async function syncGoogleUser(user) {
+    try {
+      const { data, error } = await supabase.rpc('sync_google_user', {
+        p_google_id: user.user_metadata.provider_id,
+        p_email: user.email,
+        p_name: user.user_metadata.full_name,
+        p_picture: user.user_metadata.avatar_url,
+        p_provider_id: user.user_metadata.provider_id
+      });
+
+      if (error) {
+        console.error('Sync error:', error);
+        return;
+      }
+
+      console.log('Google user synced:', data);
+      return data;
+    } catch (err) {
+      console.error('Sync error:', err);
+    }
+  }
+
+  // Event listener for Google sign-up button
+  googleSignupBtn?.addEventListener('click', handleGoogleAuth);
+
+  // Listen for auth state changes
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session?.user) {
+      const user = session.user;
+      
+      if (user.app_metadata.provider === 'google') {
+        showStatus('Syncing Google account...', 'loading');
+        await syncGoogleUser(user);
+        showStatus('Successfully signed up with Google!', 'success');
+        
+        // Redirect to dashboard
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 1500);
+      }
+    }
+  });
+
+  // Clear all form fields on page load to prevent pre-filling
+  document.addEventListener('DOMContentLoaded', function() {
+    const emailInput = document.getElementById('email') as HTMLInputElement;
+    const fullNameInput = document.getElementById('full_name') as HTMLInputElement;
+    const passwordInput = document.getElementById('password') as HTMLInputElement;
+    const confirmPasswordInput = document.getElementById('confirm_password') as HTMLInputElement;
+    const phoneInput = document.getElementById('phone') as HTMLInputElement;
+    const companyNameInput = document.getElementById('company_name') as HTMLInputElement;
+    
+    // Clear all input fields
+    if (emailInput) emailInput.value = '';
+    if (fullNameInput) fullNameInput.value = '';
+    if (passwordInput) passwordInput.value = '';
+    if (confirmPasswordInput) confirmPasswordInput.value = '';
+    if (phoneInput) phoneInput.value = '';
+    if (companyNameInput) companyNameInput.value = '';
+    
+    // Prevent autofill by setting autocomplete attributes
+    if (emailInput) {
+      emailInput.setAttribute('autocomplete', 'off');
+      emailInput.setAttribute('data-lpignore', 'true');
+    }
+    if (passwordInput) {
+      passwordInput.setAttribute('autocomplete', 'new-password');
+    }
+    if (confirmPasswordInput) {
+      confirmPasswordInput.setAttribute('autocomplete', 'new-password');
+    }
+  });
+
+  // Check for query parameter messages
+  const urlParams = new URLSearchParams(window.location.search);
+  const message = urlParams.get('message');
+  const messageType = urlParams.get('type') || 'success';
+
+  if (message) {
+    if (messageType === 'error') {
+      if (errorText) {
+        errorText.textContent = message;
+      }
+      errorMessage?.classList.remove('hidden');
+    } else {
+      // Show success toast
+      if (typeof window.showToast === 'function') {
+        window.showToast(message, 'success');
+      }
+    }
+    
+    // Clear the URL parameters
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(form);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    const confirmPassword = formData.get('confirm_password') as string;
+    const fullName = formData.get('full_name') as string;
+    const phone = formData.get('phone') as string;
+    const companyName = formData.get('company_name') as string;
+
+    // Hide previous errors
+    errorMessage?.classList.add('hidden');
+
+    // Validate passwords match
+    if (password !== confirmPassword) {
+      if (errorText) {
+        errorText.textContent = 'Passwords do not match.';
+      }
+      errorMessage?.classList.remove('hidden');
+      return;
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      if (errorText) {
+        errorText.textContent = 'Password must be at least 6 characters long.';
+      }
+      errorMessage?.classList.remove('hidden');
+      return;
+    }
+
+    // Show loading state
+    const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const originalText = submitButton.textContent;
+    submitButton.disabled = true;
+    submitButton.innerHTML = `
+      <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Creating account...
+    `;
+
+    try {
+      console.log('Attempting to sign up with Supabase:', email);
+      
+      // Determine user role based on username/email
+      let userRole = 'customer';
+      if (fullName.toLowerCase().includes('admin') || email.toLowerCase().includes('admin')) {
+        userRole = 'admin';
+      } else if (fullName.toLowerCase().includes('developer') || email.toLowerCase().includes('developer')) {
+        userRole = 'developer';
+      } else if (fullName.toLowerCase().includes('support') || email.toLowerCase().includes('support')) {
+        userRole = 'support';
+      }
+      
+      // Sign up with Supabase Auth
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            phone: phone,
+            company_name: companyName,
+            role: userRole,
+            username: fullName.toLowerCase().replace(/\s+/g, '_')
+          }
+        }
+      });
+
+      if (error) {
+        console.error('Supabase signup error:', error);
+        throw error;
+      }
+
+      if (data.user) {
+        console.log('User created successfully in Auth:', data.user.email);
+        
+        // Create complete user profile in profiles table
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: data.user.id,
+            email: email,
+            full_name: fullName,
+            phone: phone || null,
+            company_name: companyName || null,
+            role: userRole,
+            status: 'pending_verification',
+            username: fullName.toLowerCase().replace(/\s+/g, '_'),
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+
+        if (profileError) {
+          console.error('Error creating user profile:', profileError);
+          // Try to delete the auth user if profile creation fails
+          try {
+            await supabase.auth.admin.deleteUser(data.user.id);
+          } catch (deleteError) {
+            console.error('Error deleting auth user after profile creation failure:', deleteError);
+          }
+          throw new Error('Failed to create user profile. Please try again.');
+        }
+
+        // Log user activity
+        try {
+          await supabase
+            .from('user_activity_log')
+            .insert({
+              user_id: data.user.id,
+              action: 'user_signup',
+              details: {
+                email: email,
+                full_name: fullName,
+                role: userRole,
+                company_name: companyName,
+                phone: phone
+              },
+              ip_address: '127.0.0.1', // Will be updated with real IP in production
+              user_agent: navigator.userAgent
+            });
+        } catch (logError) {
+          console.warn('Could not log user activity:', logError);
+        }
+
+        console.log('Complete user profile created successfully with role:', userRole);
+        
+        // Show success message
+        if (typeof window.showToast === 'function') {
+          window.showToast(`Account created successfully! Welcome to DevExpress! Role: ${userRole}`, 'success', 3000);
+        }
+
+        // Redirect based on role
+        let redirectUrl = '/login?message=Account created successfully! Please check your email to confirm your account before signing in.&type=success';
+        
+        if (userRole === 'admin') {
+          redirectUrl = '/login?message=Admin account created! Please check your email to confirm your account before signing in.&type=success';
+      }
+
+      // Redirect to login page after 2 seconds
+      setTimeout(() => {
+          window.location.href = redirectUrl;
+      }, 2000);
+      } else {
+        throw new Error('Signup failed - no user data returned');
+      }
+      
+    } catch (error: any) {
+      console.error('Signup error:', error);
+      
+      // Show error message
+      let errorMessageText = 'An error occurred during account creation.';
+      
+      if (error.message) {
+        // Handle specific Supabase error messages
+        if (error.message.includes('User already registered')) {
+          errorMessageText = 'An account with this email already exists. Please try signing in instead.';
+        } else if (error.message.includes('Password should be at least')) {
+          errorMessageText = 'Password must be at least 6 characters long.';
+        } else if (error.message.includes('Invalid email')) {
+          errorMessageText = 'Please enter a valid email address.';
+        } else if (error.message.includes('Failed to create user profile')) {
+          errorMessageText = 'Account creation failed. Please try again or contact support.';
+        } else {
+          errorMessageText = error.message;
+        }
+      }
+      
+      if (errorText) {
+        errorText.textContent = errorMessageText;
+      }
+      errorMessage?.classList.remove('hidden');
+      
+      // Reset button
+      submitButton.disabled = false;
+      submitButton.textContent = originalText;
+    }
+  });
+
+  // Password confirmation validation
+  const passwordInput = document.getElementById('password') as HTMLInputElement;
+  const confirmPasswordInput = document.getElementById('confirm_password') as HTMLInputElement;
+
+  const validatePasswords = () => {
+    if (confirmPasswordInput.value && passwordInput.value !== confirmPasswordInput.value) {
+      confirmPasswordInput.setCustomValidity('Passwords do not match');
+    } else {
+      confirmPasswordInput.setCustomValidity('');
+    }
+  };
+
+  passwordInput?.addEventListener('input', validatePasswords);
+  confirmPasswordInput?.addEventListener('input', validatePasswords);
+</script>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Google Auth</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; color: #856404; }
+        button { padding: 12px 24px; margin: 8px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; }
+        button:hover { background: #0056b3; }
+        .google-btn { background: #4285f4; display: flex; align-items: center; gap: 10px; }
+        .google-btn:hover { background: #3367d6; }
+        .danger-btn { background: #dc3545; }
+        .danger-btn:hover { background: #c82333; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 12px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Google Authentication Debug Tool</h1>
+        
+        <div class="section info">
+            <h3>📋 Current Status</h3>
+            <div id="current-status">Checking configuration...</div>
+        </div>
+
+        <div class="section">
+            <h3>🔧 Configuration Tests</h3>
+            <button onclick="testSupabaseConnection()">Test Supabase Connection</button>
+            <button onclick="checkGoogleProvider()">Check Google Provider</button>
+            <button onclick="testDatabaseFunctions()">Test Database Functions</button>
+            <button onclick="checkAuthState()">Check Auth State</button>
+        </div>
+
+        <div class="section">
+            <h3>🚀 Google Authentication Tests</h3>
+            <button onclick="testGoogleAuth()" class="google-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                    <path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#fff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#fff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#fff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Test Google Sign In
+            </button>
+            <button onclick="signOut()" class="danger-btn">Sign Out</button>
+        </div>
+
+        <div class="section">
+            <h3>👤 Current User</h3>
+            <div id="user-info" class="hidden">
+                <div id="user-details"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>📊 Debug Results</h3>
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase configuration
+        const SUPABASE_URL = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `section ${type}`;
+            div.innerHTML = `<pre>${message}</pre>`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('current-status');
+            status.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function showUserInfo(user) {
+            const userInfo = document.getElementById('user-info');
+            const userDetails = document.getElementById('user-details');
+            
+            if (user) {
+                userDetails.innerHTML = `
+                    <div class="status success">
+                        <p><strong>✅ User Signed In</strong></p>
+                        <p><strong>Email:</strong> ${user.email}</p>
+                        <p><strong>Name:</strong> ${user.user_metadata?.full_name || 'N/A'}</p>
+                        <p><strong>Provider:</strong> ${user.app_metadata?.provider || 'N/A'}</p>
+                        <p><strong>ID:</strong> ${user.id}</p>
+                        <p><strong>Created:</strong> ${new Date(user.created_at).toLocaleString()}</p>
+                    </div>
+                `;
+                userInfo.classList.remove('hidden');
+            } else {
+                userInfo.classList.add('hidden');
+            }
+        }
+
+        async function testSupabaseConnection() {
+            try {
+                addResult('🔄 Testing Supabase connection...', 'info');
+                
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('count', { count: 'exact', head: true });
+                
+                if (error) {
+                    addResult(`❌ Connection Error: ${error.message}`, 'error');
+                    updateStatus('❌ Supabase connection failed', 'error');
+                } else {
+                    addResult(`✅ Connection successful! Found ${data} profiles.`, 'success');
+                    updateStatus('✅ Supabase connected successfully', 'success');
+                }
+            } catch (err) {
+                addResult(`❌ Connection Error: ${err.message}`, 'error');
+                updateStatus('❌ Supabase connection failed', 'error');
+            }
+        }
+
+        async function checkGoogleProvider() {
+            try {
+                addResult('🔄 Checking Google provider configuration...', 'info');
+                
+                // Test if we can access auth providers
+                const { data: { user }, error: userError } = await supabase.auth.getUser();
+                
+                if (userError && userError.message.includes('JWT')) {
+                    addResult('⚠️ No user session (expected for testing)', 'warning');
+                }
+                
+                // Try to initiate OAuth to test provider configuration
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: `${window.location.origin}/auth/callback`,
+                        skipBrowserRedirect: true // Don't actually redirect
+                    }
+                });
+
+                if (error) {
+                    if (error.message.includes('Provider not found') || error.message.includes('not configured')) {
+                        addResult('❌ Google provider not configured in Supabase', 'error');
+                        addResult('🔧 SOLUTION: Go to Supabase Dashboard → Authentication → Providers → Enable Google', 'warning');
+                    } else {
+                        addResult(`❌ Google provider error: ${error.message}`, 'error');
+                    }
+                } else {
+                    addResult('✅ Google provider is configured correctly', 'success');
+                }
+            } catch (err) {
+                addResult(`❌ Error checking provider: ${err.message}`, 'error');
+            }
+        }
+
+        async function testDatabaseFunctions() {
+            try {
+                addResult('🔄 Testing database functions...', 'info');
+                
+                // Test if sync_google_user function exists
+                const { data, error } = await supabase.rpc('sync_google_user', {
+                    p_google_id: 'test_123',
+                    p_email: 'test@example.com',
+                    p_name: 'Test User',
+                    p_picture: 'https://via.placeholder.com/150',
+                    p_provider_id: 'test_123'
+                });
+                
+                if (error) {
+                    if (error.message.includes('function') && error.message.includes('does not exist')) {
+                        addResult('❌ sync_google_user function not found', 'error');
+                        addResult('🔧 SOLUTION: Run the google_auth_setup.sql script in Supabase SQL Editor', 'warning');
+                    } else {
+                        addResult(`❌ Function error: ${error.message}`, 'error');
+                    }
+                } else {
+                    addResult('✅ Database functions are working correctly', 'success');
+                }
+            } catch (err) {
+                addResult(`❌ Error testing functions: ${err.message}`, 'error');
+            }
+        }
+
+        async function checkAuthState() {
+            try {
+                addResult('🔄 Checking authentication state...', 'info');
+                
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                if (error) {
+                    addResult(`❌ Auth state error: ${error.message}`, 'error');
+                } else if (session?.user) {
+                    addResult('✅ User is currently signed in', 'success');
+                    showUserInfo(session.user);
+                } else {
+                    addResult('ℹ️ No user currently signed in', 'info');
+                }
+            } catch (err) {
+                addResult(`❌ Error checking auth state: ${err.message}`, 'error');
+            }
+        }
+
+        async function testGoogleAuth() {
+            try {
+                addResult('🔄 Initiating Google OAuth...', 'info');
+                
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: `${window.location.origin}/auth/callback`,
+                        queryParams: {
+                            access_type: 'offline',
+                            prompt: 'consent',
+                        }
+                    }
+                });
+
+                if (error) {
+                    addResult(`❌ Google OAuth Error: ${error.message}`, 'error');
+                    
+                    if (error.message.includes('Provider not found')) {
+                        addResult('🔧 SOLUTION: Enable Google provider in Supabase Dashboard', 'warning');
+                    } else if (error.message.includes('redirect_uri_mismatch')) {
+                        addResult('🔧 SOLUTION: Check redirect URI configuration in Google Cloud Console', 'warning');
+                    }
+                } else {
+                    addResult('✅ Google OAuth initiated successfully! Redirecting...', 'success');
+                }
+            } catch (err) {
+                addResult(`❌ Error: ${err.message}`, 'error');
+            }
+        }
+
+        async function signOut() {
+            try {
+                const { error } = await supabase.auth.signOut();
+                if (error) {
+                    addResult(`❌ Sign out error: ${error.message}`, 'error');
+                } else {
+                    addResult('✅ Signed out successfully', 'success');
+                    showUserInfo(null);
+                }
+            } catch (err) {
+                addResult(`❌ Error: ${err.message}`, 'error');
+            }
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            updateStatus('🔄 Initializing debug tool...', 'info');
+            testSupabaseConnection();
+            checkAuthState();
+        };
+
+        // Listen for auth state changes
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' && session?.user) {
+                showUserInfo(session.user);
+                addResult('✅ User signed in successfully!', 'success');
+                
+                // Test sync function if it's a Google user
+                if (session.user.app_metadata?.provider === 'google') {
+                    addResult('🔄 Testing Google user sync...', 'info');
+                    syncGoogleUser(session.user);
+                }
+            } else if (event === 'SIGNED_OUT') {
+                showUserInfo(null);
+                addResult('✅ User signed out', 'success');
+            }
+        });
+
+        async function syncGoogleUser(user) {
+            try {
+                const { data, error } = await supabase.rpc('sync_google_user', {
+                    p_google_id: user.user_metadata.provider_id,
+                    p_email: user.email,
+                    p_name: user.user_metadata.full_name,
+                    p_picture: user.user_metadata.avatar_url,
+                    p_provider_id: user.user_metadata.provider_id
+                });
+
+                if (error) {
+                    addResult(`❌ Sync error: ${error.message}`, 'error');
+                } else {
+                    addResult('✅ Google user synced successfully!', 'success');
+                }
+            } catch (err) {
+                addResult(`❌ Sync error: ${err.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

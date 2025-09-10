@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Cart Access Test</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 50px auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Admin Cart Access Test</h1>
+    <p>This page tests if the admin can access cart customization data from Supabase.</p>
+    
+    <div id="status" class="test-section info">Initializing...</div>
+    
+    <div class="test-section">
+        <h3>Test 1: Supabase Connection</h3>
+        <button onclick="testConnection()">Test Connection</button>
+        <div id="connection-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 2: Cart Table Access</h3>
+        <button onclick="testCartTableAccess()">Test Cart Table Access</button>
+        <div id="cart-access-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 3: Load Cart Data</h3>
+        <button onclick="loadCartData()">Load Cart Data</button>
+        <div id="cart-data-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 4: Insert Test Cart Data</h3>
+        <button onclick="insertTestCartData()">Insert Test Cart Data</button>
+        <div id="insert-result"></div>
+    </div>
+
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        
+        let supabase;
+        
+        // Initialize Supabase client
+        function initSupabase() {
+            if (window.supabase && typeof window.supabase.createClient === 'function') {
+                supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+                console.log('✅ Supabase client initialized');
+                updateStatus('✅ Supabase client initialized successfully', 'success');
+                return true;
+            } else {
+                console.log('⏳ Supabase library not loaded yet, retrying...');
+                setTimeout(initSupabase, 100);
+                return false;
+            }
+        }
+        
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `test-section ${type}`;
+        }
+        
+        function updateResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="test-section ${type}">${message}</div>`;
+        }
+        
+        async function testConnection() {
+            try {
+                updateResult('connection-result', 'Testing connection...', 'info');
+                
+                const { data, error } = await supabase
+                    .from('contact_submissions')
+                    .select('id')
+                    .limit(1);
+                
+                if (error) {
+                    console.error('Connection test failed:', error);
+                    updateResult('connection-result', `❌ Connection failed: ${error.message}`, 'error');
+                } else {
+                    console.log('Connection test successful:', data);
+                    updateResult('connection-result', `✅ Connection successful!`, 'success');
+                }
+            } catch (err) {
+                console.error('Connection test error:', err);
+                updateResult('connection-result', `❌ Connection error: ${err.message}`, 'error');
+            }
+        }
+        
+        async function testCartTableAccess() {
+            try {
+                updateResult('cart-access-result', 'Testing cart table access...', 'info');
+                
+                const { data, error } = await supabase
+                    .from('cart_customizations')
+                    .select('id')
+                    .limit(1);
+                
+                if (error) {
+                    console.error('Cart table access failed:', error);
+                    updateResult('cart-access-result', `❌ Cart table access failed: ${error.message}`, 'error');
+                } else {
+                    console.log('Cart table access successful:', data);
+                    updateResult('cart-access-result', `✅ Cart table access successful! Found ${data.length} records`, 'success');
+                }
+            } catch (err) {
+                console.error('Cart table access error:', err);
+                updateResult('cart-access-result', `❌ Error: ${err.message}`, 'error');
+            }
+        }
+        
+        async function loadCartData() {
+            try {
+                updateResult('cart-data-result', 'Loading cart data...', 'info');
+                
+                const { data: carts, error } = await supabase
+                    .from('cart_customizations')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) {
+                    console.error('Load cart data failed:', error);
+                    updateResult('cart-data-result', `❌ Load cart data failed: ${error.message}`, 'error');
+                } else {
+                    console.log('Cart data loaded:', carts);
+                    
+                    if (carts && carts.length > 0) {
+                        let tableHtml = `
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>User Email</th>
+                                        <th>Product Name</th>
+                                        <th>Total Amount</th>
+                                        <th>Created At</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                        `;
+                        
+                        carts.forEach(cart => {
+                            tableHtml += `
+                                <tr>
+                                    <td>${cart.id}</td>
+                                    <td>${cart.user_email || 'N/A'}</td>
+                                    <td>${cart.product_name || 'N/A'}</td>
+                                    <td>₹${cart.total_amount || 0}</td>
+                                    <td>${new Date(cart.created_at).toLocaleDateString()}</td>
+                                </tr>
+                            `;
+                        });
+                        
+                        tableHtml += '</tbody></table>';
+                        updateResult('cart-data-result', `✅ Loaded ${carts.length} cart records:<br>${tableHtml}`, 'success');
+                    } else {
+                        updateResult('cart-data-result', 'ℹ️ No cart data found. The table exists but is empty.', 'info');
+                    }
+                }
+            } catch (err) {
+                console.error('Load cart data error:', err);
+                updateResult('cart-data-result', `❌ Error: ${err.message}`, 'error');
+            }
+        }
+        
+        async function insertTestCartData() {
+            try {
+                updateResult('insert-result', 'Inserting test cart data...', 'info');
+                
+                const testCartData = {
+                    user_email: 'test@example.com',
+                    product_id: '1',
+                    product_name: 'Restaurant Menu System',
+                    product_description: 'Digital menu system with QR code ordering',
+                    base_price: 25000,
+                    total_amount: 29500,
+                    project_name: 'Test Restaurant',
+                    app_name: 'Test App',
+                    contact_person: 'Test User',
+                    product_description_custom: 'Test project description',
+                    restaurant_name: 'Test Restaurant',
+                    cuisine_type: 'italian',
+                    contact_email: 'test@example.com',
+                    contact_phone: '+1234567890',
+                    primary_color: '#3B82F6',
+                    secondary_color: '#000000',
+                    accent_color: '#F59E0B',
+                    text_color: '#1F2937',
+                    additional_requirements: 'Test requirements',
+                    cart_status: 'active'
+                };
+                
+                const { data, error } = await supabase
+                    .from('cart_customizations')
+                    .insert([testCartData])
+                    .select();
+                
+                if (error) {
+                    console.error('Insert test cart data failed:', error);
+                    updateResult('insert-result', `❌ Insert failed: ${error.message}`, 'error');
+                } else {
+                    console.log('Insert test cart data successful:', data);
+                    updateResult('insert-result', `✅ Test cart data inserted successfully! ID: ${data[0].id}`, 'success');
+                }
+            } catch (err) {
+                console.error('Insert test cart data error:', err);
+                updateResult('insert-result', `❌ Error: ${err.message}`, 'error');
+            }
+        }
+        
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            console.log('🚀 Page loaded, initializing Supabase...');
+            initSupabase();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Ticket Diagnostic</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Support Ticket System Diagnostic</h1>
+    
+    <div class="test-section info">
+        <h3>Step 1: Check Environment Variables</h3>
+        <p>Make sure your .env file has the correct Supabase URL and anon key.</p>
+        <button onclick="checkEnv()">Check Environment</button>
+        <div id="env-result"></div>
+    </div>
+
+    <div class="test-section info">
+        <h3>Step 2: Test Supabase Connection</h3>
+        <button onclick="testConnection()">Test Connection</button>
+        <div id="connection-result"></div>
+    </div>
+
+    <div class="test-section info">
+        <h3>Step 3: Check Authentication</h3>
+        <button onclick="checkAuth()">Check Auth Status</button>
+        <div id="auth-result"></div>
+    </div>
+
+    <div class="test-section info">
+        <h3>Step 4: Test Table Access</h3>
+        <button onclick="testTableAccess()">Test Table Access</button>
+        <div id="table-result"></div>
+    </div>
+
+    <div class="test-section info">
+        <h3>Step 5: Create Test Ticket</h3>
+        <button onclick="createTestTicket()">Create Test Ticket</button>
+        <div id="ticket-result"></div>
+    </div>
+
+    <script>
+        // Initialize Supabase (you'll need to add your credentials)
+        const supabaseUrl = 'YOUR_SUPABASE_URL';
+        const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+        
+        let supabase;
+        
+        function logResult(elementId, message, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<pre class="${isSuccess ? 'success' : 'error'}">${message}</pre>`;
+        }
+
+        async function checkEnv() {
+            try {
+                if (supabaseUrl === 'YOUR_SUPABASE_URL' || supabaseKey === 'YOUR_SUPABASE_ANON_KEY') {
+                    logResult('env-result', '❌ Please update the Supabase URL and key in this file', false);
+                    return;
+                }
+                
+                supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+                logResult('env-result', '✅ Environment variables look good');
+            } catch (error) {
+                logResult('env-result', `❌ Error: ${error.message}`, false);
+            }
+        }
+
+        async function testConnection() {
+            try {
+                if (!supabase) {
+                    logResult('connection-result', '❌ Please check environment first', false);
+                    return;
+                }
+
+                const { data, error } = await supabase.from('profiles').select('id').limit(1);
+                
+                if (error) {
+                    logResult('connection-result', `❌ Connection failed: ${error.message}`, false);
+                } else {
+                    logResult('connection-result', '✅ Supabase connection successful');
+                }
+            } catch (error) {
+                logResult('connection-result', `❌ Error: ${error.message}`, false);
+            }
+        }
+
+        async function checkAuth() {
+            try {
+                if (!supabase) {
+                    logResult('auth-result', '❌ Please test connection first', false);
+                    return;
+                }
+
+                const { data: { user }, error } = await supabase.auth.getUser();
+                
+                if (error) {
+                    logResult('auth-result', `❌ Auth error: ${error.message}`, false);
+                } else if (user) {
+                    logResult('auth-result', `✅ User authenticated: ${user.email}`);
+                } else {
+                    logResult('auth-result', '⚠️ No user authenticated - you need to login first');
+                }
+            } catch (error) {
+                logResult('auth-result', `❌ Error: ${error.message}`, false);
+            }
+        }
+
+        async function testTableAccess() {
+            try {
+                if (!supabase) {
+                    logResult('table-result', '❌ Please test connection first', false);
+                    return;
+                }
+
+                const { data, error } = await supabase.from('support_tickets').select('id').limit(1);
+                
+                if (error) {
+                    logResult('table-result', `❌ Table access failed: ${error.message}`, false);
+                } else {
+                    logResult('table-result', '✅ Table access successful');
+                }
+            } catch (error) {
+                logResult('table-result', `❌ Error: ${error.message}`, false);
+            }
+        }
+
+        async function createTestTicket() {
+            try {
+                if (!supabase) {
+                    logResult('ticket-result', '❌ Please test connection first', false);
+                    return;
+                }
+
+                const { data: { user }, error: authError } = await supabase.auth.getUser();
+                
+                if (authError || !user) {
+                    logResult('ticket-result', '❌ Please login first', false);
+                    return;
+                }
+
+                const ticketData = {
+                    user_id: user.id,
+                    subject: 'Diagnostic Test Ticket',
+                    description: 'This is a diagnostic test ticket.',
+                    priority: 'low',
+                    category: 'general',
+                    status: 'open'
+                };
+
+                const { data: ticket, error } = await supabase
+                    .from('support_tickets')
+                    .insert([ticketData])
+                    .select()
+                    .single();
+
+                if (error) {
+                    logResult('ticket-result', `❌ Ticket creation failed: ${error.message}`, false);
+                } else {
+                    logResult('ticket-result', `✅ Test ticket created successfully! Ticket #${ticket.ticket_number}`);
+                }
+            } catch (error) {
+                logResult('ticket-result', `❌ Error: ${error.message}`, false);
+            }
+        }
+
+        // Auto-check environment on load
+        window.onload = function() {
+            checkEnv();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Authentication Test - DevExpress">
+  <div class="min-h-screen bg-gray-50 py-12">
+    <div class="max-w-4xl mx-auto px-4">
+      <h1 class="text-3xl font-bold text-gray-900 mb-8">🔐 Authentication Test Page</h1>
+      
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Current Authentication Status</h2>
+        <div id="auth-status" class="space-y-2">
+          <p><strong>Status:</strong> <span id="status-text">Loading...</span></p>
+          <p><strong>User:</strong> <span id="user-info">Loading...</span></p>
+          <p><strong>Session:</strong> <span id="session-info">Loading...</span></p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Test Actions</h2>
+        <div class="space-y-4">
+          <button id="check-auth-btn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            Check Authentication
+          </button>
+          <button id="test-login-btn" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+            Test Login Event
+          </button>
+          <button id="test-logout-btn" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+            Test Logout Event
+          </button>
+          <button id="clear-session-btn" class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">
+            Clear Session
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold mb-4">Console Logs</h2>
+        <div id="console-logs" class="bg-gray-100 p-4 rounded text-sm font-mono max-h-64 overflow-y-auto">
+          <p>Console logs will appear here...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  console.log('Test auth page loaded');
+
+  // Function to add logs to the page
+  function addLog(message) {
+    const logsDiv = document.getElementById('console-logs');
+    if (logsDiv) {
+      const logEntry = document.createElement('p');
+      logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logsDiv.appendChild(logEntry);
+      logsDiv.scrollTop = logsDiv.scrollHeight;
+    }
+  }
+
+  // Function to update authentication status
+  function updateAuthStatus() {
+    const statusText = document.getElementById('status-text');
+    const userInfo = document.getElementById('user-info');
+    const sessionInfo = document.getElementById('session-info');
+
+    const authManager = window.globalAuthManager || window.simpleAuthManager;
+    
+    if (authManager) {
+      if (authManager.isUserLoggedIn()) {
+        const user = authManager.getCurrentUser();
+        statusText.textContent = '✅ Authenticated';
+        userInfo.textContent = user ? `${user.email} (${user.full_name || 'No name'})` : 'User data missing';
+        
+        // Check session storage
+        try {
+          const sessionData = sessionStorage.getItem('simple-auth-session');
+          if (sessionData) {
+            const session = JSON.parse(sessionData);
+            sessionInfo.textContent = `Active (${new Date(session.timestamp).toLocaleString()})`;
+          } else {
+            sessionInfo.textContent = 'No session data';
+          }
+        } catch (error) {
+          sessionInfo.textContent = 'Session error: ' + error.message;
+        }
+      } else {
+        statusText.textContent = '❌ Not authenticated';
+        userInfo.textContent = 'No user logged in';
+        sessionInfo.textContent = 'No active session';
+      }
+    } else {
+      statusText.textContent = '⚠️ Auth manager not available';
+      userInfo.textContent = 'Manager not loaded';
+      sessionInfo.textContent = 'Manager not loaded';
+    }
+  }
+
+  // Check authentication button
+  document.getElementById('check-auth-btn')?.addEventListener('click', () => {
+    addLog('Checking authentication...');
+    updateAuthStatus();
+    addLog('Authentication check complete');
+  });
+
+  // Test login button
+  document.getElementById('test-login-btn')?.addEventListener('click', () => {
+    addLog('Testing login event...');
+    
+    const testUser = {
+      id: 'test-user-123',
+      email: 'test@example.com',
+      full_name: 'Test User',
+      phone: '123-456-7890',
+      company_name: 'Test Company',
+      role: 'customer'
+    };
+
+    // Trigger login event
+    window.dispatchEvent(new CustomEvent('user-logged-in', {
+      detail: testUser
+    }));
+
+    addLog('Login event triggered for: ' + testUser.email);
+    
+    // Update status after a short delay
+    setTimeout(() => {
+      updateAuthStatus();
+      addLog('Status updated after login event');
+    }, 100);
+  });
+
+  // Test logout button
+  document.getElementById('test-logout-btn')?.addEventListener('click', () => {
+    addLog('Testing logout event...');
+    
+    // Trigger logout event
+    window.dispatchEvent(new CustomEvent('user-logged-out'));
+    
+    addLog('Logout event triggered');
+    
+    // Update status after a short delay
+    setTimeout(() => {
+      updateAuthStatus();
+      addLog('Status updated after logout event');
+    }, 100);
+  });
+
+  // Clear session button
+  document.getElementById('clear-session-btn')?.addEventListener('click', () => {
+    addLog('Clearing session...');
+    
+    sessionStorage.removeItem('simple-auth-session');
+    
+    addLog('Session cleared from storage');
+    
+    // Update status
+    updateAuthStatus();
+  });
+
+  // Update status when page loads
+  document.addEventListener('DOMContentLoaded', () => {
+    addLog('Page loaded, checking authentication...');
+    
+    // Wait for auth manager to be ready
+    setTimeout(() => {
+      updateAuthStatus();
+      addLog('Initial authentication check complete');
+    }, 500);
+  });
+
+  // Listen for auth state changes
+  window.addEventListener('user-logged-in', (e) => {
+    addLog('User logged in event received: ' + e.detail.email);
+    updateAuthStatus();
+  });
+
+  window.addEventListener('user-logged-out', () => {
+    addLog('User logged out event received');
+    updateAuthStatus();
+  });
+
+  addLog('Test auth page script initialized');
+</script>

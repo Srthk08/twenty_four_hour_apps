@@ -1,0 +1,449 @@
+<header class="bg-blue-600 shadow-xl border-b border-blue-700">
+  <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+    <div class="flex justify-between items-center h-24">
+      <!-- Logo -->
+      <div class="flex items-center">
+        <a href="/" class="flex items-center space-x-4">
+          <div class="w-14 h-14 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+            <span class="text-white font-bold text-xl">24</span>
+          </div>
+          <div>
+            <span class="text-3xl font-bold text-white">DevExpress</span>
+            <p class="text-white text-opacity-90 -mt-1 font-medium">24 Hour Delivery</p>
+          </div>
+        </a>
+      </div>
+
+      <!-- Desktop Navigation - Hidden on mobile -->
+      <nav id="main-navigation" class="hidden lg:flex items-center space-x-10">
+        <a href="/" class="text-white text-opacity-90 hover:text-white px-6 py-3 text-lg font-medium transition-all duration-300 rounded-xl hover:bg-white hover:bg-opacity-20 hover:scale-105">
+          Home
+        </a>
+        <a href="/products" class="text-white text-opacity-90 hover:text-white px-6 py-3 text-lg font-medium transition-all duration-300 rounded-xl hover:bg-white hover:bg-opacity-20 hover:scale-105">
+          Products
+        </a>
+        <a href="/about" class="text-white text-opacity-90 hover:text-white px-6 py-3 text-lg font-medium transition-all duration-300 rounded-xl hover:bg-white hover:bg-opacity-20 hover:scale-105">
+          About
+        </a>
+        <a href="/contact" class="text-white text-opacity-90 hover:text-white px-6 py-3 text-lg font-medium transition-all duration-300 rounded-xl hover:bg-white hover:bg-opacity-20 hover:scale-105">
+          Contact
+        </a>
+      </nav>
+
+      <!-- User Menu / Auth Buttons - Hidden on mobile -->
+      <div class="hidden lg:flex items-center space-x-6">
+        <!-- Loading state (hidden by default) -->
+        <div id="auth-loading" class="hidden">
+          <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
+            <div class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        </div>
+
+        <!-- Auth Buttons - Only visible before login -->
+        <div id="auth-buttons" class="hidden flex items-center space-x-6">
+          <a href="/login" class="text-white text-opacity-90 hover:text-white px-8 py-3 text-lg font-medium transition-all duration-300 rounded-xl hover:bg-white hover:bg-opacity-20 hover:scale-105">
+            Sign In
+          </a>
+          <a href="/signup" class="bg-white text-primary-600 hover:bg-gray-100 px-10 py-3 rounded-xl text-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-semibold">
+            Sign Up
+          </a>
+        </div>
+
+        <!-- User Menu - Only visible after login -->
+        <div id="user-menu" class="hidden relative">
+          <button
+            id="user-menu-button"
+            class="flex items-center space-x-3 text-white hover:text-white transition-all duration-300 bg-white bg-opacity-20 hover:bg-opacity-30 px-6 py-3 rounded-xl backdrop-blur-sm"
+          >
+            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
+              <span id="user-avatar" class="text-white font-bold text-lg">U</span>
+            </div>
+            <span id="user-name" class="hidden lg:block text-lg font-medium text-white">User</span>
+            <svg id="user-menu-arrow" class="w-6 h-6 text-white transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+
+          <!-- Dropdown Menu -->
+          <div
+            id="user-dropdown"
+            class="hidden absolute right-0 mt-4 w-64 bg-white rounded-2xl shadow-2xl py-3 z-50 border border-gray-100"
+          >
+            <div class="px-6 py-4 border-b border-gray-100 bg-blue-50 rounded-t-2xl">
+              <p class="text-sm text-gray-500">Signed in as</p>
+              <p class="text-lg font-semibold text-gray-900" id="user-email">user@example.com</p>
+            </div>
+            <a href="/dashboard" class="flex items-center px-6 py-4 text-base text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200">
+              <svg class="w-6 h-6 mr-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
+              </svg>
+              Dashboard
+            </a>
+            <a href="/profile" class="flex items-center px-6 py-4 text-base text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200">
+              <svg class="w-6 h-6 mr-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+              </svg>
+              Profile
+            </a>
+            <a href="/orders" class="flex items-center px-6 py-4 text-base text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200">
+              <svg class="w-6 h-6 mr-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              My Orders
+            </a>
+            <a href="/cart" class="flex items-center px-6 py-4 text-base text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200">
+              <svg class="w-6 h-6 mr-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+              </svg>
+              Cart
+            </a>
+            <a href="/support" class="flex items-center px-6 py-4 text-base text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200">
+              <svg class="w-6 h-6 mr-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              Support
+            </a>
+            <!-- Admin Panel Link - Only visible for admin users -->
+            <div id="admin-panel-link" class="hidden">
+              <a href="/admin/data" class="flex items-center px-6 py-4 text-base text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200">
+                <svg class="w-6 h-6 mr-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+                Admin Panel
+              </a>
+            </div>
+            <div class="px-4 pt-4 pb-6 space-y-2 border-t border-gray-100">
+              <button
+                onclick="signOut()"
+                class="w-full flex items-center px-6 py-4 text-base text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 rounded-xl"
+              >
+                <svg class="w-6 h-6 mr-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <button
+        id="mobile-menu-button"
+        class="lg:hidden flex items-center text-white hover:text-white transition-all duration-300 bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-3 rounded-xl backdrop-blur-sm"
+        aria-label="Toggle mobile menu"
+      >
+        <svg id="mobile-menu-icon" class="w-6 h-6 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile Menu - Enhanced with all navigation options -->
+    <div id="mobile-menu" class="hidden lg:hidden">
+      <div class="px-4 pt-4 pb-6 space-y-2 border-t border-white border-opacity-20">
+        <!-- Main Navigation Links -->
+        <div class="space-y-2 mb-6">
+          <a href="/" class="block px-6 py-4 text-lg font-medium text-white text-opacity-90 hover:text-white hover:bg-white hover:bg-opacity-20 rounded-xl transition-all duration-300">
+            Home
+          </a>
+          <a href="/products" class="block px-6 py-4 text-lg font-medium text-white text-opacity-90 hover:text-white hover:bg-white hover:bg-opacity-20 rounded-xl transition-all duration-300">
+            Products
+          </a>
+          <a href="/about" class="block px-6 py-4 text-lg font-medium text-white text-opacity-90 hover:text-white hover:bg-white hover:bg-opacity-20 rounded-xl transition-all duration-300">
+            About
+          </a>
+          <a href="/contact" class="block px-6 py-4 text-lg font-medium text-white text-opacity-90 hover:text-white hover:bg-white hover:bg-opacity-20 rounded-xl transition-all duration-300">
+            Contact
+          </a>
+        </div>
+
+        <!-- Auth Section - Shows different content based on login state -->
+        <div class="border-t border-white border-opacity-20 pt-6">
+          <!-- Loading State -->
+          <div id="mobile-auth-loading" class="hidden px-6 py-4">
+            <div class="flex items-center justify-center">
+              <div class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <span class="ml-3 text-white text-opacity-90">Loading...</span>
+            </div>
+          </div>
+
+          <!-- Auth Buttons - Only visible before login -->
+          <div id="mobile-auth-buttons" class="hidden space-y-3">
+            <a href="/login" class="block px-6 py-4 text-lg font-medium text-white text-opacity-90 hover:text-white hover:bg-white hover:bg-opacity-20 rounded-xl transition-all duration-300 text-center">
+              Sign In
+            </a>
+            <a href="/signup" class="block px-6 py-4 text-lg font-medium bg-white text-primary-600 hover:bg-gray-100 rounded-xl transition-all duration-300 text-center font-semibold">
+              Sign Up
+            </a>
+          </div>
+
+          <!-- User Menu - Only visible after login -->
+          <div id="mobile-user-menu" class="hidden space-y-3">
+            <!-- User Info -->
+            <div class="px-6 py-4 bg-white bg-opacity-10 rounded-xl backdrop-blur-sm">
+              <p class="text-sm text-white text-opacity-70">Signed in as</p>
+              <p class="text-lg font-semibold text-white" id="mobile-user-email">user@example.com</p>
+            </div>
+
+            <!-- User Menu Items -->
+            <a href="/dashboard" class="flex items-center px-6 py-4 text-lg font-medium text-white text-opacity-90 hover:text-white hover:bg-white hover:bg-opacity-20 rounded-xl transition-all duration-300">
+              <svg class="w-6 h-6 mr-4 text-white text-opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
+              </svg>
+              Dashboard
+            </a>
+            <a href="/profile" class="flex items-center px-6 py-4 text-lg font-medium text-white text-opacity-90 hover:text-white hover:bg-white hover:bg-opacity-20 rounded-xl transition-all duration-300">
+              <svg class="w-6 h-6 mr-4 text-white text-opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+              </svg>
+              Profile
+            </a>
+            <a href="/orders" class="flex items-center px-6 py-4 text-lg font-medium text-white text-opacity-90 hover:text-white hover:bg-white hover:bg-opacity-20 rounded-xl transition-all duration-300">
+              <svg class="w-6 h-6 mr-4 text-white text-opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              My Orders
+            </a>
+            <a href="/cart" class="flex items-center px-6 py-4 text-lg font-medium text-white text-opacity-90 hover:text-white hover:bg-white hover:bg-opacity-20 rounded-xl transition-all duration-300">
+              <svg class="w-6 h-6 mr-4 text-white text-opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+              </svg>
+              Cart
+            </a>
+            <a href="/support" class="flex items-center px-6 py-4 text-lg font-medium text-white text-opacity-90 hover:text-white hover:bg-white hover:bg-opacity-20 rounded-xl transition-all duration-300">
+              <svg class="w-6 h-6 mr-4 text-white text-opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              Support
+            </a>
+            <!-- Admin Panel Link - Only visible for admin users -->
+            <div id="mobile-admin-panel-link" class="hidden">
+              <a href="/admin/data" class="flex items-center px-6 py-4 text-lg font-medium text-white text-opacity-90 hover:text-white hover:bg-white hover:bg-opacity-20 rounded-xl transition-all duration-300">
+                <svg class="w-6 h-6 mr-4 text-white text-opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+                Admin Panel
+              </a>
+            </div>
+
+            <!-- Sign Out Button -->
+            <button
+              onclick="signOut()"
+              class="w-full flex items-center px-6 py-4 text-lg font-medium text-red-300 hover:text-red-200 hover:bg-red-500 hover:bg-opacity-20 rounded-xl transition-all duration-300"
+            >
+              <svg class="w-6 h-6 mr-4 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+              </svg>
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  // Global variables
+  let isUserMenuOpen = false;
+  let isMobileMenuOpen = false;
+
+  // Function to update the header using the global auth manager
+  async function updateHeader() {
+    try {
+      console.log('Header update using global auth manager');
+      
+      // Get auth state from the global manager
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      if (!authManager) {
+        console.log('Global auth manager not available yet');
+        return;
+    }
+
+    // Update UI based on authentication state
+      authManager.updateHeader();
+      
+      console.log('✅ Header updated using global auth manager');
+      
+    } catch (error) {
+      console.error('Error in updateHeader:', error);
+    }
+  }
+
+  // Function to set initial UI state using the global auth manager
+  function setInitialUIState() {
+    console.log('Setting initial UI state using global auth manager');
+    
+    // Wait for global auth manager to be ready
+    setTimeout(() => {
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      if (authManager) {
+        authManager.updateHeader();
+        console.log('✅ Initial UI state set using global auth manager');
+      } else {
+        console.log('Global auth manager not ready yet, retrying...');
+        setInitialUIState();
+      }
+    }, 100);
+  }
+
+  // User dropdown functionality
+  function initUserDropdown() {
+    const userMenuButton = document.getElementById('user-menu-button');
+    const userDropdown = document.getElementById('user-dropdown');
+    const userMenuArrow = document.getElementById('user-menu-arrow');
+
+    if (userMenuButton && userDropdown && userMenuArrow) {
+      userMenuButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleUserDropdown();
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!userMenuButton.contains(e.target) && !userDropdown.contains(e.target)) {
+          closeUserDropdown();
+        }
+      });
+    }
+  }
+
+  function toggleUserDropdown() {
+    const userDropdown = document.getElementById('user-dropdown');
+    const userMenuArrow = document.getElementById('user-menu-arrow');
+
+    if (userDropdown && userMenuArrow) {
+      isUserMenuOpen = !isUserMenuOpen;
+
+      if (isUserMenuOpen) {
+        userDropdown.classList.remove('hidden');
+        userMenuArrow.style.transform = 'rotate(180deg)';
+      } else {
+        userDropdown.classList.add('hidden');
+        userMenuArrow.style.transform = 'rotate(0deg)';
+      }
+    }
+  }
+
+  function closeUserDropdown() {
+    const userDropdown = document.getElementById('user-dropdown');
+    const userMenuArrow = document.getElementById('user-menu-arrow');
+
+    if (userDropdown && userMenuArrow) {
+      userDropdown.classList.add('hidden');
+      userMenuArrow.style.transform = 'rotate(0deg)';
+      isUserMenuOpen = false;
+    }
+  }
+
+  // Sign out function using the global auth manager
+  window.signOut = async function() {
+    try {
+      console.log('Sign out clicked - using global auth manager');
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      if (authManager) {
+        authManager.logout();
+      } else {
+      window.location.href = '/';
+      }
+    } catch (error) {
+      console.error('Sign out error:', error);
+      window.location.href = '/';
+    }
+  };
+
+  // Mobile menu functionality
+  function initMobileMenu() {
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileMenuIcon = document.getElementById('mobile-menu-icon');
+
+    if (mobileMenuButton && mobileMenu && mobileMenuIcon) {
+      mobileMenuButton.addEventListener('click', () => {
+        toggleMobileMenu();
+      });
+
+      // Close mobile menu when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!mobileMenuButton.contains(e.target) && !mobileMenu.contains(e.target)) {
+          closeMobileMenu();
+        }
+      });
+
+      // Close mobile menu when pressing Escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !mobileMenu.classList.contains('hidden')) {
+          closeMobileMenu();
+        }
+      });
+    }
+  }
+
+  function toggleMobileMenu() {
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileMenuIcon = document.getElementById('mobile-menu-icon');
+
+    if (mobileMenu && mobileMenuIcon) {
+      isMobileMenuOpen = !isMobileMenuOpen;
+
+      if (isMobileMenuOpen) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenuIcon.style.transform = 'rotate(90deg)';
+        // Change icon to X
+        mobileMenuIcon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        `;
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenuIcon.style.transform = 'rotate(0deg)';
+        // Change icon back to hamburger
+        mobileMenuIcon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        `;
+      }
+    }
+  }
+
+  function closeMobileMenu() {
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileMenuIcon = document.getElementById('mobile-menu-icon');
+
+    if (mobileMenu && mobileMenuIcon) {
+      mobileMenu.classList.add('hidden');
+      mobileMenuIcon.style.transform = 'rotate(0deg)';
+      mobileMenuIcon.innerHTML = `
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      `;
+      isMobileMenuOpen = false;
+    }
+  }
+
+  // Initialize everything when page loads
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('Header initializing with global auth manager');
+    
+    // Set initial UI state using global auth manager
+    setInitialUIState();
+
+    // Initialize UI components
+    initUserDropdown();
+    initMobileMenu();
+    
+    console.log('✅ Header initialized with global auth manager');
+  });
+
+  // Listen for auth state changes from the global auth manager
+  window.addEventListener('user-logged-in', () => {
+    console.log('User logged in event received in header');
+      updateHeader();
+  });
+
+  window.addEventListener('user-logged-out', () => {
+    console.log('User logged out event received in header');
+    updateHeader();
+  });
+</script>
