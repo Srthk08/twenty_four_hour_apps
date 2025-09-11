@@ -289,14 +289,10 @@ import Layout from '../layouts/Layout.astro';
   // Get Supabase client from global window object
   let supabase = null;
 
-  // Function to get Supabase client with improved fallback
+  // Function to get Supabase client
   const getSupabaseClient = () => {
-    if (window.supabase) {
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
       return window.supabase;
-    } else if (window.getSupabaseClient) {
-      return window.getSupabaseClient();
-    } else if (typeof supabase !== 'undefined') {
-      return supabase.createClient(supabaseUrl, supabaseKey);
     }
     return null;
   };
@@ -320,18 +316,12 @@ import Layout from '../layouts/Layout.astro';
     }
   };
 
-  // Initialize Supabase with retry logic
-  function initializeSupabaseWithRetry() {
-    if (!initSupabase()) {
-      console.log('⏳ Supabase not ready, retrying in 100ms...');
-      setTimeout(initializeSupabaseWithRetry, 100);
-    } else {
-      console.log('✅ Supabase client ready:', !!supabase);
-    }
+  // Try to initialize Supabase
+  if (!initSupabase()) {
+    console.error('❌ Failed to initialize Supabase client');
+  } else {
+    console.log('✅ Supabase client ready:', !!supabase);
   }
-
-  // Start initialization
-  initializeSupabaseWithRetry();
 
   // Get URL parameters
   function getUrlParams() {
@@ -788,22 +778,10 @@ import Layout from '../layouts/Layout.astro';
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    console.log('📝 Contact form submission started...');
-    
     // Check if user is logged in before allowing form submission
     if (!isUserLoggedIn()) {
       showLoginAlert();
       return;
-    }
-    
-    // Ensure Supabase is available before proceeding
-    if (!supabase) {
-      console.log('🔄 Supabase not available, trying to reinitialize...');
-      if (!initSupabase()) {
-        console.error('❌ Failed to initialize Supabase client');
-        alert('Database connection not available. Please refresh the page and try again.');
-        return;
-      }
     }
     
     // Force validation to recognize pre-filled fields before validation

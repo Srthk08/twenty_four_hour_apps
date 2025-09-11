@@ -372,7 +372,7 @@ const style = categoryStyles[product.category];
 
   // Check authentication status on page load
   function checkAuthenticationStatus() {
-    console.log('🔍 Checking authentication status on product page...');
+    console.log('Checking authentication status...');
     
     // Wait for global auth manager to be ready
     const checkAuth = () => {
@@ -417,12 +417,11 @@ const style = categoryStyles[product.category];
       } else {
         // Auth manager not ready yet, retry after a short delay
         console.log('⏳ Auth manager not ready, retrying...');
-        setTimeout(checkAuth, 200);
+        setTimeout(checkAuth, 100);
       }
     };
     
-    // Start checking after a short delay to ensure auth manager is initialized
-    setTimeout(checkAuth, 500);
+    checkAuth();
   }
 
   // Check authentication when page loads

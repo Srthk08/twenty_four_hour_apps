@@ -401,76 +401,23 @@ const { title, description = "DevExpress - 24 Hour Delivery" } = Astro.props;
     <!-- Supabase Client -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
-      // Initialize Supabase client with better error handling
+      // Initialize Supabase client
       const supabaseUrl = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
       const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
       
-      let supabaseInitialized = false;
-      let initRetryCount = 0;
-      const maxRetries = 50; // 5 seconds max
-      
       // Wait for Supabase to load, then initialize
       function initSupabase() {
-        try {
-          if (typeof supabase !== 'undefined') {
-            window.supabase = supabase.createClient(supabaseUrl, supabaseKey);
-            supabaseInitialized = true;
-            console.log('✅ Supabase client initialized globally');
-            
-            // Test the connection
-            testSupabaseConnection();
-          } else {
-            initRetryCount++;
-            if (initRetryCount < maxRetries) {
-              console.log(`⏳ Supabase library not loaded yet, retrying... (${initRetryCount}/${maxRetries})`);
-              setTimeout(initSupabase, 100);
-            } else {
-              console.error('❌ Failed to load Supabase library after maximum retries');
-            }
-          }
-        } catch (error) {
-          console.error('❌ Error initializing Supabase:', error);
-          initRetryCount++;
-          if (initRetryCount < maxRetries) {
-            setTimeout(initSupabase, 100);
-          }
-        }
-      }
-      
-      // Test Supabase connection
-      async function testSupabaseConnection() {
-        try {
-          if (window.supabase) {
-            const { data, error } = await window.supabase
-              .from('contact_submissions')
-              .select('id')
-              .limit(1);
-            
-            if (error) {
-              console.warn('⚠️ Supabase connection test failed:', error.message);
-            } else {
-              console.log('✅ Supabase connection test successful');
-            }
-          }
-        } catch (error) {
-          console.warn('⚠️ Supabase connection test error:', error);
+        if (typeof supabase !== 'undefined') {
+          window.supabase = supabase.createClient(supabaseUrl, supabaseKey);
+          console.log('✅ Supabase client initialized globally');
+        } else {
+          console.log('⏳ Supabase library not loaded yet, retrying...');
+          setTimeout(initSupabase, 100);
         }
       }
       
       // Start initialization
       initSupabase();
-      
-      // Make Supabase available globally with fallback
-      window.getSupabaseClient = function() {
-        if (window.supabase) {
-          return window.supabase;
-        } else if (typeof supabase !== 'undefined') {
-          return supabase.createClient(supabaseUrl, supabaseKey);
-        } else {
-          console.error('❌ Supabase not available');
-          return null;
-        }
-      };
     </script>
 
     <!-- Custom Tailwind Config -->
@@ -995,8 +942,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         init() {
-          console.log('🚀 Starting Global Auth Manager initialization...');
-          
           // Check if user is already logged in
           this.checkExistingSession();
           
@@ -1009,86 +954,36 @@ document.addEventListener('DOMContentLoaded', () => {
             this.handleLogout();
           });
 
-          // Listen for Supabase auth state changes
-          this.setupSupabaseAuthListener();
-
           // Make it globally available
           window.globalAuthManager = this;
           window.simpleAuthManager = this; // For backward compatibility
           
-          console.log('✅ Global Auth Manager initialized and available globally');
-          
-          // Update header immediately after initialization
-          setTimeout(() => {
-            this.updateHeader();
-          }, 100);
+          console.log('✅ Global Auth Manager initialized');
         }
 
-        setupSupabaseAuthListener() {
-          // Wait for Supabase to be available
-          const setupListener = () => {
-            if (window.supabase) {
-              console.log('🔗 Setting up Supabase auth state listener...');
-              
-              window.supabase.auth.onAuthStateChange((event, session) => {
-                console.log('🔄 Supabase auth state changed:', event, session?.user?.email);
-                
-                if (event === 'SIGNED_IN' && session?.user) {
-                  this.isAuthenticated = true;
-                  this.currentUser = session.user;
-                  this.updateGlobalUI();
-                  console.log('✅ User signed in via Supabase:', session.user.email);
-                } else if (event === 'SIGNED_OUT') {
-                  this.isAuthenticated = false;
-                  this.currentUser = null;
-                  this.updateGlobalUI();
-                  console.log('✅ User signed out via Supabase');
-                }
-              });
-            } else {
-              console.log('⏳ Supabase not ready for auth listener, retrying...');
-              setTimeout(setupListener, 500);
-            }
-          };
-          
-          setupListener();
-        }
-
-        async checkExistingSession() {
+        checkExistingSession() {
           try {
-            console.log('🔍 Checking existing Supabase session...');
-            
-            // Wait for Supabase to be available
-            if (!window.supabase) {
-              console.log('⏳ Supabase not ready, retrying...');
-              setTimeout(() => this.checkExistingSession(), 500);
-              return;
-            }
-
-            // Check Supabase session
-            const { data: { session }, error } = await window.supabase.auth.getSession();
-            
-            if (error) {
-              console.error('❌ Error getting session:', error);
-              return;
-            }
-
-            if (session && session.user) {
-              this.isAuthenticated = true;
-              this.currentUser = session.user;
-              console.log('✅ Existing Supabase session found:', this.currentUser.email);
-              this.updateGlobalUI();
-              return;
-            }
-
-            // Fallback: Check sessionStorage
+            // Check sessionStorage first (most recent)
             const sessionData = sessionStorage.getItem('simple-auth-session');
             if (sessionData) {
               const session = JSON.parse(sessionData);
               if (session.user && session.access_token) {
                 this.isAuthenticated = true;
                 this.currentUser = session.user;
-                console.log('✅ Existing session found in sessionStorage:', this.currentUser.email);
+                console.log('✅ Existing session found:', this.currentUser.email);
+                this.updateGlobalUI();
+                return;
+              }
+            }
+
+            // Check localStorage as fallback
+            const storedUser = localStorage.getItem('simple-auth-user');
+            if (storedUser) {
+              const user = JSON.parse(storedUser);
+              if (user && user.email) {
+                this.isAuthenticated = true;
+                this.currentUser = user;
+                console.log('✅ Existing user found in localStorage:', this.currentUser.email);
                 this.updateGlobalUI();
                 return;
               }
@@ -1131,34 +1026,6 @@ document.addEventListener('DOMContentLoaded', () => {
           
           console.log('✅ User logged out globally');
           this.updateGlobalUI();
-        }
-
-        async signOut() {
-          try {
-            console.log('🚪 Signing out user...');
-            
-            // Sign out from Supabase
-            if (window.supabase) {
-              const { error } = await window.supabase.auth.signOut();
-              if (error) {
-                console.error('❌ Supabase sign out error:', error);
-              } else {
-                console.log('✅ Signed out from Supabase');
-              }
-            }
-            
-            // Clear local state
-            this.handleLogout();
-            
-            // Redirect to home page
-            window.location.href = '/';
-            
-          } catch (error) {
-            console.error('❌ Error signing out:', error);
-            // Still clear local state even if Supabase sign out fails
-            this.handleLogout();
-            window.location.href = '/';
-          }
         }
 
         updateGlobalUI() {
@@ -1354,26 +1221,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // Initialize global auth manager when page loads
-      function initializeAuth() {
-        try {
-          console.log('🚀 Initializing Global Auth Manager...');
-          new GlobalAuthManager();
-          checkAdminPanelNavbar();
-          handleNavigation();
-          console.log('✅ Global Auth Manager initialized successfully');
-        } catch (error) {
-          console.error('❌ Error initializing Global Auth Manager:', error);
-          // Retry after a short delay
-          setTimeout(initializeAuth, 100);
-        }
-      }
-
-      // Initialize immediately if DOM is ready, otherwise wait
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeAuth);
-      } else {
-        initializeAuth();
-      }
+      document.addEventListener('DOMContentLoaded', () => {
+        new GlobalAuthManager();
+        checkAdminPanelNavbar();
+        handleNavigation();
+      });
       
       // Handle navigation events
       window.addEventListener('popstate', handleNavigation);
@@ -1381,17 +1233,6 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Track navigation state - simplified to prevent fluctuation
       let isNavigating = false;
-
-      // Global sign out function
-      window.signOut = async function() {
-        const authManager = window.globalAuthManager || window.simpleAuthManager;
-        if (authManager) {
-          await authManager.signOut();
-        } else {
-          console.error('❌ Auth manager not available for sign out');
-          window.location.href = '/';
-        }
-      };
       
       // Set navigation state when links are clicked - but don't hide navbar
       document.addEventListener('click', function(e) {
