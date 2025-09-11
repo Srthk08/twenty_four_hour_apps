@@ -278,16 +278,18 @@
     console.log('Setting initial UI state using global auth manager');
     
     // Wait for global auth manager to be ready
-    setTimeout(() => {
+    const checkAuthManager = () => {
       const authManager = window.globalAuthManager || window.simpleAuthManager;
       if (authManager) {
         authManager.updateHeader();
         console.log('✅ Initial UI state set using global auth manager');
       } else {
         console.log('Global auth manager not ready yet, retrying...');
-        setInitialUIState();
+        setTimeout(checkAuthManager, 100);
       }
-    }, 100);
+    };
+    
+    checkAuthManager();
   }
 
   // User dropdown functionality
@@ -446,4 +448,20 @@
     console.log('User logged out event received in header');
     updateHeader();
   });
+
+  // Initialize header when DOM is ready
+  function initializeHeader() {
+    console.log('🚀 Initializing header...');
+    initUserDropdown();
+    initMobileMenu();
+    setInitialUIState();
+    console.log('✅ Header initialized');
+  }
+
+  // Initialize immediately if DOM is ready, otherwise wait
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeHeader);
+  } else {
+    initializeHeader();
+  }
 </script>

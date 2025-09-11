@@ -524,8 +524,11 @@ const { title, description } = Astro.props;
         
         // Wait for Supabase to be available
         if (!supabase) {
+          console.log('⏳ AdminGuard: Waiting for Supabase...');
           await waitForSupabase();
         }
+        
+        console.log('✅ AdminGuard: Supabase available, proceeding with auth check');
         
         // Get current user from Supabase
         const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -697,21 +700,31 @@ const { title, description } = Astro.props;
     // Also check when auth state changes
     window.addEventListener('auth-state-changed', checkAdminAccess);
     
-    // Check immediately if already loaded
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', checkAdminAccess);
-    } else {
-      checkAdminAccess();
+    // Initialize admin access check
+    function initializeAdminAccess() {
+      console.log('🚀 Initializing admin access check...');
+      
+      // Wait a bit for Supabase to be ready
+      setTimeout(() => {
+        checkAdminAccess();
+      }, 1000);
     }
     
-    // Fallback: Hide loading screen after 10 seconds if still showing
+    // Check immediately if already loaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeAdminAccess);
+    } else {
+      initializeAdminAccess();
+    }
+    
+    // Fallback: Hide loading screen after 15 seconds if still showing
     setTimeout(() => {
       const guardElement = document.getElementById('admin-guard');
       if (guardElement && guardElement.style.display !== 'none') {
         console.warn('⚠️ Admin access check timed out, showing content anyway');
         showAdminContent();
       }
-    }, 10000);
+    }, 15000);
     
     console.log('AdminLayout loaded successfully');
     </script>

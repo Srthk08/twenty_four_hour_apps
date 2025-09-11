@@ -995,6 +995,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         init() {
+          console.log('🚀 Starting Global Auth Manager initialization...');
+          
           // Check if user is already logged in
           this.checkExistingSession();
           
@@ -1011,7 +1013,12 @@ document.addEventListener('DOMContentLoaded', () => {
           window.globalAuthManager = this;
           window.simpleAuthManager = this; // For backward compatibility
           
-          console.log('✅ Global Auth Manager initialized');
+          console.log('✅ Global Auth Manager initialized and available globally');
+          
+          // Update header immediately after initialization
+          setTimeout(() => {
+            this.updateHeader();
+          }, 100);
         }
 
         checkExistingSession() {
