@@ -136,14 +136,29 @@ const processedProducts = products
 </Layout>
 
 <script>
-  // Product filtering with performance optimization
-  const filterButtons = document.querySelectorAll('.filter-btn');
-  const productCards = document.querySelectorAll('.product-card');
+  // Wait for DOM to be fully loaded before initializing
+  function initializeFilters() {
+    console.log('🔍 Initializing product filters...');
+    
+    // Get filter buttons and product cards
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const productCards = document.querySelectorAll('.product-card');
+    
+    console.log('📊 Found filter buttons:', filterButtons.length);
+    console.log('📦 Found product cards:', productCards.length);
+    
+    if (filterButtons.length === 0) {
+      console.error('❌ No filter buttons found!');
+      return;
+    }
+    
+    if (productCards.length === 0) {
+      console.error('❌ No product cards found!');
+      return;
+    }
   
-  
-  
-  filterButtons.forEach(button => {
-    button.addEventListener('click', () => {
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
       // Remove active class from all buttons
       filterButtons.forEach(btn => {
         btn.classList.remove('active', 'bg-primary-600', 'text-white');
@@ -193,10 +208,7 @@ const processedProducts = products
       });
     });
   });
-
-
-
-
+  }
 
   // Add animation classes with performance optimization
   const observer = new IntersectionObserver((entries) => {
@@ -257,6 +269,13 @@ const processedProducts = products
       });
     }
   });
+
+  // Initialize filters when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeFilters);
+  } else {
+    initializeFilters();
+  }
 </script>
 
 <style>

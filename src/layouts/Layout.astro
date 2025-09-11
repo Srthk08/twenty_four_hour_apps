@@ -401,23 +401,76 @@ const { title, description = "DevExpress - 24 Hour Delivery" } = Astro.props;
     <!-- Supabase Client -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
-      // Initialize Supabase client
+      // Initialize Supabase client with better error handling
       const supabaseUrl = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
       const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
       
+      let supabaseInitialized = false;
+      let initRetryCount = 0;
+      const maxRetries = 50; // 5 seconds max
+      
       // Wait for Supabase to load, then initialize
       function initSupabase() {
-        if (typeof supabase !== 'undefined') {
-          window.supabase = supabase.createClient(supabaseUrl, supabaseKey);
-          console.log('✅ Supabase client initialized globally');
-        } else {
-          console.log('⏳ Supabase library not loaded yet, retrying...');
-          setTimeout(initSupabase, 100);
+        try {
+          if (typeof supabase !== 'undefined') {
+            window.supabase = supabase.createClient(supabaseUrl, supabaseKey);
+            supabaseInitialized = true;
+            console.log('✅ Supabase client initialized globally');
+            
+            // Test the connection
+            testSupabaseConnection();
+          } else {
+            initRetryCount++;
+            if (initRetryCount < maxRetries) {
+              console.log(`⏳ Supabase library not loaded yet, retrying... (${initRetryCount}/${maxRetries})`);
+              setTimeout(initSupabase, 100);
+            } else {
+              console.error('❌ Failed to load Supabase library after maximum retries');
+            }
+          }
+        } catch (error) {
+          console.error('❌ Error initializing Supabase:', error);
+          initRetryCount++;
+          if (initRetryCount < maxRetries) {
+            setTimeout(initSupabase, 100);
+          }
+        }
+      }
+      
+      // Test Supabase connection
+      async function testSupabaseConnection() {
+        try {
+          if (window.supabase) {
+            const { data, error } = await window.supabase
+              .from('contact_submissions')
+              .select('id')
+              .limit(1);
+            
+            if (error) {
+              console.warn('⚠️ Supabase connection test failed:', error.message);
+            } else {
+              console.log('✅ Supabase connection test successful');
+            }
+          }
+        } catch (error) {
+          console.warn('⚠️ Supabase connection test error:', error);
         }
       }
       
       // Start initialization
       initSupabase();
+      
+      // Make Supabase available globally with fallback
+      window.getSupabaseClient = function() {
+        if (window.supabase) {
+          return window.supabase;
+        } else if (typeof supabase !== 'undefined') {
+          return supabase.createClient(supabaseUrl, supabaseKey);
+        } else {
+          console.error('❌ Supabase not available');
+          return null;
+        }
+      };
     </script>
 
     <!-- Custom Tailwind Config -->
@@ -1221,11 +1274,26 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // Initialize global auth manager when page loads
-      document.addEventListener('DOMContentLoaded', () => {
-        new GlobalAuthManager();
-        checkAdminPanelNavbar();
-        handleNavigation();
-      });
+      function initializeAuth() {
+        try {
+          console.log('🚀 Initializing Global Auth Manager...');
+          new GlobalAuthManager();
+          checkAdminPanelNavbar();
+          handleNavigation();
+          console.log('✅ Global Auth Manager initialized successfully');
+        } catch (error) {
+          console.error('❌ Error initializing Global Auth Manager:', error);
+          // Retry after a short delay
+          setTimeout(initializeAuth, 100);
+        }
+      }
+
+      // Initialize immediately if DOM is ready, otherwise wait
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeAuth);
+      } else {
+        initializeAuth();
+      }
       
       // Handle navigation events
       window.addEventListener('popstate', handleNavigation);
