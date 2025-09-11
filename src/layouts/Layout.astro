@@ -1009,6 +1009,9 @@ document.addEventListener('DOMContentLoaded', () => {
             this.handleLogout();
           });
 
+          // Listen for Supabase auth state changes
+          this.setupSupabaseAuthListener();
+
           // Make it globally available
           window.globalAuthManager = this;
           window.simpleAuthManager = this; // For backward compatibility
@@ -1021,29 +1024,71 @@ document.addEventListener('DOMContentLoaded', () => {
           }, 100);
         }
 
-        checkExistingSession() {
+        setupSupabaseAuthListener() {
+          // Wait for Supabase to be available
+          const setupListener = () => {
+            if (window.supabase) {
+              console.log('🔗 Setting up Supabase auth state listener...');
+              
+              window.supabase.auth.onAuthStateChange((event, session) => {
+                console.log('🔄 Supabase auth state changed:', event, session?.user?.email);
+                
+                if (event === 'SIGNED_IN' && session?.user) {
+                  this.isAuthenticated = true;
+                  this.currentUser = session.user;
+                  this.updateGlobalUI();
+                  console.log('✅ User signed in via Supabase:', session.user.email);
+                } else if (event === 'SIGNED_OUT') {
+                  this.isAuthenticated = false;
+                  this.currentUser = null;
+                  this.updateGlobalUI();
+                  console.log('✅ User signed out via Supabase');
+                }
+              });
+            } else {
+              console.log('⏳ Supabase not ready for auth listener, retrying...');
+              setTimeout(setupListener, 500);
+            }
+          };
+          
+          setupListener();
+        }
+
+        async checkExistingSession() {
           try {
-            // Check sessionStorage first (most recent)
+            console.log('🔍 Checking existing Supabase session...');
+            
+            // Wait for Supabase to be available
+            if (!window.supabase) {
+              console.log('⏳ Supabase not ready, retrying...');
+              setTimeout(() => this.checkExistingSession(), 500);
+              return;
+            }
+
+            // Check Supabase session
+            const { data: { session }, error } = await window.supabase.auth.getSession();
+            
+            if (error) {
+              console.error('❌ Error getting session:', error);
+              return;
+            }
+
+            if (session && session.user) {
+              this.isAuthenticated = true;
+              this.currentUser = session.user;
+              console.log('✅ Existing Supabase session found:', this.currentUser.email);
+              this.updateGlobalUI();
+              return;
+            }
+
+            // Fallback: Check sessionStorage
             const sessionData = sessionStorage.getItem('simple-auth-session');
             if (sessionData) {
               const session = JSON.parse(sessionData);
               if (session.user && session.access_token) {
                 this.isAuthenticated = true;
                 this.currentUser = session.user;
-                console.log('✅ Existing session found:', this.currentUser.email);
-                this.updateGlobalUI();
-                return;
-              }
-            }
-
-            // Check localStorage as fallback
-            const storedUser = localStorage.getItem('simple-auth-user');
-            if (storedUser) {
-              const user = JSON.parse(storedUser);
-              if (user && user.email) {
-                this.isAuthenticated = true;
-                this.currentUser = user;
-                console.log('✅ Existing user found in localStorage:', this.currentUser.email);
+                console.log('✅ Existing session found in sessionStorage:', this.currentUser.email);
                 this.updateGlobalUI();
                 return;
               }
@@ -1086,6 +1131,34 @@ document.addEventListener('DOMContentLoaded', () => {
           
           console.log('✅ User logged out globally');
           this.updateGlobalUI();
+        }
+
+        async signOut() {
+          try {
+            console.log('🚪 Signing out user...');
+            
+            // Sign out from Supabase
+            if (window.supabase) {
+              const { error } = await window.supabase.auth.signOut();
+              if (error) {
+                console.error('❌ Supabase sign out error:', error);
+              } else {
+                console.log('✅ Signed out from Supabase');
+              }
+            }
+            
+            // Clear local state
+            this.handleLogout();
+            
+            // Redirect to home page
+            window.location.href = '/';
+            
+          } catch (error) {
+            console.error('❌ Error signing out:', error);
+            // Still clear local state even if Supabase sign out fails
+            this.handleLogout();
+            window.location.href = '/';
+          }
         }
 
         updateGlobalUI() {
@@ -1308,6 +1381,17 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Track navigation state - simplified to prevent fluctuation
       let isNavigating = false;
+
+      // Global sign out function
+      window.signOut = async function() {
+        const authManager = window.globalAuthManager || window.simpleAuthManager;
+        if (authManager) {
+          await authManager.signOut();
+        } else {
+          console.error('❌ Auth manager not available for sign out');
+          window.location.href = '/';
+        }
+      };
       
       // Set navigation state when links are clicked - but don't hide navbar
       document.addEventListener('click', function(e) {
