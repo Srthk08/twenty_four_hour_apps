@@ -16,7 +16,7 @@ RETURNS TRIGGER AS $$
 DECLARE
   existing_items JSONB;
   new_item JSONB;
-  item_name TEXT;
+  item_name TEXT;  *
   item_price DECIMAL;
   item_quantity INTEGER;
   i INTEGER;

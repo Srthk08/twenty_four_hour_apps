@@ -148,6 +148,7 @@ const processedProducts = products
   // Product filtering with performance optimization
   const filterButtons = document.querySelectorAll('.filter-btn');
   const productCards = document.querySelectorAll('.product-card');
+  let colorsEnabled = true;
   
   filterButtons.forEach(button => {
     button.addEventListener('click', () => {
@@ -353,6 +354,7 @@ const processedProducts = products
     transition: all 0.3s ease;
   }
   
+
   /* Code modal styles */
   #code-modal {
     backdrop-filter: blur(5px);
