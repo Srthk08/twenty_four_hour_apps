@@ -34,6 +34,16 @@ import Layout from '../layouts/Layout.astro';
             </div>
           </div>
 
+          <!-- Success Message -->
+          <div id="success-message" class="hidden p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div class="flex">
+              <svg class="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+              </svg>
+              <span id="success-text" class="text-green-800">Account created successfully! Redirecting...</span>
+            </div>
+          </div>
+
           <!-- Full Name -->
           <div>
             <label for="full_name" class="block text-sm font-medium text-gray-700">
@@ -305,6 +315,8 @@ import Layout from '../layouts/Layout.astro';
   const form = document.getElementById('signup-form') as HTMLFormElement;
   const errorMessage = document.getElementById('error-message');
   const errorText = document.getElementById('error-text');
+  const successMessage = document.getElementById('success-message');
+  const successText = document.getElementById('success-text');
   const googleSignupBtn = document.getElementById('google-signup-btn');
 
   // Show status message
@@ -513,17 +525,7 @@ import Layout from '../layouts/Layout.astro';
     try {
       console.log('Attempting to sign up with Supabase:', email);
       
-      // Determine user role based on username/email
-      let userRole = 'customer';
-      if (fullName.toLowerCase().includes('admin') || email.toLowerCase().includes('admin')) {
-        userRole = 'admin';
-      } else if (fullName.toLowerCase().includes('developer') || email.toLowerCase().includes('developer')) {
-        userRole = 'developer';
-      } else if (fullName.toLowerCase().includes('support') || email.toLowerCase().includes('support')) {
-        userRole = 'support';
-      }
-      
-      // Sign up with Supabase Auth
+      // Sign up with Supabase directly
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -532,8 +534,6 @@ import Layout from '../layouts/Layout.astro';
             full_name: fullName,
             phone: phone,
             company_name: companyName,
-            role: userRole,
-            username: fullName.toLowerCase().replace(/\s+/g, '_')
           }
         }
       });
@@ -544,105 +544,72 @@ import Layout from '../layouts/Layout.astro';
       }
 
       if (data.user) {
-        console.log('User created successfully in Auth:', data.user.email);
+        console.log('User created successfully:', data.user.email);
         
-        // Create complete user profile in profiles table
+        // Create profile in profiles table
         const { error: profileError } = await supabase
           .from('profiles')
           .insert({
             id: data.user.id,
             email: email,
-            full_name: fullName,
-            phone: phone || null,
-            company_name: companyName || null,
-            role: userRole,
+            full_name: fullName || '',
+            phone: phone || '',
+            company_name: companyName || '',
+            role: 'customer',
             status: 'pending_verification',
-            username: fullName.toLowerCase().replace(/\s+/g, '_'),
+            username: fullName?.toLowerCase().replace(/\s+/g, '_') || email.split('@')[0],
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           });
 
         if (profileError) {
-          console.error('Error creating user profile:', profileError);
-          // Try to delete the auth user if profile creation fails
-          try {
-            await supabase.auth.admin.deleteUser(data.user.id);
-          } catch (deleteError) {
-            console.error('Error deleting auth user after profile creation failure:', deleteError);
-          }
-          throw new Error('Failed to create user profile. Please try again.');
+          console.error('Profile creation error:', profileError);
+          // Don't fail the signup if profile creation fails
         }
-
-        // Log user activity
-        try {
-          await supabase
-            .from('user_activity_log')
-            .insert({
-              user_id: data.user.id,
-              action: 'user_signup',
-              details: {
-                email: email,
-                full_name: fullName,
-                role: userRole,
-                company_name: companyName,
-                phone: phone
-              },
-              ip_address: '127.0.0.1', // Will be updated with real IP in production
-              user_agent: navigator.userAgent
-            });
-        } catch (logError) {
-          console.warn('Could not log user activity:', logError);
+        
+        // Store session in sessionStorage if there's a session
+        if (data.session) {
+          sessionStorage.setItem('simple-auth-session', JSON.stringify({
+            user: data.user,
+            access_token: data.session.access_token,
+            timestamp: Date.now()
+          }));
+          
+          // Dispatch login event
+          window.dispatchEvent(new CustomEvent('user-logged-in', { detail: data.user }));
         }
-
-        console.log('Complete user profile created successfully with role:', userRole);
         
         // Show success message
-        if (typeof window.showToast === 'function') {
-          window.showToast(`Account created successfully! Welcome to DevExpress! Role: ${userRole}`, 'success', 3000);
+        if (successText) {
+          successText.textContent = data.session ? 'Account created and signed in successfully!' : 'Account created. Please check your email to verify your account.';
         }
+        successMessage?.classList.remove('hidden');
 
-        // Redirect based on role
-        let redirectUrl = '/login?message=Account created successfully! Please check your email to confirm your account before signing in.&type=success';
-        
-        if (userRole === 'admin') {
-          redirectUrl = '/login?message=Admin account created! Please check your email to confirm your account before signing in.&type=success';
-      }
-
-      // Redirect to login page after 2 seconds
-      setTimeout(() => {
-          window.location.href = redirectUrl;
-      }, 2000);
+        // Redirect based on whether user is signed in
+        if (data.session) {
+          // User is signed in, redirect to dashboard
+          setTimeout(() => {
+            window.location.href = '/dashboard';
+          }, 2000);
+        } else {
+          // User needs to verify email, redirect to login
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 3000);
+        }
       } else {
-        throw new Error('Signup failed - no user data returned');
+        throw new Error('Account creation failed');
       }
-      
-    } catch (error: any) {
+    } catch (error) {
       console.error('Signup error:', error);
       
       // Show error message
-      let errorMessageText = 'An error occurred during account creation.';
-      
-      if (error.message) {
-        // Handle specific Supabase error messages
-        if (error.message.includes('User already registered')) {
-          errorMessageText = 'An account with this email already exists. Please try signing in instead.';
-        } else if (error.message.includes('Password should be at least')) {
-          errorMessageText = 'Password must be at least 6 characters long.';
-        } else if (error.message.includes('Invalid email')) {
-          errorMessageText = 'Please enter a valid email address.';
-        } else if (error.message.includes('Failed to create user profile')) {
-          errorMessageText = 'Account creation failed. Please try again or contact support.';
-        } else {
-          errorMessageText = error.message;
-        }
-      }
-      
       if (errorText) {
-        errorText.textContent = errorMessageText;
+        errorText.textContent = error.message || 'An error occurred during account creation.';
       }
       errorMessage?.classList.remove('hidden');
-      
-      // Reset button
+    } finally {
+      // Reset button state
       submitButton.disabled = false;
       submitButton.textContent = originalText;
     }

@@ -283,22 +283,27 @@
       // Check sessionStorage for existing session
       const sessionData = sessionStorage.getItem('simple-auth-session');
       const isAuthenticated = sessionData && JSON.parse(sessionData).user;
+      let user = null;
+      
+      if (isAuthenticated) {
+        // Use session storage data
+        const session = JSON.parse(sessionData);
+        user = session.user;
+      }
       
       const authButtons = document.getElementById('auth-buttons');
       const userMenu = document.getElementById('user-menu');
       const mobileAuthButtons = document.getElementById('mobile-auth-buttons');
       const mobileUserMenu = document.getElementById('mobile-user-menu');
       
-      if (isAuthenticated) {
+      if (isAuthenticated && user) {
         // User is logged in
         if (authButtons) authButtons.classList.add('hidden');
         if (userMenu) userMenu.classList.remove('hidden');
         if (mobileAuthButtons) mobileAuthButtons.classList.add('hidden');
         if (mobileUserMenu) mobileUserMenu.classList.remove('hidden');
         
-        // Update user info from session
-        const session = JSON.parse(sessionData);
-        const user = session.user;
+        // Update user info
         updateUserInfoFallback(user);
       } else {
         // User is not logged in - show auth buttons

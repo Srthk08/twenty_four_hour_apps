@@ -381,7 +381,7 @@ import Layout from '../layouts/Layout.astro';
     try {
         console.log('Attempting to sign in with Supabase:', email);
         
-        // Sign in with Supabase
+        // Sign in with Supabase directly
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -394,6 +394,17 @@ import Layout from '../layouts/Layout.astro';
 
         if (data.user) {
           console.log('User signed in successfully:', data.user.email);
+          
+          // Store session in sessionStorage for fallback
+          sessionStorage.setItem('simple-auth-session', JSON.stringify({
+            user: data.user,
+            access_token: data.session?.access_token,
+            timestamp: Date.now()
+          }));
+          
+          // Dispatch login event
+          window.dispatchEvent(new CustomEvent('user-logged-in', { detail: data.user }));
+          
       if (successText) {
         successText.textContent = 'Welcome back! Signing you in...';
       }

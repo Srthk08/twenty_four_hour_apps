@@ -144,8 +144,33 @@ import AuthGuard from '../components/AuthGuard.astro';
 <script>
   console.log('Dashboard loaded - using global auth manager');
 
-  // Function to update user info - SIMPLIFIED APPROACH
-  function updateUserInfo() {
+  // Function to fetch user profile from Supabase
+  async function fetchUserProfile(userId) {
+    try {
+      console.log('🔍 Fetching user profile from Supabase for user:', userId);
+      const { supabase } = await import('../lib/supabase');
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        return null;
+      }
+
+      console.log('✅ User profile fetched from Supabase:', data);
+      return data;
+    } catch (error) {
+      console.error('Error in fetchUserProfile:', error);
+      return null;
+    }
+  }
+
+  // Function to update user info - ENHANCED FOR SUPABASE
+  async function updateUserInfo() {
     console.log('🔄 Updating user info...');
     
     // Get all possible user data sources
@@ -191,6 +216,43 @@ import AuthGuard from '../components/AuthGuard.astro';
       };
       source = 'URL parameters';
       console.log('Using fallback data:', userData);
+    }
+    
+    // Normalize user data structure for Supabase
+    if (userData) {
+      // Handle Supabase user metadata
+      if (userData.user_metadata) {
+        userData.full_name = userData.user_metadata.full_name || userData.full_name;
+        userData.phone = userData.user_metadata.phone || userData.phone;
+        userData.company_name = userData.user_metadata.company_name || userData.company_name;
+      }
+      
+      // If we have incomplete data, try to fetch from Supabase
+      if (userData.id && (!userData.full_name || userData.full_name === 'User' || !userData.phone || userData.phone === 'Not set')) {
+        console.log('🔄 Incomplete user data, fetching from Supabase...');
+        try {
+          const profileData = await fetchUserProfile(userData.id);
+          if (profileData) {
+            // Merge profile data with existing user data
+            userData = {
+              ...userData,
+              ...profileData,
+              email: userData.email || profileData.email
+            };
+            console.log('✅ Enhanced user data with profile:', userData);
+          }
+        } catch (error) {
+          console.log('Error fetching profile data:', error);
+        }
+      }
+      
+      // Ensure we have the required fields
+      userData.full_name = userData.full_name || userData.fullName || 'User';
+      userData.phone = userData.phone || 'Not set';
+      userData.company_name = userData.company_name || userData.companyName || 'Not set';
+      userData.email = userData.email || 'user@example.com';
+      
+      console.log('📋 Final normalized user data:', userData);
     }
     
     // Update the dashboard elements
@@ -241,12 +303,20 @@ import AuthGuard from '../components/AuthGuard.astro';
       console.log('❌ userCompany element not found!');
     }
     
+    // Update welcome message
+    const userWelcome = document.getElementById('user-welcome');
+    if (userWelcome) {
+      const displayName = userData.full_name || userData.fullName || userData.email?.split('@')[0] || 'User';
+      userWelcome.textContent = displayName;
+      console.log('👋 Welcome message updated to:', displayName);
+    }
+    
     console.log(`✅ Dashboard updated successfully from ${source}`);
     
     // Force update with a more aggressive approach
     setTimeout(() => {
       console.log('🔄 Force update attempt...');
-      const elements = document.querySelectorAll('#user-email, #user-full-name, #user-phone, #user-company');
+      const elements = document.querySelectorAll('#user-email, #user-full-name, #user-phone, #user-company, #user-welcome');
       console.log('Found elements with querySelectorAll:', elements.length);
       
       elements.forEach((el, index) => {
@@ -263,6 +333,10 @@ import AuthGuard from '../components/AuthGuard.astro';
         } else if (el.id === 'user-company') {
           el.textContent = userData.company_name || userData.companyName || 'Not set';
           console.log('Force updated company to:', el.textContent);
+        } else if (el.id === 'user-welcome') {
+          const displayName = userData.full_name || userData.fullName || userData.email?.split('@')[0] || 'User';
+          el.textContent = displayName;
+          console.log('Force updated welcome to:', el.textContent);
         }
       });
     }, 100);

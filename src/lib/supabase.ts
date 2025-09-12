@@ -8,17 +8,17 @@ const SUPABASE_CONFIG = {
 
 // Get environment variables with fallbacks
 const getEnvVar = (key: string): string => {
-  // Try to get from import.meta.env (Astro)
+  // Try to get from import.meta.env (Astro) - this is the primary method
   if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) {
     return import.meta.env[key];
   }
   
-  // Try to get from process.env (Node.js)
+  // Try to get from process.env (Node.js) - for server-side
   if (typeof process !== 'undefined' && process.env && process.env[key]) {
     return process.env[key];
   }
   
-  // Try to get from window (browser)
+  // Try to get from window (browser) - for client-side fallback
   if (typeof window !== 'undefined' && window.__ENV__ && window.__ENV__[key]) {
     return window.__ENV__[key];
   }
@@ -30,6 +30,15 @@ const getEnvVar = (key: string): string => {
 // Use environment variables if available, otherwise use hardcoded config
 const supabaseUrl = getEnvVar('VITE_SUPABASE_URL') || SUPABASE_CONFIG.url;
 const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY') || SUPABASE_CONFIG.anonKey;
+
+// Enhanced logging for debugging
+console.log('Environment Detection:', {
+  hasImportMeta: typeof import.meta !== 'undefined',
+  hasProcess: typeof process !== 'undefined',
+  hasWindow: typeof window !== 'undefined',
+  importMetaEnv: typeof import.meta !== 'undefined' ? Object.keys(import.meta.env || {}) : 'N/A',
+  processEnv: typeof process !== 'undefined' ? Object.keys(process.env || {}).filter(k => k.includes('SUPABASE')) : 'N/A'
+});
 
 console.log('Supabase Configuration:', {
   url: supabaseUrl ? '✅ Set' : '❌ Missing',
