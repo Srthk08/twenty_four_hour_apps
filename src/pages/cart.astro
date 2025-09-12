@@ -46,12 +46,12 @@ import { sharedDataStore } from '../lib/shared-data-store';
 
 <Layout title="Shopping Cart">
 
-  <div class="min-h-screen bg-transparent py-12">
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Page Header -->
       <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold text-white mb-4">Shopping Cart</h1>
-        <p class="text-xl text-gray-200">Customize your project and proceed to checkout</p>
+        <h1 class="text-4xl font-bold text-blue-900 mb-4">Shopping Cart</h1>
+        <p class="text-xl text-blue-800">Customize your project and proceed to checkout</p>
       </div>
 
                 <!-- Cart Content - Now always visible since AuthGuard handles authentication -->
@@ -64,8 +64,8 @@ import { sharedDataStore } from '../lib/shared-data-store';
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m0 0h9m-9 0V19a2 2 0 002 2h7a2 2 0 002-2v-.5"></path>
             </svg>
           </div>
-          <h2 class="text-2xl font-bold text-white mb-2">Your cart is empty</h2>
-          <p class="text-gray-200 mb-6">Browse our products and add something to get started</p>
+          <h2 class="text-2xl font-bold text-blue-900 mb-2">Your cart is empty</h2>
+          <p class="text-blue-800 mb-6">Browse our products and add something to get started</p>
           <a href="/products" class="inline-block bg-primary-600 hover:bg-primary-700 text-white font-medium px-8 py-3 rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
             Browse Products
           </a>
@@ -81,7 +81,7 @@ import { sharedDataStore } from '../lib/shared-data-store';
                 <div class="flex items-start justify-between mb-6">
                   <div>
                     <h3 class="text-2xl font-bold text-gray-900 product-name mb-2">Product Name</h3>
-                    <p class="text-gray-200 product-description text-lg mb-4">Product description</p>
+                    <p class="text-blue-800 product-description text-lg mb-4">Product description</p>
                     <p class="text-3xl font-bold text-primary-600 product-price">₹0</p>
                     
                     <!-- Product Type Badge -->
@@ -101,21 +101,21 @@ import { sharedDataStore } from '../lib/shared-data-store';
               <div class="flex-1 space-y-6">
                 <!-- Product Name Input -->
                 <div>
-                  <label class="block text-lg font-semibold text-white mb-3">Custom Product Name</label>
+                  <label class="block text-lg font-semibold text-blue-900 mb-3">Custom Product Name</label>
                   <input type="text" class="product-name-input w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter your custom product name">
-                  <p class="text-sm text-gray-300 mt-2">Give your product a unique name</p>
+                  <p class="text-sm text-blue-700 mt-2">Give your product a unique name</p>
                 </div>
 
                 <!-- Restaurant Name Input (shown only for restaurant products) -->
                 <div id="restaurant-name-customization" class="hidden">
-                  <label class="block text-lg font-semibold text-white mb-3">Restaurant Name</label>
+                  <label class="block text-lg font-semibold text-blue-900 mb-3">Restaurant Name</label>
                   <input type="text" class="restaurant-name-input w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter your restaurant name">
-                  <p class="text-sm text-gray-300 mt-2">Enter the name of your restaurant</p>
+                  <p class="text-sm text-blue-700 mt-2">Enter the name of your restaurant</p>
                 </div>
 
                 <!-- Logo Upload -->
                 <div>
-                  <label class="block text-lg font-semibold text-white mb-3">Upload Your Logo</label>
+                  <label class="block text-lg font-semibold text-blue-900 mb-3">Upload Your Logo</label>
                   <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                     <input type="file" accept="image/*" class="logo-upload hidden" />
                     <button type="button" class="logo-upload-btn w-full sm:w-auto px-6 py-3 border-2 border-primary-300 rounded-lg text-lg font-medium text-primary-600 hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all transform hover:scale-105">
@@ -125,12 +125,12 @@ import { sharedDataStore } from '../lib/shared-data-store';
                       <span class="text-gray-400 text-sm">Logo</span>
                     </div>
                   </div>
-                  <p class="text-sm text-gray-300 mt-2">Upload your company or brand logo</p>
+                  <p class="text-sm text-blue-700 mt-2">Upload your company or brand logo</p>
                 </div>
 
                 <!-- Color Selection -->
                 <div>
-                  <label class="block text-lg font-semibold text-white mb-3">Choose Color Theme</label>
+                  <label class="block text-lg font-semibold text-blue-900 mb-3">Choose Color Theme</label>
                   <div class="flex flex-wrap gap-4">
                     <button type="button" class="color-option w-12 h-12 rounded-full border-4 border-gray-300 hover:border-gray-400 transition-all transform hover:scale-110" data-color="#3B82F6" style="background-color: #3B82F6;"></button>
                     <button type="button" class="color-option w-12 h-12 rounded-full border-4 border-gray-300 hover:border-gray-400 transition-all transform hover:scale-110" data-color="#8B5CF6" style="background-color: #8B5CF6;"></button>
@@ -139,27 +139,27 @@ import { sharedDataStore } from '../lib/shared-data-store';
                     <button type="button" class="color-option w-12 h-12 rounded-full border-4 border-gray-300 hover:border-gray-400 transition-all transform hover:scale-110" data-color="#EF4444" style="background-color: #EF4444;"></button>
                     <button type="button" class="color-option w-12 h-12 rounded-full border-4 border-gray-300 hover:border-gray-400 transition-all transform hover:scale-110" data-color="#000000" style="background-color: #000000;"></button>
                   </div>
-                  <p class="text-sm text-gray-300 mt-2">Select your preferred color scheme</p>
+                  <p class="text-sm text-blue-700 mt-2">Select your preferred color scheme</p>
                 </div>
 
                 <!-- Additional Options -->
                 <div>
-                  <label class="block text-lg font-semibold text-white mb-3">Additional Features</label>
+                  <label class="block text-lg font-semibold text-blue-900 mb-3">Additional Features</label>
                   <div class="space-y-3">
                     <label class="flex items-center p-3 bg-white rounded-lg hover:bg-gray-50 transition-colors cursor-pointer border border-gray-200">
                       <input type="checkbox" class="feature-checkbox rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5" data-feature="responsive" data-price="500">
-                      <span class="ml-3 text-lg text-white">Responsive Design (+₹500)</span>
+                      <span class="ml-3 text-lg text-blue-900">Responsive Design (+₹500)</span>
                     </label>
                     <label class="flex items-center p-3 bg-white rounded-lg hover:bg-gray-50 transition-colors cursor-pointer border border-gray-200">
                       <input type="checkbox" class="feature-checkbox rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5" data-feature="seo" data-price="300">
-                      <span class="ml-3 text-lg text-white">SEO Optimization (+₹300)</span>
+                      <span class="ml-3 text-lg text-blue-900">SEO Optimization (+₹300)</span>
                     </label>
                     <label class="flex items-center p-3 bg-white rounded-lg hover:bg-gray-50 transition-colors cursor-pointer border border-gray-200">
                       <input type="checkbox" class="feature-checkbox rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5" data-feature="analytics" data-price="200">
-                      <span class="ml-3 text-lg text-white">Analytics Integration (+₹200)</span>
+                      <span class="ml-3 text-lg text-blue-900">Analytics Integration (+₹200)</span>
                     </label>
                   </div>
-                  <p class="text-sm text-gray-300 mt-2">Select additional features for your product</p>
+                  <p class="text-sm text-blue-700 mt-2">Select additional features for your product</p>
                 </div>
               </div>
             </div>
@@ -325,8 +325,8 @@ import { sharedDataStore } from '../lib/shared-data-store';
               </div>
             </div>
 
-            <!-- Dynamic Upload Section -->
-            <div id="logo-upload-section">
+            <!-- App Icon Upload Section - Only for non-Order Menu System products -->
+            <div id="logo-upload-section" class="non-order-menu-fields">
               <label class="block text-lg font-semibold text-white mb-3">
                 <span id="upload-label">App Icon</span>
               </label>
@@ -366,8 +366,8 @@ import { sharedDataStore } from '../lib/shared-data-store';
               </div>
             </div>
 
-            <!-- Dynamic Menu/App Photos Section -->
-            <div id="photos-upload-section">
+            <!-- App Screenshots Upload Section - Only for non-Order Menu System products -->
+            <div id="photos-upload-section" class="non-order-menu-fields">
               <label class="block text-lg font-semibold text-white mb-3">
                 <span id="photos-label">App Screenshots (Optional)</span>
               </label>
@@ -805,6 +805,7 @@ import { sharedDataStore } from '../lib/shared-data-store';
       this.items = [];
       this.requirements = {};
       this.currentSharedOrderId = null;
+      this.isSubmitting = false; // Flag to prevent duplicate submissions
       this.debouncedSaveToSupabase = this.debounce(this.saveCartToSupabase.bind(this), 1000);
       this.init().catch(error => {
         console.error('❌ Error initializing cart:', error);
@@ -1614,6 +1615,14 @@ import { sharedDataStore } from '../lib/shared-data-store';
       const submitBtn = document.getElementById('submit-requirements');
       const originalText = submitBtn.innerHTML;
       
+      // Prevent duplicate submissions
+      if (this.isSubmitting || submitBtn.disabled) {
+        console.log('❌ Form already being submitted, ignoring duplicate call');
+        return;
+      }
+      
+      this.isSubmitting = true;
+      
       try {
         console.log('🚀 Starting submitRequirements...');
         
@@ -1622,8 +1631,10 @@ import { sharedDataStore } from '../lib/shared-data-store';
         const isOrderMenuSystem = this.items[0] && (this.items[0].id === 'order-menu-system' || this.items[0].id === '5');
         
         if (isOrderMenuSystem) {
-          // For Order Menu System, check only Order Menu System fields
+          // For Order Menu System, check Order Menu System fields plus Project Name and Contact Person
           const requiredFields = [
+            'projectName',
+            'contactPerson',
             'orderMenuRestaurantName',
             'orderMenuOwnerName', 
             'orderMenuAddress',
@@ -1691,6 +1702,10 @@ import { sharedDataStore } from '../lib/shared-data-store';
         const currentItem = this.items[0];
         
         if (isOrderMenuSystem) {
+          // Collect menu items first
+          const collectedMenuItems = this.collectMenuItems();
+          console.log('🍽️ Collected menu items for Order Menu System:', collectedMenuItems);
+          
           // Collect Order Menu System specific data
           this.requirements = {
             // Order Menu System fields
@@ -1702,7 +1717,7 @@ import { sharedDataStore } from '../lib/shared-data-store';
             additionalRequirements: (form.querySelector('[name="additionalRequirements"]') as HTMLTextAreaElement)?.value || '',
             
             // Collect menu items
-            menuItems: this.collectMenuItems(),
+            menuItems: collectedMenuItems,
             
             // Brand colors
             primaryColor: (form.querySelector('[name="primaryColor"]') as HTMLInputElement)?.value || '#3B82F6',
@@ -1710,7 +1725,7 @@ import { sharedDataStore } from '../lib/shared-data-store';
             accentColor: (form.querySelector('[name="accentColor"]') as HTMLInputElement)?.value || '#F59E0B',
             textColor: (form.querySelector('[name="textColor"]') as HTMLInputElement)?.value || '#1F2937',
             
-            // Logo file
+            // Logo file (only for Order Menu System)
             restaurantLogo: this.orderMenuLogoFile || null
           };
         } else {
@@ -1841,6 +1856,7 @@ import { sharedDataStore } from '../lib/shared-data-store';
         setTimeout(() => {
           submitBtn.innerHTML = originalText;
           submitBtn.disabled = false;
+          this.isSubmitting = false;
         }, 2000);
 
       } catch (error) {
@@ -1912,6 +1928,7 @@ import { sharedDataStore } from '../lib/shared-data-store';
         setTimeout(() => {
           submitBtn.innerHTML = originalText;
           submitBtn.disabled = false;
+          this.isSubmitting = false;
         }, 3000);
       }
     }
@@ -2051,19 +2068,14 @@ import { sharedDataStore } from '../lib/shared-data-store';
         const appNameField = document.querySelector('input[name="appName"]');
         const productDescriptionField = document.querySelector('textarea[name="productDescription"]');
         
-        // Hide Project Name field and its container
+        // Keep Project Name and Contact Person fields visible for Order Menu System
+        // These fields are needed for the database schema
         if (projectNameField) {
-          const projectNameContainer = projectNameField.closest('div[class*="grid"]');
-          if (projectNameContainer) {
-            projectNameContainer.classList.add('hidden');
-            projectNameContainer.style.display = 'none';
-          }
-          projectNameField.required = false;
+          projectNameField.required = true;
         }
         
-        // Hide Contact Person field (it's in the same grid container as Project Name)
         if (contactPersonField) {
-          contactPersonField.required = false;
+          contactPersonField.required = true;
         }
         
         // Hide App Name field
@@ -2078,19 +2090,12 @@ import { sharedDataStore } from '../lib/shared-data-store';
           productDescriptionField.required = false;
         }
         
-        // Hide App Screenshots section for Order Menu System
-        const photosUploadSection = document.getElementById('photos-upload-section');
-        if (photosUploadSection) {
-          photosUploadSection.classList.add('hidden');
-          photosUploadSection.style.display = 'none';
-        }
-        
-        // Hide App Icon section for Order Menu System
-        const logoUploadSection = document.getElementById('logo-upload-section');
-        if (logoUploadSection) {
-          logoUploadSection.classList.add('hidden');
-          logoUploadSection.style.display = 'none';
-        }
+        // Hide App Screenshots and App Icon sections for Order Menu System
+        const nonOrderMenuFields = document.querySelectorAll('.non-order-menu-fields');
+        nonOrderMenuFields.forEach(field => {
+          field.classList.add('hidden');
+          field.style.display = 'none';
+        });
         
         // Also hide restaurant fields for Order Menu System
         const restaurantFields = document.getElementById('restaurant-fields');
@@ -2098,7 +2103,12 @@ import { sharedDataStore } from '../lib/shared-data-store';
         if (restaurantFields) restaurantFields.classList.add('hidden');
         if (restaurantCuisineFields) restaurantCuisineFields.classList.add('hidden');
         
-        // Note: App Screenshots and App Icon sections are already hidden above
+        // Show App Screenshots and App Icon sections for other products
+        const nonOrderMenuFieldsForOther = document.querySelectorAll('.non-order-menu-fields');
+        nonOrderMenuFieldsForOther.forEach(field => {
+          field.classList.remove('hidden');
+          field.style.display = 'block';
+        });
         
         // Setup Order Menu System logo upload functionality
         this.setupOrderMenuLogoUpload();
@@ -2127,17 +2137,11 @@ import { sharedDataStore } from '../lib/shared-data-store';
         }
         
         // Show image upload sections for non-Order Menu System products
-        const logoUploadSection = document.getElementById('logo-upload-section');
-        const photosUploadSection = document.getElementById('photos-upload-section');
-        
-        if (logoUploadSection) {
-          logoUploadSection.classList.remove('hidden');
-          logoUploadSection.style.display = 'block';
-        }
-        if (photosUploadSection) {
-          photosUploadSection.classList.remove('hidden');
-          photosUploadSection.style.display = 'block';
-        }
+        const nonOrderMenuFieldsForNonOrder = document.querySelectorAll('.non-order-menu-fields');
+        nonOrderMenuFieldsForNonOrder.forEach(field => {
+          field.classList.remove('hidden');
+          field.style.display = 'block';
+        });
         
         // Show general fields for non-Order Menu System products
         const projectNameField = document.querySelector('input[name="projectName"]');
@@ -2365,20 +2369,30 @@ import { sharedDataStore } from '../lib/shared-data-store';
       const menuItems = [];
       const menuItemElements = document.querySelectorAll('.menu-item');
       
-      menuItemElements.forEach(item => {
-        const itemName = item.querySelector('input[name="menuItemName[]"]')?.value;
-        const price = item.querySelector('input[name="menuItemPrice[]"]')?.value;
-        const quantity = item.querySelector('input[name="menuItemQuantity[]"]')?.value;
+      console.log('🍽️ Collecting menu items from', menuItemElements.length, 'elements');
+      
+      menuItemElements.forEach((item, index) => {
+        const itemName = item.querySelector('input[name="menuItemName[]"]')?.value?.trim();
+        const price = item.querySelector('input[name="menuItemPrice[]"]')?.value?.trim();
+        const quantity = item.querySelector('input[name="menuItemQuantity[]"]')?.value?.trim();
+        
+        console.log(`🍽️ Item ${index + 1}:`, { itemName, price, quantity });
         
         if (itemName && price && quantity) {
           menuItems.push({
             item_name: itemName,
             price: parseFloat(price) || 0,
-            quantity_available: parseInt(quantity) || 0
+            quantity_available: parseInt(quantity) || 0,
+            item_description: '',
+            item_category: 'General',
+            is_available: true
           });
+        } else {
+          console.log(`⚠️ Skipping item ${index + 1} - missing required fields`);
         }
       });
       
+      console.log('🍽️ Collected menu items:', menuItems);
       return menuItems;
     }
 
@@ -2387,17 +2401,19 @@ import { sharedDataStore } from '../lib/shared-data-store';
       if (!menuItemsContainer) return;
       
       if (this.requirements.menuItems && this.requirements.menuItems.length > 0) {
-        menuItemsContainer.innerHTML = this.requirements.menuItems.map(item => `
-          <div class="flex justify-between items-center py-2 border-b border-gray-200">
-            <div>
-              <span class="font-medium">${item.item_name}</span>
-              <span class="text-gray-500 text-sm ml-2">(Qty: ${item.quantity_available})</span>
+        menuItemsContainer.innerHTML = this.requirements.menuItems.map((item, index) => `
+          <div class="flex justify-between items-center py-3 border-b border-gray-200 ${index === this.requirements.menuItems.length - 1 ? 'border-b-0' : ''}">
+            <div class="flex-1">
+              <div class="font-medium text-gray-900">${item.item_name}</div>
+              <div class="text-sm text-gray-500">Quantity Available: ${item.quantity_available}</div>
             </div>
-            <span class="font-semibold">₹${item.price.toFixed(2)}</span>
+            <div class="text-right">
+              <div class="font-semibold text-lg text-gray-900">₹${item.price.toFixed(2)}</div>
+            </div>
           </div>
         `).join('');
       } else {
-        menuItemsContainer.innerHTML = '<p class="text-gray-500">No menu items added</p>';
+        menuItemsContainer.innerHTML = '<p class="text-gray-500 text-center py-4">No menu items added</p>';
       }
     }
 
@@ -2447,16 +2463,37 @@ import { sharedDataStore } from '../lib/shared-data-store';
         
         if (form) {
           if (isOrderMenuSystem) {
-            // Order Menu System specific form data
+            // Order Menu System specific form data - Updated to include all required fields
             formData = {
+              // 1. Project Name
+              projectName: form.querySelector('[name="projectName"]')?.value || '',
+              
+              // 2. Contact Person
+              contactPerson: form.querySelector('[name="contactPerson"]')?.value || '',
+              
+              // 3. Restaurant Name
               restaurantName: form.querySelector('[name="orderMenuRestaurantName"]')?.value || '',
+              
+              // 4. Owner Name
               ownerName: form.querySelector('[name="orderMenuOwnerName"]')?.value || '',
+              
+              // 6. Restaurant Address
               restaurantAddress: form.querySelector('[name="orderMenuAddress"]')?.value || '',
+              
+              // 9. Contact Information
+              // 9.1. Email
               email: form.querySelector('[name="email"]')?.value || '',
+              // 9.2. Phone Number
               phone: form.querySelector('[name="phone"]')?.value || '',
-              additionalRequirements: form.querySelector('[name="additionalRequirements"]')?.value || '',
-              menuItems: this.collectMenuItems()
+              
+              // 8. Menu Items
+              menuItems: this.collectMenuItems(),
+              
+              // 12. Additional Requirements
+              additionalRequirements: form.querySelector('[name="additionalRequirements"]')?.value || ''
             };
+            
+            console.log('🍽️ Form data collected for Order Menu System:', formData);
           } else {
             // Standard form data for other products
           formData = {
@@ -2538,7 +2575,7 @@ import { sharedDataStore } from '../lib/shared-data-store';
         let cartData;
         
         if (isOrderMenuSystem) {
-          // Order Menu System data structure
+          // Order Menu System data structure - Updated to match new database schema
           cartData = {
             user_email: currentUser.email,
             user_id: currentUser.id || null,
@@ -2546,21 +2583,66 @@ import { sharedDataStore } from '../lib/shared-data-store';
             product_name: 'Order Menu System',
             base_price: item.price,
             total_amount: totalAmount,
+            
+            // 1. Project Name
+            project_name: formData.projectName || '',
+            
+            // 2. Contact Person
+            contact_person: formData.contactPerson || '',
+            
+            // 3. Restaurant Name
             restaurant_name: formData.restaurantName || '',
+            
+            // 4. Owner Name
             owner_name: formData.ownerName || '',
+            
+            // 5. App Icon (for non-Order Menu System products - empty for Order Menu System)
+            app_icon_url: null,
+            app_icon_filename: null,
+            app_icon_size: null,
+            app_icon_type: null,
+            
+            // 6. Restaurant Address
             restaurant_address: formData.restaurantAddress || '',
-            contact_email: formData.email || currentUser.email,
-            contact_phone: formData.phone || currentUser.phone || '',
-            primary_color: primaryColor,
-            secondary_color: secondaryColor,
-            accent_color: accentColor,
-            text_color: textColor,
+            
+            // 7. Restaurant Logo
             restaurant_logo_url: restaurantLogoUrl,
             restaurant_logo_filename: restaurantLogoFilename,
             restaurant_logo_size: restaurantLogoSize,
             restaurant_logo_type: restaurantLogoType,
-            restaurant_logo_hash: restaurantLogoHash,
+            
+            // 9. Contact Information
+            // 9.1. Email
+            contact_email: formData.email || currentUser.email,
+            // 9.2. Phone Number
+            contact_phone: formData.phone || currentUser.phone || '',
+            
+            // 10. App Screenshots (for non-Order Menu System products - empty for Order Menu System)
+            app_screenshots: [],
+            
+            // 11. Brand Colors
+            primary_color: primaryColor,
+            secondary_color: secondaryColor,
+            accent_color: accentColor,
+            text_color: textColor,
+            
+            // 12. Additional Requirements
             additional_requirements: formData.additionalRequirements || '',
+            
+            // 13. Menu Items (JSON array)
+            menu_items: formData.menuItems ? formData.menuItems.map(item => ({
+              item_name: item.item_name,
+              price: parseFloat(item.price) || 0,
+              quantity_available: parseInt(item.quantity_available) || 0,
+              item_description: item.item_description || '',
+              item_category: item.item_category || 'General',
+              is_available: true,
+              created_at: new Date().toISOString()
+            })) : [],
+            
+            // 14. Menu Items Count
+            menu_items_count: formData.menuItems ? formData.menuItems.length : 0,
+            
             cart_status: 'pending'
           };
         } else {
@@ -2625,27 +2707,7 @@ import { sharedDataStore } from '../lib/shared-data-store';
           }
           
           console.log('✅ Order Menu System customization saved:', customizationData);
-          
-          // Save menu items if any
-          if (formData.menuItems && formData.menuItems.length > 0) {
-            const menuItemsData = formData.menuItems.map(menuItem => ({
-              customization_id: customizationData.id,
-              item_name: menuItem.item_name,
-              price: menuItem.price,
-              quantity_available: menuItem.quantity_available
-            }));
-            
-            const { error: menuItemsError } = await supabase
-              .from('order_menu_items')
-              .insert(menuItemsData);
-              
-            if (menuItemsError) {
-              console.error('❌ Error saving menu items:', menuItemsError);
-              // Don't return null here, customization was saved successfully
-            } else {
-              console.log('✅ Menu items saved successfully');
-            }
-          }
+          console.log('✅ Menu items included in customization:', formData.menuItems ? formData.menuItems.length : 0, 'items');
           
           return customizationData;
         } else {
@@ -3332,15 +3394,34 @@ import { sharedDataStore } from '../lib/shared-data-store';
       
               if (form) {
         if (isOrderMenuSystem) {
-          // Order Menu System specific form data
+          // Order Menu System specific form data - Updated to include all required fields
           formData = {
+            // 1. Project Name
+            projectName: form.querySelector('[name="projectName"]')?.value || '',
+            
+            // 2. Contact Person
+            contactPerson: form.querySelector('[name="contactPerson"]')?.value || '',
+            
+            // 3. Restaurant Name
             restaurantName: form.querySelector('[name="orderMenuRestaurantName"]')?.value || '',
+            
+            // 4. Owner Name
             ownerName: form.querySelector('[name="orderMenuOwnerName"]')?.value || '',
+            
+            // 6. Restaurant Address
             restaurantAddress: form.querySelector('[name="orderMenuAddress"]')?.value || '',
+            
+            // 9. Contact Information
+            // 9.1. Email
             email: form.querySelector('[name="email"]')?.value || '',
+            // 9.2. Phone Number
             phone: form.querySelector('[name="phone"]')?.value || '',
-            additionalRequirements: form.querySelector('[name="additionalRequirements"]')?.value || '',
-            menuItems: this.collectMenuItems()
+            
+            // 8. Menu Items
+            menuItems: this.collectMenuItems(),
+            
+            // 12. Additional Requirements
+            additionalRequirements: form.querySelector('[name="additionalRequirements"]')?.value || ''
           };
         } else {
           // Standard form data for other products

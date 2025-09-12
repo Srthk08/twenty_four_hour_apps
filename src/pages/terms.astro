@@ -195,7 +195,7 @@ import Layout from '../layouts/Layout.astro';
         <a href="/products" class="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
           View Our Services
         </a>
-        <a href="/contact" class="contact-us-btn inline-flex items-center px-8 py-3 border border-blue-600 text-base font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 transition-colors">
+        <a href="/contact" class="contact-us-btn inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 hover:text-black transition-colors" style="color: white !important; background-color: #2563eb !important; background: #2563eb !important;" onmouseover="this.style.color='black'; this.style.backgroundColor='#1d4ed8'; this.style.background='#1d4ed8';" onmouseout="this.style.color='white'; this.style.backgroundColor='#2563eb'; this.style.background='#2563eb';" onmouseleave="this.style.color='white'; this.style.backgroundColor='#2563eb'; this.style.background='#2563eb';">
           Contact Us
         </a>
       </div>
@@ -207,16 +207,20 @@ import Layout from '../layouts/Layout.astro';
   /* Contact Us button text visibility - More specific selectors */
   a.contact-us-btn {
     color: white !important;
+    background-color: #2563eb !important;
+    background: #2563eb !important;
   }
   
   a.contact-us-btn:hover {
-    color: #000000 !important; /* Black text on white background */
-    background-color: white !important;
+    color: #000000 !important; /* Black text on darker blue background */
+    background-color: #1d4ed8 !important;
+    background: #1d4ed8 !important;
   }
   
   a.contact-us-btn:focus {
     color: #000000 !important; /* Black text on focus */
-    background-color: white !important;
+    background-color: #1d4ed8 !important;
+    background: #1d4ed8 !important;
   }
   
   /* Additional specificity for hover state */
@@ -233,11 +237,13 @@ import Layout from '../layouts/Layout.astro';
     contactButtons.forEach(button => {
       button.addEventListener('mouseenter', function() {
         this.style.color = '#000000';
-        this.style.backgroundColor = 'white';
+        this.style.backgroundColor = '#1d4ed8';
+        this.style.background = '#1d4ed8';
       });
       button.addEventListener('mouseleave', function() {
         this.style.color = 'white';
-        this.style.backgroundColor = 'transparent';
+        this.style.backgroundColor = '#2563eb';
+        this.style.background = '#2563eb';
       });
     });
   });

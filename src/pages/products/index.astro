@@ -19,6 +19,8 @@ const processedProducts = products
 ---
 
 <Layout title="Our Products - DevExpress" description="Explore our range of professional digital solutions delivered in 24 hours">
+  <!-- Full Page Blue and White Gradient Background -->
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
   <!-- Hero Section -->
   <section class="bg-blue-600 text-white py-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -33,7 +35,7 @@ const processedProducts = products
   <!-- Filter Section -->
   <section class="filter-section py-8 bg-blue-600">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-wrap justify-center gap-4">
+      <div class="flex flex-wrap justify-center gap-4 mb-4">
         <button class="filter-btn active px-6 py-2 rounded-full bg-primary-600 text-white font-medium transition-all" data-filter="all">
           All Products
         </button>
@@ -57,7 +59,7 @@ const processedProducts = products
   </section>
 
   <!-- Products Grid -->
-  <section class="py-16">
+  <section class="py-16 bg-white/80 backdrop-blur-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="products-grid">
         {processedProducts.map((product, index) => {
@@ -75,24 +77,30 @@ const processedProducts = products
             'web': 'from-orange-500 to-red-600'
           };
           
+          // Get specific labels for products
+          const getProductLabel = (product) => {
+            if (product.slug === 'restaurant-website') return 'Restaurant Website';
+            if (product.slug === 'order-menu-system') return 'Order Menu System';
+            return categoryLabels[product.category] || 'Product';
+          };
           
           return (
             <div class="product-card bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2" data-category={product.category} data-product-id={product.id} data-product-slug={product.slug} data-product-name={product.name}>
               <div class="relative rounded-t-xl overflow-hidden" style="height: 192px;">
                 <img src={product.featured_image} alt={product.name} class="w-full h-full object-cover" />
-                <div class={`absolute top-4 left-4 px-3 py-1 rounded-full text-white text-sm font-medium bg-gradient-to-r ${categoryColors[product.category]}`}>
-                  {categoryLabels[product.category]}
+                <div class={`category-badge absolute top-4 left-4 px-3 py-1 rounded-full text-white text-sm font-medium bg-gradient-to-r ${categoryColors[product.category]}`}>
+                  {getProductLabel(product)}
                 </div>
               </div>
               
               <div class="p-6">
-                <h3 class="text-xl font-bold text-gray-900 mb-2">{product.name}</h3>
-                <p class="text-gray-600 mb-4">{product.short_description}</p>
+                <h3 class="text-xl font-bold text-black mb-2">{product.name}</h3>
+                <p class="text-black font-medium mb-4">{product.short_description}</p>
                 
                 <div class="mb-4">
                   <div class="flex flex-wrap gap-2">
                     {product.features.slice(0, 3).map((feature) => (
-                      <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">{feature}</span>
+                      <span class="px-2 py-1 bg-gray-100 text-black text-xs rounded-full font-medium">{feature}</span>
                     ))}
                   </div>
                 </div>
@@ -100,7 +108,7 @@ const processedProducts = products
                 <div class="flex flex-col space-y-3">
                   <div class="flex items-center justify-between">
                     <div>
-                      <span class="text-sm text-gray-500">Starting from</span>
+                      <span class="text-sm text-black font-medium">Starting from</span>
                       <div class="text-2xl font-bold text-primary-600">₹{product.base_price.toLocaleString()}</div>
                     </div>
                   </div>
@@ -133,14 +141,13 @@ const processedProducts = products
       </a>
     </div>
   </section>
+  </div>
 </Layout>
 
 <script>
   // Product filtering with performance optimization
   const filterButtons = document.querySelectorAll('.filter-btn');
   const productCards = document.querySelectorAll('.product-card');
-  
-  
   
   filterButtons.forEach(button => {
     button.addEventListener('click', () => {
@@ -336,6 +343,16 @@ const processedProducts = products
     opacity: 1 !important;
   }
 
+  /* Color filter styles */
+  .category-badge.no-color {
+    background: linear-gradient(to right, #6b7280, #9ca3af) !important;
+    color: #ffffff !important;
+  }
+  
+  .category-badge {
+    transition: all 0.3s ease;
+  }
+  
   /* Code modal styles */
   #code-modal {
     backdrop-filter: blur(5px);
