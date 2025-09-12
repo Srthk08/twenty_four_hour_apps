@@ -259,23 +259,92 @@
       // Get auth state from the global manager
       const authManager = window.globalAuthManager || window.simpleAuthManager;
       if (!authManager) {
-        console.log('Global auth manager not available yet');
+        console.log('Global auth manager not available yet, using fallback logic');
+        updateHeaderFallback();
         return;
-    }
+      }
 
-    // Update UI based on authentication state
+      // Update UI based on authentication state
       authManager.updateHeader();
       
       console.log('✅ Header updated using global auth manager');
       
     } catch (error) {
       console.error('Error in updateHeader:', error);
+      updateHeaderFallback();
     }
+  }
+
+  // Fallback function when global auth manager is not available
+  function updateHeaderFallback() {
+    console.log('Using fallback authentication logic');
+    
+    try {
+      // Check sessionStorage for existing session
+      const sessionData = sessionStorage.getItem('simple-auth-session');
+      const isAuthenticated = sessionData && JSON.parse(sessionData).user;
+      
+      const authButtons = document.getElementById('auth-buttons');
+      const userMenu = document.getElementById('user-menu');
+      const mobileAuthButtons = document.getElementById('mobile-auth-buttons');
+      const mobileUserMenu = document.getElementById('mobile-user-menu');
+      
+      if (isAuthenticated) {
+        // User is logged in
+        if (authButtons) authButtons.classList.add('hidden');
+        if (userMenu) userMenu.classList.remove('hidden');
+        if (mobileAuthButtons) mobileAuthButtons.classList.add('hidden');
+        if (mobileUserMenu) mobileUserMenu.classList.remove('hidden');
+        
+        // Update user info from session
+        const session = JSON.parse(sessionData);
+        const user = session.user;
+        updateUserInfoFallback(user);
+      } else {
+        // User is not logged in - show auth buttons
+        if (authButtons) authButtons.classList.remove('hidden');
+        if (userMenu) userMenu.classList.add('hidden');
+        if (mobileAuthButtons) mobileAuthButtons.classList.remove('hidden');
+        if (mobileUserMenu) mobileUserMenu.classList.add('hidden');
+      }
+      
+      console.log('✅ Header updated using fallback logic');
+    } catch (error) {
+      console.error('Error in fallback update:', error);
+      // Default to showing auth buttons if there's an error
+      const authButtons = document.getElementById('auth-buttons');
+      const userMenu = document.getElementById('user-menu');
+      const mobileAuthButtons = document.getElementById('mobile-auth-buttons');
+      const mobileUserMenu = document.getElementById('mobile-user-menu');
+      
+      if (authButtons) authButtons.classList.remove('hidden');
+      if (userMenu) userMenu.classList.add('hidden');
+      if (mobileAuthButtons) mobileAuthButtons.classList.remove('hidden');
+      if (mobileUserMenu) mobileUserMenu.classList.add('hidden');
+    }
+  }
+
+  // Fallback function to update user info
+  function updateUserInfoFallback(user) {
+    if (!user) return;
+
+    const userEmail = document.getElementById('user-email');
+    const userName = document.getElementById('user-name');
+    const userAvatar = document.getElementById('user-avatar');
+    const mobileUserEmail = document.getElementById('mobile-user-email');
+
+    if (userEmail) userEmail.textContent = user.email || '';
+    if (userName) userName.textContent = user.full_name || user.email?.split('@')[0] || 'User';
+    if (userAvatar) userAvatar.textContent = (user.full_name || user.email || 'U').charAt(0).toUpperCase();
+    if (mobileUserEmail) mobileUserEmail.textContent = user.email || '';
   }
 
   // Function to set initial UI state using the global auth manager
   function setInitialUIState() {
     console.log('Setting initial UI state using global auth manager');
+    
+    // First try immediate fallback
+    updateHeaderFallback();
     
     // Wait for global auth manager to be ready
     setTimeout(() => {
@@ -284,8 +353,8 @@
         authManager.updateHeader();
         console.log('✅ Initial UI state set using global auth manager');
       } else {
-        console.log('Global auth manager not ready yet, retrying...');
-        setInitialUIState();
+        console.log('Global auth manager not ready yet, using fallback');
+        updateHeaderFallback();
       }
     }, 100);
   }
@@ -424,16 +493,37 @@
 
   // Initialize everything when page loads
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('Header initializing with global auth manager');
+    console.log('Header initializing with fallback support');
     
-    // Set initial UI state using global auth manager
+    // Set initial UI state immediately with fallback
     setInitialUIState();
 
     // Initialize UI components
     initUserDropdown();
     initMobileMenu();
     
-    console.log('✅ Header initialized with global auth manager');
+    // Also try to update when global auth manager becomes available
+    const checkForAuthManager = () => {
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      if (authManager) {
+        console.log('Global auth manager found, updating header');
+        authManager.updateHeader();
+      } else {
+        // Keep checking for a bit longer
+        setTimeout(checkForAuthManager, 200);
+      }
+    };
+    
+    // Start checking for auth manager
+    setTimeout(checkForAuthManager, 100);
+    
+    console.log('✅ Header initialized with fallback support');
+  });
+
+  // Also initialize on window load as backup
+  window.addEventListener('load', () => {
+    console.log('Window loaded, ensuring header is properly initialized');
+    updateHeaderFallback();
   });
 
   // Listen for auth state changes from the global auth manager
