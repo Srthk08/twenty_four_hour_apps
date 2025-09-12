@@ -416,11 +416,12 @@ import Layout from '../layouts/Layout.astro';
       if (user.app_metadata.provider === 'google') {
         showStatus('Syncing Google account...', 'loading');
         await syncGoogleUser(user);
-        showStatus('Successfully signed up with Google!', 'success');
+        showStatus('Account created successfully! Please log in to continue.', 'success');
         
-        // Redirect to dashboard
+        // Clear session and redirect to login page
+        sessionStorage.removeItem('simple-auth-session');
         setTimeout(() => {
-          window.location.href = '/dashboard';
+          window.location.href = '/login';
         }, 1500);
       }
     }
@@ -567,36 +568,20 @@ import Layout from '../layouts/Layout.astro';
           // Don't fail the signup if profile creation fails
         }
         
-        // Store session in sessionStorage if there's a session
-        if (data.session) {
-          sessionStorage.setItem('simple-auth-session', JSON.stringify({
-            user: data.user,
-            access_token: data.session.access_token,
-            timestamp: Date.now()
-          }));
-          
-          // Dispatch login event
-          window.dispatchEvent(new CustomEvent('user-logged-in', { detail: data.user }));
-        }
+        // Don't store session or auto-login user - force them to login manually
+        // Clear any existing session to ensure fresh login
+        sessionStorage.removeItem('simple-auth-session');
         
         // Show success message
         if (successText) {
-          successText.textContent = data.session ? 'Account created and signed in successfully!' : 'Account created. Please check your email to verify your account.';
+          successText.textContent = 'Account created successfully! Please log in to continue.';
         }
         successMessage?.classList.remove('hidden');
 
-        // Redirect based on whether user is signed in
-        if (data.session) {
-          // User is signed in, redirect to dashboard
-          setTimeout(() => {
-            window.location.href = '/dashboard';
-          }, 2000);
-        } else {
-          // User needs to verify email, redirect to login
-          setTimeout(() => {
-            window.location.href = '/login';
-          }, 3000);
-        }
+        // Always redirect to login page after account creation
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
       } else {
         throw new Error('Account creation failed');
       }

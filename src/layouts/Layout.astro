@@ -422,7 +422,8 @@ const { title, description = "DevExpress - 24 Hour Delivery" } = Astro.props;
 
     <!-- Custom Tailwind Config -->
     <script>
-      tailwind.config = {
+      if (typeof tailwind !== 'undefined') {
+        tailwind.config = {
         theme: {
           extend: {
             colors: {
@@ -492,6 +493,7 @@ const { title, description = "DevExpress - 24 Hour Delivery" } = Astro.props;
             },
           },
         },
+      };
       }
     </script>
 

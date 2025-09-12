@@ -40,7 +40,7 @@
         </div>
 
         <!-- Auth Buttons - Only visible before login -->
-        <div id="auth-buttons" class="hidden flex items-center space-x-6">
+        <div id="auth-buttons" class="flex items-center space-x-6">
           <a href="/login" class="text-white text-opacity-90 hover:text-white px-8 py-3 text-lg font-medium transition-all duration-300 rounded-xl hover:bg-white hover:bg-opacity-20 hover:scale-105">
             Sign In
           </a>
@@ -170,7 +170,7 @@
           </div>
 
           <!-- Auth Buttons - Only visible before login -->
-          <div id="mobile-auth-buttons" class="hidden space-y-3">
+          <div id="mobile-auth-buttons" class="space-y-3">
             <a href="/login" class="block px-6 py-4 text-lg font-medium text-white text-opacity-90 hover:text-white hover:bg-white hover:bg-opacity-20 rounded-xl transition-all duration-300 text-center">
               Sign In
             </a>
@@ -306,7 +306,7 @@
         // Update user info
         updateUserInfoFallback(user);
       } else {
-        // User is not logged in - show auth buttons
+        // User is not logged in - show auth buttons (they should already be visible by default)
         if (authButtons) authButtons.classList.remove('hidden');
         if (userMenu) userMenu.classList.add('hidden');
         if (mobileAuthButtons) mobileAuthButtons.classList.remove('hidden');
@@ -316,7 +316,7 @@
       console.log('✅ Header updated using fallback logic');
     } catch (error) {
       console.error('Error in fallback update:', error);
-      // Default to showing auth buttons if there's an error
+      // Default to showing auth buttons if there's an error (they should already be visible by default)
       const authButtons = document.getElementById('auth-buttons');
       const userMenu = document.getElementById('user-menu');
       const mobileAuthButtons = document.getElementById('mobile-auth-buttons');
