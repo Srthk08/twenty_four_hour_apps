@@ -15,113 +15,434 @@ import AuthGuard from '../components/AuthGuard.astro';
           <p class="text-gray-600">Manage your projects and orders from your dashboard.</p>
         </div>
 
-        <!-- Quick Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div class="bg-white rounded-lg shadow-sm p-6">
-            <div class="flex items-center">
-              <div class="p-2 bg-blue-100 rounded-lg">
-                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+
+        <!-- Product Customization Form (shown when product is selected) -->
+        <div id="product-customization-form" class="bg-white rounded-lg shadow-sm p-8 hidden">
+          <div class="flex items-center justify-between mb-8">
+            <h2 class="text-3xl font-bold text-gray-900">Project Requirements</h2>
+            <button id="close-customization-form" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
+            </button>
               </div>
-              <div class="ml-4">
-                <p class="text-sm font-medium text-gray-600">Active Orders</p>
-                <p class="text-2xl font-bold text-gray-900">0</p>
+          
+          <!-- Product Details Display -->
+          <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 mb-8 border border-blue-200">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 id="selected-product-name" class="text-xl font-bold text-gray-900 mb-2">Selected Product</h3>
+                <p id="selected-product-description" class="text-gray-600 mb-1">Product description</p>
+                <p class="text-sm text-blue-600 font-medium">Customize your project requirements below</p>
+              </div>
+              <div class="text-right">
+                <p id="selected-product-price" class="text-3xl font-bold text-primary-600">₹0</p>
+                <p class="text-sm text-gray-500">Base Price</p>
               </div>
             </div>
           </div>
 
-          <div class="bg-white rounded-lg shadow-sm p-6">
-            <div class="flex items-center">
-              <div class="p-2 bg-green-100 rounded-lg">
-                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          <!-- Complete Customization Form -->
+          <form id="customization-form" class="space-y-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <!-- Left Column -->
+              <div class="space-y-6">
+                <!-- Project Name -->
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Project Name <span class="text-red-500">*</span>
+                  </label>
+                  <input type="text" name="projectName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter your project name" required>
+                </div>
+
+                <!-- App Name -->
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    App Name <span class="text-red-500">*</span>
+                  </label>
+                  <input type="text" name="appName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter your app name" required>
+                </div>
+
+                <!-- Restaurant Name (only for restaurant products) -->
+                <div id="restaurant-name-field" class="hidden">
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Restaurant Name <span class="text-red-500">*</span>
+                  </label>
+                  <input type="text" name="restaurantName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter restaurant name">
+                </div>
+
+                <!-- Logo Upload -->
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Upload Logo <span class="text-red-500">*</span>
+                  </label>
+                  <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-400 transition-colors">
+                    <div class="flex flex-col items-center">
+                      <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
+                      <p class="text-gray-600 mb-2">Click to upload restaurant logo</p>
+                      <p class="text-sm text-gray-500">PNG, JPG, SVG up to 10MB</p>
               </div>
-              <div class="ml-4">
-                <p class="text-sm font-medium text-gray-600">Completed</p>
-                <p class="text-2xl font-bold text-gray-900">0</p>
+                    <input type="file" name="restaurantLogo" accept="image/*" class="hidden" id="restaurant-logo-upload">
               </div>
             </div>
           </div>
 
-          <div class="bg-white rounded-lg shadow-sm p-6">
-            <div class="flex items-center">
-              <div class="p-2 bg-purple-100 rounded-lg">
-                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+              <!-- Right Column -->
+              <div class="space-y-6">
+                <!-- Contact Person -->
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Contact Person <span class="text-red-500">*</span>
+                  </label>
+                  <input type="text" name="contactPerson" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Your full name" required>
+                </div>
+
+                <!-- Product Description -->
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Product Description <span class="text-red-500">*</span>
+                  </label>
+                  <textarea name="productDescription" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg resize-none" placeholder="Describe your product requirements and features" required></textarea>
+                </div>
+
+                <!-- Cuisine Type (only for restaurant products) -->
+                <div id="cuisine-type-field" class="hidden">
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Cuisine Type <span class="text-red-500">*</span>
+                  </label>
+                  <select name="cuisineType" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg">
+                    <option value="">Select cuisine type</option>
+                    <option value="indian">Indian</option>
+                    <option value="chinese">Chinese</option>
+                    <option value="italian">Italian</option>
+                    <option value="mexican">Mexican</option>
+                    <option value="thai">Thai</option>
+                    <option value="japanese">Japanese</option>
+                    <option value="korean">Korean</option>
+                    <option value="mediterranean">Mediterranean</option>
+                    <option value="american">American</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <!-- Contact Information Section -->
+                <div class="border-t pt-6">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
+                  
+                  <!-- Email -->
+                  <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                      Email <span class="text-red-500">*</span>
+                    </label>
+                    <input type="email" name="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="your.email@example.com" required>
+                  </div>
+
+                  <!-- Phone Number -->
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                      Phone Number <span class="text-red-500">*</span>
+                    </label>
+                    <input type="tel" name="phone" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="+91 9876543210" required>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Color Customization -->
+            <div class="border-t pt-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Color Customization</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Primary Color -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Primary Color <span class="text-red-500">*</span>
+                  </label>
+                  <div class="flex items-center space-x-3">
+                    <input type="color" name="primaryColor" value="#3B82F6" class="w-12 h-12 border border-gray-300 rounded-lg cursor-pointer">
+                    <input type="text" name="primaryColorText" value="#3B82F6" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="#3B82F6">
+                  </div>
+                </div>
+
+                <!-- Secondary Color -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Secondary Color
+                  </label>
+                  <div class="flex items-center space-x-3">
+                    <input type="color" name="secondaryColor" value="#10B981" class="w-12 h-12 border border-gray-300 rounded-lg cursor-pointer">
+                    <input type="text" name="secondaryColorText" value="#10B981" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="#10B981">
+                  </div>
+                </div>
+
+                <!-- Accent Color -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Accent Color
+                  </label>
+                  <div class="flex items-center space-x-3">
+                    <input type="color" name="accentColor" value="#F59E0B" class="w-12 h-12 border border-gray-300 rounded-lg cursor-pointer">
+                    <input type="text" name="accentColorText" value="#F59E0B" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="#F59E0B">
+                  </div>
+                </div>
+
+                <!-- Text Color -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Text Color
+                  </label>
+                  <div class="flex items-center space-x-3">
+                    <input type="color" name="textColor" value="#1F2937" class="w-12 h-12 border border-gray-300 rounded-lg cursor-pointer">
+                    <input type="text" name="textColorText" value="#1F2937" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="#1F2937">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Additional Requirements -->
+            <div class="border-t pt-6">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Additional Requirements
+              </label>
+              <textarea name="additionalRequirements" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Describe any specific requirements or features you need..."></textarea>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex justify-end space-x-4 pt-6 border-t">
+              <button type="button" id="cancel-customization" class="px-8 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium">
+                Cancel
+              </button>
+              <button type="submit" class="px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium">
+                Save Requirements
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Order Menu System Custom Form (shown when Order Menu System is selected) -->
+        <div id="order-menu-customization-form" class="bg-white rounded-lg shadow-sm p-8 hidden">
+          <div class="flex items-center justify-between mb-8">
+            <h2 class="text-3xl font-bold text-gray-900">Order Menu System Requirements</h2>
+            <button id="close-order-menu-form" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
+            </button>
               </div>
-              <div class="ml-4">
-                <p class="text-sm font-medium text-gray-600">Total Spent</p>
-                <p class="text-2xl font-bold text-gray-900">₹0</p>
+          
+          <!-- Product Details Display -->
+          <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-6 mb-8 border border-amber-200">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 id="order-menu-product-name" class="text-xl font-bold text-gray-900 mb-2">Order Menu System</h3>
+                <p id="order-menu-product-description" class="text-gray-600 mb-1">Complete order management system with digital menu integration, real-time order tracking, and payment processing</p>
+                <p class="text-sm text-amber-600 font-medium">Customize your order management requirements below</p>
               </div>
+              <div class="text-right">
+                <p id="order-menu-product-price" class="text-3xl font-bold text-primary-600">₹25,000</p>
+                <p class="text-sm text-gray-500">Base Price</p>
             </div>
           </div>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div class="bg-white rounded-lg shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-            <div class="space-y-3">
-              <a href="/products" class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                <svg class="w-5 h-5 text-primary-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <!-- Order Menu System Form -->
+          <form id="order-menu-form" class="space-y-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <!-- Left Column -->
+              <div class="space-y-6">
+                <!-- Project Name -->
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Project Name <span class="text-red-500">*</span>
+                  </label>
+                  <input type="text" name="projectName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter your project name" required>
+                </div>
+
+                <!-- Restaurant Name -->
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Restaurant Name <span class="text-red-500">*</span>
+                  </label>
+                  <input type="text" name="restaurantName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter restaurant name" required>
+                </div>
+
+                <!-- Owner Name -->
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Owner Name <span class="text-red-500">*</span>
+                  </label>
+                  <input type="text" name="ownerName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter owner name" required>
+                </div>
+
+                <!-- Restaurant Address -->
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Restaurant Address <span class="text-red-500">*</span>
+                  </label>
+                  <textarea name="restaurantAddress" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg resize-none" placeholder="Enter complete restaurant address" required></textarea>
+                </div>
+
+                <!-- Logo Upload -->
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Upload Logo <span class="text-red-500">*</span>
+                  </label>
+                  <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-400 transition-colors">
+                    <div class="flex flex-col items-center">
+                      <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
-                <span class="text-gray-700">Browse Products</span>
-              </a>
-              <a href="/cart" class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                <svg class="w-5 h-5 text-primary-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m0 0h9m-9 0V19a2 2 0 002 2h7a2 2 0 002-2v-.5"></path>
-                </svg>
-                <span class="text-gray-700">View Cart</span>
-              </a>
-              <a href="/orders" class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                <svg class="w-5 h-5 text-primary-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                </svg>
-                <span class="text-gray-700">View Orders</span>
-              </a>
-              <button id="logout-btn" class="w-full flex items-center p-3 bg-red-50 rounded-lg hover:bg-red-100 transition-colors text-red-700">
-                <svg class="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                </svg>
-                <span>Sign Out</span>
+                      <p class="text-gray-600 mb-2">Click to upload restaurant logo</p>
+                      <p class="text-sm text-gray-500">PNG, JPG, SVG up to 10MB</p>
+                    </div>
+                    <input type="file" name="restaurantLogo" accept="image/*" class="hidden" id="order-menu-logo-upload">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Column -->
+              <div class="space-y-6">
+                <!-- Contact Person -->
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Contact Person <span class="text-red-500">*</span>
+                  </label>
+                  <input type="text" name="contactPerson" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Your full name" required>
+                </div>
+
+
+                <!-- Contact Information Section -->
+                <div class="border-t pt-6">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
+                  
+                  <!-- Email -->
+                  <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                      Email <span class="text-red-500">*</span>
+                    </label>
+                    <input type="email" name="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="your.email@example.com" required>
+                  </div>
+
+                  <!-- Phone Number -->
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                      Phone Number <span class="text-red-500">*</span>
+                    </label>
+                    <input type="tel" name="phone" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="+91 9876543210" required>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Menu Items Section -->
+            <div class="border-t pt-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Menu Items</h3>
+              <div id="menu-items-container">
+                <div class="menu-item-row grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 p-4 border border-gray-200 rounded-lg">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Item Name</label>
+                    <input type="text" name="menuItems[0][item_name]" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="e.g., Margherita Pizza" required>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Price (₹)</label>
+                    <input type="number" name="menuItems[0][price]" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="299" step="0.01" required>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select name="menuItems[0][item_category]" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" required>
+                      <option value="">Select Category</option>
+                      <option value="appetizers">Appetizers</option>
+                      <option value="main-course">Main Course</option>
+                      <option value="desserts">Desserts</option>
+                      <option value="beverages">Beverages</option>
+                      <option value="sides">Sides</option>
+                    </select>
+                  </div>
+                  <div class="flex items-end">
+                    <button type="button" class="remove-menu-item px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm">
+                      Remove
               </button>
             </div>
+                </div>
+              </div>
+              <button type="button" id="add-menu-item" class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 text-sm">
+                + Add Menu Item
+              </button>
           </div>
 
-          <div class="bg-white rounded-lg shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Account Info</h3>
-            <div class="space-y-3">
-              <div class="flex justify-between">
-                <span class="text-gray-600">Name:</span>
-                <span id="user-full-name" class="font-medium">Loading...</span>
+            <!-- Color Customization -->
+            <div class="border-t pt-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Color Customization</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Primary Color -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Primary Color <span class="text-red-500">*</span>
+                  </label>
+                  <div class="flex items-center space-x-3">
+                    <input type="color" name="primaryColor" value="#3B82F6" class="w-12 h-12 border border-gray-300 rounded-lg cursor-pointer">
+                    <input type="text" name="primaryColorText" value="#3B82F6" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="#3B82F6">
               </div>
-              <div class="flex justify-between">
-                <span class="text-gray-600">Email:</span>
-                <span id="user-email" class="font-medium">Loading...</span>
               </div>
-              <div class="flex justify-between">
-                <span class="text-gray-600">Phone:</span>
-                <span id="user-phone" class="font-medium">Loading...</span>
+
+                <!-- Secondary Color -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Secondary Color
+                  </label>
+                  <div class="flex items-center space-x-3">
+                    <input type="color" name="secondaryColor" value="#10B981" class="w-12 h-12 border border-gray-300 rounded-lg cursor-pointer">
+                    <input type="text" name="secondaryColorText" value="#10B981" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="#10B981">
               </div>
-              <div class="flex justify-between">
-                <span class="text-gray-600">Company:</span>
-                <span id="user-company" class="font-medium">Loading...</span>
               </div>
+
+                <!-- Accent Color -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Accent Color
+                  </label>
+                  <div class="flex items-center space-x-3">
+                    <input type="color" name="accentColor" value="#F59E0B" class="w-12 h-12 border border-gray-300 rounded-lg cursor-pointer">
+                    <input type="text" name="accentColorText" value="#F59E0B" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="#F59E0B">
             </div>
-            <div class="mt-4 space-y-2">
-              <a href="/profile" class="text-primary-600 hover:text-primary-700 text-sm font-medium">
-                Edit Profile →
-              </a>
+                </div>
+
+                <!-- Text Color -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Text Color
+                  </label>
+                  <div class="flex items-center space-x-3">
+                    <input type="color" name="textColor" value="#1F2937" class="w-12 h-12 border border-gray-300 rounded-lg cursor-pointer">
+                    <input type="text" name="textColorText" value="#1F2937" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="#1F2937">
+                  </div>
             </div>
           </div>
+            </div>
+
+            <!-- Additional Requirements -->
+            <div class="border-t pt-6">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Additional Requirements
+              </label>
+              <textarea name="additionalRequirements" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Describe any specific requirements or features you need..."></textarea>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex justify-end space-x-4 pt-6 border-t">
+              <button type="button" id="cancel-order-menu" class="px-8 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium">
+                Cancel
+              </button>
+              <button type="submit" class="px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium">
+                Save Order Menu Requirements
+              </button>
+            </div>
+          </form>
         </div>
 
         <!-- Recent Activity -->
-        <div class="bg-white rounded-lg shadow-sm p-6">
+        <div id="recent-activity" class="bg-white rounded-lg shadow-sm p-6">
           <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
           <div class="text-center py-8">
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -255,53 +576,7 @@ import AuthGuard from '../components/AuthGuard.astro';
       console.log('📋 Final normalized user data:', userData);
     }
     
-    // Update the dashboard elements
-    const userEmail = document.getElementById('user-email');
-    const userFullName = document.getElementById('user-full-name');
-    const userPhone = document.getElementById('user-phone');
-    const userCompany = document.getElementById('user-company');
-    
-    console.log('🔍 DOM Elements found:');
-    console.log('userEmail:', userEmail);
-    console.log('userFullName:', userFullName);
-    console.log('userPhone:', userPhone);
-    console.log('userCompany:', userCompany);
-    
-    if (userEmail) {
-      console.log('📧 Before update - Email element text:', userEmail.textContent);
-      userEmail.textContent = userData.email || 'Not set';
-      console.log('📧 After update - Email element text:', userEmail.textContent);
-      console.log('📧 Email updated to:', userData.email);
-    } else {
-      console.log('❌ userEmail element not found!');
-    }
-    
-    if (userFullName) {
-      console.log('👤 Before update - Name element text:', userFullName.textContent);
-      userFullName.textContent = userData.full_name || userData.fullName || 'Not set';
-      console.log('👤 After update - Name element text:', userFullName.textContent);
-      console.log('👤 Name updated to:', userData.full_name || userData.fullName);
-    } else {
-      console.log('❌ userFullName element not found!');
-    }
-    
-    if (userPhone) {
-      console.log('📞 Before update - Phone element text:', userPhone.textContent);
-      userPhone.textContent = userData.phone || 'Not set';
-      console.log('📞 After update - Phone element text:', userPhone.textContent);
-      console.log('📞 Phone updated to:', userData.phone);
-    } else {
-      console.log('❌ userPhone element not found!');
-    }
-    
-    if (userCompany) {
-      console.log('🏢 Before update - Company element text:', userCompany.textContent);
-      userCompany.textContent = userData.company_name || userData.companyName || 'Not set';
-      console.log('🏢 After update - Company element text:', userCompany.textContent);
-      console.log('🏢 Company updated to:', userData.company_name || userData.companyName);
-    } else {
-      console.log('❌ userCompany element not found!');
-    }
+    // Update the dashboard elements (only welcome message remains)
     
     // Update welcome message
     const userWelcome = document.getElementById('user-welcome');
@@ -313,38 +588,730 @@ import AuthGuard from '../components/AuthGuard.astro';
     
     console.log(`✅ Dashboard updated successfully from ${source}`);
     
-    // Force update with a more aggressive approach
+    // Force update welcome message
     setTimeout(() => {
-      console.log('🔄 Force update attempt...');
-      const elements = document.querySelectorAll('#user-email, #user-full-name, #user-phone, #user-company, #user-welcome');
-      console.log('Found elements with querySelectorAll:', elements.length);
+      console.log('🔄 Force update welcome message...');
+      const userWelcome = document.getElementById('user-welcome');
+      if (userWelcome) {
+        const displayName = userData.full_name || userData.fullName || userData.email?.split('@')[0] || 'User';
+        userWelcome.textContent = displayName;
+        console.log('Force updated welcome to:', userWelcome.textContent);
+      }
+    }, 100);
+  }
+
+  // Handle product selection and customization form
+  function handleProductSelection() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('product');
+    const price = urlParams.get('price');
+    
+    console.log('🔍 Checking for product selection:', { productId, price });
+    
+    if (productId && price) {
+      console.log('✅ Product selected, showing customization form');
       
-      elements.forEach((el, index) => {
-        console.log(`Element ${index}:`, el.id, el.textContent);
-        if (el.id === 'user-email') {
-          el.textContent = userData.email || 'Not set';
-          console.log('Force updated email to:', el.textContent);
-        } else if (el.id === 'user-full-name') {
-          el.textContent = userData.full_name || userData.fullName || 'Not set';
-          console.log('Force updated name to:', el.textContent);
-        } else if (el.id === 'user-phone') {
-          el.textContent = userData.phone || 'Not set';
-          console.log('Force updated phone to:', el.textContent);
-        } else if (el.id === 'user-company') {
-          el.textContent = userData.company_name || userData.companyName || 'Not set';
-          console.log('Force updated company to:', el.textContent);
-        } else if (el.id === 'user-welcome') {
-          const displayName = userData.full_name || userData.fullName || userData.email?.split('@')[0] || 'User';
-          el.textContent = displayName;
-          console.log('Force updated welcome to:', el.textContent);
+      // Get product details from actual products data (matching products-data.ts)
+      const products = [
+        { id: '1', name: 'Restaurant Menu System', description: 'Digital menu system with QR code integration, online ordering, and real-time updates. Perfect for restaurants looking to modernize their customer experience.', price: 25000, type: 'restaurant' },
+        { id: '2', name: 'Android TV App', description: 'Custom Android TV applications with beautiful UI, content management, and remote control support. Perfect for streaming services and media companies.', price: 55000, type: 'non-restaurant' },
+        { id: '3', name: 'Streaming Mobile App', description: 'Mobile streaming applications for iOS and Android with custom features, user authentication, and content management.', price: 35000, type: 'non-restaurant' },
+        { id: '4', name: 'Restaurant Website', description: 'Professional restaurant website with online ordering, menu display, and customer management features.', price: 20000, type: 'restaurant' },
+        { id: '5', name: 'Order Menu System', description: 'Complete order management system with digital menu integration, real-time order tracking, and payment processing. Perfect for restaurants looking to streamline their ordering process.', price: 25000, type: 'order-menu' }
+      ];
+      
+      const selectedProduct = products.find(p => p.id === productId);
+      
+      if (selectedProduct) {
+        // Hide all forms first with smooth transition
+        const productForm = document.getElementById('product-customization-form');
+        const orderMenuForm = document.getElementById('order-menu-customization-form');
+        const recentActivity = document.getElementById('recent-activity');
+        
+        // Smooth hide transitions
+        if (productForm && !productForm.classList.contains('hidden')) {
+          productForm.style.transition = 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out';
+          productForm.style.opacity = '0';
+          productForm.style.transform = 'translateY(-10px)';
+          setTimeout(() => productForm.classList.add('hidden'), 300);
+        }
+        
+        if (orderMenuForm && !orderMenuForm.classList.contains('hidden')) {
+          orderMenuForm.style.transition = 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out';
+          orderMenuForm.style.opacity = '0';
+          orderMenuForm.style.transform = 'translateY(-10px)';
+          setTimeout(() => orderMenuForm.classList.add('hidden'), 300);
+        }
+        
+        if (recentActivity && !recentActivity.classList.contains('hidden')) {
+          recentActivity.style.transition = 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out';
+          recentActivity.style.opacity = '0';
+          recentActivity.style.transform = 'translateY(-10px)';
+          setTimeout(() => recentActivity.classList.add('hidden'), 300);
+        }
+        
+        // Show appropriate form with smooth transition after hiding
+        setTimeout(() => {
+          if (selectedProduct.type === 'order-menu') {
+            // Show Order Menu System form
+            document.getElementById('order-menu-product-name').textContent = selectedProduct.name;
+            document.getElementById('order-menu-product-description').textContent = selectedProduct.description;
+            document.getElementById('order-menu-product-price').textContent = `₹${parseInt(price).toLocaleString()}`;
+            
+            const orderMenuForm = document.getElementById('order-menu-customization-form');
+            orderMenuForm.classList.remove('hidden');
+            orderMenuForm.style.transition = 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out';
+            orderMenuForm.style.opacity = '0';
+            orderMenuForm.style.transform = 'translateY(10px)';
+            
+            setTimeout(() => {
+              orderMenuForm.style.opacity = '1';
+              orderMenuForm.style.transform = 'translateY(0)';
+            }, 50);
+    } else {
+            // Show regular customization form
+            document.getElementById('selected-product-name').textContent = selectedProduct.name;
+            document.getElementById('selected-product-description').textContent = selectedProduct.description;
+            document.getElementById('selected-product-price').textContent = `₹${parseInt(price).toLocaleString()}`;
+            
+            // Show/hide cuisine type and restaurant name based on product type
+            const cuisineField = document.getElementById('cuisine-type-field');
+            const restaurantNameField = document.getElementById('restaurant-name-field');
+            
+            if (selectedProduct.type === 'restaurant') {
+              cuisineField.classList.remove('hidden');
+              cuisineField.querySelector('select').required = true;
+              restaurantNameField.classList.remove('hidden');
+              restaurantNameField.querySelector('input').required = true;
+            } else {
+              cuisineField.classList.add('hidden');
+              cuisineField.querySelector('select').required = false;
+              restaurantNameField.classList.add('hidden');
+              restaurantNameField.querySelector('input').required = false;
+            }
+            
+            const productForm = document.getElementById('product-customization-form');
+            productForm.classList.remove('hidden');
+            productForm.style.transition = 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out';
+            productForm.style.opacity = '0';
+            productForm.style.transform = 'translateY(10px)';
+            
+            setTimeout(() => {
+              productForm.style.opacity = '1';
+              productForm.style.transform = 'translateY(0)';
+            }, 50);
+          }
+        }, 350);
+        
+        // Auto-fill user details when form is shown (with longer delay)
+        setTimeout(() => autofillUserDetails(), 500);
+        
+        // Don't clear URL parameters immediately - let them persist for refresh
+        // window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }
+
+  // Handle Order Menu System form
+  function handleOrderMenuForm() {
+    const form = document.getElementById('order-menu-form');
+    const closeBtn = document.getElementById('close-order-menu-form');
+    const cancelBtn = document.getElementById('cancel-order-menu');
+    const logoUpload = document.getElementById('order-menu-logo-upload');
+    const logoUploadArea = document.querySelector('#order-menu-customization-form .border-dashed');
+    const addMenuItemBtn = document.getElementById('add-menu-item');
+    const menuItemsContainer = document.getElementById('menu-items-container');
+    
+    // Logo upload functionality
+    logoUploadArea?.addEventListener('click', () => {
+      logoUpload?.click();
+    });
+    
+    logoUpload?.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const fileName = file.name;
+        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+        logoUploadArea.innerHTML = `
+          <div class="flex flex-col items-center">
+            <svg class="w-12 h-12 text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <p class="text-green-600 mb-1 font-medium">Logo uploaded successfully</p>
+            <p class="text-sm text-gray-500">${fileName} (${fileSize} MB)</p>
+          </div>
+        `;
+      }
+    });
+    
+    // Color picker synchronization for Order Menu form
+    function syncOrderMenuColorInputs() {
+      const colorInputs = form?.querySelectorAll('input[type="color"]');
+      const textInputs = form?.querySelectorAll('input[name$="ColorText"]');
+      
+      colorInputs?.forEach((colorInput, index) => {
+        const textInput = textInputs?.[index];
+        if (textInput) {
+          // Sync color picker to text input
+          colorInput.addEventListener('input', () => {
+            textInput.value = colorInput.value;
+          });
+          
+          // Sync text input to color picker
+          textInput.addEventListener('input', () => {
+            if (/^#[0-9A-F]{6}$/i.test(textInput.value)) {
+              colorInput.value = textInput.value;
+            }
+          });
         }
       });
-    }, 100);
+    }
+    
+    syncOrderMenuColorInputs();
+    
+    // Add menu item functionality
+    let menuItemCount = 1;
+    addMenuItemBtn?.addEventListener('click', () => {
+      const menuItemRow = document.createElement('div');
+      menuItemRow.className = 'menu-item-row grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 p-4 border border-gray-200 rounded-lg';
+      menuItemRow.innerHTML = `
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Item Name</label>
+          <input type="text" name="menuItems[${menuItemCount}][item_name]" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="e.g., Margherita Pizza" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Price (₹)</label>
+          <input type="number" name="menuItems[${menuItemCount}][price]" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="299" step="0.01" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+          <select name="menuItems[${menuItemCount}][item_category]" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" required>
+            <option value="">Select Category</option>
+            <option value="appetizers">Appetizers</option>
+            <option value="main-course">Main Course</option>
+            <option value="desserts">Desserts</option>
+            <option value="beverages">Beverages</option>
+            <option value="sides">Sides</option>
+          </select>
+        </div>
+        <div class="flex items-end">
+          <button type="button" class="remove-menu-item px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm">
+            Remove
+          </button>
+        </div>
+      `;
+      menuItemsContainer?.appendChild(menuItemRow);
+      menuItemCount++;
+    });
+    
+    // Remove menu item functionality
+    menuItemsContainer?.addEventListener('click', (e) => {
+      if (e.target.classList.contains('remove-menu-item')) {
+        e.target.closest('.menu-item-row').remove();
+      }
+    });
+    
+    // Close form handlers
+    closeBtn?.addEventListener('click', () => {
+      showBrowseProductsSection();
+      // Clear URL parameters when form is closed
+      window.history.replaceState({}, document.title, window.location.pathname);
+    });
+    
+    cancelBtn?.addEventListener('click', () => {
+      showBrowseProductsSection();
+      // Clear URL parameters when form is closed
+      window.history.replaceState({}, document.title, window.location.pathname);
+    });
+    
+    // Form submission
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+      
+      console.log('📝 Order Menu requirements saved:', data);
+      
+      // Create order menu requirements object
+      const orderMenuRequirements = {
+        productId: '5',
+        productName: 'Order Menu System',
+        productDescription: 'Complete order management system with digital menu integration, real-time order tracking, and payment processing. Perfect for restaurants looking to streamline their ordering process.',
+        productPrice: '₹25,000',
+        projectName: data.projectName,
+        restaurantName: data.restaurantName,
+        ownerName: data.ownerName,
+        restaurantAddress: data.restaurantAddress,
+        contactPerson: data.contactPerson,
+        email: data.email,
+        phone: data.phone,
+        additionalRequirements: data.additionalRequirements,
+        restaurantLogo: data.restaurantLogo,
+        primaryColor: data.primaryColor,
+        secondaryColor: data.secondaryColor,
+        accentColor: data.accentColor,
+        textColor: data.textColor,
+        menuItems: Array.from(document.querySelectorAll('.menu-item-row')).map((row, index) => ({
+          item_name: row.querySelector(`input[name="menuItems[${index}][item_name]"]`)?.value || '',
+          price: row.querySelector(`input[name="menuItems[${index}][price]"]`)?.value || '',
+          item_category: row.querySelector(`select[name="menuItems[${index}][item_category]"]`)?.value || ''
+        })).filter(item => item.item_name),
+        timestamp: new Date().toISOString()
+      };
+      
+      try {
+        // Save to localStorage
+        const existingRequirements = JSON.parse(localStorage.getItem('order-menu-requirements') || '[]');
+        existingRequirements.push(orderMenuRequirements);
+        localStorage.setItem('order-menu-requirements', JSON.stringify(existingRequirements));
+        
+        // Show success message
+        alert('Order Menu requirements saved successfully! Our team will contact you soon.');
+        
+        // Show Browse Products section with smooth transition
+        showBrowseProductsSection();
+        
+        // Clear form
+        form.reset();
+        
+      } catch (error) {
+        console.error('Error saving order menu requirements:', error);
+        alert('Error saving order menu requirements. Please try again.');
+      }
+    });
+  }
+
+  // Handle form submission
+  function handleFormSubmission() {
+    const form = document.getElementById('customization-form');
+    const closeBtn = document.getElementById('close-customization-form');
+    const cancelBtn = document.getElementById('cancel-customization');
+    const logoUpload = document.getElementById('restaurant-logo-upload');
+    const logoUploadArea = document.querySelector('#product-customization-form .border-dashed');
+    
+    // Logo upload functionality
+    logoUploadArea?.addEventListener('click', () => {
+      logoUpload?.click();
+    });
+    
+    logoUpload?.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const fileName = file.name;
+        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+        logoUploadArea.innerHTML = `
+          <div class="flex flex-col items-center">
+            <svg class="w-12 h-12 text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <p class="text-green-600 mb-1 font-medium">Logo uploaded successfully</p>
+            <p class="text-sm text-gray-500">${fileName} (${fileSize} MB)</p>
+          </div>
+        `;
+      }
+    });
+    
+    // Color picker synchronization
+    function syncColorInputs() {
+      const colorInputs = form?.querySelectorAll('input[type="color"]');
+      const textInputs = form?.querySelectorAll('input[name$="ColorText"]');
+      
+      colorInputs?.forEach((colorInput, index) => {
+        const textInput = textInputs?.[index];
+        if (textInput) {
+          // Sync color picker to text input
+          colorInput.addEventListener('input', () => {
+            textInput.value = colorInput.value;
+          });
+          
+          // Sync text input to color picker
+          textInput.addEventListener('input', () => {
+            if (/^#[0-9A-F]{6}$/i.test(textInput.value)) {
+              colorInput.value = textInput.value;
+            }
+          });
+        }
+      });
+    }
+    
+    syncColorInputs();
+    
+    // Close form handlers
+    closeBtn?.addEventListener('click', () => {
+      showBrowseProductsSection();
+      // Clear URL parameters when form is closed
+      window.history.replaceState({}, document.title, window.location.pathname);
+    });
+    
+    cancelBtn?.addEventListener('click', () => {
+      showBrowseProductsSection();
+      // Clear URL parameters when form is closed
+      window.history.replaceState({}, document.title, window.location.pathname);
+    });
+    
+    // Form submission - Save requirements only
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+      
+      console.log('📝 Project requirements saved:', data);
+      
+      // Get product details
+      const productName = document.getElementById('selected-product-name').textContent;
+      const productPrice = document.getElementById('selected-product-price').textContent;
+      
+      // Create project requirements object
+      const projectRequirements = {
+        productId: new URLSearchParams(window.location.search).get('product') || '1',
+        productName: productName,
+        productDescription: document.getElementById('selected-product-description').textContent,
+        productPrice: productPrice,
+        projectName: data.projectName,
+        appName: data.appName,
+        contactPerson: data.contactPerson,
+        productDescriptionCustom: data.productDescription,
+        email: data.email,
+        phone: data.phone,
+        additionalRequirements: data.additionalRequirements,
+        restaurantLogo: data.restaurantLogo,
+        primaryColor: data.primaryColor,
+        secondaryColor: data.secondaryColor,
+        accentColor: data.accentColor,
+        textColor: data.textColor,
+        timestamp: new Date().toISOString()
+      };
+      
+      // Add restaurant-specific fields only for restaurant products
+      const selectedProductId = new URLSearchParams(window.location.search).get('product') || '1';
+      const restaurantProducts = ['3', '4']; // Restaurant Menu System and Restaurant Website
+      
+      if (restaurantProducts.includes(selectedProductId)) {
+        projectRequirements.restaurantName = data.restaurantName;
+        projectRequirements.cuisineType = data.cuisineType;
+      }
+      
+      try {
+        // Save to localStorage for now (can be changed to save to database)
+        const existingRequirements = JSON.parse(localStorage.getItem('project-requirements') || '[]');
+        existingRequirements.push(projectRequirements);
+        localStorage.setItem('project-requirements', JSON.stringify(existingRequirements));
+        
+        // Show success message
+        alert('Project requirements saved successfully! Our team will contact you soon.');
+        
+        // Show Browse Products section with smooth transition
+        showBrowseProductsSection();
+        
+        // Clear form
+        form.reset();
+        
+        // Reset logo upload area
+        if (logoUploadArea) {
+          logoUploadArea.innerHTML = `
+            <div class="flex flex-col items-center">
+              <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+              <p class="text-gray-600 mb-2">Click to upload restaurant logo</p>
+              <p class="text-sm text-gray-500">PNG, JPG, SVG up to 10MB</p>
+            </div>
+          `;
+        }
+        
+      } catch (error) {
+        console.error('Error saving requirements:', error);
+        alert('Error saving project requirements. Please try again.');
+      }
+    });
+  }
+
+  // Show Browse Products section with smooth transition
+  function showBrowseProductsSection() {
+    const productForm = document.getElementById('product-customization-form');
+    const orderMenuForm = document.getElementById('order-menu-customization-form');
+    const recentActivity = document.getElementById('recent-activity');
+    
+    // Hide forms with smooth transition
+    if (productForm && !productForm.classList.contains('hidden')) {
+      productForm.style.transition = 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out';
+      productForm.style.opacity = '0';
+      productForm.style.transform = 'translateY(-10px)';
+      setTimeout(() => productForm.classList.add('hidden'), 300);
+    }
+    
+    if (orderMenuForm && !orderMenuForm.classList.contains('hidden')) {
+      orderMenuForm.style.transition = 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out';
+      orderMenuForm.style.opacity = '0';
+      orderMenuForm.style.transform = 'translateY(-10px)';
+      setTimeout(() => orderMenuForm.classList.add('hidden'), 300);
+    }
+    
+    // Show Browse Products section with smooth transition
+    setTimeout(() => {
+      if (recentActivity) {
+        recentActivity.classList.remove('hidden');
+        recentActivity.style.transition = 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out';
+        recentActivity.style.opacity = '0';
+        recentActivity.style.transform = 'translateY(10px)';
+        
+        setTimeout(() => {
+          recentActivity.style.opacity = '1';
+          recentActivity.style.transform = 'translateY(0)';
+        }, 50);
+      }
+    }, 350);
+  }
+
+  // Auto-fill user details in forms
+  function autofillUserDetails() {
+    console.log('🔄 Attempting to auto-fill user details...');
+    
+    // Get user data from session storage (correct key)
+    const sessionData = sessionStorage.getItem('simple-auth-session');
+    console.log('📦 Session data:', sessionData);
+    
+    if (sessionData) {
+      try {
+        const sessionObj = JSON.parse(sessionData);
+        console.log('👤 Parsed session data:', sessionObj);
+        
+        // Get user data from the nested user object
+        const userData = sessionObj.user;
+        console.log('👤 User data from session:', userData);
+        
+        if (userData && userData.email) {
+          console.log('📧 Auto-filling email:', userData.email);
+          const emailFields = document.querySelectorAll('input[name="email"]');
+          emailFields.forEach(field => {
+            field.value = userData.email;
+            console.log('✅ Filled email field:', field);
+          });
+        }
+        
+        if (userData && userData.phone) {
+          console.log('📱 Auto-filling phone:', userData.phone);
+          const phoneFields = document.querySelectorAll('input[name="phone"]');
+          phoneFields.forEach(field => {
+            field.value = userData.phone;
+            console.log('✅ Filled phone field:', field);
+          });
+        }
+      } catch (error) {
+        console.error('❌ Error parsing session data:', error);
+      }
+    }
+    
+    // Also try to get from global auth manager if available
+    if (window.authManager && window.authManager.getCurrentUser) {
+      console.log('🔍 Trying global auth manager...');
+      const currentUser = window.authManager.getCurrentUser();
+      console.log('👤 Current user from auth manager:', currentUser);
+      
+      if (currentUser && currentUser.email) {
+        const emailFields = document.querySelectorAll('input[name="email"]');
+        emailFields.forEach(field => {
+          if (!field.value) {
+            field.value = currentUser.email;
+            console.log('✅ Filled email from auth manager:', field);
+          }
+        });
+      }
+      if (currentUser && currentUser.phone) {
+        const phoneFields = document.querySelectorAll('input[name="phone"]');
+        phoneFields.forEach(field => {
+          if (!field.value) {
+            field.value = currentUser.phone;
+            console.log('✅ Filled phone from auth manager:', field);
+          }
+        });
+      }
+    }
+    
+    console.log('✅ Auto-fill attempt completed');
+    
+    // Additional attempt with more specific selectors
+    setTimeout(() => {
+      console.log('🔄 Additional auto-fill attempt...');
+      const emailFields = document.querySelectorAll('input[name="email"], input[type="email"]');
+      const phoneFields = document.querySelectorAll('input[name="phone"], input[type="tel"]');
+      
+      console.log('📧 Found email fields:', emailFields.length);
+      console.log('📱 Found phone fields:', phoneFields.length);
+      
+      // Try to fill email again
+      if (sessionData) {
+        try {
+          const sessionObj = JSON.parse(sessionData);
+          const userData = sessionObj.user;
+          
+          if (userData && userData.email) {
+            emailFields.forEach((field, index) => {
+              if (!field.value) {
+                field.value = userData.email;
+                console.log(`✅ Additional fill email field ${index}:`, field);
+              }
+            });
+          }
+          
+          if (userData && userData.phone) {
+            phoneFields.forEach((field, index) => {
+              if (!field.value) {
+                field.value = userData.phone;
+                console.log(`✅ Additional fill phone field ${index}:`, field);
+              }
+            });
+          }
+        } catch (error) {
+          console.error('❌ Error in additional auto-fill:', error);
+        }
+      }
+    }, 1000);
   }
 
   // Update user info when page loads
   document.addEventListener('DOMContentLoaded', () => {
     console.log('Dashboard DOM loaded - initializing with global auth manager');
+    
+    // Smooth page load transition
+    document.body.style.transition = 'opacity 0.3s ease-in-out';
+    document.body.style.opacity = '0';
+    
+    // Fade in the page
+    setTimeout(() => {
+      document.body.style.opacity = '1';
+    }, 50);
+    
+    // Check if we should show a form based on URL parameters (fix refresh issue)
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('product');
+    const price = urlParams.get('price');
+    
+    if (productId && price) {
+      // Show the appropriate form based on product ID
+      const products = [
+        { id: '1', name: 'Restaurant Menu System', description: 'Digital menu system with QR code integration, online ordering, and real-time updates. Perfect for restaurants looking to modernize their customer experience.', price: 25000, type: 'restaurant' },
+        { id: '2', name: 'Android TV App', description: 'Custom Android TV applications with beautiful UI, content management, and remote control support. Perfect for streaming services and media companies.', price: 55000, type: 'non-restaurant' },
+        { id: '3', name: 'Streaming Mobile App', description: 'Mobile streaming applications for iOS and Android with custom features, user authentication, and content management.', price: 35000, type: 'non-restaurant' },
+        { id: '4', name: 'Restaurant Website', description: 'Professional restaurant website with online ordering, menu display, and customer management features.', price: 20000, type: 'restaurant' },
+        { id: '5', name: 'Order Menu System', description: 'Complete order management system with digital menu integration, real-time order tracking, and payment processing. Perfect for restaurants looking to streamline their ordering process.', price: 25000, type: 'order-menu' }
+      ];
+      
+      const selectedProduct = products.find(p => p.id === productId);
+      if (selectedProduct) {
+        // Update product details
+        document.getElementById('selected-product-name').textContent = selectedProduct.name;
+        document.getElementById('selected-product-description').textContent = selectedProduct.description;
+        document.getElementById('selected-product-price').textContent = `₹${selectedProduct.price.toLocaleString()}`;
+        
+        // Update Order Menu System product details
+        document.getElementById('order-menu-product-name').textContent = selectedProduct.name;
+        document.getElementById('order-menu-product-description').textContent = selectedProduct.description;
+        document.getElementById('order-menu-product-price').textContent = `₹${selectedProduct.price.toLocaleString()}`;
+        
+        // Show appropriate form with smooth transition
+        const recentActivity = document.getElementById('recent-activity');
+        const productForm = document.getElementById('product-customization-form');
+        const orderMenuForm = document.getElementById('order-menu-customization-form');
+        
+        // Hide recent activity with smooth transition
+        if (recentActivity) {
+          recentActivity.style.transition = 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out';
+          recentActivity.style.opacity = '0';
+          recentActivity.style.transform = 'translateY(-10px)';
+          
+          setTimeout(() => {
+            recentActivity.classList.add('hidden');
+          }, 300);
+        }
+        
+        // Show appropriate form with smooth transition
+        setTimeout(() => {
+          if (selectedProduct.type === 'order-menu') {
+            if (orderMenuForm) {
+              orderMenuForm.classList.remove('hidden');
+              orderMenuForm.style.transition = 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out';
+              orderMenuForm.style.opacity = '0';
+              orderMenuForm.style.transform = 'translateY(10px)';
+              
+              setTimeout(() => {
+                orderMenuForm.style.opacity = '1';
+                orderMenuForm.style.transform = 'translateY(0)';
+              }, 50);
+            }
+          } else {
+            if (productForm) {
+              productForm.classList.remove('hidden');
+              productForm.style.transition = 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out';
+              productForm.style.opacity = '0';
+              productForm.style.transform = 'translateY(10px)';
+              
+              setTimeout(() => {
+                productForm.style.opacity = '1';
+                productForm.style.transform = 'translateY(0)';
+              }, 50);
+            }
+            
+            // Show/hide cuisine type and restaurant name field
+            const cuisineField = document.getElementById('cuisine-type-field');
+            const restaurantNameField = document.getElementById('restaurant-name-field');
+            
+            if (selectedProduct.type === 'restaurant') {
+              cuisineField.classList.remove('hidden');
+              cuisineField.querySelector('select').setAttribute('required', 'required');
+              restaurantNameField.classList.remove('hidden');
+              restaurantNameField.querySelector('input').setAttribute('required', 'required');
+            } else {
+              cuisineField.classList.add('hidden');
+              cuisineField.querySelector('select').removeAttribute('required');
+              restaurantNameField.classList.add('hidden');
+              restaurantNameField.querySelector('input').removeAttribute('required');
+            }
+          }
+        }, 300);
+        
+        // Auto-fill user details when form is shown (with longer delay)
+        setTimeout(() => autofillUserDetails(), 500);
+      }
+    }
+    
+    // Handle product selection
+    handleProductSelection();
+    
+    // Handle form functionality
+    handleFormSubmission();
+    
+    // Handle Order Menu form functionality
+    handleOrderMenuForm();
+    
+    // Auto-fill user details (try multiple times)
+    autofillUserDetails();
+    setTimeout(() => autofillUserDetails(), 1000);
+    setTimeout(() => autofillUserDetails(), 2000);
+    
+    // Watch for form visibility changes and auto-fill when forms become visible
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          const target = mutation.target;
+          if (target.id === 'product-customization-form' || target.id === 'order-menu-customization-form') {
+            if (!target.classList.contains('hidden')) {
+              console.log('👁️ Form became visible, auto-filling...');
+              setTimeout(() => autofillUserDetails(), 100);
+            }
+          }
+        }
+      });
+    });
+    
+    // Observe both forms for class changes
+    const productForm = document.getElementById('product-customization-form');
+    const orderMenuForm = document.getElementById('order-menu-customization-form');
+    
+    if (productForm) observer.observe(productForm, { attributes: true, attributeFilter: ['class'] });
+    if (orderMenuForm) observer.observe(orderMenuForm, { attributes: true, attributeFilter: ['class'] });
     
     // Try multiple times with different delays to ensure data loads
     updateUserInfo(); // Immediate
@@ -385,17 +1352,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     updateUserInfo();
   });
   
-  // Add logout functionality using the global auth manager
-  const logoutBtn = document.getElementById('logout-btn');
-  logoutBtn?.addEventListener('click', () => {
-    console.log('Logout clicked - using global auth manager');
-    const authManager = window.globalAuthManager || window.simpleAuthManager;
-    if (authManager) {
-      authManager.logout();
-    } else {
-      window.location.href = '/';
-    }
-  });
+  // Logout functionality removed (was in Quick Actions section)
   
   
   console.log('✅ Dashboard script initialized with global auth manager');

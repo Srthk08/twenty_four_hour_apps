@@ -451,15 +451,15 @@ const style = categoryStyles[product.category];
     console.log('🔍 Auth manager found:', !!authManager);
     
     if (authManager && authManager.isUserLoggedIn()) {
-      // User is authenticated, redirect to cart
-      console.log('✅ User authenticated, redirecting to cart');
-      const cartUrl = `/cart?product=${productId}&price=${price}`;
-      console.log('🔗 Redirecting to:', cartUrl);
-      window.location.href = cartUrl;
+      // User is authenticated, redirect to dashboard with product info
+      console.log('✅ User authenticated, redirecting to dashboard');
+      const dashboardUrl = `/dashboard?product=${productId}&price=${price}`;
+      console.log('🔗 Redirecting to:', dashboardUrl);
+      window.location.href = dashboardUrl;
     } else {
       // User is not authenticated, redirect to login with return URL
       console.log('❌ User not authenticated, redirecting to login');
-      const loginUrl = `/login?redirect=/cart?product=${productId}&price=${price}`;
+      const loginUrl = `/login?redirect=/dashboard?product=${productId}&price=${price}`;
       console.log('🔗 Redirecting to:', loginUrl);
       window.location.href = loginUrl;
     }

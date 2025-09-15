@@ -67,13 +67,13 @@
           <!-- Dropdown Menu -->
           <div
             id="user-dropdown"
-            class="hidden absolute right-0 mt-4 w-64 bg-white rounded-2xl shadow-2xl py-3 z-50 border border-gray-100"
+            class="hidden absolute right-0 mt-4 w-72 bg-white rounded-2xl shadow-2xl py-3 z-50 border border-gray-100"
           >
             <div class="px-6 py-4 border-b border-gray-100 bg-blue-50 rounded-t-2xl">
               <p class="text-sm text-gray-500">Signed in as</p>
-              <p class="text-lg font-semibold text-gray-900" id="user-email">user@example.com</p>
+              <p class="text-sm font-normal text-gray-900 break-all overflow-hidden" id="user-email" title="user@example.com">user@example.com</p>
             </div>
-            <a href="/dashboard" class="flex items-center px-6 py-4 text-base text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200">
+            <a href="/dashboard" id="dashboard-link" class="flex items-center px-6 py-4 text-base text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200">
               <svg class="w-6 h-6 mr-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
@@ -91,12 +91,6 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
               </svg>
               My Orders
-            </a>
-            <a href="/cart" class="flex items-center px-6 py-4 text-base text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200">
-              <svg class="w-6 h-6 mr-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
-              </svg>
-              Cart
             </a>
             <a href="/support" class="flex items-center px-6 py-4 text-base text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200">
               <svg class="w-6 h-6 mr-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -184,11 +178,11 @@
             <!-- User Info -->
             <div class="px-6 py-4 bg-white bg-opacity-10 rounded-xl backdrop-blur-sm">
               <p class="text-sm text-white text-opacity-70">Signed in as</p>
-              <p class="text-lg font-semibold text-white" id="mobile-user-email">user@example.com</p>
+              <p class="text-sm font-normal text-white break-all overflow-hidden" id="mobile-user-email" title="user@example.com">user@example.com</p>
             </div>
 
             <!-- User Menu Items -->
-            <a href="/dashboard" class="flex items-center px-6 py-4 text-lg font-medium text-white text-opacity-90 hover:text-white hover:bg-white hover:bg-opacity-20 rounded-xl transition-all duration-300">
+            <a href="/dashboard" id="mobile-dashboard-link" class="flex items-center px-6 py-4 text-lg font-medium text-white text-opacity-90 hover:text-white hover:bg-white hover:bg-opacity-20 rounded-xl transition-all duration-300">
               <svg class="w-6 h-6 mr-4 text-white text-opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
@@ -206,12 +200,6 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
               </svg>
               My Orders
-            </a>
-            <a href="/cart" class="flex items-center px-6 py-4 text-lg font-medium text-white text-opacity-90 hover:text-white hover:bg-white hover:bg-opacity-20 rounded-xl transition-all duration-300">
-              <svg class="w-6 h-6 mr-4 text-white text-opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
-              </svg>
-              Cart
             </a>
             <a href="/support" class="flex items-center px-6 py-4 text-lg font-medium text-white text-opacity-90 hover:text-white hover:bg-white hover:bg-opacity-20 rounded-xl transition-all duration-300">
               <svg class="w-6 h-6 mr-4 text-white text-opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -245,6 +233,26 @@
     </div>
   </div>
 </header>
+
+<style>
+  /* Email text overflow handling */
+  #user-email, #mobile-user-email {
+    word-break: break-all;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    max-width: 100%;
+    line-height: 1.4;
+  }
+  
+  /* Ensure dropdown doesn't get too wide on mobile */
+  @media (max-width: 640px) {
+    #user-dropdown {
+      width: calc(100vw - 2rem);
+      right: 1rem;
+      left: 1rem;
+    }
+  }
+</style>
 
 <script>
   // Global variables
@@ -496,6 +504,94 @@
     }
   }
 
+  // Function to preserve URL parameters when navigating to dashboard
+  function initDashboardLinks() {
+    const dashboardLink = document.getElementById('dashboard-link');
+    const mobileDashboardLink = document.getElementById('mobile-dashboard-link');
+    
+    function updateDashboardLink(link) {
+      if (link) {
+        // Get current URL parameters
+        const currentParams = new URLSearchParams(window.location.search);
+        const product = currentParams.get('product');
+        const price = currentParams.get('price');
+        
+        // If we have product parameters, preserve them
+        if (product && price) {
+          link.href = `/dashboard?product=${product}&price=${price}`;
+          console.log('🔗 Dashboard link updated with parameters:', link.href);
+        } else {
+          link.href = '/dashboard';
+        }
+      }
+    }
+    
+    // Update both desktop and mobile links
+    updateDashboardLink(dashboardLink);
+    updateDashboardLink(mobileDashboardLink);
+    
+    // Add click handlers for smooth transitions
+    if (dashboardLink) {
+      dashboardLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        // Check if we're already on dashboard
+        if (window.location.pathname === '/dashboard') {
+          // If already on dashboard, just scroll to top smoothly
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+        
+        // Smooth transition to dashboard
+        const currentParams = new URLSearchParams(window.location.search);
+        const product = currentParams.get('product');
+        const price = currentParams.get('price');
+        
+        // Add smooth transition effect
+        document.body.style.transition = 'opacity 0.3s ease-in-out';
+        document.body.style.opacity = '0.7';
+        
+        setTimeout(() => {
+          if (product && price) {
+            window.location.href = `/dashboard?product=${product}&price=${price}`;
+          } else {
+            window.location.href = '/dashboard';
+          }
+        }, 150);
+      });
+    }
+    
+    if (mobileDashboardLink) {
+      mobileDashboardLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        // Check if we're already on dashboard
+        if (window.location.pathname === '/dashboard') {
+          // If already on dashboard, just scroll to top smoothly
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+        
+        // Smooth transition to dashboard
+        const currentParams = new URLSearchParams(window.location.search);
+        const product = currentParams.get('product');
+        const price = currentParams.get('price');
+        
+        // Add smooth transition effect
+        document.body.style.transition = 'opacity 0.3s ease-in-out';
+        document.body.style.opacity = '0.7';
+        
+        setTimeout(() => {
+          if (product && price) {
+            window.location.href = `/dashboard?product=${product}&price=${price}`;
+          } else {
+            window.location.href = '/dashboard';
+          }
+        }, 150);
+      });
+    }
+  }
+
   // Initialize everything when page loads
   document.addEventListener('DOMContentLoaded', () => {
     console.log('Header initializing with fallback support');
@@ -506,6 +602,7 @@
     // Initialize UI components
     initUserDropdown();
     initMobileMenu();
+    initDashboardLinks();
     
     // Also try to update when global auth manager becomes available
     const checkForAuthManager = () => {
@@ -521,6 +618,18 @@
     
     // Start checking for auth manager
     setTimeout(checkForAuthManager, 100);
+    
+    // Listen for URL changes to update dashboard links
+    window.addEventListener('popstate', () => {
+      initDashboardLinks();
+    });
+    
+    // Also update links when the page becomes visible (in case of back/forward navigation)
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        initDashboardLinks();
+      }
+    });
     
     console.log('✅ Header initialized with fallback support');
   });

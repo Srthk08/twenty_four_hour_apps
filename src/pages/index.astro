@@ -12,28 +12,63 @@ try {
 ---
 
 <Layout title="DevExpress - 24 Hour Development Company">
-  <!-- Full Page Blue and White Gradient Background -->
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
+  <!-- Ultra-Fast Loading Styles -->
+  <style>
+    /* Minimal product card hover - maximum speed */
+    .product-card:hover {
+      transform: translateY(-1px);
+    }
+    
+    /* Force immediate rendering - no delays */
+    .product-card {
+      opacity: 1 !important;
+      transform: none !important;
+      will-change: auto !important;
+    }
+    
+    /* Optimize images for fast loading */
+    .product-card img {
+      will-change: auto !important;
+      transform: translateZ(0) !important;
+      background-color: #f3f4f6;
+      min-height: 192px;
+    }
+    
+    /* Image loading state */
+    .product-card img:not([src]) {
+      background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+    }
+    
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
+  
+  <!-- Full Page White Background -->
+  <div class="min-h-screen bg-white">
   <!-- Hero Section -->
   <section class="relative bg-blue-600 text-white overflow-hidden">
     <div class="absolute inset-0 bg-black opacity-20"></div>
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
       <div class="text-center">
-        <h1 class="text-4xl md:text-6xl font-bold mb-6 animate-fade-in text-white" style="color: #ffffff !important;">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6 text-white" style="color: #ffffff !important;">
           Your App Ready in
           <span class="text-white" style="color: #ffffff !important;">
             24 Hours
           </span>
         </h1>
-        <p class="text-xl md:text-2xl text-gray-200 mb-8 max-w-3xl mx-auto animate-slide-up">
+        <p class="text-xl md:text-2xl text-gray-200 mb-8 max-w-3xl mx-auto">
           Professional restaurant systems, mobile apps, and websites delivered lightning-fast. 
           No compromises on quality, just rapid results.
         </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up">
-          <a href="/products" class="bg-accent-500 hover:bg-accent-600 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all transform hover:scale-105 shadow-lg">
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/products" class="bg-accent-500 hover:bg-accent-600 text-white px-8 py-4 rounded-lg text-lg font-semibold shadow-lg">
             View Our Products
           </a>
-          <a href="#how-it-works" class="border-2 border-white text-white hover:bg-white hover:text-primary-900 px-8 py-4 rounded-lg text-lg font-semibold transition-all how-it-works-btn">
+          <a href="#how-it-works" class="border-2 border-white text-white hover:bg-white hover:text-primary-900 px-8 py-4 rounded-lg text-lg font-semibold how-it-works-btn">
             How It Works
           </a>
         </div>
@@ -41,27 +76,27 @@ try {
     </div>
     
     <!-- Floating Elements -->
-    <div class="absolute top-20 left-10 w-20 h-20 bg-accent-500 rounded-full opacity-20 animate-bounce-slow"></div>
-    <div class="absolute bottom-20 right-10 w-16 h-16 bg-secondary-500 rounded-full opacity-20 animate-bounce-slow" style="animation-delay: 1s;"></div>
+    <div class="absolute top-20 left-10 w-20 h-20 bg-accent-500 rounded-full opacity-20"></div>
+    <div class="absolute bottom-20 right-10 w-16 h-16 bg-secondary-500 rounded-full opacity-20"></div>
   </section>
 
   <!-- Stats Section -->
-  <section class="py-16 bg-white/80 backdrop-blur-sm">
+  <section class="py-16 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-        <div class="animate-fade-in">
+        <div>
           <div class="text-4xl font-bold text-primary-600 mb-2">500+</div>
           <div class="text-black font-medium">Projects Delivered</div>
         </div>
-        <div class="animate-fade-in" style="animation-delay: 0.1s;">
+        <div>
           <div class="text-4xl font-bold text-primary-600 mb-2">24hrs</div>
           <div class="text-black font-medium">Average Delivery</div>
         </div>
-        <div class="animate-fade-in" style="animation-delay: 0.2s;">
+        <div>
           <div class="text-4xl font-bold text-primary-600 mb-2">98%</div>
           <div class="text-black font-medium">Client Satisfaction</div>
         </div>
-        <div class="animate-fade-in" style="animation-delay: 0.3s;">
+        <div>
           <div class="text-4xl font-bold text-primary-600 mb-2">24/7</div>
           <div class="text-black font-medium">Support Available</div>
         </div>
@@ -81,9 +116,16 @@ try {
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {products.map((product, index) => (
-          <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in" style={`animation-delay: ${index * 0.1}s;`}>
+          <div class="product-card bg-white rounded-xl shadow-lg">
             <div class="relative rounded-t-xl overflow-hidden" style="height: 192px;">
-              <img src={product.featured_image} alt={product.name} class="w-full h-full object-cover" />
+              <img 
+                src={product.featured_image} 
+                alt={product.name} 
+                class="w-full h-full object-cover" 
+                loading="eager" 
+                decoding="async"
+                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDMwMCAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMTkyIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xNTAgODBMMTgwIDExMEgxMjBMMTUwIDgwWiIgZmlsbD0iIzlDQTNBRiIvPgo8Y2lyY2xlIGN4PSIxNTAiIGN5PSIxMjAiIHI9IjEwIiBmaWxsPSIjOUNBM0FGIi8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTUwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNkI3MjgwIj5JbWFnZSBVbmF2YWlsYWJsZTwvdGV4dD4KPC9zdmc+Cg=='"
+              />
             </div>
             <div class="p-6">
               <h3 class="text-xl font-semibold text-black mb-2">{product.name}</h3>
@@ -92,7 +134,7 @@ try {
                 <span class="text-2xl font-bold text-primary-600">
                   ₹{product.base_price.toLocaleString()}
                 </span>
-                <a href={`/products/${product.slug}`} class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <a href={`/products/${product.slug}`} class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
                   View Details
                 </a>
               </div>
@@ -104,7 +146,7 @@ try {
   </section>
 
   <!-- How It Works Section -->
-  <section id="how-it-works" class="py-20 bg-white/80 backdrop-blur-sm">
+  <section id="how-it-works" class="py-20 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-16">
         <h2 class="text-3xl md:text-4xl font-bold text-black mb-4">How It Works</h2>
@@ -114,7 +156,7 @@ try {
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="text-center animate-fade-in">
+        <div class="text-center">
           <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <span class="text-2xl font-bold text-primary-600">1</span>
           </div>
@@ -125,7 +167,7 @@ try {
           </p>
         </div>
 
-        <div class="text-center animate-fade-in" style="animation-delay: 0.1s;">
+        <div class="text-center">
           <div class="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <span class="text-2xl font-bold text-secondary-600">2</span>
           </div>
@@ -136,7 +178,7 @@ try {
           </p>
         </div>
 
-        <div class="text-center animate-fade-in" style="animation-delay: 0.2s;">
+        <div class="text-center">
           <div class="w-16 h-16 bg-accent-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <span class="text-2xl font-bold text-accent-600">3</span>
           </div>
@@ -231,26 +273,6 @@ try {
 </Layout>
 
 <style>
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .animate-fade-in {
-    animation: fadeIn 0.6s ease-out forwards;
-    opacity: 0;
-  }
-
-  .animate-slide-up {
-    animation: slideUp 0.8s ease-out forwards;
-    opacity: 0;
-    animation-delay: 0.3s;
-  }
 
   /* How It Works button text visibility */
   .how-it-works-btn {
@@ -320,5 +342,31 @@ try {
         howItWorksBtn.style.backgroundColor = 'transparent';
       });
     }
+  });
+  
+  // Ultra-fast loading - minimal JavaScript
+  document.addEventListener('DOMContentLoaded', function() {
+    // Only handle anchor links - everything else loads immediately
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href').substring(1);
+        const target = document.getElementById(targetId);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+    
+    // Handle image loading errors
+    document.querySelectorAll('.product-card img').forEach(img => {
+      img.addEventListener('error', function() {
+        this.style.backgroundColor = '#f3f4f6';
+        this.style.display = 'flex';
+        this.style.alignItems = 'center';
+        this.style.justifyContent = 'center';
+        this.innerHTML = '<div style="text-align: center; color: #6b7280; font-size: 12px;">Image Unavailable</div>';
+      });
+    });
   });
 </script>

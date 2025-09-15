@@ -147,8 +147,21 @@ import Layout from '../layouts/Layout.astro';
             </div>
           </div>
 
+          <!-- Submit Button -->
+            <button
+              type="submit"
+            id="signup-btn"
+            class="w-full bg-primary-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+            >
+              Create Account
+            </button>
+
           <!-- Google Authentication -->
           <div class="google-auth-section">
+            <div class="divider">
+              <span>or</span>
+            </div>
+            
             <div class="google-auth-container">
               <button id="google-signup-btn" class="google-btn signup">
                 <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20">
@@ -160,20 +173,7 @@ import Layout from '../layouts/Layout.astro';
                 <span>Sign up with Google</span>
               </button>
             </div>
-            
-            <div class="divider">
-              <span>or</span>
-            </div>
           </div>
-
-          <!-- Submit Button -->
-            <button
-              type="submit"
-            id="signup-btn"
-            class="w-full bg-primary-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
-            >
-              Create Account
-            </button>
 
           <!-- Login Link -->
           <div class="text-center text-sm text-gray-600">
@@ -226,14 +226,16 @@ import Layout from '../layouts/Layout.astro';
   }
 
   .google-btn.signup {
-    background: #4285f4;
-    border-color: #4285f4;
-    color: white;
+    background: white;
+    border-color: #e5e7eb;
+    color: #374151;
   }
 
   .google-btn.signup:hover {
-    background: #3367d6;
-    border-color: #3367d6;
+    background: #f9fafb;
+    border-color: #d1d5db;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   }
 
   .google-icon {
@@ -416,12 +418,21 @@ import Layout from '../layouts/Layout.astro';
       if (user.app_metadata.provider === 'google') {
         showStatus('Syncing Google account...', 'loading');
         await syncGoogleUser(user);
-        showStatus('Account created successfully! Please log in to continue.', 'success');
+        showStatus('Successfully signed up with Google!', 'success');
         
-        // Clear session and redirect to login page
-        sessionStorage.removeItem('simple-auth-session');
+        // Store session for Google signup
+        sessionStorage.setItem('simple-auth-session', JSON.stringify({
+          user: user,
+          access_token: session?.access_token,
+          timestamp: Date.now()
+        }));
+        
+        // Dispatch login event
+        window.dispatchEvent(new CustomEvent('user-logged-in', { detail: user }));
+        
+        // Redirect to dashboard
         setTimeout(() => {
-          window.location.href = '/login';
+          window.location.href = '/dashboard';
         }, 1500);
       }
     }
@@ -511,16 +522,15 @@ import Layout from '../layouts/Layout.astro';
       return;
     }
 
-    // Show loading state
+    // Show loading state - center icon and hide text
     const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
     const originalText = submitButton.textContent;
     submitButton.disabled = true;
     submitButton.innerHTML = `
-      <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <svg class="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
-      Creating account...
     `;
 
     try {
@@ -568,20 +578,36 @@ import Layout from '../layouts/Layout.astro';
           // Don't fail the signup if profile creation fails
         }
         
-        // Don't store session or auto-login user - force them to login manually
-        // Clear any existing session to ensure fresh login
-        sessionStorage.removeItem('simple-auth-session');
+        // Store session and auto-login user after account creation
+        if (data.session) {
+          sessionStorage.setItem('simple-auth-session', JSON.stringify({
+            user: data.user,
+            access_token: data.session.access_token,
+            timestamp: Date.now()
+          }));
+          
+          // Dispatch login event
+          window.dispatchEvent(new CustomEvent('user-logged-in', { detail: data.user }));
+        }
         
         // Show success message
         if (successText) {
-          successText.textContent = 'Account created successfully! Please log in to continue.';
+          successText.textContent = data.session ? 'Account created and signed in successfully!' : 'Account created. Please check your email to verify your account.';
         }
         successMessage?.classList.remove('hidden');
 
-        // Always redirect to login page after account creation
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 2000);
+        // Redirect based on whether user is signed in
+        if (data.session) {
+          // User is signed in, redirect to dashboard
+          setTimeout(() => {
+            window.location.href = '/dashboard';
+          }, 2000);
+        } else {
+          // User needs to verify email, redirect to login
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 3000);
+        }
       } else {
         throw new Error('Account creation failed');
       }

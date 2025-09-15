@@ -19,6 +19,15 @@ const processedProducts = products
 ---
 
 <Layout title="Our Products - DevExpress" description="Explore our range of professional digital solutions delivered in 24 hours">
+  <!-- Simple Styles - Same as About and Contact pages -->
+  <style>
+    /* Simple product card hover - same as other pages */
+    .product-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+  
   <!-- Full Page Blue and White Gradient Background -->
   <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
   <!-- Hero Section -->
@@ -32,34 +41,33 @@ const processedProducts = products
     </div>
   </section>
 
-  <!-- Filter Section -->
-  <section class="filter-section py-8 bg-blue-600">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-wrap justify-center gap-4 mb-4">
-        <button class="filter-btn active px-6 py-2 rounded-full bg-primary-600 text-white font-medium transition-all" data-filter="all">
-          All Products
-        </button>
-        <button class="filter-btn px-6 py-2 rounded-full bg-white text-gray-700 hover:bg-gray-100 font-medium transition-all border" data-filter="restaurant">
-          Restaurant Menu
-        </button>
-        <button class="filter-btn px-6 py-2 rounded-full bg-white text-gray-700 hover:bg-gray-100 font-medium transition-all border" data-filter="order-menu-system">
-          Order Menu System
-        </button>
-        <button class="filter-btn px-6 py-2 rounded-full bg-white text-gray-700 hover:bg-gray-100 font-medium transition-all border" data-filter="mobile">
-          Mobile Apps
-        </button>
-        <button class="filter-btn px-6 py-2 rounded-full bg-white text-gray-700 hover:bg-gray-100 font-medium transition-all border" data-filter="tv">
-          TV Apps
-        </button>
-        <button class="filter-btn px-6 py-2 rounded-full bg-white text-gray-700 hover:bg-gray-100 font-medium transition-all border" data-filter="web">
-          Websites
-        </button>
+  <!-- Products Grid -->
+  <section class="py-16 bg-white">
+    <!-- Filter Section -->
+    <div class="filter-section py-8 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-wrap justify-center gap-4 mb-8">
+          <button class="filter-btn active px-6 py-2 rounded-full bg-white text-gray-700 hover:bg-gray-100 font-medium transition-all border border-gray-300" data-filter="all">
+            All Products
+          </button>
+          <button class="filter-btn px-6 py-2 rounded-full bg-white text-gray-700 hover:bg-gray-100 font-medium transition-all border border-gray-300" data-filter="restaurant">
+            Restaurant Menu
+          </button>
+          <button class="filter-btn px-6 py-2 rounded-full bg-white text-gray-700 hover:bg-gray-100 font-medium transition-all border border-gray-300" data-filter="order-menu-system">
+            Order Menu System
+          </button>
+          <button class="filter-btn px-6 py-2 rounded-full bg-white text-gray-700 hover:bg-gray-100 font-medium transition-all border border-gray-300" data-filter="mobile">
+            Mobile Apps
+          </button>
+          <button class="filter-btn px-6 py-2 rounded-full bg-white text-gray-700 hover:bg-gray-100 font-medium transition-all border border-gray-300" data-filter="tv">
+            TV Apps
+          </button>
+          <button class="filter-btn px-6 py-2 rounded-full bg-white text-gray-700 hover:bg-gray-100 font-medium transition-all border border-gray-300" data-filter="web">
+            Websites
+          </button>
+        </div>
       </div>
     </div>
-  </section>
-
-  <!-- Products Grid -->
-  <section class="py-16 bg-white/80 backdrop-blur-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="products-grid">
         {processedProducts.map((product, index) => {
@@ -154,19 +162,22 @@ const processedProducts = products
     button.addEventListener('click', () => {
       // Remove active class from all buttons
       filterButtons.forEach(btn => {
-        btn.classList.remove('active', 'bg-primary-600', 'text-white');
+        btn.classList.remove('active');
         btn.classList.add('bg-white', 'text-gray-700', 'border');
+        // Remove any blue background classes
+        btn.classList.remove('bg-primary-600', 'bg-blue-600', 'text-white');
         // Ensure proper text color for inactive buttons
         btn.style.color = '#374151';
         btn.style.backgroundColor = '#ffffff';
+        btn.style.background = '#ffffff';
       });
       
       // Add active class to clicked button
-      button.classList.remove('bg-white', 'text-gray-700', 'border');
-      button.classList.add('active', 'bg-primary-600', 'text-white');
-      // Ensure proper text color for active button
-      button.style.color = '#ffffff';
-      button.style.backgroundColor = '#3b82f6';
+      button.classList.add('active');
+      // Ensure proper text color for active button (blue text on white background)
+      button.style.color = '#3b82f6';
+      button.style.backgroundColor = '#ffffff';
+      button.style.background = '#ffffff';
       
       // Get filter value
       const filter = (button as HTMLElement).dataset.filter;
@@ -246,14 +257,19 @@ const processedProducts = products
       button.style.visibility = 'visible';
       button.style.opacity = '1';
       
-      // Set proper initial text colors
+      // Set proper initial text colors and ensure white backgrounds
       if (button.classList.contains('active')) {
-        button.style.color = '#ffffff';
-        button.style.backgroundColor = '#3b82f6';
+        button.style.color = '#3b82f6';
+        button.style.backgroundColor = '#ffffff';
+        button.style.background = '#ffffff';
       } else {
         button.style.color = '#374151';
         button.style.backgroundColor = '#ffffff';
+        button.style.background = '#ffffff';
       }
+      
+      // Remove any blue background classes that might be present
+      button.classList.remove('bg-primary-600', 'bg-blue-600', 'text-white');
     });
     
     // Preload critical resources
@@ -308,24 +324,48 @@ const processedProducts = products
     z-index: 10 !important;
   }
   
-  /* Filter button text visibility */
+  /* Filter button text visibility - Force white backgrounds */
   .filter-btn {
     color: #374151 !important; /* Dark gray text for inactive buttons */
+    background-color: #ffffff !important; /* White background for all buttons */
+    background: #ffffff !important; /* Force white background */
+    border: 1px solid #d1d5db !important; /* Gray border */
   }
   
   .filter-btn:hover {
-    color: #111827 !important; /* Black text on hover */
+    color: #111827 !important; /* Darker text on hover */
     background-color: #f9fafb !important; /* Light gray background on hover */
+    background: #f9fafb !important; /* Force light gray background on hover */
+    border-color: #9ca3af !important; /* Darker border on hover */
   }
   
   .filter-btn.active {
-    color: #ffffff !important; /* White text for active button */
-    background-color: #3b82f6 !important; /* Blue background for active button */
+    color: #3b82f6 !important; /* Blue text for active button */
+    background-color: #ffffff !important; /* White background for active button */
+    background: #ffffff !important; /* Force white background for active button */
+    border-color: #3b82f6 !important; /* Blue border for active button */
   }
   
   .filter-btn.active:hover {
-    color: #ffffff !important; /* Keep white text on active button hover */
-    background-color: #2563eb !important; /* Darker blue on active button hover */
+    color: #2563eb !important; /* Darker blue text on active button hover */
+    background-color: #f9fafb !important; /* Light gray background on active button hover */
+    background: #f9fafb !important; /* Force light gray background on active button hover */
+    border-color: #2563eb !important; /* Darker blue border on active button hover */
+  }
+  
+  /* Override any Tailwind classes that might be causing blue backgrounds */
+  .filter-btn.bg-primary-600,
+  .filter-btn.bg-blue-600,
+  .filter-btn[class*="bg-primary"],
+  .filter-btn[class*="bg-blue"] {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+  }
+  
+  /* Ensure filter section has white background */
+  .filter-section {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
   }
   
   /* Ensure filter section is always visible */
@@ -369,3 +409,23 @@ const processedProducts = products
     transition: all 0.2s ease;
   }
 </style>
+
+<script>
+  // Simple smooth scrolling - same as About and Contact pages
+  document.addEventListener('DOMContentLoaded', function() {
+    // Simple smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href').substring(1);
+        const target = document.getElementById(targetId);
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+  });
+</script>
