@@ -411,6 +411,18 @@ import Layout from '../layouts/Layout.astro';
         supabase: !!window.supabase
       });
       
+      // Wait for auth manager if not available
+      let authManager = window.globalAuthManager || window.simpleAuthManager;
+      if (!authManager) {
+        console.log('⏳ Auth manager not available, waiting...');
+        let attempts = 0;
+        while (!authManager && attempts < 50) { // Wait up to 5 seconds
+          await new Promise(resolve => setTimeout(resolve, 100));
+          authManager = window.globalAuthManager || window.simpleAuthManager;
+          attempts++;
+        }
+      }
+      
       // First, always clear the form to ensure no previous data is shown
       console.log('🧹 Clearing form first to ensure clean state...');
       window.clearForm();
@@ -418,7 +430,6 @@ import Layout from '../layouts/Layout.astro';
       const urlParams = getUrlParams();
       
       // Only pre-fill project details if user is logged in and has selected products
-      const authManager = window.globalAuthManager || window.simpleAuthManager;
       const isLoggedIn = authManager && authManager.isUserLoggedIn();
       
       if (isLoggedIn && urlParams.projectType) {
@@ -1054,19 +1065,26 @@ import Layout from '../layouts/Layout.astro';
       window.checkUserStatus();
     }, 100);
     
-    // Small delay to ensure global auth manager is fully loaded
-    setTimeout(() => {
-      // Check if user is actually logged in before pre-filling
+    // Wait for auth manager to be fully initialized
+    const waitForAuthManager = () => {
       const authManager = window.globalAuthManager || window.simpleAuthManager;
-      if (authManager && authManager.isUserLoggedIn()) {
-        console.log('👤 User is logged in - pre-filling form');
-        prefillForm();
+      if (authManager) {
+        console.log('✅ Auth manager found, checking user status...');
+        if (authManager.isUserLoggedIn()) {
+          console.log('👤 User is logged in - pre-filling form');
+          prefillForm();
+        } else {
+          console.log('👤 User is not logged in - clearing form');
+          window.clearForm();
+        }
       } else {
-        console.log('👤 User is not logged in - clearing form');
-        // Only clear form if user is not logged in
-        window.clearForm();
+        console.log('⏳ Auth manager not ready yet, retrying in 100ms...');
+        setTimeout(waitForAuthManager, 100);
       }
-    }, 500);
+    };
+    
+    // Start checking for auth manager after a short delay
+    setTimeout(waitForAuthManager, 200);
   });
 
   // Listen for logout events to clear the form
@@ -1075,25 +1093,38 @@ import Layout from '../layouts/Layout.astro';
     window.clearForm();
   });
 
+  // Listen for login events to pre-fill the form
+  window.addEventListener('user-logged-in', () => {
+    console.log('👤 User logged in - pre-filling contact form');
+    setTimeout(() => {
+      prefillForm();
+    }, 100);
+  });
+
   // Additional form clearing on window load to ensure form is always cleared
   window.addEventListener('load', () => {
-    console.log('🔄 Window loaded - ensuring form is cleared');
+    console.log('🔄 Window loaded - checking authentication status...');
     
-    // Always clear form first
-    window.clearForm();
+    // Wait for auth manager to be available
+    const waitForAuthManagerOnLoad = () => {
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      if (authManager) {
+        console.log('✅ Auth manager found on window load, checking user status...');
+        if (authManager.isUserLoggedIn()) {
+          console.log('👤 User is logged in on window load - pre-filling form');
+          prefillForm();
+        } else {
+          console.log('👤 User not logged in on window load - clearing form');
+          window.clearForm();
+        }
+      } else {
+        console.log('⏳ Auth manager not ready on window load, retrying in 100ms...');
+        setTimeout(waitForAuthManagerOnLoad, 100);
+      }
+    };
     
-    // Double-check authentication status and clear form if not logged in
-    const authManager = window.globalAuthManager || window.simpleAuthManager;
-    if (!authManager || !authManager.isUserLoggedIn()) {
-      console.log('👤 User not logged in on window load - clearing form');
-      window.clearForm();
-    } else {
-      console.log('👤 User is logged in on window load - will pre-fill form');
-      // If user is logged in, pre-fill the form
-      setTimeout(() => {
-        window.prefillForm();
-      }, 200);
-    }
+    // Start checking for auth manager
+    setTimeout(waitForAuthManagerOnLoad, 100);
   });
 
   // Clear form on page visibility change (when user comes back to tab) - but only if user is not logged in

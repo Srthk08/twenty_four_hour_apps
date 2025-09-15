@@ -40,7 +40,7 @@
         </div>
 
         <!-- Auth Buttons - Only visible before login -->
-        <div id="auth-buttons" class="flex items-center space-x-6">
+        <div id="auth-buttons" class="hidden flex items-center space-x-6">
           <a href="/login" class="text-white text-opacity-90 hover:text-white px-8 py-3 text-lg font-medium transition-all duration-300 rounded-xl hover:bg-white hover:bg-opacity-20 hover:scale-105">
             Sign In
           </a>
@@ -164,7 +164,7 @@
           </div>
 
           <!-- Auth Buttons - Only visible before login -->
-          <div id="mobile-auth-buttons" class="space-y-3">
+          <div id="mobile-auth-buttons" class="hidden space-y-3">
             <a href="/login" class="block px-6 py-4 text-lg font-medium text-white text-opacity-90 hover:text-white hover:bg-white hover:bg-opacity-20 rounded-xl transition-all duration-300 text-center">
               Sign In
             </a>
@@ -252,9 +252,61 @@
       left: 1rem;
     }
   }
+  
+  /* Prevent navbar flashing during navigation */
+  #auth-buttons, #user-menu, #mobile-auth-buttons, #mobile-user-menu {
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+  }
+  
+  /* Ensure smooth transitions between states */
+  #auth-loading, #mobile-auth-loading {
+    transition: opacity 0.2s ease-in-out;
+  }
+  
+  /* Fix navbar positioning - ensure consistent layout */
+  #main-navigation {
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* Ensure auth section maintains proper positioning */
+  .hidden.lg\\:flex.items-center.space-x-6 {
+    position: relative;
+    z-index: 1;
+  }
 </style>
 
 <script>
+  // Immediate script to prevent flashing - runs before DOM is ready
+  (function() {
+    // Check auth state immediately and set initial display
+    try {
+      const sessionData = sessionStorage.getItem('simple-auth-session');
+      const isAuthenticated = sessionData && JSON.parse(sessionData).user;
+      
+      // Set initial state in CSS to prevent flash - only control visibility, not layout
+      const style = document.createElement('style');
+      if (isAuthenticated) {
+        // User is logged in - hide auth buttons, show user menu
+        style.textContent = `
+          #auth-buttons, #mobile-auth-buttons { visibility: hidden !important; opacity: 0 !important; }
+          #user-menu, #mobile-user-menu { visibility: visible !important; opacity: 1 !important; }
+        `;
+      } else {
+        // User is not logged in - show auth buttons, hide user menu
+        style.textContent = `
+          #auth-buttons, #mobile-auth-buttons { visibility: visible !important; opacity: 1 !important; }
+          #user-menu, #mobile-user-menu { visibility: hidden !important; opacity: 0 !important; }
+        `;
+      }
+      document.head.appendChild(style);
+      
+      console.log('✅ Initial navbar state set immediately:', isAuthenticated ? 'logged in' : 'logged out');
+    } catch (error) {
+      console.error('Error setting initial navbar state:', error);
+    }
+  })();
+
   // Global variables
   let isUserMenuOpen = false;
   let isMobileMenuOpen = false;
@@ -305,35 +357,73 @@
       const mobileUserMenu = document.getElementById('mobile-user-menu');
       
       if (isAuthenticated && user) {
-        // User is logged in
-        if (authButtons) authButtons.classList.add('hidden');
-        if (userMenu) userMenu.classList.remove('hidden');
-        if (mobileAuthButtons) mobileAuthButtons.classList.add('hidden');
-        if (mobileUserMenu) mobileUserMenu.classList.remove('hidden');
+        // User is logged in - hide auth buttons, show user menu
+        if (authButtons) {
+          authButtons.style.display = 'none';
+          authButtons.classList.add('hidden');
+        }
+        if (userMenu) {
+          userMenu.style.display = 'flex';
+          userMenu.classList.remove('hidden');
+        }
+        if (mobileAuthButtons) {
+          mobileAuthButtons.style.display = 'none';
+          mobileAuthButtons.classList.add('hidden');
+        }
+        if (mobileUserMenu) {
+          mobileUserMenu.style.display = 'block';
+          mobileUserMenu.classList.remove('hidden');
+        }
         
         // Update user info
         updateUserInfoFallback(user);
+        console.log('✅ User logged in - showing user menu');
       } else {
-        // User is not logged in - show auth buttons (they should already be visible by default)
-        if (authButtons) authButtons.classList.remove('hidden');
-        if (userMenu) userMenu.classList.add('hidden');
-        if (mobileAuthButtons) mobileAuthButtons.classList.remove('hidden');
-        if (mobileUserMenu) mobileUserMenu.classList.add('hidden');
+        // User is not logged in - show auth buttons, hide user menu
+        if (authButtons) {
+          authButtons.style.display = 'flex';
+          authButtons.classList.remove('hidden');
+        }
+        if (userMenu) {
+          userMenu.style.display = 'none';
+          userMenu.classList.add('hidden');
+        }
+        if (mobileAuthButtons) {
+          mobileAuthButtons.style.display = 'block';
+          mobileAuthButtons.classList.remove('hidden');
+        }
+        if (mobileUserMenu) {
+          mobileUserMenu.style.display = 'none';
+          mobileUserMenu.classList.add('hidden');
+        }
+        console.log('✅ User not logged in - showing auth buttons');
       }
       
       console.log('✅ Header updated using fallback logic');
     } catch (error) {
       console.error('Error in fallback update:', error);
-      // Default to showing auth buttons if there's an error (they should already be visible by default)
+      // Default to showing auth buttons if there's an error
       const authButtons = document.getElementById('auth-buttons');
       const userMenu = document.getElementById('user-menu');
       const mobileAuthButtons = document.getElementById('mobile-auth-buttons');
       const mobileUserMenu = document.getElementById('mobile-user-menu');
       
-      if (authButtons) authButtons.classList.remove('hidden');
-      if (userMenu) userMenu.classList.add('hidden');
-      if (mobileAuthButtons) mobileAuthButtons.classList.remove('hidden');
-      if (mobileUserMenu) mobileUserMenu.classList.add('hidden');
+      if (authButtons) {
+        authButtons.style.display = 'flex';
+        authButtons.classList.remove('hidden');
+      }
+      if (userMenu) {
+        userMenu.style.display = 'none';
+        userMenu.classList.add('hidden');
+      }
+      if (mobileAuthButtons) {
+        mobileAuthButtons.style.display = 'block';
+        mobileAuthButtons.classList.remove('hidden');
+      }
+      if (mobileUserMenu) {
+        mobileUserMenu.style.display = 'none';
+        mobileUserMenu.classList.add('hidden');
+      }
     }
   }
 
@@ -356,20 +446,149 @@
   function setInitialUIState() {
     console.log('Setting initial UI state using global auth manager');
     
-    // First try immediate fallback
-    updateHeaderFallback();
+    // Show loading state first to prevent flashing
+    showLoadingState();
     
-    // Wait for global auth manager to be ready
+    // Check authentication state immediately
+    const isAuthenticated = checkAuthState();
+    
+    if (isAuthenticated) {
+      // User is logged in - show user menu immediately
+      showUserMenu();
+      console.log('✅ User authenticated - showing user menu');
+    } else {
+      // User is not logged in - show auth buttons
+      showAuthButtons();
+      console.log('✅ User not authenticated - showing auth buttons');
+    }
+    
+    // Hide loading state after showing appropriate UI
     setTimeout(() => {
-      const authManager = window.globalAuthManager || window.simpleAuthManager;
-      if (authManager) {
-        authManager.updateHeader();
-        console.log('✅ Initial UI state set using global auth manager');
-      } else {
-        console.log('Global auth manager not ready yet, using fallback');
-        updateHeaderFallback();
-      }
+      hideLoadingState();
     }, 100);
+  }
+  
+  // Function to check authentication state
+  function checkAuthState() {
+    try {
+      const sessionData = sessionStorage.getItem('simple-auth-session');
+      return sessionData && JSON.parse(sessionData).user;
+    } catch (error) {
+      console.error('Error checking auth state:', error);
+      return false;
+    }
+  }
+  
+  // Function to show user menu
+  function showUserMenu() {
+    const authButtons = document.getElementById('auth-buttons');
+    const userMenu = document.getElementById('user-menu');
+    const mobileAuthButtons = document.getElementById('mobile-auth-buttons');
+    const mobileUserMenu = document.getElementById('mobile-user-menu');
+    
+    if (authButtons) {
+      authButtons.style.visibility = 'hidden';
+      authButtons.style.opacity = '0';
+      authButtons.classList.add('hidden');
+    }
+    if (userMenu) {
+      userMenu.style.visibility = 'visible';
+      userMenu.style.opacity = '1';
+      userMenu.classList.remove('hidden');
+    }
+    if (mobileAuthButtons) {
+      mobileAuthButtons.style.visibility = 'hidden';
+      mobileAuthButtons.style.opacity = '0';
+      mobileAuthButtons.classList.add('hidden');
+    }
+    if (mobileUserMenu) {
+      mobileUserMenu.style.visibility = 'visible';
+      mobileUserMenu.style.opacity = '1';
+      mobileUserMenu.classList.remove('hidden');
+    }
+    
+    // Update user info
+    updateUserInfoFromSession();
+  }
+  
+  // Function to show auth buttons
+  function showAuthButtons() {
+    const authButtons = document.getElementById('auth-buttons');
+    const userMenu = document.getElementById('user-menu');
+    const mobileAuthButtons = document.getElementById('mobile-auth-buttons');
+    const mobileUserMenu = document.getElementById('mobile-user-menu');
+    
+    if (authButtons) {
+      authButtons.style.visibility = 'visible';
+      authButtons.style.opacity = '1';
+      authButtons.classList.remove('hidden');
+    }
+    if (userMenu) {
+      userMenu.style.visibility = 'hidden';
+      userMenu.style.opacity = '0';
+      userMenu.classList.add('hidden');
+    }
+    if (mobileAuthButtons) {
+      mobileAuthButtons.style.visibility = 'visible';
+      mobileAuthButtons.style.opacity = '1';
+      mobileAuthButtons.classList.remove('hidden');
+    }
+    if (mobileUserMenu) {
+      mobileUserMenu.style.visibility = 'hidden';
+      mobileUserMenu.style.opacity = '0';
+      mobileUserMenu.classList.add('hidden');
+    }
+  }
+  
+  // Function to update user info from session
+  function updateUserInfoFromSession() {
+    try {
+      const sessionData = sessionStorage.getItem('simple-auth-session');
+      if (sessionData) {
+        const session = JSON.parse(sessionData);
+        const user = session.user;
+        
+        if (user) {
+          const userEmail = document.getElementById('user-email');
+          const userName = document.getElementById('user-name');
+          const userAvatar = document.getElementById('user-avatar');
+          const mobileUserEmail = document.getElementById('mobile-user-email');
+
+          if (userEmail) userEmail.textContent = user.email || '';
+          if (userName) userName.textContent = user.full_name || user.email?.split('@')[0] || 'User';
+          if (userAvatar) userAvatar.textContent = (user.full_name || user.email || 'U').charAt(0).toUpperCase();
+          if (mobileUserEmail) mobileUserEmail.textContent = user.email || '';
+        }
+      }
+    } catch (error) {
+      console.error('Error updating user info:', error);
+    }
+  }
+  
+  // Function to show loading state
+  function showLoadingState() {
+    const authLoading = document.getElementById('auth-loading');
+    const authButtons = document.getElementById('auth-buttons');
+    const userMenu = document.getElementById('user-menu');
+    const mobileAuthLoading = document.getElementById('mobile-auth-loading');
+    const mobileAuthButtons = document.getElementById('mobile-auth-buttons');
+    const mobileUserMenu = document.getElementById('mobile-user-menu');
+    
+    if (authLoading) authLoading.classList.remove('hidden');
+    if (authButtons) authButtons.classList.add('hidden');
+    if (userMenu) userMenu.classList.add('hidden');
+    if (mobileAuthLoading) mobileAuthLoading.classList.remove('hidden');
+    if (mobileAuthButtons) mobileAuthButtons.classList.add('hidden');
+    if (mobileUserMenu) mobileUserMenu.classList.add('hidden');
+  }
+  
+  // Function to hide loading state
+  function hideLoadingState() {
+    const authLoading = document.getElementById('auth-loading');
+    const mobileAuthLoading = document.getElementById('mobile-auth-loading');
+    
+    if (authLoading) authLoading.classList.add('hidden');
+    if (mobileAuthLoading) mobileAuthLoading.classList.add('hidden');
   }
 
   // User dropdown functionality
@@ -610,6 +829,7 @@
       if (authManager) {
         console.log('Global auth manager found, updating header');
         authManager.updateHeader();
+        hideLoadingState();
       } else {
         // Keep checking for a bit longer
         setTimeout(checkForAuthManager, 200);
@@ -619,16 +839,26 @@
     // Start checking for auth manager
     setTimeout(checkForAuthManager, 100);
     
-    // Listen for URL changes to update dashboard links
+    // Listen for URL changes to update dashboard links and prevent flashing
     window.addEventListener('popstate', () => {
+      console.log('Navigation detected - updating header state');
+      setInitialUIState();
       initDashboardLinks();
     });
     
     // Also update links when the page becomes visible (in case of back/forward navigation)
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) {
+        console.log('Page visible - updating header state');
+        setInitialUIState();
         initDashboardLinks();
       }
+    });
+    
+    // Listen for page focus to ensure header state is correct
+    window.addEventListener('focus', () => {
+      console.log('Window focused - updating header state');
+      setInitialUIState();
     });
     
     console.log('✅ Header initialized with fallback support');

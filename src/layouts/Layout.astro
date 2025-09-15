@@ -19,14 +19,37 @@ const { title, description = "DevExpress - 24 Hour Delivery" } = Astro.props;
     <meta name="description" content={description} />
     <title>{title}</title>
 
-    <!-- Favicon -->
+    <!-- Favicon - Preload to prevent flickering -->
+    <link rel="preload" href="/favicon.svg" as="image" type="image/svg+xml" />
+    
+    <!-- Primary favicon - SVG for modern browsers -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    
+    <!-- Fallback favicon - ICO for older browsers -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNSIgZmlsbD0iIzE0YjhhNiIvPgogIDx0ZXh0IHg9IjE2IiB5PSIyMSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiPjI0PC90ZXh0Pgo8L3N2Zz4K" />
+    
+    <!-- Shortcut icon -->
     <link rel="shortcut icon" href="/favicon.svg" />
+    
+    <!-- Apple touch icon -->
     <link rel="apple-touch-icon" href="/favicon.svg" />
+    
+    <!-- Theme color -->
     <meta name="theme-color" content="#14b8a6" />
     
-    <!-- Inline favicon as fallback -->
-    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNSIgZmlsbD0iIzE0YjhhNiIvPgogIDx0ZXh0IHg9IjE2IiB5PSIyMSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiPjI0PC90ZXh0Pgo8L3N2Zz4K">
+    <!-- Additional meta tags to prevent default icons -->
+    <meta name="msapplication-TileColor" content="#14b8a6" />
+    <meta name="msapplication-config" content="none" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="DevExpress" />
+    
+    <!-- Prevent browser from showing default icons -->
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    
+    <!-- Persistent favicon to survive navigation -->
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNSIgZmlsbD0iIzE0YjhhNiIvPgogIDx0ZXh0IHg9IjE2IiB5PSIyMSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiPjI0PC90ZXh0Pgo8L3N2Zz4K" />
 
     <!-- Preconnect to external domains -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -310,6 +333,149 @@ const { title, description = "DevExpress - 24 Hour Delivery" } = Astro.props;
       }
     </style>
     
+    <!-- Force favicon to load immediately to prevent flickering -->
+    <script>
+      // Global favicon management to prevent hand icon during navigation
+      (function() {
+        let faviconLocked = false;
+        
+        function forceFavicon() {
+          if (faviconLocked) return;
+          faviconLocked = true;
+          
+          // Remove ALL existing favicon links
+          const existingFavicons = document.querySelectorAll('link[rel*="icon"], link[rel*="shortcut"], link[rel*="apple-touch"]');
+          existingFavicons.forEach(link => link.remove());
+          
+          // Create the correct favicon
+          const favicon = document.createElement('link');
+          favicon.rel = 'icon';
+          favicon.type = 'image/svg+xml';
+          favicon.href = '/favicon.svg';
+          document.head.appendChild(favicon);
+          
+          // Also set it as shortcut icon
+          const shortcutIcon = document.createElement('link');
+          shortcutIcon.rel = 'shortcut icon';
+          shortcutIcon.href = '/favicon.svg';
+          document.head.appendChild(shortcutIcon);
+          
+          // Apple touch icon
+          const appleIcon = document.createElement('link');
+          appleIcon.rel = 'apple-touch-icon';
+          appleIcon.href = '/favicon.svg';
+          document.head.appendChild(appleIcon);
+          
+          // Force the favicon to load by creating an image element
+          const img = new Image();
+          img.onload = function() {
+            console.log('✅ Favicon loaded successfully');
+            faviconLocked = false;
+          };
+          img.src = '/favicon.svg';
+          
+          // Also try to set it directly on the document
+          try {
+            document.querySelector('link[rel="icon"]').href = '/favicon.svg';
+          } catch(e) {
+            // Ignore if not found
+          }
+        }
+        
+        // Force favicon immediately
+        forceFavicon();
+        
+        // Force favicon on every page load
+        window.addEventListener('load', forceFavicon);
+        document.addEventListener('DOMContentLoaded', forceFavicon);
+        
+        // Force favicon before page unload (during navigation)
+        window.addEventListener('beforeunload', function() {
+          forceFavicon();
+        });
+        
+        // Force favicon on page visibility change
+        document.addEventListener('visibilitychange', function() {
+          if (!document.hidden) {
+            forceFavicon();
+          }
+        });
+        
+        // Force favicon on focus (when user returns to tab)
+        window.addEventListener('focus', forceFavicon);
+        
+        // Force favicon on every navigation event
+        window.addEventListener('popstate', forceFavicon);
+        
+        // Override any browser default icon behavior
+        document.addEventListener('DOMContentLoaded', function() {
+          // Remove any default browser icons
+          const defaultIcons = document.querySelectorAll('link[rel="icon"][href*="data:"]');
+          defaultIcons.forEach(icon => icon.remove());
+          
+          // Ensure our favicon is the only one
+          const ourFavicon = document.querySelector('link[rel="icon"][href="/favicon.svg"]');
+          if (!ourFavicon) {
+            forceFavicon();
+          }
+        });
+        
+        // Continuous monitoring to prevent hand icon
+        setInterval(function() {
+          const currentFavicon = document.querySelector('link[rel="icon"]');
+          if (!currentFavicon || !currentFavicon.href.includes('/favicon.svg')) {
+            console.log('🔄 Favicon lost, forcing reload...');
+            forceFavicon();
+          }
+        }, 100);
+        
+        // Intercept all link clicks to maintain favicon during navigation
+        document.addEventListener('click', function(e) {
+          const link = e.target.closest('a[href]');
+          if (link && !link.href.includes('#')) {
+            // Force favicon before navigation
+            forceFavicon();
+            
+            // Also set a temporary favicon during navigation
+            setTimeout(function() {
+              const tempFavicon = document.createElement('link');
+              tempFavicon.rel = 'icon';
+              tempFavicon.type = 'image/svg+xml';
+              tempFavicon.href = '/favicon.svg';
+              document.head.appendChild(tempFavicon);
+            }, 10);
+          }
+        });
+        
+        // Override browser's default favicon behavior during navigation
+        const originalPushState = history.pushState;
+        const originalReplaceState = history.replaceState;
+        
+        history.pushState = function() {
+          forceFavicon();
+          return originalPushState.apply(history, arguments);
+        };
+        
+        history.replaceState = function() {
+          forceFavicon();
+          return originalReplaceState.apply(history, arguments);
+        };
+        
+        console.log('✅ Favicon management system active - hand icon prevented during navigation');
+      })();
+      
+      // Register service worker for favicon persistence
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/favicon-sw.js')
+          .then(function(registration) {
+            console.log('✅ Favicon Service Worker registered:', registration.scope);
+          })
+          .catch(function(error) {
+            console.log('❌ Favicon Service Worker registration failed:', error);
+          });
+      }
+    </script>
+
     <!-- Immediate admin panel detection and navbar hiding -->
     <script>
       // Check if we're in admin panel immediately

@@ -214,7 +214,7 @@ import AuthGuard from '../components/AuthGuard.astro';
                 Cancel
               </button>
               <button type="submit" class="px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium">
-                Save Requirements
+                Save and Make Payment
               </button>
             </div>
           </form>
@@ -435,14 +435,14 @@ import AuthGuard from '../components/AuthGuard.astro';
                 Cancel
               </button>
               <button type="submit" class="px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium">
-                Save Order Menu Requirements
+                Save and Make Payment
               </button>
             </div>
           </form>
         </div>
 
         <!-- Recent Activity -->
-        <div id="recent-activity" class="bg-white rounded-lg shadow-sm p-6">
+        <div id="recent-activity" class="bg-white rounded-lg shadow-sm p-6" style="display: none;">
           <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
           <div class="text-center py-8">
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -869,6 +869,9 @@ import AuthGuard from '../components/AuthGuard.astro';
         // Show success message
         alert('Order Menu requirements saved successfully! Our team will contact you soon.');
         
+        // Clear URL parameters to show browse products section
+        window.history.replaceState({}, document.title, window.location.pathname);
+        
         // Show Browse Products section with smooth transition
         showBrowseProductsSection();
         
@@ -1002,6 +1005,9 @@ import AuthGuard from '../components/AuthGuard.astro';
         // Show success message
         alert('Project requirements saved successfully! Our team will contact you soon.');
         
+        // Clear URL parameters to show browse products section
+        window.history.replaceState({}, document.title, window.location.pathname);
+        
         // Show Browse Products section with smooth transition
         showBrowseProductsSection();
         
@@ -1052,6 +1058,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     // Show Browse Products section with smooth transition
     setTimeout(() => {
       if (recentActivity) {
+        recentActivity.style.display = 'block'; // Ensure it's visible
         recentActivity.classList.remove('hidden');
         recentActivity.style.transition = 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out';
         recentActivity.style.opacity = '0';
@@ -1069,111 +1076,133 @@ import AuthGuard from '../components/AuthGuard.astro';
   function autofillUserDetails() {
     console.log('🔄 Attempting to auto-fill user details...');
     
-    // Get user data from session storage (correct key)
-    const sessionData = sessionStorage.getItem('simple-auth-session');
-    console.log('📦 Session data:', sessionData);
-    
-    if (sessionData) {
-      try {
-        const sessionObj = JSON.parse(sessionData);
-        console.log('👤 Parsed session data:', sessionObj);
+    // Wait for auth manager to be available
+    const waitForAuthManager = () => {
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      if (authManager && authManager.isUserLoggedIn()) {
+        const currentUser = authManager.getCurrentUser();
+        console.log('👤 Current user from auth manager:', currentUser);
         
-        // Get user data from the nested user object
-        const userData = sessionObj.user;
-        console.log('👤 User data from session:', userData);
-        
-        if (userData && userData.email) {
-          console.log('📧 Auto-filling email:', userData.email);
-          const emailFields = document.querySelectorAll('input[name="email"]');
+        if (currentUser && currentUser.email) {
+          console.log('📧 Auto-filling email:', currentUser.email);
+          const emailFields = document.querySelectorAll('input[name="email"], input[type="email"]');
           emailFields.forEach(field => {
-            field.value = userData.email;
+            field.value = currentUser.email;
+            field.dispatchEvent(new Event('input', { bubbles: true }));
+            field.dispatchEvent(new Event('change', { bubbles: true }));
             console.log('✅ Filled email field:', field);
           });
         }
         
-        if (userData && userData.phone) {
-          console.log('📱 Auto-filling phone:', userData.phone);
-          const phoneFields = document.querySelectorAll('input[name="phone"]');
+        if (currentUser && currentUser.phone) {
+          console.log('📱 Auto-filling phone:', currentUser.phone);
+          const phoneFields = document.querySelectorAll('input[name="phone"], input[type="tel"]');
           phoneFields.forEach(field => {
-            field.value = userData.phone;
+            field.value = currentUser.phone;
+            field.dispatchEvent(new Event('input', { bubbles: true }));
+            field.dispatchEvent(new Event('change', { bubbles: true }));
             console.log('✅ Filled phone field:', field);
           });
         }
-      } catch (error) {
-        console.error('❌ Error parsing session data:', error);
-      }
-    }
-    
-    // Also try to get from global auth manager if available
-    if (window.authManager && window.authManager.getCurrentUser) {
-      console.log('🔍 Trying global auth manager...');
-      const currentUser = window.authManager.getCurrentUser();
-      console.log('👤 Current user from auth manager:', currentUser);
-      
-      if (currentUser && currentUser.email) {
-        const emailFields = document.querySelectorAll('input[name="email"]');
-        emailFields.forEach(field => {
-          if (!field.value) {
-            field.value = currentUser.email;
-            console.log('✅ Filled email from auth manager:', field);
-          }
-        });
-      }
-      if (currentUser && currentUser.phone) {
-        const phoneFields = document.querySelectorAll('input[name="phone"]');
-        phoneFields.forEach(field => {
-          if (!field.value) {
-            field.value = currentUser.phone;
-            console.log('✅ Filled phone from auth manager:', field);
-          }
-        });
-      }
-    }
-    
-    console.log('✅ Auto-fill attempt completed');
-    
-    // Additional attempt with more specific selectors
-    setTimeout(() => {
-      console.log('🔄 Additional auto-fill attempt...');
-      const emailFields = document.querySelectorAll('input[name="email"], input[type="email"]');
-      const phoneFields = document.querySelectorAll('input[name="phone"], input[type="tel"]');
-      
-      console.log('📧 Found email fields:', emailFields.length);
-      console.log('📱 Found phone fields:', phoneFields.length);
-      
-      // Try to fill email again
-      if (sessionData) {
-        try {
-          const sessionObj = JSON.parse(sessionData);
-          const userData = sessionObj.user;
-          
-          if (userData && userData.email) {
-            emailFields.forEach((field, index) => {
-              if (!field.value) {
-                field.value = userData.email;
-                console.log(`✅ Additional fill email field ${index}:`, field);
-              }
-            });
-          }
-          
-          if (userData && userData.phone) {
-            phoneFields.forEach((field, index) => {
-              if (!field.value) {
-                field.value = userData.phone;
-                console.log(`✅ Additional fill phone field ${index}:`, field);
-              }
-            });
-          }
-        } catch (error) {
-          console.error('❌ Error in additional auto-fill:', error);
+        
+        if (currentUser && currentUser.full_name) {
+          console.log('👤 Auto-filling contact person:', currentUser.full_name);
+          const contactPersonFields = document.querySelectorAll('input[name="contactPerson"]');
+          contactPersonFields.forEach(field => {
+            field.value = currentUser.full_name;
+            field.dispatchEvent(new Event('input', { bubbles: true }));
+            field.dispatchEvent(new Event('change', { bubbles: true }));
+            console.log('✅ Filled contact person field:', field);
+          });
         }
+        
+        console.log('✅ Auto-fill completed with auth manager data');
+        return true;
       }
-    }, 1000);
+      return false;
+    };
+    
+    // Try immediate fill
+    if (!waitForAuthManager()) {
+      // If auth manager not ready, wait for it
+      let attempts = 0;
+      const maxAttempts = 50; // 5 seconds
+      const interval = setInterval(() => {
+        attempts++;
+        if (waitForAuthManager() || attempts >= maxAttempts) {
+          clearInterval(interval);
+          if (attempts >= maxAttempts) {
+            console.log('⏰ Auth manager timeout, trying fallback methods...');
+            
+            // Fallback: Try session storage
+            const sessionData = sessionStorage.getItem('simple-auth-session');
+            if (sessionData) {
+              try {
+                const sessionObj = JSON.parse(sessionData);
+                const userData = sessionObj.user;
+                
+                if (userData && userData.email) {
+                  const emailFields = document.querySelectorAll('input[name="email"], input[type="email"]');
+                  emailFields.forEach(field => {
+                    field.value = userData.email;
+                    field.dispatchEvent(new Event('input', { bubbles: true }));
+                    field.dispatchEvent(new Event('change', { bubbles: true }));
+                  });
+                }
+                
+                if (userData && userData.phone) {
+                  const phoneFields = document.querySelectorAll('input[name="phone"], input[type="tel"]');
+                  phoneFields.forEach(field => {
+                    field.value = userData.phone;
+                    field.dispatchEvent(new Event('input', { bubbles: true }));
+                    field.dispatchEvent(new Event('change', { bubbles: true }));
+                  });
+                }
+                
+                if (userData && userData.full_name) {
+                  const contactPersonFields = document.querySelectorAll('input[name="contactPerson"]');
+                  contactPersonFields.forEach(field => {
+                    field.value = userData.full_name;
+                    field.dispatchEvent(new Event('input', { bubbles: true }));
+                    field.dispatchEvent(new Event('change', { bubbles: true }));
+                  });
+                }
+                
+                console.log('✅ Auto-fill completed with session storage fallback');
+              } catch (error) {
+                console.error('❌ Error parsing session data:', error);
+              }
+            }
+          }
+        }
+      }, 100);
+    }
   }
 
   // Update user info when page loads
   document.addEventListener('DOMContentLoaded', () => {
     console.log('Dashboard DOM loaded - initializing with global auth manager');
+    
+    // Check URL parameters immediately to prevent blinking
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('product');
+    const price = urlParams.get('price');
+    
+    const recentActivity = document.getElementById('recent-activity');
+    
+    // Show recent activity only if there are NO URL parameters (no product selected)
+    if (!productId || !price) {
+      if (recentActivity) {
+        recentActivity.style.display = 'block';
+        console.log('✅ Showing browse products section - no product selected');
+      }
+    } else {
+      // Hide recent activity if there are URL parameters (product selected)
+      if (recentActivity) {
+        recentActivity.style.display = 'none';
+        console.log('✅ Hiding browse products section - product selected');
+      }
+    }
     
     // Smooth page load transition
     document.body.style.transition = 'opacity 0.3s ease-in-out';
@@ -1185,10 +1214,6 @@ import AuthGuard from '../components/AuthGuard.astro';
     }, 50);
     
     // Check if we should show a form based on URL parameters (fix refresh issue)
-    const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get('product');
-    const price = urlParams.get('price');
-    
     if (productId && price) {
       // Show the appropriate form based on product ID
       const products = [
@@ -1319,6 +1344,29 @@ import AuthGuard from '../components/AuthGuard.astro';
     setTimeout(() => updateUserInfo(), 500);
     setTimeout(() => updateUserInfo(), 1000);
     setTimeout(() => updateUserInfo(), 2000);
+    
+    // Double-check browse products section visibility after page load
+    setTimeout(() => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const productId = urlParams.get('product');
+      const price = urlParams.get('price');
+      
+      const recentActivity = document.getElementById('recent-activity');
+      
+      // Only show browse products section if no product is selected
+      if (!productId || !price) {
+        if (recentActivity) {
+          recentActivity.style.display = 'block';
+          recentActivity.classList.remove('hidden');
+          console.log('✅ Browse products section confirmed visible - no product selected');
+        }
+      } else {
+        if (recentActivity) {
+          recentActivity.style.display = 'none';
+          console.log('✅ Browse products section confirmed hidden - product selected');
+        }
+      }
+    }, 1000);
   });
   
   // Also try when window loads

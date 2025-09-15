@@ -33,10 +33,20 @@ import AuthGuard from '../components/AuthGuard.astro';
               </svg>
             </div>
             <h2 class="text-2xl font-bold text-gray-900 mb-2">No orders yet</h2>
-            <p class="text-gray-600 mb-6">Start shopping to see your orders here</p>
-            <a href="/products" class="inline-block bg-primary-600 hover:bg-primary-700 text-white font-medium px-8 py-3 rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
-              Browse Products
-            </a>
+            <p class="text-gray-600 mb-6">You haven't placed any orders yet. Browse our products and submit your requirements to see your orders here.</p>
+            <div class="space-y-4">
+              <a href="/products" class="inline-block bg-primary-600 hover:bg-primary-700 text-white font-medium px-8 py-3 rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
+                Browse Products
+              </a>
+              <div class="text-sm text-gray-500">
+                <p>Orders will appear here after you:</p>
+                <ul class="mt-2 space-y-1">
+                  <li>• Select a product from our catalog</li>
+                  <li>• Fill out the project requirements form</li>
+                  <li>• Submit your project details</li>
+                </ul>
+              </div>
+            </div>
           </div>
 
           <!-- Orders List -->
@@ -172,28 +182,90 @@ import AuthGuard from '../components/AuthGuard.astro';
     }
 
     loadOrders() {
-      // Load orders from localStorage (simulating database)
-      const ordersData = localStorage.getItem('user-orders');
-      console.log('Raw orders data:', ordersData);
+      // Load orders from multiple localStorage sources
+      const projectRequirements = localStorage.getItem('project-requirements');
+      const orderMenuRequirements = localStorage.getItem('order-menu-requirements');
+      const userOrders = localStorage.getItem('user-orders');
       
-      if (ordersData) {
-        const allOrders = JSON.parse(ordersData);
-        const currentUser = simpleAuth.getCurrentUser();
-        
-        console.log('All orders:', allOrders);
-        console.log('Current user:', currentUser);
-        
-        // Filter orders for current user only
-        if (currentUser) {
-          this.orders = allOrders.filter(order => order.userId === currentUser.email);
-          console.log('Filtered orders for user:', this.orders);
-        } else {
-          this.orders = [];
-          console.log('No current user found');
-        }
-      } else {
-        console.log('No orders data found in localStorage');
+      console.log('Loading orders from multiple sources...');
+      console.log('Project requirements:', projectRequirements);
+      console.log('Order menu requirements:', orderMenuRequirements);
+      console.log('User orders:', userOrders);
+      
+      this.orders = [];
+      
+      // Get current user
+      const currentUser = window.globalAuthManager?.getCurrentUser() || window.simpleAuthManager?.getCurrentUser();
+      console.log('Current user:', currentUser);
+      
+      if (!currentUser) {
+        console.log('No current user found');
+        return;
       }
+      
+      // Load project requirements as orders
+      if (projectRequirements) {
+        try {
+          const projectOrders = JSON.parse(projectRequirements);
+          projectOrders.forEach(order => {
+            this.orders.push({
+              ...order,
+              orderId: `PROJ-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              orderDate: order.timestamp || new Date().toISOString(),
+              total: this.extractPrice(order.productPrice) || 0,
+              projectName: order.productName || 'Custom Project',
+              description: order.productDescription || 'Professional digital solution',
+              requirements: order,
+              status: 'completed'
+            });
+          });
+        } catch (error) {
+          console.error('Error parsing project requirements:', error);
+        }
+      }
+      
+      // Load order menu requirements as orders
+      if (orderMenuRequirements) {
+        try {
+          const orderMenuOrders = JSON.parse(orderMenuRequirements);
+          orderMenuOrders.forEach(order => {
+            this.orders.push({
+              ...order,
+              orderId: `MENU-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              orderDate: order.timestamp || new Date().toISOString(),
+              total: this.extractPrice(order.productPrice) || 0,
+              projectName: order.productName || 'Order Menu System',
+              description: order.productDescription || 'Complete order management system',
+              requirements: order,
+              status: 'completed'
+            });
+          });
+        } catch (error) {
+          console.error('Error parsing order menu requirements:', error);
+        }
+      }
+      
+      // Load user orders (if any)
+      if (userOrders) {
+        try {
+          const userOrdersData = JSON.parse(userOrders);
+          const filteredOrders = userOrdersData.filter(order => order.userId === currentUser.email);
+          this.orders.push(...filteredOrders);
+        } catch (error) {
+          console.error('Error parsing user orders:', error);
+        }
+      }
+      
+      console.log('Total orders loaded:', this.orders.length);
+    }
+    
+    extractPrice(priceString) {
+      if (!priceString) return 0;
+      const match = priceString.match(/₹?([\d,]+)/);
+      if (match) {
+        return parseInt(match[1].replace(/,/g, ''));
+      }
+      return 0;
     }
 
     renderOrders() {
@@ -203,23 +275,21 @@ import AuthGuard from '../components/AuthGuard.astro';
 
       console.log('Rendering orders. Orders count:', this.orders.length);
 
-      // Hide loading after a short delay
-      setTimeout(() => {
-        loadingOrders?.classList.add('hidden');
+      // Hide loading immediately and show appropriate state
+      loadingOrders?.classList.add('hidden');
 
-        if (this.orders.length === 0) {
-          console.log('No orders found, showing empty state');
-          emptyOrders?.classList.remove('hidden');
-          ordersList?.classList.add('hidden');
-          return;
-        }
+      if (this.orders.length === 0) {
+        console.log('No orders found, showing empty state');
+        emptyOrders?.classList.remove('hidden');
+        ordersList?.classList.add('hidden');
+        return;
+      }
 
-        console.log('Orders found, showing orders list');
-        emptyOrders?.classList.add('hidden');
-        ordersList?.classList.remove('hidden');
+      console.log('Orders found, showing orders list');
+      emptyOrders?.classList.add('hidden');
+      ordersList?.classList.remove('hidden');
 
-        this.renderOrdersList();
-      }, 1000);
+      this.renderOrdersList();
     }
 
     renderOrdersList() {
