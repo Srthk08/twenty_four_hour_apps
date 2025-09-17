@@ -286,6 +286,66 @@ import Layout from '../layouts/Layout.astro';
   const errorMessage = document.getElementById('error-message');
   const errorText = document.getElementById('error-text');
 
+  // Personal field helpers
+  function getPersonalInputs() {
+    const firstNameInput = document.getElementById('first_name') as HTMLInputElement;
+    const lastNameInput = document.getElementById('last_name') as HTMLInputElement;
+    const emailInput = document.getElementById('email') as HTMLInputElement;
+    const phoneInput = document.getElementById('phone') as HTMLInputElement;
+    const companyInput = document.getElementById('company') as HTMLInputElement;
+    return { firstNameInput, lastNameInput, emailInput, phoneInput, companyInput };
+  }
+
+  function preventAutofill(el?: HTMLInputElement) {
+    if (!el) return;
+    el.setAttribute('autocomplete', 'off');
+    // Change the name temporarily to defeat saved autofill
+    el.setAttribute('data-orig-name', el.name || '');
+    el.name = `${el.id}_noautofill`;
+  }
+
+  function restoreName(el?: HTMLInputElement) {
+    if (!el) return;
+    const orig = el.getAttribute('data-orig-name');
+    if (orig) el.name = orig;
+  }
+
+  function clearAndDisablePersonalFields() {
+    const { firstNameInput, lastNameInput, emailInput, phoneInput, companyInput } = getPersonalInputs();
+    [firstNameInput, lastNameInput, emailInput, phoneInput, companyInput].forEach((el) => {
+      if (!el) return;
+      el.value = '';
+      el.disabled = true;
+      preventAutofill(el);
+    });
+    // Disable submit to prevent anonymous sends
+    const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement;
+    if (submitBtn) submitBtn.disabled = true;
+  }
+
+  function enablePersonalFields() {
+    const { firstNameInput, lastNameInput, emailInput, phoneInput, companyInput } = getPersonalInputs();
+    [firstNameInput, lastNameInput, emailInput, phoneInput, companyInput].forEach((el) => {
+      if (!el) return;
+      el.disabled = false;
+      restoreName(el);
+    });
+    const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement;
+    if (submitBtn) submitBtn.disabled = false;
+  }
+
+  // Immediately clear/disable until auth confirms login
+  clearAndDisablePersonalFields();
+
+  // Re-enable on login
+  window.addEventListener('user-logged-in', () => {
+    enablePersonalFields();
+  });
+  // Ensure cleared on logout
+  window.addEventListener('user-logged-out', () => {
+    clearAndDisablePersonalFields();
+  });
+
   // Get Supabase client from global window object
   let supabase = null;
 
@@ -431,7 +491,14 @@ import Layout from '../layouts/Layout.astro';
       
       // Only pre-fill project details if user is logged in and has selected products
       const isLoggedIn = authManager && authManager.isUserLoggedIn();
-      
+
+      // Toggle field/button enabled state according to auth
+      if (isLoggedIn) {
+        enablePersonalFields();
+      } else {
+        clearAndDisablePersonalFields();
+      }
+       
       if (isLoggedIn && urlParams.projectType) {
         const projectTypeSelect = document.getElementById('project_type') as HTMLSelectElement;
         if (projectTypeSelect) {
@@ -505,6 +572,11 @@ import Layout from '../layouts/Layout.astro';
         const phoneInput = document.getElementById('phone') as HTMLInputElement;
         const companyInput = document.getElementById('company') as HTMLInputElement;
 
+        // Enable fields when logged in
+        [firstNameInput, lastNameInput, emailInput, phoneInput, companyInput].forEach((el) => {
+          if (el) el.disabled = false;
+        });
+
         // Pre-fill first name and last name
         if (currentUser && currentUser.full_name) {
           const names = currentUser.full_name.split(' ');
@@ -523,44 +595,42 @@ import Layout from '../layouts/Layout.astro';
             console.log('✅ Pre-filled last name:', names.slice(1).join(' '));
           }
         }
-
-        // Pre-fill email
-        if (emailInput && currentUser.email) {
-          emailInput.value = currentUser.email;
-          // Trigger validation events
+        
+        // Pre-fill email, phone and company
+        if (emailInput) {
+          emailInput.value = currentUser.email || '';
           emailInput.dispatchEvent(new Event('input', { bubbles: true }));
           emailInput.dispatchEvent(new Event('change', { bubbles: true }));
           console.log('✅ Pre-filled email:', currentUser.email);
         }
-
-        // Pre-fill phone
         if (phoneInput && currentUser.phone) {
           phoneInput.value = currentUser.phone;
-          // Trigger validation events
-          phoneInput.dispatchEvent(new Event('input', { bubbles: true }));
-          phoneInput.dispatchEvent(new Event('change', { bubbles: true }));
-          console.log('✅ Pre-filled phone:', currentUser.phone);
         }
-
-        // Pre-fill company
         if (companyInput && currentUser.company_name) {
           companyInput.value = currentUser.company_name;
-          // Trigger validation events
-          companyInput.dispatchEvent(new Event('input', { bubbles: true }));
-          companyInput.dispatchEvent(new Event('change', { bubbles: true }));
-          console.log('✅ Pre-filled company:', currentUser.company_name);
         }
-
-          console.log('✅ Form pre-filled successfully with global auth manager data');
-          // Force validation to recognize pre-filled fields
-          setTimeout(() => forceFormValidation(), 100);
-        } else {
-          console.log('👤 User not properly authenticated - clearing form');
-          window.clearForm();
+        
         }
       } else {
-        console.log('👤 No auth manager available - clearing form');
-        window.clearForm();
+        // Not logged in: clear and disable personal fields
+        const firstNameInput = document.getElementById('first_name') as HTMLInputElement;
+        const lastNameInput = document.getElementById('last_name') as HTMLInputElement;
+        const emailInput = document.getElementById('email') as HTMLInputElement;
+        const phoneInput = document.getElementById('phone') as HTMLInputElement;
+        const companyInput = document.getElementById('company') as HTMLInputElement;
+
+        [firstNameInput, lastNameInput, emailInput, phoneInput, companyInput].forEach((el) => {
+          if (!el) return;
+          el.value = '';
+          el.disabled = true;
+        });
+        
+        // Show a gentle hint
+        const messageTextarea = document.getElementById('message') as HTMLTextAreaElement;
+        if (messageTextarea) {
+          messageTextarea.placeholder = 'Please sign in to send us a message.';
+        }
+        console.log('🚫 User not logged in - cleared and disabled personal fields');
       }
       
       if (supabase) {
@@ -854,11 +924,10 @@ import Layout from '../layouts/Layout.astro';
     const originalText = submitButton.textContent;
     submitButton.disabled = true;
     submitButton.innerHTML = `
-      <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <svg class="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
-      Sending...
     `;
 
     try {
