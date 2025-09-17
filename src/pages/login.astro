@@ -227,6 +227,8 @@ import Layout from '../layouts/Layout.astro';
   const successMessage = document.getElementById('success-message');
   const successText = document.getElementById('success-text');
   const googleSigninBtn = document.getElementById('google-signin-btn');
+  // Track whether user explicitly started Google OAuth from this page
+  let oauthGoogleStarted = false;
 
   // Show status message
   function showStatus(message, type = 'info') {
@@ -245,6 +247,9 @@ import Layout from '../layouts/Layout.astro';
 
   // Handle Google authentication
   async function handleGoogleAuth() {
+    oauthGoogleStarted = true;
+    // Persist intent across redirect/callback
+    sessionStorage.setItem('oauth-google', '1');
     try {
       showStatus('Connecting to Google...', 'loading');
       
@@ -323,6 +328,13 @@ import Layout from '../layouts/Layout.astro';
       const user = session.user;
       
       if (user.app_metadata.provider === 'google') {
+        // Only proceed if OAuth was initiated via the Google button
+        const started = oauthGoogleStarted || sessionStorage.getItem('oauth-google') === '1';
+        if (!started) {
+          return;
+        }
+        // Clear the intent flag once handled
+        sessionStorage.removeItem('oauth-google');
         showStatus('Syncing Google account...', 'loading');
         await syncGoogleUser(user);
         showStatus('Successfully signed in with Google!', 'success');
