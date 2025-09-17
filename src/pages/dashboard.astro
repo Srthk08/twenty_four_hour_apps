@@ -32,7 +32,6 @@ import AuthGuard from '../components/AuthGuard.astro';
             <div class="flex items-center justify-between">
               <div>
                 <h3 id="selected-product-name" class="text-xl font-bold text-gray-900 mb-2">Selected Product</h3>
-                <p id="selected-product-description" class="text-gray-600 mb-1">Product description</p>
                 <p class="text-sm text-blue-600 font-medium">Customize your project requirements below</p>
               </div>
               <div class="text-right">
@@ -671,7 +670,6 @@ import AuthGuard from '../components/AuthGuard.astro';
     } else {
             // Show regular customization form
             document.getElementById('selected-product-name').textContent = selectedProduct.name;
-            document.getElementById('selected-product-description').textContent = selectedProduct.description;
             document.getElementById('selected-product-price').textContent = `₹${parseInt(price).toLocaleString()}`;
             
             // Show/hide cuisine type and restaurant name based on product type
@@ -970,7 +968,6 @@ import AuthGuard from '../components/AuthGuard.astro';
       const projectRequirements = {
         productId: new URLSearchParams(window.location.search).get('product') || '1',
         productName: productName,
-        productDescription: document.getElementById('selected-product-description').textContent,
         productPrice: productPrice,
         projectName: data.projectName,
         appName: data.appName,
@@ -1228,7 +1225,6 @@ import AuthGuard from '../components/AuthGuard.astro';
       if (selectedProduct) {
         // Update product details
         document.getElementById('selected-product-name').textContent = selectedProduct.name;
-        document.getElementById('selected-product-description').textContent = selectedProduct.description;
         document.getElementById('selected-product-price').textContent = `₹${selectedProduct.price.toLocaleString()}`;
         
         // Update Order Menu System product details

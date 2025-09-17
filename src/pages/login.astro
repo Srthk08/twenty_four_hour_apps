@@ -76,8 +76,21 @@ import Layout from '../layouts/Layout.astro';
             </div>
           </div>
 
+          <!-- Submit Button -->
+            <button
+              type="submit"
+            id="login-btn"
+            class="w-full bg-primary-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+            >
+            Sign In
+            </button>
+
           <!-- Google Authentication -->
           <div class="google-auth-section">
+            <div class="divider">
+              <span>or</span>
+            </div>
+            
             <div class="google-auth-container">
               <button id="google-signin-btn" class="google-btn">
                 <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20">
@@ -89,20 +102,7 @@ import Layout from '../layouts/Layout.astro';
                 <span>Continue with Google</span>
               </button>
             </div>
-            
-            <div class="divider">
-              <span>or</span>
-            </div>
           </div>
-
-          <!-- Submit Button -->
-            <button
-              type="submit"
-            id="login-btn"
-            class="w-full bg-primary-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
-            >
-            Sign In
-            </button>
 
           <!-- Forgot Password Link -->
           <div class="text-center">
@@ -409,7 +409,30 @@ import Layout from '../layouts/Layout.astro';
       }
       successMessage?.classList.remove('hidden');
 
-          // Fetch user profile to determine redirect and get user data
+          // Create basic user data immediately
+          const userData = {
+            id: data.user.id,
+            email: data.user.email,
+            full_name: data.user.email?.split('@')[0] || 'User',
+            phone: 'Not set',
+            company_name: 'Not set',
+            role: 'customer'
+          };
+
+          // Trigger login event immediately
+          window.dispatchEvent(new CustomEvent('user-logged-in', {
+            detail: userData
+          }));
+
+          console.log('✅ User data sent to global auth manager:', userData);
+
+          // Set a fallback redirect in case profile fetch takes too long
+          const fallbackRedirect = setTimeout(() => {
+            console.log('⚠️ Fallback redirect triggered - going to dashboard');
+            window.location.href = '/dashboard';
+          }, 3000);
+
+          // Try to fetch user profile for role-based redirect (non-blocking)
           try {
             const { data: profileData, error: profileError } = await supabase
               .from('profiles')
@@ -421,17 +444,10 @@ import Layout from '../layouts/Layout.astro';
             
             if (!profileError && profileData) {
               console.log('✅ User profile found:', profileData);
-              console.log('🔍 Profile details:', {
-                id: profileData.id,
-                username: profileData.username,
-                role: profileData.role,
-                status: profileData.status,
-                full_name: profileData.full_name
-              });
               
               // Role-based redirect - ADMIN ROLE TAKES PRIORITY OVER STATUS
               if (profileData.role === 'admin' || profileData.role === 'developer' || profileData.role === 'support') {
-          redirectUrl = '/admin';
+                redirectUrl = '/admin';
                 console.log(`🎉 ADMIN USER DETECTED: ${profileData.full_name} (${profileData.role})`);
                 console.log(`🚀 Redirecting to admin panel: ${redirectUrl}`);
               } else {
@@ -442,58 +458,40 @@ import Layout from '../layouts/Layout.astro';
                 } else if (profileData.status && profileData.status === 'suspended') {
                   redirectUrl = '/dashboard?message=Your account has been suspended. Please contact support.&type=error';
                   console.log(`❌ Customer user suspended: ${profileData.full_name}`);
-        } else {
-          redirectUrl = '/dashboard';
+                } else {
+                  redirectUrl = '/dashboard';
                   console.log(`✅ Customer user: ${profileData.full_name} (${profileData.role})`);
                 }
               }
               
               console.log(`🎯 Final redirect URL: ${redirectUrl}`);
-
-              // Create user data object for the global auth manager
-              const userData = {
-                id: data.user.id,
-                email: data.user.email,
-                full_name: profileData.full_name || data.user.email?.split('@')[0] || 'User',
-                phone: profileData.phone || 'Not set',
-                company_name: profileData.company_name || 'Not set',
-                role: profileData.role || 'customer'
-              };
-
-              // Trigger login event for the global auth manager
+              
+              // Update user data with profile info
+              userData.full_name = profileData.full_name || userData.full_name;
+              userData.phone = profileData.phone || userData.phone;
+              userData.company_name = profileData.company_name || userData.company_name;
+              userData.role = profileData.role || userData.role;
+              
+              // Trigger updated login event
               window.dispatchEvent(new CustomEvent('user-logged-in', {
                 detail: userData
               }));
-
-              console.log('✅ User data sent to global auth manager:', userData);
             }
             
-            // Redirect after successful login
-      setTimeout(() => {
-        window.location.href = redirectUrl;
-            }, 1500);
+            // Clear fallback and redirect after successful login (reduced timeout)
+            clearTimeout(fallbackRedirect);
+            setTimeout(() => {
+              window.location.href = redirectUrl;
+            }, 1000);
             
           } catch (profileError) {
-            console.warn('Could not fetch user profile, defaulting to dashboard:', profileError);
+            console.warn('Could not fetch user profile, using default dashboard:', profileError);
             
-            // Create basic user data
-            const userData = {
-              id: data.user.id,
-              email: data.user.email,
-              full_name: data.user.email?.split('@')[0] || 'User',
-              phone: 'Not set',
-              company_name: 'Not set',
-              role: 'customer'
-            };
-
-            // Trigger login event
-            window.dispatchEvent(new CustomEvent('user-logged-in', {
-              detail: userData
-            }));
-
+            // Clear fallback and redirect to dashboard immediately if profile fetch fails
+            clearTimeout(fallbackRedirect);
             setTimeout(() => {
               window.location.href = '/dashboard';
-            }, 1500);
+            }, 1000);
           }
           
         } else {
