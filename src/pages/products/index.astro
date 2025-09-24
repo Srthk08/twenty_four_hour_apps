@@ -121,12 +121,13 @@ const processedProducts = products
                     </div>
                   </div>
                   <div class="flex justify-center">
-                    <a 
-                      href={`/products/${product.slug}`}
-                      class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all transform hover:scale-105 shadow-lg hover:shadow-xl text-center"
+                    <button 
+                      class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all transform hover:scale-105 shadow-lg hover:shadow-xl text-center product-view-btn"
+                      data-product-slug={product.slug}
+                      data-product-name={product.name}
                     >
                       View Details
-                    </a>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -281,6 +282,69 @@ const processedProducts = products
       });
     }
   });
+
+  // Product click handler with role-based access
+  document.addEventListener('DOMContentLoaded', function() {
+    const productButtons = document.querySelectorAll('.product-view-btn');
+    
+    productButtons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const productSlug = this.getAttribute('data-product-slug');
+        const productName = this.getAttribute('data-product-name');
+        
+        // Check if user is admin
+        const isAdmin = checkIfUserIsAdmin();
+        
+        // If user is admin, allow access to all products
+        if (isAdmin) {
+          window.location.href = `/products/${productSlug}`;
+          return;
+        }
+        
+        // If user is not admin and product is not Order Menu System, show dialog
+        if (productSlug !== 'order-menu-system') {
+          if (window.showProductDialog) {
+            window.showProductDialog();
+          }
+          return;
+        }
+        
+        // If product is Order Menu System, allow access for all users
+        window.location.href = `/products/${productSlug}`;
+      });
+    });
+  });
+
+  // Function to check if user is admin
+  function checkIfUserIsAdmin() {
+    try {
+      // Check if user is logged in
+      if (window.simpleAuthManager && window.simpleAuthManager.isUserLoggedIn()) {
+        const currentUser = window.simpleAuthManager.getCurrentUser();
+        
+        // Check if user has admin role
+        if (currentUser && currentUser.role === 'admin') {
+          return true;
+        }
+      }
+      
+      // Check session storage for admin role
+      const sessionData = sessionStorage.getItem('simple-auth-session');
+      if (sessionData) {
+        const session = JSON.parse(sessionData);
+        if (session.user && session.user.role === 'admin') {
+          return true;
+        }
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      return false;
+    }
+  }
 </script>
 
 <style>

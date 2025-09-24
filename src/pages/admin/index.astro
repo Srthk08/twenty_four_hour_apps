@@ -8,14 +8,16 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       <div class="flex items-center justify-between mb-6">
         <div>
           <h2 class="text-2xl font-bold text-gray-900 mb-2">Admin Dashboard - Complete User Data</h2>
-          <p class="text-gray-600">View all user activities, registrations, contact forms, support tickets, and cart customizations.</p>
+          <p class="text-gray-600">View all user activities, registrations, contact forms, support tickets, and product customizations.</p>
         </div>
-        <a href="/admin/data" class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 transition-colors">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-          </svg>
-          View All Data
-        </a>
+        <div>
+          <a href="/admin/data" class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 transition-colors">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+            View All Data
+          </a>
+        </div>
       </div>
       
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -79,17 +81,17 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           </div>
         </div>
 
-        <!-- Cart Customizations Card -->
+        <!-- Customizations Card -->
         <div class="bg-teal-50 rounded-lg p-6 border border-teal-200">
           <div class="flex items-center">
             <div class="p-2 bg-teal-100 rounded-lg">
               <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
               </svg>
             </div>
             <div class="ml-4">
-              <p class="text-sm font-medium text-teal-600">Cart Customizations</p>
-              <p class="text-2xl font-bold text-teal-900" id="total-carts">0</p>
+              <p class="text-sm font-medium text-teal-600">Customizations</p>
+              <p class="text-2xl font-bold text-teal-900" id="total-customizations">0</p>
             </div>
           </div>
         </div>
@@ -171,24 +173,25 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         </div>
       </div>
 
-        <!-- Cart Customizations Section -->
+        <!-- Customizations Section -->
         <div class="bg-white rounded-lg shadow p-6">
-          <h3 class="text-xl font-bold text-gray-900 mb-4">Cart Customizations & Orders</h3>
+          <h3 class="text-xl font-bold text-gray-900 mb-4">Product Customizations</h3>
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User Email</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Email</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product Type</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product Name</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project Name</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">App Name</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Person</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody id="cart-table-body" class="bg-white divide-y divide-gray-200">
+              <tbody id="customizations-table-body" class="bg-white divide-y divide-gray-200">
                 <tr>
-                  <td colspan="6" class="px-6 py-4 text-center text-gray-500">Loading cart customizations...</td>
+                  <td colspan="7" class="px-6 py-4 text-center text-blue-500">JavaScript is working! Loading customizations...</td>
                 </tr>
               </tbody>
             </table>
@@ -230,6 +233,15 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   
   console.log('Admin dashboard loaded successfully');
   
+  // Initialize admin panel
+  window.addEventListener('load', () => {
+    console.log('✅ Admin panel loaded successfully');
+    const customizationsTable = document.getElementById('customizations-table-body');
+    if (customizationsTable) {
+      customizationsTable.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">Loading customizations...</td></tr>';
+    }
+  });
+  
   // Load all user data when page loads
   document.addEventListener('DOMContentLoaded', async () => {
     console.log('🔄 Loading admin dashboard data...');
@@ -237,21 +249,23 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     
     // Wait for Supabase to be available
     if (!supabase) {
+      console.log('⏳ Waiting for Supabase client...');
       await waitForSupabase();
     }
     
     console.log('🔍 Supabase client:', supabase);
+    console.log('🔍 Customizations table body element:', document.getElementById('customizations-table-body'));
     
     // Test if we can find the table elements
     const usersTable = document.getElementById('users-table-body');
     const contactTable = document.getElementById('contact-table-body');
     
     if (usersTable) {
-      usersTable.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-blue-500">JavaScript is working! Loading data...</td></tr>';
+      usersTable.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Loading users...</td></tr>';
     }
     
     if (contactTable) {
-      contactTable.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-blue-500">JavaScript is working! Loading data...</td></tr>';
+      contactTable.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Loading contacts...</td></tr>';
     }
     
     try {
@@ -321,9 +335,9 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       console.log('🔄 Loading tickets data...');
       await loadTicketsData();
       
-      // Load cart customizations
-      console.log('🔄 Loading cart data...');
-      await loadCartData();
+      // Load customizations
+      console.log('🔄 Loading customizations data...');
+      await loadCustomizationsData();
       
       // Update summary cards
       console.log('🔄 Updating summary cards...');
@@ -507,77 +521,75 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     }
   }
 
-  async function loadCartData() {
+  async function loadCustomizationsData() {
     try {
-      console.log('🔄 Loading cart customizations data...');
+      console.log('🔄 Loading customizations data...');
       console.log('🔍 Supabase client available:', !!supabase);
+      console.log('🔍 Function called at:', new Date().toISOString());
       
       if (!supabase) {
         console.error('❌ Supabase client not available');
-        const tbody = document.getElementById('cart-table-body');
+        const tbody = document.getElementById('customizations-table-body');
         if (tbody) {
           tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Supabase client not available</td></tr>';
         }
         return;
       }
 
-      const { data: carts, error } = await supabase
-        .from('cart_customizations')
+      console.log('🔍 Querying customization_forms table...');
+      const { data: customizations, error } = await supabase
+        .from('customization_forms')
         .select('*')
         .order('created_at', { ascending: false });
 
-      console.log('🔍 Cart data query result:', { data: carts, error });
+      console.log('🔍 Customizations data query result:', { data: customizations, error });
+      console.log('🔍 Number of customizations found:', customizations ? customizations.length : 0);
 
       if (error) {
-        console.error('❌ Error loading cart data:', error);
-        const tbody = document.getElementById('cart-table-body');
+        console.error('❌ Error loading customizations data:', error);
+        const tbody = document.getElementById('customizations-table-body');
         if (tbody) {
           tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Error: ${error.message}</td></tr>`;
         }
         return;
       }
 
-      const tbody = document.getElementById('cart-table-body');
+      const tbody = document.getElementById('customizations-table-body');
       if (!tbody) {
-        console.error('❌ Cart table body not found');
+        console.error('❌ Customizations table body not found');
         return;
       }
 
-      console.log('🔍 Cart data received:', carts);
+      console.log('🔍 Customizations data received:', customizations);
 
-      if (carts && carts.length > 0) {
-        console.log(`✅ Found ${carts.length} cart customizations`);
-        tbody.innerHTML = carts.map(cart => {
-          // Use stored total_amount if available, otherwise calculate it
-          let totalAmount = cart.total_amount;
-          if (!totalAmount || totalAmount === 0) {
-            // Calculate total amount including features
-            const basePrice = cart.base_price || 0;
-            const features = cart.selected_features || [];
-            const featuresTotal = features.length * 500; // Each feature costs ₹500
-            const subtotal = basePrice + featuresTotal;
-            const tax = Math.round(subtotal * 0.18); // 18% GST
-            totalAmount = subtotal + tax;
-          }
-          
+      if (customizations && customizations.length > 0) {
+        console.log(`✅ Found ${customizations.length} customizations`);
+        // Debug: Log first customization to see what data we have
+        console.log('First customization data:', customizations[0]);
+        
+        tbody.innerHTML = customizations.map(customization => {
+          console.log('Processing customization:', customization.id, customization.contact_email, customization.product_name);
           return `
             <tr>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${cart.user_email}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${cart.project_name || '-'}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${cart.app_name || '-'}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${cart.contact_person || '-'}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹${totalAmount.toLocaleString()}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(cart.created_at).toLocaleDateString()}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${customization.contact_email || '-'}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${customization.product_type || '-'}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${customization.product_name || '-'}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${customization.project_name || '-'}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${(customization.product_price || 0).toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(customization.created_at).toLocaleDateString()}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <button onclick="viewCustomizationDetails('${customization.id}')" class="text-blue-600 hover:text-blue-900 cursor-pointer">View Details</button>
+              </td>
             </tr>
           `;
         }).join('');
       } else {
-        console.log('ℹ️ No cart customizations found');
-        tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No cart customizations found</td></tr>';
+        console.log('ℹ️ No customizations found');
+        tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">No customizations found</td></tr>';
       }
     } catch (error) {
-      console.error('❌ Error loading cart data:', error);
-      const tbody = document.getElementById('cart-table-body');
+      console.error('❌ Error loading customizations data:', error);
+      const tbody = document.getElementById('customizations-table-body');
       if (tbody) {
         tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Error: ${error.message}</td></tr>`;
       }
@@ -587,38 +599,33 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   async function updateSummaryCards() {
     try {
       // Get counts for summary cards
-      const [usersResult, contactsResult, ticketsResult, cartsResult] = await Promise.all([
+      const [usersResult, contactsResult, ticketsResult, customizationsResult] = await Promise.all([
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
         supabase.from('contact_submissions').select('*', { count: 'exact', head: true }),
         supabase.from('support_tickets').select('*', { count: 'exact', head: true }),
-        supabase.from('cart_customizations').select('*', { count: 'exact', head: true })
+        supabase.from('customization_forms').select('*', { count: 'exact', head: true })
       ]);
 
       // Update summary cards
       const totalUsers = usersResult.count || 0;
       const totalContacts = contactsResult.count || 0;
       const totalTickets = ticketsResult.count || 0;
-      const totalCarts = cartsResult.count || 0;
+      const totalCustomizations = customizationsResult.count || 0;
 
       // Update the summary card numbers
       const userCard = document.getElementById('total-users');
       const contactCard = document.getElementById('total-contacts');
       const ticketCard = document.getElementById('total-tickets');
       const revenueCard = document.getElementById('total-revenue');
-      const cartCard = document.getElementById('total-carts');
+      const customizationsCard = document.getElementById('total-customizations');
 
       if (userCard) userCard.textContent = totalUsers.toString();
       if (contactCard) contactCard.textContent = totalContacts.toString();
       if (ticketCard) ticketCard.textContent = totalTickets.toString();
-      if (cartCard) cartCard.textContent = totalCarts.toString();
+      if (customizationsCard) customizationsCard.textContent = totalCustomizations.toString();
       if (revenueCard) {
-        // Calculate total revenue only from completed orders
-        const { data: completedOrders } = await supabase
-          .from('cart_customizations')
-          .select('total_amount')
-          .eq('cart_status', 'completed');
-        const totalRevenue = completedOrders ? completedOrders.reduce((sum, order) => sum + (order.total_amount || 0), 0) : 0;
-        revenueCard.textContent = `₹${totalRevenue.toLocaleString()}`;
+        // Revenue is 0 until real payments are processed
+        revenueCard.textContent = '₹0';
       }
 
       console.log('✅ Summary cards updated');
@@ -682,8 +689,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   // Global variable to store all contacts for search functionality
   let allContacts = [];
   
-  // Global variable to store all cart customizations for search functionality
-  let allCartCustomizations = [];
+  // Global variable to store all customizations for search functionality
+  let allCustomizations = [];
 
   // Show all contact form details function
   window.showContactFormDetails = async function() {
@@ -803,29 +810,29 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     contactsList.textContent = `Contact Form Details (${filteredContacts.length} of ${allContacts.length} submissions)`;
   };
 
-  // Show all cart customizations function
-  window.showCartCustomizations = async function() {
-    console.log('Loading all cart customizations...');
+  // Show all customizations function
+  window.showCustomizations = async function() {
+    console.log('Loading all customizations...');
     
     try {
-      const { data: carts, error } = await supabase
-        .from('cart_customizations')
+      const { data: customizations, error } = await supabase
+        .from('customization_forms')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error loading cart customizations:', error);
-        alert('Error loading cart customizations: ' + error.message);
+        console.error('Error loading customizations:', error);
+        alert('Error loading customizations: ' + error.message);
         return;
       }
 
-      allCartCustomizations = carts || []; // Store carts globally
+      allCustomizations = customizations || []; // Store customizations globally
 
-      const modal = document.getElementById('cart-customizations-modal');
-      const modalTitle = document.getElementById('cart-modal-title');
-      const modalContent = document.getElementById('cart-modal-content');
+      const modal = document.getElementById('customizations-modal');
+      const modalTitle = document.getElementById('customizations-modal-title');
+      const modalContent = document.getElementById('customizations-modal-content');
 
-      modalTitle.textContent = `All Cart Customizations (${allCartCustomizations.length} items)`;
+      modalTitle.textContent = `All Product Customizations (${allCustomizations.length} items)`;
       
       modalContent.innerHTML = `
         <div class="mb-6">
@@ -837,146 +844,288 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             </div>
             <input 
               type="text" 
-              id="cart-search-input" 
+              id="customizations-search-input" 
               placeholder="Search by email address..." 
               class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              onkeyup="filterCartCustomizations()"
+              onkeyup="filterCustomizations()"
             />
           </div>
-          <p class="mt-2 text-sm text-gray-500">Type an email address to quickly find a specific cart customization</p>
+          <p class="mt-2 text-sm text-gray-500">Type an email address to quickly find a specific customization</p>
         </div>
-        <div id="carts-list" class="space-y-6 max-h-96 overflow-y-auto">
-          ${renderCartCustomizations(allCartCustomizations)}
+        <div id="customizations-list" class="space-y-6 max-h-96 overflow-y-auto">
+          ${renderCustomizations(allCustomizations)}
         </div>
       `;
 
       modal.classList.remove('hidden');
     } catch (error) {
-      console.error('Error loading cart customizations:', error);
-      alert('Error loading cart customizations: ' + error.message);
+      console.error('Error loading customizations:', error);
+      alert('Error loading customizations: ' + error.message);
     }
   };
 
-  // Function to render cart customizations
-  function renderCartCustomizations(carts) {
-    if (carts && carts.length > 0) {
-      return carts.map((cart, index) => {
-        // Calculate total amount if not stored
-        let totalAmount = cart.total_amount;
-        if (!totalAmount || totalAmount === 0) {
-          const basePrice = cart.base_price || 0;
-          const features = cart.selected_features || [];
-          const featuresTotal = features.length * 500; // Each feature costs ₹500
-          const subtotal = basePrice + featuresTotal;
-          const tax = Math.round(subtotal * 0.18); // 18% GST
-          totalAmount = subtotal + tax;
-        }
-        
-        return `
-          <div class="bg-gray-50 p-4 rounded-lg border cart-item" data-email="${(cart.user_email || '').toLowerCase()}">
+  // Function to render customizations
+  function renderCustomizations(customizations) {
+    if (customizations && customizations.length > 0) {
+      return customizations.map((customization, index) => `
+        <div class="bg-gray-50 p-4 rounded-lg border customization-item" data-email="${(customization.contact_email || '').toLowerCase()}">
             <div class="flex justify-between items-start mb-3">
-              <h4 class="text-lg font-semibold text-gray-900">#${index + 1} - ${cart.product_name || 'Unknown Product'}</h4>
-              <span class="text-sm text-gray-500">${new Date(cart.created_at).toLocaleDateString()}</span>
+            <h4 class="text-lg font-semibold text-gray-900">#${index + 1} - ${customization.product_name || 'Unknown Product'}</h4>
+            <span class="text-sm text-gray-500">${new Date(customization.created_at).toLocaleDateString()}</span>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <p class="text-sm text-gray-600"><strong>User Email:</strong> <span class="font-mono text-indigo-600">${cart.user_email || 'Not provided'}</span></p>
-                <p class="text-sm text-gray-600"><strong>Project Name:</strong> ${cart.project_name || 'Not provided'}</p>
-                <p class="text-sm text-gray-600"><strong>App Name:</strong> ${cart.app_name || 'Not provided'}</p>
-                <p class="text-sm text-gray-600"><strong>Contact Person:</strong> ${cart.contact_person || 'Not provided'}</p>
+              <p class="text-sm text-gray-600"><strong>Contact Email:</strong> <span class="font-mono text-indigo-600">${customization.contact_email || 'Not provided'}</span></p>
+              <p class="text-sm text-gray-600"><strong>Product Type:</strong> ${customization.product_type || 'Not specified'}</p>
+              <p class="text-sm text-gray-600"><strong>Product Name:</strong> ${customization.product_name || 'Not provided'}</p>
+              <p class="text-sm text-gray-600"><strong>Project Name:</strong> ${customization.project_name || 'Not provided'}</p>
               </div>
               <div>
-                <p class="text-sm text-gray-600"><strong>Product ID:</strong> ${cart.product_id || 'Not specified'}</p>
-                <p class="text-sm text-gray-600"><strong>Base Price:</strong> ₹${cart.base_price || 0}</p>
-                <p class="text-sm text-gray-600"><strong>Total Amount:</strong> ₹${totalAmount.toLocaleString()}</p>
-                <p class="text-sm text-gray-600"><strong>Status:</strong> 
-                  <span class="px-2 py-1 rounded-full text-xs font-medium ${
-                    cart.cart_status === 'completed' ? 'bg-green-100 text-green-800' :
-                    cart.cart_status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                    cart.cart_status === 'expired' ? 'bg-gray-100 text-gray-800' :
-                    'bg-blue-100 text-blue-800'
-                  }">${cart.cart_status || 'active'}</span>
-                </p>
+              <p class="text-sm text-gray-600"><strong>Price:</strong> ${(customization.product_price || 0).toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</p>
+              <p class="text-sm text-gray-600"><strong>Restaurant Name:</strong> ${customization.restaurant_name || 'N/A'}</p>
+              <p class="text-sm text-gray-600"><strong>Cuisine Type:</strong> ${customization.cuisine_type || 'N/A'}</p>
+              <p class="text-sm text-gray-600"><strong>Created:</strong> ${new Date(customization.created_at).toLocaleString()}</p>
               </div>
             </div>
             
-            ${cart.restaurant_name ? `
+          ${customization.logo_url ? `
             <div class="bg-white p-3 rounded border mb-3">
-              <h5 class="font-medium text-gray-900 mb-2">Restaurant Details:</h5>
-              <p class="text-sm text-gray-600"><strong>Restaurant Name:</strong> ${cart.restaurant_name}</p>
-              <p class="text-sm text-gray-600"><strong>Cuisine Type:</strong> ${cart.cuisine_type || 'Not specified'}</p>
+            <h5 class="font-medium text-gray-900 mb-2">Logo:</h5>
+            <img src="${customization.logo_url}" alt="Logo" class="h-16 w-16 object-contain border rounded">
+            <p class="text-xs text-gray-500 mt-1">${customization.logo_filename || 'Logo file'}</p>
             </div>
             ` : ''}
             
+          ${customization.additional_requirements ? `
             <div class="bg-white p-3 rounded border">
-              <h5 class="font-medium text-gray-900 mb-2">Contact Information:</h5>
-              <p class="text-sm text-gray-600"><strong>Email:</strong> ${cart.contact_email || 'Not provided'}</p>
-              <p class="text-sm text-gray-600"><strong>Phone:</strong> ${cart.contact_phone || 'Not provided'}</p>
-              ${cart.additional_requirements ? `<p class="text-sm text-gray-600 mt-2"><strong>Additional Requirements:</strong> ${cart.additional_requirements}</p>` : ''}
+            <h5 class="font-medium text-gray-900 mb-2">Additional Requirements:</h5>
+            <p class="text-sm text-gray-600">${customization.additional_requirements}</p>
             </div>
-            
-            <div class="mt-4">
-              ${cart.cart_status === 'completed' ? `
-                <span class="px-3 py-1 bg-green-100 text-green-800 text-xs rounded font-medium">
-                  ✅ Payment Completed
-                </span>
-              ` : ''}
-              ${cart.cart_status === 'cancelled' ? `
-                <span class="px-3 py-1 bg-red-100 text-red-800 text-xs rounded font-medium">
-                  ❌ Order Cancelled
-                </span>
-              ` : ''}
-              ${cart.cart_status === 'pending' ? `
-                <span class="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs rounded font-medium">
-                  ⏳ Payment Pending
-                </span>
-              ` : ''}
-              ${cart.cart_status === 'expired' ? `
-                <span class="px-3 py-1 bg-gray-100 text-gray-800 text-xs rounded font-medium">
-                  ⏰ Order Expired
-                </span>
-              ` : ''}
-              ${!cart.cart_status || cart.cart_status === 'active' ? `
-                <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded font-medium">
-                  📋 Order Active
-                </span>
               ` : ''}
             </div>
-          </div>
-        `;
-      }).join('');
+      `).join('');
     } else {
       return `
         <div class="text-center py-8">
           <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
           </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No cart customizations found</h3>
-          <p class="mt-1 text-sm text-gray-500">No cart customizations match your search criteria.</p>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No customizations found</h3>
+          <p class="mt-1 text-sm text-gray-500">No customizations match your search criteria.</p>
         </div>
       `;
     }
   }
 
-  // Function to filter cart customizations based on search input
-  window.filterCartCustomizations = function() {
-    const searchInput = document.getElementById('cart-search-input');
-    const cartsListTitle = document.getElementById('cart-modal-title');
+  // Function to filter customizations based on search input
+  window.filterCustomizations = function() {
+    const searchInput = document.getElementById('customizations-search-input');
+    const customizationsListTitle = document.getElementById('customizations-modal-title');
     const searchTerm = searchInput.value.toLowerCase().trim();
     
     if (!searchTerm) {
-      document.getElementById('carts-list').innerHTML = renderCartCustomizations(allCartCustomizations);
-      cartsListTitle.textContent = `All Cart Customizations (${allCartCustomizations.length} items)`;
+      document.getElementById('customizations-list').innerHTML = renderCustomizations(allCustomizations);
+      customizationsListTitle.textContent = `All Product Customizations (${allCustomizations.length} items)`;
       return;
     }
 
-    const filteredCarts = allCartCustomizations.filter(cart => 
-      (cart.user_email || '').toLowerCase().includes(searchTerm)
+    const filteredCustomizations = allCustomizations.filter(customization => 
+      (customization.contact_email || '').toLowerCase().includes(searchTerm)
     );
 
-    document.getElementById('carts-list').innerHTML = renderCartCustomizations(filteredCarts);
-    cartsListTitle.textContent = `Cart Customizations (${filteredCarts.length} of ${allCartCustomizations.length} items)`;
+    document.getElementById('customizations-list').innerHTML = renderCustomizations(filteredCustomizations);
+    customizationsListTitle.textContent = `Product Customizations (${filteredCustomizations.length} of ${allCustomizations.length} items)`;
+  };
+
+  // Make loadCustomizationsData globally accessible
+  window.loadCustomizationsData = loadCustomizationsData;
+
+  // Function to view customization details
+  window.viewCustomizationDetails = async function(customizationId) {
+    console.log('🔍 Viewing customization details for ID:', customizationId);
+    console.log('🔍 Supabase client available:', !!supabase);
+    
+    try {
+      if (!supabase) {
+        console.error('❌ Supabase client not available');
+        alert('Database connection not available. Please refresh the page.');
+        return;
+      }
+
+      console.log('🔍 Fetching customization data from database...');
+      const { data: customization, error } = await supabase
+        .from('customization_forms')
+        .select('*')
+        .eq('id', customizationId)
+        .single();
+
+      console.log('🔍 Database response:', { data: customization, error });
+
+      if (error) {
+        console.error('❌ Error loading customization details:', error);
+        alert('Error loading customization details: ' + error.message);
+        return;
+      }
+
+      if (!customization) {
+        console.error('❌ No customization found with ID:', customizationId);
+        alert('No customization found with the specified ID.');
+        return;
+      }
+
+      console.log('✅ Customization data loaded:', customization);
+
+      const modal = document.getElementById('details-modal');
+      const modalTitle = document.getElementById('modal-title');
+      const modalContent = document.getElementById('modal-content');
+
+      console.log('🔍 Modal elements found:', {
+        modal: !!modal,
+        modalTitle: !!modalTitle,
+        modalContent: !!modalContent
+      });
+
+      if (!modal || !modalTitle || !modalContent) {
+        console.error('❌ Modal elements not found');
+        alert('Modal elements not found. Please refresh the page.');
+        return;
+      }
+
+      modalTitle.textContent = 'Customization Details';
+      modalContent.innerHTML = `
+        <div class="space-y-4">
+          <!-- Product Information Section -->
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h4 class="text-lg font-semibold text-gray-900 mb-3">Product Information</h4>
+            <div class="space-y-2">
+              <div class="flex justify-between">
+                <span class="text-sm font-medium text-gray-600">Product Type:</span>
+                <span class="text-sm text-gray-900">${customization.product_type || 'Not specified'}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm font-medium text-gray-600">Product Name:</span>
+                <span class="text-sm text-gray-900">${customization.product_name || 'Not specified'}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm font-medium text-gray-600">Price:</span>
+                <span class="text-sm text-gray-900">${(customization.product_price || 0).toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm font-medium text-gray-600">Project Name:</span>
+                <span class="text-sm text-gray-900">${customization.project_name || 'Not specified'}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm font-medium text-gray-600">Restaurant Name:</span>
+                <span class="text-sm text-gray-900">${customization.restaurant_name || 'N/A'}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm font-medium text-gray-600">Cuisine Type:</span>
+                <span class="text-sm text-gray-900">${customization.cuisine_type || 'N/A'}</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Contact Information Section -->
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h4 class="text-lg font-semibold text-gray-900 mb-3">Contact Information</h4>
+            <div class="space-y-2">
+              <div class="flex justify-between">
+                <span class="text-sm font-medium text-gray-600">Email:</span>
+                <span class="text-sm text-gray-900">${customization.contact_email || 'Not provided'}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm font-medium text-gray-600">Phone:</span>
+                <span class="text-sm text-gray-900">${customization.contact_phone || 'Not provided'}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm font-medium text-gray-600">Created:</span>
+                <span class="text-sm text-gray-900">${new Date(customization.created_at).toLocaleString()}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm font-medium text-gray-600">Updated:</span>
+                <span class="text-sm text-gray-900">${new Date(customization.updated_at).toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+          
+          ${customization.additional_requirements ? `
+          <!-- Additional Requirements Section -->
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h4 class="text-lg font-semibold text-gray-900 mb-3">Additional Requirements</h4>
+            <div class="space-y-2">
+              <div class="flex justify-between">
+                <span class="text-sm font-medium text-gray-600">Requirements:</span>
+                <span class="text-sm text-gray-900">${customization.additional_requirements}</span>
+              </div>
+            </div>
+          </div>
+          ` : ''}
+          
+          ${customization.primary_color || customization.secondary_color || customization.accent_color || customization.text_color ? `
+          <!-- Color Customization Section -->
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h4 class="text-lg font-semibold text-gray-900 mb-3">Color Customization</h4>
+            <div class="space-y-2">
+              ${customization.primary_color ? `
+              <div class="flex justify-between items-center">
+                <span class="text-sm font-medium text-gray-600">Primary:</span>
+                <div class="flex items-center space-x-2">
+                  <span class="inline-block w-4 h-4 rounded border" style="background-color: ${customization.primary_color}"></span>
+                  <span class="text-sm text-gray-900">${customization.primary_color}</span>
+                </div>
+              </div>
+              ` : ''}
+              ${customization.secondary_color ? `
+              <div class="flex justify-between items-center">
+                <span class="text-sm font-medium text-gray-600">Secondary:</span>
+                <div class="flex items-center space-x-2">
+                  <span class="inline-block w-4 h-4 rounded border" style="background-color: ${customization.secondary_color}"></span>
+                  <span class="text-sm text-gray-900">${customization.secondary_color}</span>
+                </div>
+              </div>
+              ` : ''}
+              ${customization.accent_color ? `
+              <div class="flex justify-between items-center">
+                <span class="text-sm font-medium text-gray-600">Accent:</span>
+                <div class="flex items-center space-x-2">
+                  <span class="inline-block w-4 h-4 rounded border" style="background-color: ${customization.accent_color}"></span>
+                  <span class="text-sm text-gray-900">${customization.accent_color}</span>
+                </div>
+              </div>
+              ` : ''}
+              ${customization.text_color ? `
+              <div class="flex justify-between items-center">
+                <span class="text-sm font-medium text-gray-600">Text:</span>
+                <div class="flex items-center space-x-2">
+                  <span class="inline-block w-4 h-4 rounded border" style="background-color: ${customization.text_color}"></span>
+                  <span class="text-sm text-gray-900">${customization.text_color}</span>
+                </div>
+              </div>
+              ` : ''}
+            </div>
+          </div>
+          ` : ''}
+          
+        </div>
+      `;
+
+      console.log('🔍 Showing modal...');
+      modal.classList.remove('hidden');
+      console.log('✅ Modal should now be visible');
+      
+      // Verify modal is visible
+      setTimeout(() => {
+        const isVisible = !modal.classList.contains('hidden');
+        console.log('🔍 Modal visibility check:', isVisible);
+        if (!isVisible) {
+          console.error('❌ Modal is not visible after showing');
+        }
+      }, 100);
+    } catch (error) {
+      console.error('Error viewing customization details:', error);
+      alert('Error viewing customization details: ' + error.message);
+    }
   };
 
 </script>
@@ -1019,19 +1168,19 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   </div>
 </div>
 
-<!-- Modal for viewing all cart customizations -->
-<div id="cart-customizations-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+<!-- Modal for viewing all customizations -->
+<div id="customizations-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
   <div class="relative top-10 mx-auto p-5 border w-11/12 md:w-5/6 lg:w-4/5 xl:w-3/4 shadow-lg rounded-md bg-white">
     <div class="mt-3">
       <div class="flex items-center justify-between mb-6">
-        <h3 id="cart-modal-title" class="text-xl font-medium text-gray-900">Cart Customizations</h3>
-        <button onclick="document.getElementById('cart-customizations-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+        <h3 id="customizations-modal-title" class="text-xl font-medium text-gray-900">Product Customizations</h3>
+        <button onclick="document.getElementById('customizations-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
       </div>
-      <div id="cart-modal-content" class="text-gray-600">
+      <div id="customizations-modal-content" class="text-gray-600">
         <!-- Content will be populated by JavaScript -->
       </div>
     </div>

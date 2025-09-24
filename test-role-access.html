@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Role Access Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #2563eb;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background: #d1fae5; color: #065f46; }
+        .error { background: #fee2e2; color: #991b1b; }
+        .info { background: #dbeafe; color: #1e40af; }
+    </style>
+</head>
+<body>
+    <h1>Role-Based Access Control Test</h1>
+    
+    <div class="test-section">
+        <h2>Current User Status</h2>
+        <div id="user-status" class="status info">Checking user status...</div>
+        <button class="test-button" onclick="checkUserStatus()">Refresh Status</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Product Access</h2>
+        <p>Click these buttons to test product access based on user role:</p>
+        
+        <button class="test-button" onclick="testProductAccess('restaurant-menu-system')">
+            Test Restaurant Menu System
+        </button>
+        
+        <button class="test-button" onclick="testProductAccess('android-tv-app')">
+            Test Android TV App
+        </button>
+        
+        <button class="test-button" onclick="testProductAccess('streaming-mobile-app')">
+            Test Streaming Mobile App
+        </button>
+        
+        <button class="test-button" onclick="testProductAccess('restaurant-website')">
+            Test Restaurant Website
+        </button>
+        
+        <button class="test-button" onclick="testProductAccess('order-menu-system')">
+            Test Order Menu System
+        </button>
+    </div>
+
+    <div class="test-section">
+        <h2>Simulate User Roles</h2>
+        <p>Test different user roles:</p>
+        
+        <button class="test-button" onclick="simulateUser('admin')">
+            Simulate Admin User
+        </button>
+        
+        <button class="test-button" onclick="simulateUser('customer')">
+            Simulate Regular User
+        </button>
+        
+        <button class="test-button" onclick="simulateUser('guest')">
+            Simulate Guest (Not Logged In)
+        </button>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="test-results"></div>
+    </div>
+
+    <script>
+        // Mock auth manager for testing
+        const mockAuthManager = {
+            isUserLoggedIn: () => {
+                const session = sessionStorage.getItem('simple-auth-session');
+                return !!session;
+            },
+            getCurrentUser: () => {
+                const session = sessionStorage.getItem('simple-auth-session');
+                if (session) {
+                    return JSON.parse(session).user;
+                }
+                return null;
+            }
+        };
+
+        // Function to check if user is admin
+        function checkIfUserIsAdmin() {
+            try {
+                const currentUser = mockAuthManager.getCurrentUser();
+                if (currentUser && currentUser.role === 'admin') {
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.error('Error checking admin status:', error);
+                return false;
+            }
+        }
+
+        // Check user status
+        function checkUserStatus() {
+            const statusDiv = document.getElementById('user-status');
+            const isLoggedIn = mockAuthManager.isUserLoggedIn();
+            const currentUser = mockAuthManager.getCurrentUser();
+            const isAdmin = checkIfUserIsAdmin();
+
+            if (!isLoggedIn) {
+                statusDiv.innerHTML = '<strong>Status:</strong> Not logged in (Guest)';
+                statusDiv.className = 'status error';
+            } else {
+                const role = currentUser?.role || 'unknown';
+                statusDiv.innerHTML = `<strong>Status:</strong> Logged in as ${currentUser?.email || 'Unknown'} (Role: ${role}) ${isAdmin ? '👑' : ''}`;
+                statusDiv.className = isAdmin ? 'status success' : 'status info';
+            }
+        }
+
+        // Test product access
+        function testProductAccess(productSlug) {
+            const resultsDiv = document.getElementById('test-results');
+            const isAdmin = checkIfUserIsAdmin();
+            const isLoggedIn = mockAuthManager.isUserLoggedIn();
+            
+            let result = '';
+            let className = '';
+
+            if (!isLoggedIn) {
+                result = `❌ ${productSlug}: Not logged in - would redirect to login`;
+                className = 'error';
+            } else if (isAdmin) {
+                result = `✅ ${productSlug}: Admin access - would allow access to product page`;
+                className = 'success';
+            } else if (productSlug === 'order-menu-system') {
+                result = `✅ ${productSlug}: Regular user access - Order Menu System is available`;
+                className = 'success';
+            } else {
+                result = `⚠️ ${productSlug}: Regular user - would show "under development" dialog`;
+                className = 'error';
+            }
+
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `status ${className}`;
+            resultDiv.innerHTML = result;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        // Simulate different user roles
+        function simulateUser(role) {
+            if (role === 'guest') {
+                sessionStorage.removeItem('simple-auth-session');
+            } else {
+                const mockUser = {
+                    id: 'test-user-123',
+                    email: role === 'admin' ? 'admin@test.com' : 'user@test.com',
+                    full_name: role === 'admin' ? 'Admin User' : 'Regular User',
+                    role: role
+                };
+
+                sessionStorage.setItem('simple-auth-session', JSON.stringify({
+                    user: mockUser,
+                    access_token: 'test-token',
+                    timestamp: Date.now()
+                }));
+            }
+
+            checkUserStatus();
+            
+            // Clear previous test results
+            document.getElementById('test-results').innerHTML = '';
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkUserStatus();
+        });
+    </script>
+</body>
+</html>

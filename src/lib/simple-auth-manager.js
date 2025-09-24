@@ -43,6 +43,11 @@ class SimpleAuthManager {
     this.isAuthenticated = true;
     this.currentUser = userData;
     
+    // Add default role if not present
+    if (!userData.role) {
+      userData.role = 'user'; // Default role for regular users
+    }
+    
     // Store session
     const sessionData = {
       user: userData,

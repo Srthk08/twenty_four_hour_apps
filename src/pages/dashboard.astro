@@ -235,7 +235,6 @@ import AuthGuard from '../components/AuthGuard.astro';
             <div class="flex items-center justify-between">
               <div>
                 <h3 id="order-menu-product-name" class="text-xl font-bold text-gray-900 mb-2">Order Menu System</h3>
-                <p id="order-menu-product-description" class="text-gray-600 mb-1">Complete order management system with digital menu integration, real-time order tracking, and payment processing</p>
                 <p class="text-sm text-amber-600 font-medium">Customize your order management requirements below</p>
               </div>
               <div class="text-right">
@@ -334,9 +333,29 @@ import AuthGuard from '../components/AuthGuard.astro';
               </div>
             </div>
 
-            <!-- Menu Items Section -->
+            <!-- Menu Items Section with Categories & Pagination -->
             <div class="border-t pt-6">
               <h3 class="text-lg font-semibold text-gray-900 mb-4">Menu Items</h3>
+
+              <!-- Category Management -->
+              <div class="mb-4 flex flex-wrap gap-3 items-end">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">New Category</label>
+                  <input id="oms-category-input" type="text" class="w-56 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="e.g., Starters">
+                </div>
+                <button id="oms-add-category-btn" type="button" class="px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700">Add Category</button>
+                <button id="oms-clear-all-categories-btn" type="button" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Clear All</button>
+                <div class="ml-auto flex gap-2">
+                  <button id="oms-prev-page" type="button" class="px-3 py-2 border rounded-md">Prev</button>
+                  <span id="oms-page-indicator" class="px-2 text-sm text-gray-600">Page 1</span>
+                  <button id="oms-next-page" type="button" class="px-3 py-2 border rounded-md">Next</button>
+                </div>
+              </div>
+
+              <!-- Category Pills -->
+              <div id="oms-category-pills" class="flex flex-wrap gap-2 mb-4"></div>
+              <div class="text-sm text-gray-600 mb-4">Current Category: <span id="oms-current-category" class="font-medium">Uncategorized</span></div>
+
               <div id="menu-items-container">
                 <div class="menu-item-row grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 p-4 border border-gray-200 rounded-lg">
                   <div>
@@ -349,14 +368,7 @@ import AuthGuard from '../components/AuthGuard.astro';
                   </div>
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                    <select name="menuItems[0][item_category]" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" required>
-                      <option value="">Select Category</option>
-                      <option value="appetizers">Appetizers</option>
-                      <option value="main-course">Main Course</option>
-                      <option value="desserts">Desserts</option>
-                      <option value="beverages">Beverages</option>
-                      <option value="sides">Sides</option>
-                    </select>
+                    <input type="text" name="menuItems[0][item_category]" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 oms-category-field" placeholder="Type or pick from pills" required>
                   </div>
                   <div class="flex items-end">
                     <button type="button" class="remove-menu-item px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm">
@@ -462,6 +474,9 @@ import AuthGuard from '../components/AuthGuard.astro';
 </Layout>
 
 <script>
+  // Import the FIXED database helper
+  import { saveCustomizationForm } from '../lib/customization-db.js';
+  
   console.log('Dashboard loaded - using global auth manager');
 
   // Function to fetch user profile from Supabase
@@ -616,7 +631,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         { id: '2', name: 'Android TV App', description: 'Custom Android TV applications with beautiful UI, content management, and remote control support. Perfect for streaming services and media companies.', price: 55000, type: 'non-restaurant' },
         { id: '3', name: 'Streaming Mobile App', description: 'Mobile streaming applications for iOS and Android with custom features, user authentication, and content management.', price: 35000, type: 'non-restaurant' },
         { id: '4', name: 'Restaurant Website', description: 'Professional restaurant website with online ordering, menu display, and customer management features.', price: 20000, type: 'restaurant' },
-        { id: '5', name: 'Order Menu System', description: 'Complete order management system with digital menu integration, real-time order tracking, and payment processing. Perfect for restaurants looking to streamline their ordering process.', price: 25000, type: 'order-menu' }
+        { id: '5', name: 'Order Menu System', description: 'Complete order management system with digital menu integration, real-time order tracking, and payment processing. Perfect for restaurants looking to streamline their ordering process.', price: 999, type: 'order-menu' }
       ];
       
       const selectedProduct = products.find(p => p.id === productId);
@@ -651,11 +666,12 @@ import AuthGuard from '../components/AuthGuard.astro';
         
         // Show appropriate form with smooth transition after hiding
         setTimeout(() => {
+          // Force common price for Order Menu System
+          const forcedPrice = selectedProduct.type === 'order-menu' ? 999 : parseInt(price);
           if (selectedProduct.type === 'order-menu') {
             // Show Order Menu System form
             document.getElementById('order-menu-product-name').textContent = selectedProduct.name;
-            document.getElementById('order-menu-product-description').textContent = selectedProduct.description;
-            document.getElementById('order-menu-product-price').textContent = `₹${parseInt(price).toLocaleString()}`;
+            document.getElementById('order-menu-product-price').textContent = `₹${forcedPrice.toLocaleString()}`;
             
             const orderMenuForm = document.getElementById('order-menu-customization-form');
             orderMenuForm.classList.remove('hidden');
@@ -670,7 +686,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     } else {
             // Show regular customization form
             document.getElementById('selected-product-name').textContent = selectedProduct.name;
-            document.getElementById('selected-product-price').textContent = `₹${parseInt(price).toLocaleString()}`;
+            document.getElementById('selected-product-price').textContent = `₹${forcedPrice.toLocaleString()}`;
             
             // Show/hide cuisine type and restaurant name based on product type
             const cuisineField = document.getElementById('cuisine-type-field');
@@ -719,6 +735,126 @@ import AuthGuard from '../components/AuthGuard.astro';
     const logoUploadArea = document.querySelector('#order-menu-customization-form .border-dashed');
     const addMenuItemBtn = document.getElementById('add-menu-item');
     const menuItemsContainer = document.getElementById('menu-items-container');
+    const categoryInput = document.getElementById('oms-category-input');
+    const addCategoryBtn = document.getElementById('oms-add-category-btn');
+    const clearAllCategoriesBtn = document.getElementById('oms-clear-all-categories-btn');
+    const categoryPills = document.getElementById('oms-category-pills');
+    const currentCategoryEl = document.getElementById('oms-current-category');
+    const prevBtn = document.getElementById('oms-prev-page');
+    const nextBtn = document.getElementById('oms-next-page');
+    const pageIndicator = document.getElementById('oms-page-indicator');
+
+    // Category state
+    const categories = [];
+    let currentCategoryIndex = -1;
+    const ITEMS_PER_PAGE = 6;
+    let currentPage = 1;
+
+    function renderCategoryPills() {
+      categoryPills.innerHTML = '';
+      categories.forEach((cat, idx) => {
+        const pill = document.createElement('button');
+        pill.type = 'button';
+        pill.className = `px-3 py-1 rounded-full text-sm ${idx === currentCategoryIndex ? 'bg-amber-600 text-white' : 'bg-gray-100'} flex items-center`;
+        // Build button-like content with spacing between text and x
+        const label = document.createElement('span');
+        label.textContent = cat;
+        label.className = 'mr-2';
+        pill.appendChild(label);
+        const x = document.createElement('span');
+        x.textContent = '✕';
+        x.className = 'text-xs opacity-70 hover:opacity-100 ml-1';
+        x.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // Remove this category and any items with it
+          const removed = categories.splice(idx, 1)[0];
+          if (currentCategoryIndex >= categories.length) currentCategoryIndex = categories.length - 1;
+          // Remove category from visible item rows' category inputs if matched
+          menuItemsContainer.querySelectorAll('.menu-item-row').forEach(row => {
+            const input = row.querySelector('.oms-category-field');
+            if (input && input.value === removed) {
+              input.value = '';
+            }
+          });
+          currentCategoryEl.textContent = categories[currentCategoryIndex] || 'Uncategorized';
+          renderCategoryPills();
+          filterItemsByCategory();
+        });
+        pill.appendChild(x);
+        pill.addEventListener('click', () => {
+          currentCategoryIndex = idx;
+          currentCategoryEl.textContent = cat;
+          renderCategoryPills();
+          filterItemsByCategory();
+        });
+        categoryPills.appendChild(pill);
+      });
+    }
+    // Remove selected button intentionally removed per request
+
+    // Clear all categories
+    clearAllCategoriesBtn?.addEventListener('click', () => {
+      categories.splice(0, categories.length);
+      currentCategoryIndex = -1;
+      currentCategoryEl.textContent = 'Uncategorized';
+      renderCategoryPills();
+      filterItemsByCategory();
+      // Do not delete items, just clear their category values
+      menuItemsContainer.querySelectorAll('.oms-category-field').forEach((el) => el.value = '');
+    });
+
+    addCategoryBtn?.addEventListener('click', () => {
+      const value = categoryInput.value.trim();
+      if (!value) return;
+      if (!categories.includes(value)) {
+        categories.push(value);
+        currentCategoryIndex = categories.length - 1;
+        currentCategoryEl.textContent = value;
+        renderCategoryPills();
+        // Apply to visible category inputs
+        menuItemsContainer.querySelectorAll('.oms-category-field').forEach((el) => {
+          if (!el.value) el.value = value;
+        });
+        categoryInput.value = '';
+      }
+    });
+
+    function filterItemsByCategory() {
+      const allItems = Array.from(menuItemsContainer.querySelectorAll('.menu-item-row'));
+      // Show all first
+      allItems.forEach(row => row.style.display = '');
+      // Filter by category if selected
+      if (currentCategoryIndex >= 0) {
+        const cat = categories[currentCategoryIndex];
+        allItems.forEach(row => {
+          const input = row.querySelector('.oms-category-field');
+          if (input && input.value && input.value !== cat) {
+            row.style.display = 'none';
+          }
+        });
+      }
+      // Then paginate
+      const visible = allItems.filter(r => r.style.display !== 'none');
+      const totalPages = Math.max(1, Math.ceil(visible.length / ITEMS_PER_PAGE));
+      currentPage = Math.min(currentPage, totalPages);
+      pageIndicator.textContent = `Page ${currentPage} / ${totalPages}`;
+      visible.forEach((row, idx) => {
+        const pageOfItem = Math.floor(idx / ITEMS_PER_PAGE) + 1;
+        row.style.display = (pageOfItem === currentPage) ? '' : 'none';
+      });
+    }
+
+    prevBtn?.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage -= 1;
+        filterItemsByCategory();
+      }
+    });
+
+    nextBtn?.addEventListener('click', () => {
+      currentPage += 1;
+      filterItemsByCategory();
+    });
     
     // Logo upload functionality
     logoUploadArea?.addEventListener('click', () => {
@@ -783,14 +919,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-          <select name="menuItems[${menuItemCount}][item_category]" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" required>
-            <option value="">Select Category</option>
-            <option value="appetizers">Appetizers</option>
-            <option value="main-course">Main Course</option>
-            <option value="desserts">Desserts</option>
-            <option value="beverages">Beverages</option>
-            <option value="sides">Sides</option>
-          </select>
+          <input type="text" name="menuItems[${menuItemCount}][item_category]" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 oms-category-field" placeholder="Type or pick from pills" required>
         </div>
         <div class="flex items-end">
           <button type="button" class="remove-menu-item px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm">
@@ -800,14 +929,25 @@ import AuthGuard from '../components/AuthGuard.astro';
       `;
       menuItemsContainer?.appendChild(menuItemRow);
       menuItemCount++;
+      // Apply current category automatically
+      if (currentCategoryIndex >= 0) {
+        const currentCat = categories[currentCategoryIndex];
+        const catInput = menuItemRow.querySelector('.oms-category-field');
+        if (catInput && !catInput.value) catInput.value = currentCat;
+      }
+      filterItemsByCategory();
     });
     
     // Remove menu item functionality
     menuItemsContainer?.addEventListener('click', (e) => {
       if (e.target.classList.contains('remove-menu-item')) {
         e.target.closest('.menu-item-row').remove();
+        filterItemsByCategory();
       }
     });
+
+    // Initial filter
+    filterItemsByCategory();
     
     // Close form handlers
     closeBtn?.addEventListener('click', () => {
@@ -859,23 +999,20 @@ import AuthGuard from '../components/AuthGuard.astro';
       };
       
       try {
-        // Save to localStorage
+        // Per requirement: DO NOT store Order Menu System in Supabase customization_forms
+        // Save only locally and continue normal flow
         const existingRequirements = JSON.parse(localStorage.getItem('order-menu-requirements') || '[]');
         existingRequirements.push(orderMenuRequirements);
         localStorage.setItem('order-menu-requirements', JSON.stringify(existingRequirements));
         
-        // Show success message
         alert('Order Menu requirements saved successfully! Our team will contact you soon.');
         
         // Clear URL parameters to show browse products section
         window.history.replaceState({}, document.title, window.location.pathname);
-        
         // Show Browse Products section with smooth transition
         showBrowseProductsSection();
-        
         // Clear form
         form.reset();
-        
       } catch (error) {
         console.error('Error saving order menu requirements:', error);
         alert('Error saving order menu requirements. Please try again.');
@@ -969,6 +1106,9 @@ import AuthGuard from '../components/AuthGuard.astro';
         productId: new URLSearchParams(window.location.search).get('product') || '1',
         productName: productName,
         productPrice: productPrice,
+        // product context
+        productName,
+        productPrice,
         projectName: data.projectName,
         appName: data.appName,
         contactPerson: data.contactPerson,
@@ -984,23 +1124,104 @@ import AuthGuard from '../components/AuthGuard.astro';
         timestamp: new Date().toISOString()
       };
       
-      // Add restaurant-specific fields only for restaurant products
-      const selectedProductId = new URLSearchParams(window.location.search).get('product') || '1';
-      const restaurantProducts = ['3', '4']; // Restaurant Menu System and Restaurant Website
-      
-      if (restaurantProducts.includes(selectedProductId)) {
-        projectRequirements.restaurantName = data.restaurantName;
-        projectRequirements.cuisineType = data.cuisineType;
-      }
+      // Always capture restaurant-specific fields if present (avoid ID mismatches)
+      projectRequirements.restaurantName = data.restaurantName || projectRequirements.restaurantName || '';
+      projectRequirements.cuisineType = data.cuisineType || projectRequirements.cuisineType || '';
       
       try {
-        // Save to localStorage for now (can be changed to save to database)
+        // Save to database using the helper function
+        console.log('💾 Saving project form to database...');
+        
+        // Determine product type from the visible product name to avoid ID mismatches
+        const normalize = (s) => (s || '').toLowerCase();
+        const name = normalize(productName);
+        let productType = 'restaurant-website';
+        if (name.includes('order menu')) productType = 'restaurant-menu-system';
+        else if (name.includes('restaurant website')) productType = 'restaurant-website';
+        else if (name.includes('android tv')) productType = 'android-tv-app';
+        else if (name.includes('streaming')) productType = 'streaming-mobile-app';
+
+        // Upload logo to Supabase Storage (if provided)
+        let logoUrl = projectRequirements.logoUrl || null;
+        let logoFilename = projectRequirements.logoFilename || null;
+        let logoMimeType = projectRequirements.logoMimeType || null;
+        let logoSize = projectRequirements.logoSize || null;
+        try {
+          const fileInput = form.querySelector('input[name="restaurantLogo"]');
+          const file = fileInput?.files?.[0];
+          if (file) {
+            const { supabase } = await import('../lib/supabase');
+            // Normalize filename (no spaces), enforce max size 10MB, and use ArrayBuffer for reliability
+            const safeName = file.name.replace(/\s+/g, '_');
+            if (file.size > 10 * 1024 * 1024) {
+              throw new Error('Logo file exceeds 10MB limit');
+            }
+            const path = `${Date.now()}_${safeName}`;
+            const fileBuffer = await file.arrayBuffer();
+            const { error: upErr } = await supabase.storage
+              .from('logos')
+              .upload(path, fileBuffer, { upsert: true, contentType: file.type, cacheControl: '3600' });
+            if (!upErr) {
+              const { data: pub } = supabase.storage.from('logos').getPublicUrl(path);
+              logoUrl = pub?.publicUrl || null;
+              // Fallback: create a long-lived signed URL if bucket isn't public
+              if (!logoUrl) {
+                const { data: signed, error: signErr } = await supabase.storage
+                  .from('logos')
+                  .createSignedUrl(path, 60 * 60 * 24 * 365); // 1 year
+                if (!signErr) {
+                  logoUrl = signed?.signedUrl || null;
+                }
+              }
+              logoFilename = file.name;
+              logoMimeType = file.type;
+              logoSize = file.size;
+            }
+          }
+        } catch (e) {
+          console.warn('Logo upload skipped:', e);
+        }
+        
+        const formData = {
+          productName,
+          productPrice,
+          projectName: projectRequirements.projectName,
+          contactPerson: projectRequirements.contactPerson,
+          appName: projectRequirements.appName,
+          productDescription: projectRequirements.productDescriptionCustom,
+          restaurantName: projectRequirements.restaurantName,
+          cuisineType: projectRequirements.cuisineType,
+          email: projectRequirements.email,
+          phone: projectRequirements.phone,
+          primaryColor: projectRequirements.primaryColor,
+          secondaryColor: projectRequirements.secondaryColor,
+          accentColor: projectRequirements.accentColor,
+          textColor: projectRequirements.textColor,
+          additionalRequirements: projectRequirements.additionalRequirements,
+          // logo info
+          logoUrl,
+          logoFilename,
+          logoMimeType,
+          logoSize
+        };
+
+        const result = await saveCustomizationForm(formData, productType);
+        
+        if (result.success) {
+          console.log('✅ Project form saved to Supabase database:', result.data);
+          
+          // Show success message with database confirmation
+          alert(`✅ Project requirements saved to database successfully!\n\nRecord ID: ${result.data.id}\nProject: ${result.data.project_name}\nRestaurant: ${result.data.restaurant_name || 'N/A'}\nCuisine: ${result.data.cuisine_type || 'N/A'}\n\nOur team will contact you soon!`);
+        } else {
+          console.error('❌ Error saving to database:', result.error);
+          
+          // Fallback to localStorage
         const existingRequirements = JSON.parse(localStorage.getItem('project-requirements') || '[]');
         existingRequirements.push(projectRequirements);
         localStorage.setItem('project-requirements', JSON.stringify(existingRequirements));
         
-        // Show success message
-        alert('Project requirements saved successfully! Our team will contact you soon.');
+          alert(`❌ Database save failed: ${result.error}\n\nData saved locally as backup. Our team will contact you soon.`);
+        }
         
         // Clear URL parameters to show browse products section
         window.history.replaceState({}, document.title, window.location.pathname);
@@ -1133,24 +1354,24 @@ import AuthGuard from '../components/AuthGuard.astro';
             
             // Fallback: Try session storage
             const sessionData = sessionStorage.getItem('simple-auth-session');
-            if (sessionData) {
-              try {
-                const sessionObj = JSON.parse(sessionData);
-                const userData = sessionObj.user;
-                
-                if (userData && userData.email) {
+      if (sessionData) {
+        try {
+          const sessionObj = JSON.parse(sessionData);
+          const userData = sessionObj.user;
+          
+          if (userData && userData.email) {
                   const emailFields = document.querySelectorAll('input[name="email"], input[type="email"]');
                   emailFields.forEach(field => {
-                    field.value = userData.email;
+                field.value = userData.email;
                     field.dispatchEvent(new Event('input', { bubbles: true }));
                     field.dispatchEvent(new Event('change', { bubbles: true }));
-                  });
-                }
-                
-                if (userData && userData.phone) {
+            });
+          }
+          
+          if (userData && userData.phone) {
                   const phoneFields = document.querySelectorAll('input[name="phone"], input[type="tel"]');
                   phoneFields.forEach(field => {
-                    field.value = userData.phone;
+                field.value = userData.phone;
                     field.dispatchEvent(new Event('input', { bubbles: true }));
                     field.dispatchEvent(new Event('change', { bubbles: true }));
                   });
@@ -1166,10 +1387,10 @@ import AuthGuard from '../components/AuthGuard.astro';
                 }
                 
                 console.log('✅ Auto-fill completed with session storage fallback');
-              } catch (error) {
+        } catch (error) {
                 console.error('❌ Error parsing session data:', error);
-              }
-            }
+        }
+      }
           }
         }
       }, 100);
@@ -1218,7 +1439,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         { id: '2', name: 'Android TV App', description: 'Custom Android TV applications with beautiful UI, content management, and remote control support. Perfect for streaming services and media companies.', price: 55000, type: 'non-restaurant' },
         { id: '3', name: 'Streaming Mobile App', description: 'Mobile streaming applications for iOS and Android with custom features, user authentication, and content management.', price: 35000, type: 'non-restaurant' },
         { id: '4', name: 'Restaurant Website', description: 'Professional restaurant website with online ordering, menu display, and customer management features.', price: 20000, type: 'restaurant' },
-        { id: '5', name: 'Order Menu System', description: 'Complete order management system with digital menu integration, real-time order tracking, and payment processing. Perfect for restaurants looking to streamline their ordering process.', price: 25000, type: 'order-menu' }
+        { id: '5', name: 'Order Menu System', description: 'Complete order management system with digital menu integration, real-time order tracking, and payment processing. Perfect for restaurants looking to streamline their ordering process.', price: 999, type: 'order-menu' }
       ];
       
       const selectedProduct = products.find(p => p.id === productId);
@@ -1229,7 +1450,6 @@ import AuthGuard from '../components/AuthGuard.astro';
         
         // Update Order Menu System product details
         document.getElementById('order-menu-product-name').textContent = selectedProduct.name;
-        document.getElementById('order-menu-product-description').textContent = selectedProduct.description;
         document.getElementById('order-menu-product-price').textContent = `₹${selectedProduct.price.toLocaleString()}`;
         
         // Show appropriate form with smooth transition

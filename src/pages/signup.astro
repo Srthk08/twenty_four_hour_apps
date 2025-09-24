@@ -147,6 +147,22 @@ import Layout from '../layouts/Layout.astro';
             </div>
           </div>
 
+          <!-- Admin Code (Hidden by default) -->
+          <div id="admin-code-section" class="hidden">
+            <label for="admin_code" class="block text-sm font-medium text-gray-700">
+              Admin Code
+            </label>
+            <div class="mt-1">
+              <input
+                id="admin_code"
+                name="admin_code"
+                type="text"
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                placeholder="Enter admin code (optional)"
+              />
+            </div>
+          </div>
+
           <!-- Submit Button -->
             <button
               type="submit"
@@ -441,15 +457,21 @@ import Layout from '../layouts/Layout.astro';
         await syncGoogleUser(user);
         showStatus('Successfully signed up with Google!', 'success');
         
+        // Add default role for Google signup (can be updated later)
+        const userWithRole = {
+          ...user,
+          role: 'customer' // Default role for Google signup
+        };
+        
         // Store session for Google signup
         sessionStorage.setItem('simple-auth-session', JSON.stringify({
-          user: user,
+          user: userWithRole,
           access_token: session?.access_token,
           timestamp: Date.now()
         }));
         
         // Dispatch login event
-        window.dispatchEvent(new CustomEvent('user-logged-in', { detail: user }));
+        window.dispatchEvent(new CustomEvent('user-logged-in', { detail: userWithRole }));
         
         // Redirect to dashboard
         setTimeout(() => {
@@ -467,6 +489,7 @@ import Layout from '../layouts/Layout.astro';
     const confirmPasswordInput = document.getElementById('confirm_password') as HTMLInputElement;
     const phoneInput = document.getElementById('phone') as HTMLInputElement;
     const companyNameInput = document.getElementById('company_name') as HTMLInputElement;
+    const adminCodeSection = document.getElementById('admin-code-section');
     
     // Clear all input fields
     if (emailInput) emailInput.value = '';
@@ -475,6 +498,17 @@ import Layout from '../layouts/Layout.astro';
     if (confirmPasswordInput) confirmPasswordInput.value = '';
     if (phoneInput) phoneInput.value = '';
     if (companyNameInput) companyNameInput.value = '';
+    
+    // Check for admin signup URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const adminCode = urlParams.get('admin_code');
+    if (adminCode && adminCodeSection) {
+      adminCodeSection.classList.remove('hidden');
+      const adminCodeInput = document.getElementById('admin_code') as HTMLInputElement;
+      if (adminCodeInput) {
+        adminCodeInput.value = adminCode;
+      }
+    }
     
     // Prevent autofill by setting autocomplete attributes
     if (emailInput) {
@@ -521,6 +555,7 @@ import Layout from '../layouts/Layout.astro';
     const fullName = formData.get('full_name') as string;
     const phone = formData.get('phone') as string;
     const companyName = formData.get('company_name') as string;
+    const adminCode = formData.get('admin_code') as string;
 
     // Hide previous errors
     errorMessage?.classList.add('hidden');
@@ -578,6 +613,12 @@ import Layout from '../layouts/Layout.astro';
       if (data.user) {
         console.log('User created successfully:', data.user.email);
         
+        // Determine user role based on admin code
+        let userRole = 'customer';
+        if (adminCode === 'ADMIN2024') {
+          userRole = 'admin';
+        }
+
         // Create profile in profiles table
         const { error: profileError } = await supabase
           .from('profiles')
@@ -587,7 +628,7 @@ import Layout from '../layouts/Layout.astro';
             full_name: fullName || '',
             phone: phone || '',
             company_name: companyName || '',
-            role: 'customer',
+            role: userRole,
             status: 'pending_verification',
             username: fullName?.toLowerCase().replace(/\s+/g, '_') || email.split('@')[0],
             created_at: new Date().toISOString(),
@@ -601,14 +642,20 @@ import Layout from '../layouts/Layout.astro';
         
         // Store session and auto-login user after account creation
         if (data.session) {
+          // Add role to user data
+          const userWithRole = {
+            ...data.user,
+            role: userRole
+          };
+          
           sessionStorage.setItem('simple-auth-session', JSON.stringify({
-            user: data.user,
+            user: userWithRole,
             access_token: data.session.access_token,
             timestamp: Date.now()
           }));
           
           // Dispatch login event
-          window.dispatchEvent(new CustomEvent('user-logged-in', { detail: data.user }));
+          window.dispatchEvent(new CustomEvent('user-logged-in', { detail: userWithRole }));
         }
         
         // Show success message

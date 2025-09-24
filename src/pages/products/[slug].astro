@@ -293,53 +293,114 @@ const style = categoryStyles[product.category];
     </div>
   </section>
 
-  <!-- Product Plans Section -->
-  <section class="py-16">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class={`text-3xl font-bold text-center mb-12 ${isRestaurantMenuSystem ? 'text-blue-900' : isAndroidTVApp ? 'text-purple-900' : isStreamingMobileApp ? 'text-pink-800' : isRestaurantWebsite ? 'text-emerald-800' : isOrderMenuSystem ? 'text-amber-800' : 'text-gray-900'}`}>Choose Your Plan</h2>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {productPlans.map((plan) => (
-          <div class={`${isRestaurantMenuSystem ? 'bg-white/90 backdrop-blur-sm border border-blue-200' : isAndroidTVApp ? 'bg-white/90 backdrop-blur-sm border border-purple-200' : isStreamingMobileApp ? 'bg-white/90 backdrop-blur-sm border border-pink-200' : isRestaurantWebsite ? 'bg-white/90 backdrop-blur-sm border border-emerald-200' : isOrderMenuSystem ? 'bg-white/90 backdrop-blur-sm border border-amber-200' : 'bg-white'} rounded-xl shadow-lg p-8 ${plan.is_popular ? 'ring-2 ring-primary-500 relative' : ''}`}>
-            {plan.is_popular && (
-              <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span class="bg-primary-500 text-white px-4 py-2 rounded-full text-sm font-medium">Most Popular</span>
-              </div>
-            )}
-            
-            <div class="text-center mb-6">
-              <h3 class={`text-xl font-bold mb-2 ${isRestaurantMenuSystem ? 'text-blue-900' : isAndroidTVApp ? 'text-purple-900' : isStreamingMobileApp ? 'text-pink-800' : isRestaurantWebsite ? 'text-emerald-800' : isOrderMenuSystem ? 'text-amber-800' : 'text-gray-900'}`}>{plan.name}</h3>
-              <p class={`text-sm mb-4 ${isRestaurantMenuSystem ? 'text-blue-800' : isAndroidTVApp ? 'text-purple-800' : isStreamingMobileApp ? 'text-pink-700' : isRestaurantWebsite ? 'text-emerald-700' : isOrderMenuSystem ? 'text-amber-700' : 'text-gray-600'}`}>{plan.description}</p>
-              <div class="text-3xl font-bold text-primary-600">₹{plan.price.toLocaleString()}</div>
-              <div class={`text-sm ${isRestaurantMenuSystem ? 'text-blue-700' : isAndroidTVApp ? 'text-purple-700' : isStreamingMobileApp ? 'text-pink-700' : isRestaurantWebsite ? 'text-emerald-700' : isOrderMenuSystem ? 'text-amber-700' : 'text-gray-500'}`}>Delivery in {plan.delivery_days} day{plan.delivery_days > 1 ? 's' : ''}</div>
-            </div>
-            
-            <ul class="space-y-3 mb-8">
-              {plan.features.map((feature) => (
+  <!-- Single Price Section for Order Menu System -->
+  {product.slug === 'order-menu-system' && (
+    <section class="py-16">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h2 class="text-3xl font-bold text-amber-800 mb-8">Simple Pricing</h2>
+          <div class="bg-white/90 backdrop-blur-sm border border-amber-200 rounded-xl shadow-lg p-8 max-w-md mx-auto">
+            <div class="text-center">
+              <h3 class="text-2xl font-bold text-amber-800 mb-4">Order Menu System</h3>
+              <p class="text-amber-700 mb-6">Complete order management solution with all essential features</p>
+              <div class="text-4xl font-bold text-amber-600 mb-2">₹999</div>
+              <div class="text-sm text-amber-600 mb-8">One-time payment • Delivery in 1 day</div>
+              
+              <ul class="space-y-3 mb-8 text-left">
                 <li class="flex items-center">
                   <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                   </svg>
-                  <span class="text-gray-700">{feature}</span>
+                  <span class="text-gray-700">All essential OMS features</span>
                 </li>
-              ))}
-            </ul>
-            
-            <button 
-              onclick={`redirectToCart('${product.id}', ${plan.price})`}
-              class={`w-full py-3 px-6 rounded-lg font-medium transition-all ${
-                plan.is_popular 
-                  ? 'bg-primary-600 hover:bg-primary-700 text-white' 
-                  : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
-              }`}
-            >
-              Choose {plan.name}
-            </button>
+                <li class="flex items-center">
+                  <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span class="text-gray-700">Digital menu integration</span>
+                </li>
+                <li class="flex items-center">
+                  <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span class="text-gray-700">Real-time order tracking</span>
+                </li>
+                <li class="flex items-center">
+                  <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span class="text-gray-700">Payment processing</span>
+                </li>
+                <li class="flex items-center">
+                  <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span class="text-gray-700">Analytics dashboard</span>
+                </li>
+              </ul>
+              
+              <button 
+                onclick={`redirectToCart('${product.id}', 999)`}
+                class="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 px-6 rounded-lg font-medium transition-colors"
+              >
+                Get Started - ₹999
+              </button>
+            </div>
           </div>
-        ))}
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+  )}
+
+  <!-- Product Plans Section (Hidden for Order Menu System) -->
+  {product.slug !== 'order-menu-system' && (
+    <section class="py-16">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class={`text-3xl font-bold text-center mb-12 ${isRestaurantMenuSystem ? 'text-blue-900' : isAndroidTVApp ? 'text-purple-900' : isStreamingMobileApp ? 'text-pink-800' : isRestaurantWebsite ? 'text-emerald-800' : 'text-gray-900'}`}>Choose Your Plan</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {productPlans.map((plan) => (
+            <div class={`${isRestaurantMenuSystem ? 'bg-white/90 backdrop-blur-sm border border-blue-200' : isAndroidTVApp ? 'bg-white/90 backdrop-blur-sm border border-purple-200' : isStreamingMobileApp ? 'bg-white/90 backdrop-blur-sm border border-pink-200' : isRestaurantWebsite ? 'bg-white/90 backdrop-blur-sm border border-emerald-200' : 'bg-white'} rounded-xl shadow-lg p-8 ${plan.is_popular ? 'ring-2 ring-primary-500 relative' : ''}`}>
+              {plan.is_popular && (
+                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <span class="bg-primary-500 text-white px-4 py-2 rounded-full text-sm font-medium">Most Popular</span>
+                </div>
+              )}
+              
+              <div class="text-center mb-6">
+                <h3 class={`text-xl font-bold mb-2 ${isRestaurantMenuSystem ? 'text-blue-900' : isAndroidTVApp ? 'text-purple-900' : isStreamingMobileApp ? 'text-pink-800' : isRestaurantWebsite ? 'text-emerald-800' : 'text-gray-900'}`}>{plan.name}</h3>
+                <p class={`text-sm mb-4 ${isRestaurantMenuSystem ? 'text-blue-800' : isAndroidTVApp ? 'text-purple-800' : isStreamingMobileApp ? 'text-pink-700' : isRestaurantWebsite ? 'text-emerald-700' : 'text-gray-600'}`}>{plan.description}</p>
+                <div class="text-3xl font-bold text-primary-600">₹{plan.price.toLocaleString()}</div>
+                <div class={`text-sm ${isRestaurantMenuSystem ? 'text-blue-700' : isAndroidTVApp ? 'text-purple-700' : isStreamingMobileApp ? 'text-pink-700' : isRestaurantWebsite ? 'text-emerald-700' : 'text-gray-500'}`}>Delivery in {plan.delivery_days} day{plan.delivery_days > 1 ? 's' : ''}</div>
+              </div>
+              
+              <ul class="space-y-3 mb-8">
+                {plan.features.map((feature) => (
+                  <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-gray-700">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              
+              <button 
+                onclick={`redirectToCart('${product.id}', ${plan.price})`}
+                class={`w-full py-3 px-6 rounded-lg font-medium transition-all ${
+                  plan.is_popular 
+                    ? 'bg-primary-600 hover:bg-primary-700 text-white' 
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+                }`}
+              >
+                Choose {plan.name}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
 
   <!-- FAQ Section -->
   <section class={`py-16 ${isStreamingMobileApp ? streamingMobileBg : isRestaurantWebsite ? restaurantWebsiteBg : isOrderMenuSystem ? orderMenuSystemBg : ''}`}>
@@ -396,12 +457,12 @@ const style = categoryStyles[product.category];
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
         <button 
           id="add-to-cart-btn"
-          onclick={`redirectToCart('${product.id}', '${productPlans[0]?.price}')`}
+          onclick={`redirectToCart('${product.id}', '${isOrderMenuSystem ? 999 : productPlans[0]?.price}')`}
           class="bg-white text-gray-900 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-colors"
         >
-          Add to Cart - ₹{productPlans[0]?.price.toLocaleString()}
+          Add to Cart - ₹{isOrderMenuSystem ? '999' : productPlans[0]?.price.toLocaleString()}
         </button>
-        <a href={`/contact?product=${encodeURIComponent(product.name)}&project_type=${product.category}&project_details=${encodeURIComponent(`I'm interested in the ${product.name}. ${product.description}`)}&price=${productPlans[0]?.price || product.base_price}`} class="contact-us-btn border-2 border-white text-white hover:bg-white hover:text-black px-8 py-3 rounded-lg font-semibold transition-all">
+        <a href={`/contact?product=${encodeURIComponent(product.name)}&project_type=${product.category}&project_details=${encodeURIComponent(`I'm interested in the ${product.name}. ${product.description}`)}&price=${isOrderMenuSystem ? 999 : productPlans[0]?.price || product.base_price}`} class="contact-us-btn border-2 border-white text-white hover:bg-white hover:text-black px-8 py-3 rounded-lg font-semibold transition-all">
           Contact Us
         </a>
       </div>
@@ -521,6 +582,58 @@ const style = categoryStyles[product.category];
 
   // Check authentication when page loads
   document.addEventListener('DOMContentLoaded', checkAuthenticationStatus);
+
+  // Role-based access control for product pages
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get current product slug from URL
+    const currentPath = window.location.pathname;
+    const productSlug = currentPath.split('/').pop();
+    
+    // Check if user is admin
+    const isAdmin = checkIfUserIsAdmin();
+    
+    // If user is not admin and product is not Order Menu System, show dialog and redirect
+    if (!isAdmin && productSlug !== 'order-menu-system') {
+      // Show the dialog
+      if (window.showProductDialog) {
+        window.showProductDialog();
+      }
+      
+      // Redirect to products page after a short delay
+      setTimeout(() => {
+        window.location.href = '/products';
+      }, 3000);
+    }
+  });
+
+  // Function to check if user is admin
+  function checkIfUserIsAdmin() {
+    try {
+      // Check if user is logged in
+      if (window.simpleAuthManager && window.simpleAuthManager.isUserLoggedIn()) {
+        const currentUser = window.simpleAuthManager.getCurrentUser();
+        
+        // Check if user has admin role
+        if (currentUser && currentUser.role === 'admin') {
+          return true;
+        }
+      }
+      
+      // Check session storage for admin role
+      const sessionData = sessionStorage.getItem('simple-auth-session');
+      if (sessionData) {
+        const session = JSON.parse(sessionData);
+        if (session.user && session.user.role === 'admin') {
+          return true;
+        }
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      return false;
+    }
+  }
 
   // Listen for authentication state changes
   window.addEventListener('user-logged-in', (e) => {

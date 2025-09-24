@@ -1,0 +1,252 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Database Debug - DevExpress">
+  <section class="py-12 bg-gray-50 min-h-screen">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="bg-white rounded-lg shadow-sm p-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">Database Debug Tool</h1>
+        
+        <div class="space-y-6">
+          <div>
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Connection Test</h2>
+            <button id="test-connection" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+              Test Supabase Connection
+            </button>
+            <div id="connection-result" class="mt-4 p-4 bg-gray-100 rounded-lg hidden">
+              <!-- Results will be displayed here -->
+            </div>
+          </div>
+          
+          <div>
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Table Check</h2>
+            <button id="check-table" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+              Check if customization_forms table exists
+            </button>
+            <div id="table-result" class="mt-4 p-4 bg-gray-100 rounded-lg hidden">
+              <!-- Results will be displayed here -->
+            </div>
+          </div>
+          
+          <div>
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Test Insert</h2>
+            <button id="test-insert" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+              Test Insert Data
+            </button>
+            <div id="insert-result" class="mt-4 p-4 bg-gray-100 rounded-lg hidden">
+              <!-- Results will be displayed here -->
+            </div>
+          </div>
+          
+          <div>
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">View Data</h2>
+            <button id="view-data" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700">
+              View All Data in Table
+            </button>
+            <div id="data-result" class="mt-4 p-4 bg-gray-100 rounded-lg hidden">
+              <!-- Results will be displayed here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  // Import the database helper
+  import { saveCustomizationForm } from '../lib/customization-db.js';
+  import { createClient } from '@supabase/supabase-js';
+  
+  // Supabase configuration
+  const SUPABASE_URL = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+  
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  
+  console.log('🔧 Database debug tool loaded');
+  console.log('🔧 Supabase URL:', SUPABASE_URL);
+  console.log('🔧 Supabase Key (first 20 chars):', SUPABASE_ANON_KEY.substring(0, 20) + '...');
+  
+  // Test connection
+  document.getElementById('test-connection')?.addEventListener('click', async () => {
+    const resultDiv = document.getElementById('connection-result');
+    resultDiv.innerHTML = '<div class="text-center"><div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div><p class="mt-2">Testing connection...</p></div>';
+    resultDiv.classList.remove('hidden');
+    
+    try {
+      console.log('🔧 Testing Supabase connection...');
+      const { data, error } = await supabase.from('customization_forms').select('count').limit(1);
+      
+      if (error) {
+        console.error('❌ Connection test failed:', error);
+        resultDiv.innerHTML = `
+          <div class="text-red-600">
+            <h3 class="font-semibold">❌ Connection Failed</h3>
+            <p class="text-sm mt-2">Error: ${error.message}</p>
+            <p class="text-sm">Code: ${error.code}</p>
+            <p class="text-sm">Details: ${error.details}</p>
+            <p class="text-sm">Hint: ${error.hint}</p>
+          </div>
+        `;
+      } else {
+        console.log('✅ Connection test successful:', data);
+        resultDiv.innerHTML = `
+          <div class="text-green-600">
+            <h3 class="font-semibold">✅ Connection Successful</h3>
+            <p class="text-sm mt-2">Connected to Supabase successfully!</p>
+            <p class="text-sm">Data: ${JSON.stringify(data)}</p>
+          </div>
+        `;
+      }
+    } catch (err) {
+      console.error('❌ Unexpected error:', err);
+      resultDiv.innerHTML = `
+        <div class="text-red-600">
+          <h3 class="font-semibold">❌ Unexpected Error</h3>
+          <p class="text-sm mt-2">Error: ${err.message}</p>
+        </div>
+      `;
+    }
+  });
+  
+  // Check if table exists
+  document.getElementById('check-table')?.addEventListener('click', async () => {
+    const resultDiv = document.getElementById('table-result');
+    resultDiv.innerHTML = '<div class="text-center"><div class="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600 mx-auto"></div><p class="mt-2">Checking table...</p></div>';
+    resultDiv.classList.remove('hidden');
+    
+    try {
+      console.log('🔧 Checking if customization_forms table exists...');
+      const { data, error } = await supabase
+        .from('customization_forms')
+        .select('*')
+        .limit(1);
+      
+      if (error) {
+        console.error('❌ Table check failed:', error);
+        resultDiv.innerHTML = `
+          <div class="text-red-600">
+            <h3 class="font-semibold">❌ Table Not Found</h3>
+            <p class="text-sm mt-2">Error: ${error.message}</p>
+            <p class="text-sm">Code: ${error.code}</p>
+            <p class="text-sm">This means the table doesn't exist yet.</p>
+            <p class="text-sm mt-2"><strong>Solution:</strong> Execute the SQL schema in Supabase Dashboard → SQL Editor</p>
+          </div>
+        `;
+      } else {
+        console.log('✅ Table exists:', data);
+        resultDiv.innerHTML = `
+          <div class="text-green-600">
+            <h3 class="font-semibold">✅ Table Exists</h3>
+            <p class="text-sm mt-2">customization_forms table found!</p>
+            <p class="text-sm">Sample data: ${JSON.stringify(data)}</p>
+          </div>
+        `;
+      }
+    } catch (err) {
+      console.error('❌ Unexpected error:', err);
+      resultDiv.innerHTML = `
+        <div class="text-red-600">
+          <h3 class="font-semibold">❌ Unexpected Error</h3>
+          <p class="text-sm mt-2">Error: ${err.message}</p>
+        </div>
+      `;
+    }
+  });
+  
+  // Test insert
+  document.getElementById('test-insert')?.addEventListener('click', async () => {
+    const resultDiv = document.getElementById('insert-result');
+    resultDiv.innerHTML = '<div class="text-center"><div class="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600 mx-auto"></div><p class="mt-2">Testing insert...</p></div>';
+    resultDiv.classList.remove('hidden');
+    
+    try {
+      console.log('🔧 Testing insert...');
+      
+      const testData = {
+        projectName: 'Debug Test Project',
+        contactPerson: 'Debug User',
+        appName: 'Debug App',
+        productDescription: 'This is a debug test',
+        email: 'debug@example.com',
+        phone: '+1234567890',
+        additionalRequirements: 'Debug test requirements'
+      };
+      
+      const result = await saveCustomizationForm(testData, 'restaurant-website');
+      
+      if (result.success) {
+        console.log('✅ Insert test successful:', result.data);
+        resultDiv.innerHTML = `
+          <div class="text-green-600">
+            <h3 class="font-semibold">✅ Insert Successful</h3>
+            <p class="text-sm mt-2">Data inserted successfully!</p>
+            <p class="text-sm">ID: ${result.data.id}</p>
+            <p class="text-sm">Is Update: ${result.isUpdate ? 'Yes' : 'No'}</p>
+          </div>
+        `;
+      } else {
+        console.error('❌ Insert test failed:', result.error);
+        resultDiv.innerHTML = `
+          <div class="text-red-600">
+            <h3 class="font-semibold">❌ Insert Failed</h3>
+            <p class="text-sm mt-2">Error: ${result.error}</p>
+          </div>
+        `;
+      }
+    } catch (err) {
+      console.error('❌ Unexpected error:', err);
+      resultDiv.innerHTML = `
+        <div class="text-red-600">
+          <h3 class="font-semibold">❌ Unexpected Error</h3>
+          <p class="text-sm mt-2">Error: ${err.message}</p>
+        </div>
+      `;
+    }
+  });
+  
+  // View data
+  document.getElementById('view-data')?.addEventListener('click', async () => {
+    const resultDiv = document.getElementById('data-result');
+    resultDiv.innerHTML = '<div class="text-center"><div class="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-600 mx-auto"></div><p class="mt-2">Loading data...</p></div>';
+    resultDiv.classList.remove('hidden');
+    
+    try {
+      console.log('🔧 Loading all data...');
+      const { data, error } = await supabase
+        .from('customization_forms')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('❌ Load data failed:', error);
+        resultDiv.innerHTML = `
+          <div class="text-red-600">
+            <h3 class="font-semibold">❌ Load Failed</h3>
+            <p class="text-sm mt-2">Error: ${error.message}</p>
+          </div>
+        `;
+      } else {
+        console.log('✅ Data loaded:', data);
+        resultDiv.innerHTML = `
+          <div class="text-green-600">
+            <h3 class="font-semibold">✅ Data Loaded (${data.length} records)</h3>
+            <div class="mt-2 text-sm">
+              <pre class="bg-gray-200 p-2 rounded text-xs overflow-auto max-h-64">${JSON.stringify(data, null, 2)}</pre>
+            </div>
+          </div>
+        `;
+      }
+    } catch (err) {
+      console.error('❌ Unexpected error:', err);
+      resultDiv.innerHTML = `
+        <div class="text-red-600">
+          <h3 class="font-semibold">❌ Unexpected Error</h3>
+          <p class="text-sm mt-2">Error: ${err.message}</p>
+        </div>
+      `;
+    }
+  });
+</script>

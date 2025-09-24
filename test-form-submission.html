@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Form Submission to Supabase</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; }
+        input, select, textarea { width: 100%; padding: 8px; margin-bottom: 10px; }
+        button { background: #3B82F6; color: white; padding: 10px 20px; border: none; cursor: pointer; }
+        .result { margin: 20px 0; padding: 10px; border-radius: 5px; }
+        .success { background: #D1FAE5; color: #065F46; border: 1px solid #10B981; }
+        .error { background: #FEE2E2; color: #991B1B; border: 1px solid #EF4444; }
+    </style>
+</head>
+<body>
+    <h1>Test Customization Form Submission</h1>
+    <p>This will test if data is being saved to Supabase instead of localStorage.</p>
+    
+    <form id="test-form">
+        <div class="form-group">
+            <label>Project Name *</label>
+            <input type="text" id="projectName" value="Test Restaurant Project" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Contact Person *</label>
+            <input type="text" id="contactPerson" value="John Doe" required>
+        </div>
+        
+        <div class="form-group">
+            <label>App Name *</label>
+            <input type="text" id="appName" value="TestRestaurantApp" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Restaurant Name *</label>
+            <input type="text" id="restaurantName" value="Test Pizza Palace" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Cuisine Type *</label>
+            <select id="cuisineType" required>
+                <option value="">Select cuisine type</option>
+                <option value="Italian" selected>Italian</option>
+                <option value="Chinese">Chinese</option>
+                <option value="Indian">Indian</option>
+                <option value="Mexican">Mexican</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Email *</label>
+            <input type="email" id="email" value="test@example.com" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Phone *</label>
+            <input type="tel" id="phone" value="+1234567890" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Primary Color</label>
+            <input type="color" id="primaryColor" value="#3B82F6">
+        </div>
+        
+        <div class="form-group">
+            <label>Additional Requirements</label>
+            <textarea id="additionalRequirements" rows="3">Test requirements for database storage</textarea>
+        </div>
+        
+        <button type="submit">Test Save to Supabase</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <h2>Recent Submissions</h2>
+    <button onclick="loadRecentSubmissions()">Load Recent Submissions</button>
+    <div id="submissions"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js@2';
+        
+        const SUPABASE_URL = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        document.getElementById('test-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Saving to Supabase...';
+            
+            try {
+                // Prepare form data
+                const formData = {
+                    product_type: 'restaurant-website',
+                    product_name: 'Restaurant Website',
+                    product_price: '₹299',
+                    project_name: document.getElementById('projectName').value,
+                    contact_person: document.getElementById('contactPerson').value,
+                    app_name: document.getElementById('appName').value,
+                    product_description: 'Test restaurant website project',
+                    restaurant_name: document.getElementById('restaurantName').value,
+                    cuisine_type: document.getElementById('cuisineType').value,
+                    contact_email: document.getElementById('email').value,
+                    contact_phone: document.getElementById('phone').value,
+                    primary_color: document.getElementById('primaryColor').value,
+                    secondary_color: '#10B981',
+                    accent_color: '#F59E0B',
+                    text_color: '#1F2937',
+                    additional_requirements: document.getElementById('additionalRequirements').value,
+                    status: 'pending'
+                };
+                
+                console.log('Saving form data:', formData);
+                
+                // Save to Supabase
+                const { data, error } = await supabase
+                    .from('customization_forms')
+                    .upsert(formData, { onConflict: 'contact_email,product_type,product_name,product_price' })
+                    .select()
+                    .single();
+                
+                if (error) {
+                    throw error;
+                }
+                
+                resultDiv.innerHTML = `
+                    <div class="result success">
+                        <h3>✅ Successfully saved to Supabase!</h3>
+                        <p><strong>Record ID:</strong> ${data.id}</p>
+                        <p><strong>Project:</strong> ${data.project_name}</p>
+                        <p><strong>Restaurant:</strong> ${data.restaurant_name}</p>
+                        <p><strong>Cuisine:</strong> ${data.cuisine_type}</p>
+                        <p><strong>Created:</strong> ${new Date(data.created_at).toLocaleString()}</p>
+                    </div>
+                `;
+                
+                // Load recent submissions
+                loadRecentSubmissions();
+                
+            } catch (error) {
+                console.error('Error saving to Supabase:', error);
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Error saving to Supabase</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p>Check the browser console for more details.</p>
+                    </div>
+                `;
+            }
+        });
+        
+        window.loadRecentSubmissions = async function() {
+            const submissionsDiv = document.getElementById('submissions');
+            submissionsDiv.innerHTML = 'Loading recent submissions...';
+            
+            try {
+                const { data, error } = await supabase
+                    .from('customization_forms')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+                
+                if (error) {
+                    throw error;
+                }
+                
+                if (data.length === 0) {
+                    submissionsDiv.innerHTML = '<p>No submissions found.</p>';
+                    return;
+                }
+                
+                let html = '<h3>Recent Submissions:</h3><table border="1" style="width: 100%; border-collapse: collapse;">';
+                html += '<tr><th>ID</th><th>Project</th><th>Restaurant</th><th>Cuisine</th><th>Email</th><th>Created</th></tr>';
+                
+                data.forEach(submission => {
+                    html += `
+                        <tr>
+                            <td>${submission.id.substring(0, 8)}...</td>
+                            <td>${submission.project_name}</td>
+                            <td>${submission.restaurant_name || 'N/A'}</td>
+                            <td>${submission.cuisine_type || 'N/A'}</td>
+                            <td>${submission.contact_email}</td>
+                            <td>${new Date(submission.created_at).toLocaleString()}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</table>';
+                submissionsDiv.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading submissions:', error);
+                submissionsDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Error loading submissions</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        };
+    </script>
+</body>
+</html>

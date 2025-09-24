@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Table Columns</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .success { background: #e8f5e8; color: #2e7d32; padding: 10px; border-radius: 5px; }
+        .error { background: #ffebee; color: #c62828; padding: 10px; border-radius: 5px; }
+        .info { background: #e3f2fd; color: #1565c0; padding: 10px; border-radius: 5px; }
+        button { background: #3B82F6; color: white; padding: 10px 20px; border: none; cursor: pointer; margin: 5px; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f5f5f5; }
+    </style>
+</head>
+<body>
+    <h1>Test Table Columns</h1>
+    <p>This will check if the customization_forms table has all required columns.</p>
+    
+    <button onclick="checkColumns()">Check Table Columns</button>
+    <button onclick="testInsert()">Test Insert with All Columns</button>
+    
+    <div id="result"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js@2';
+        
+        const SUPABASE_URL = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Required columns that should exist
+        const REQUIRED_COLUMNS = [
+            'id', 'created_at', 'updated_at',
+            'product_type', 'product_name', 'product_price',
+            'project_name', 'contact_person', 'app_name', 'product_description',
+            'restaurant_name', 'cuisine_type',
+            'logo_url', 'logo_filename', 'logo_mime_type', 'logo_size',
+            'contact_email', 'contact_phone',
+            'primary_color', 'secondary_color', 'accent_color', 'text_color',
+            'additional_requirements', 'user_id', 'menu_items',
+            'restaurant_address', 'owner_name', 'status', 'admin_notes'
+        ];
+        
+        window.checkColumns = async function() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="info">Checking table columns...</div>';
+            
+            try {
+                // Get table structure
+                const { data, error } = await supabase
+                    .from('customization_forms')
+                    .select('*')
+                    .limit(1);
+                
+                if (error) {
+                    resultDiv.innerHTML = `<div class="error">❌ Error accessing table: ${error.message}</div>`;
+                    return;
+                }
+                
+                // If we can select, the table exists. Now check columns by trying to insert
+                const testData = {
+                    product_type: 'test',
+                    product_name: 'test',
+                    product_price: 'test',
+                    project_name: 'test',
+                    contact_person: 'test',
+                    app_name: 'test',
+                    contact_email: 'test@test.com',
+                    contact_phone: 'test'
+                };
+                
+                const { data: insertData, error: insertError } = await supabase
+                    .from('customization_forms')
+                    .insert(testData)
+                    .select()
+                    .single();
+                
+                if (insertError) {
+                    if (insertError.message.includes('product_type')) {
+                        resultDiv.innerHTML = `
+                            <div class="error">
+                                ❌ MISSING COLUMNS DETECTED!<br><br>
+                                Error: ${insertError.message}<br><br>
+                                <strong>SOLUTION:</strong><br>
+                                1. Go to Supabase Dashboard → SQL Editor<br>
+                                2. Copy and paste the contents of <code>fixed_schema.sql</code><br>
+                                3. Click "Run" to recreate the table with all required columns
+                            </div>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `<div class="error">❌ Insert error: ${insertError.message}</div>`;
+                    }
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ All required columns exist!<br><br>
+                            Test record created with ID: ${insertData.id}<br>
+                            The table has all necessary columns for data storage.
+                        </div>
+                    `;
+                }
+                
+            } catch (err) {
+                resultDiv.innerHTML = `<div class="error">❌ Exception: ${err.message}</div>`;
+            }
+        };
+        
+        window.testInsert = async function() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="info">Testing insert with all columns...</div>';
+            
+            const fullTestData = {
+                product_type: 'restaurant-website',
+                product_name: 'Restaurant Website',
+                product_price: '₹299',
+                project_name: 'Test Project',
+                contact_person: 'Test User',
+                app_name: 'TestApp',
+                product_description: 'Test description',
+                restaurant_name: 'Test Restaurant',
+                cuisine_type: 'Italian',
+                logo_url: 'https://example.com/logo.png',
+                logo_filename: 'logo.png',
+                logo_mime_type: 'image/png',
+                logo_size: 1024,
+                contact_email: 'test@example.com',
+                contact_phone: '+1234567890',
+                primary_color: '#3B82F6',
+                secondary_color: '#10B981',
+                accent_color: '#F59E0B',
+                text_color: '#1F2937',
+                additional_requirements: 'Test requirements',
+                menu_items: [],
+                restaurant_address: '123 Test St',
+                owner_name: 'Test Owner',
+                status: 'pending'
+            };
+            
+            try {
+                const { data, error } = await supabase
+                    .from('customization_forms')
+                    .insert(fullTestData)
+                    .select()
+                    .single();
+                
+                if (error) {
+                    resultDiv.innerHTML = `<div class="error">❌ Insert failed: ${error.message}</div>`;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Full insert successful!<br><br>
+                            Record ID: ${data.id}<br>
+                            All columns are working correctly.
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                resultDiv.innerHTML = `<div class="error">❌ Exception: ${err.message}</div>`;
+            }
+        };
+    </script>
+</body>
+</html>

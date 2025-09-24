@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Supabase Connection</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+        button { background: #3B82F6; color: white; padding: 10px 20px; border: none; cursor: pointer; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Debug Supabase Connection</h1>
+    <button onclick="testConnection()">Test Connection</button>
+    <button onclick="testInsert()">Test Insert</button>
+    <button onclick="testSelect()">Test Select</button>
+    <button onclick="clearLog()">Clear Log</button>
+    
+    <div id="log"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js@2';
+        
+        const SUPABASE_URL = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        function log(message, type = 'log') {
+            const logDiv = document.getElementById('log');
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            logDiv.appendChild(div);
+            console.log(message);
+        }
+        
+        window.clearLog = function() {
+            document.getElementById('log').innerHTML = '';
+        };
+        
+        window.testConnection = async function() {
+            log('Testing Supabase connection...');
+            
+            try {
+                const { data, error } = await supabase
+                    .from('customization_forms')
+                    .select('count')
+                    .limit(1);
+                
+                if (error) {
+                    log(`❌ Connection failed: ${error.message}`, 'error');
+                    log(`Error details: ${JSON.stringify(error, null, 2)}`, 'error');
+                } else {
+                    log('✅ Connection successful!', 'success');
+                }
+            } catch (err) {
+                log(`❌ Exception: ${err.message}`, 'error');
+            }
+        };
+        
+        window.testInsert = async function() {
+            log('Testing data insert...');
+            
+            const testData = {
+                product_type: 'restaurant-website',
+                product_name: 'Test Restaurant Website',
+                product_price: '₹299',
+                project_name: 'Debug Test Project',
+                contact_person: 'Debug User',
+                app_name: 'DebugApp',
+                product_description: 'This is a test insert',
+                restaurant_name: 'Debug Restaurant',
+                cuisine_type: 'Italian',
+                contact_email: 'debug@test.com',
+                contact_phone: '+1234567890',
+                primary_color: '#3B82F6',
+                secondary_color: '#10B981',
+                accent_color: '#F59E0B',
+                text_color: '#1F2937',
+                additional_requirements: 'Debug test requirements',
+                status: 'pending'
+            };
+            
+            try {
+                log('Inserting test data...');
+                const { data, error } = await supabase
+                    .from('customization_forms')
+                    .insert(testData)
+                    .select()
+                    .single();
+                
+                if (error) {
+                    log(`❌ Insert failed: ${error.message}`, 'error');
+                    log(`Error details: ${JSON.stringify(error, null, 2)}`, 'error');
+                } else {
+                    log(`✅ Insert successful! ID: ${data.id}`, 'success');
+                }
+            } catch (err) {
+                log(`❌ Insert exception: ${err.message}`, 'error');
+            }
+        };
+        
+        window.testSelect = async function() {
+            log('Testing data select...');
+            
+            try {
+                const { data, error } = await supabase
+                    .from('customization_forms')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+                
+                if (error) {
+                    log(`❌ Select failed: ${error.message}`, 'error');
+                    log(`Error details: ${JSON.stringify(error, null, 2)}`, 'error');
+                } else {
+                    log(`✅ Select successful! Found ${data.length} records`, 'success');
+                    data.forEach((record, index) => {
+                        log(`Record ${index + 1}: ${record.project_name} (${record.restaurant_name}) - ${record.contact_email}`);
+                    });
+                }
+            } catch (err) {
+                log(`❌ Select exception: ${err.message}`, 'error');
+            }
+        };
+    </script>
+</body>
+</html>

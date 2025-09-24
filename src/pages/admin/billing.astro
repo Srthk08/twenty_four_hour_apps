@@ -262,15 +262,15 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     try {
       const stats = adminDataStore.getStats();
       
-      document.getElementById('total-revenue').textContent = `₹${stats.totalRevenue.toLocaleString()}`;
-      document.getElementById('monthly-revenue').textContent = `₹${stats.monthlyRevenue.toLocaleString()}`;
-      document.getElementById('weekly-revenue').textContent = `₹${stats.weeklyRevenue.toLocaleString()}`;
+      document.getElementById('total-revenue').textContent = `${stats.totalRevenue.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}`;
+      document.getElementById('monthly-revenue').textContent = `${stats.monthlyRevenue.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}`;
+      document.getElementById('weekly-revenue').textContent = `${stats.weeklyRevenue.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}`;
       
       // Calculate pending revenue
       const pendingRevenue = currentTransactions
         .filter(t => t.status === 'pending')
         .reduce((sum, t) => sum + t.amount, 0);
-      document.getElementById('pending-revenue').textContent = `₹${pendingRevenue.toLocaleString()}`;
+      document.getElementById('pending-revenue').textContent = `${pendingRevenue.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}`;
       
     } catch (error) {
       console.error('Error updating revenue stats:', error);
@@ -315,7 +315,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           <div class="text-sm text-gray-900">${transaction.customerEmail}</div>
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-          ₹${transaction.amount.toLocaleString()}
+          ${transaction.amount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
           <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(transaction.status)}">
@@ -528,7 +528,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">Amount</label>
-              <p class="text-sm text-gray-900">₹${transaction.amount.toLocaleString()}</p>
+              <p class="text-sm text-gray-900">${transaction.amount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</p>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">Currency</label>

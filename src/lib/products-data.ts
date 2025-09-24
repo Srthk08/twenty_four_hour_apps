@@ -113,17 +113,36 @@ export const getProductsByCategory = (category: string): Product[] => {
 };
 
 export const getProductPlans = async (productId: string) => {
+  // For Order Menu System (id '5'), return a single common plan priced at 999
+  if (productId === '5') {
+    return [
+      {
+        id: 'oms-999',
+        product_id: productId,
+        name: 'Common Plan',
+        description: 'Standard Order Menu System plan',
+        price: 999,
+        features: ['All essential OMS features'],
+        delivery_days: 1,
+        is_popular: true,
+        sort_order: 1,
+        created_at: new Date().toISOString()
+      }
+    ];
+  }
+
+  // Default plans for other products
   return [
     {
       id: '1',
       product_id: productId,
-    name: 'Basic Plan',
+      name: 'Basic Plan',
       description: 'Essential features for small businesses',
-    price: 15000,
+      price: 15000,
       features: ['Basic Features', 'Email Support'],
-    delivery_days: 1,
-    is_popular: false,
-    sort_order: 1,
+      delivery_days: 1,
+      is_popular: false,
+      sort_order: 1,
       created_at: new Date().toISOString()
     },
     {
@@ -131,23 +150,23 @@ export const getProductPlans = async (productId: string) => {
       product_id: productId,
       name: 'Pro Plan',
       description: 'Advanced features for growing businesses',
-    price: 25000,
+      price: 25000,
       features: ['All Basic Features', 'Advanced Features', 'Priority Support'],
-    delivery_days: 1,
-    is_popular: true,
-    sort_order: 2,
+      delivery_days: 1,
+      is_popular: true,
+      sort_order: 2,
       created_at: new Date().toISOString()
-  },
-  {
+    },
+    {
       id: '3',
       product_id: productId,
-    name: 'Enterprise Plan',
+      name: 'Enterprise Plan',
       description: 'Complete solution for large enterprises',
       price: 50000,
       features: ['All Pro Features', 'Custom Development', '24/7 Support', 'Dedicated Manager'],
       delivery_days: 2,
-    is_popular: false,
-    sort_order: 3,
+      is_popular: false,
+      sort_order: 3,
       created_at: new Date().toISOString()
     }
   ];

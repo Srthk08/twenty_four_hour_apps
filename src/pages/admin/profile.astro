@@ -274,7 +274,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
         supabase.from('contact_submissions').select('*', { count: 'exact', head: true }),
         supabase.from('support_tickets').select('*', { count: 'exact', head: true }),
-        supabase.from('cart_customizations').select('*', { count: 'exact', head: true })
+        supabase.from('customization_forms').select('*', { count: 'exact', head: true })
       ]);
 
       const totalUsers = usersResult.count || 0;
@@ -311,7 +311,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       const [contactsResult, ticketsResult, cartsResult] = await Promise.all([
         supabase.from('contact_submissions').select('*').order('created_at', { ascending: false }).limit(3),
         supabase.from('support_tickets').select('*').order('created_at', { ascending: false }).limit(3),
-        supabase.from('cart_customizations').select('*').order('created_at', { ascending: false }).limit(3)
+        supabase.from('customization_forms').select('*').order('created_at', { ascending: false }).limit(3)
       ]);
 
       const activities = [];
