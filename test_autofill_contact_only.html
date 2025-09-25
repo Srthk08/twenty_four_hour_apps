@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Auto-fill Contact Details Only</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .auto-filled { background-color: #e8f5e8; border-color: #4caf50; }
+        .manual-field { background-color: #fff3cd; border-color: #ffc107; }
+        .info-box { background: #d1ecf1; color: #0c5460; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Test Auto-fill Contact Details Only</h1>
+    
+    <div class="info-box">
+        <h3>📋 What Should Happen:</h3>
+        <ul>
+            <li><strong>✅ Auto-filled:</strong> Email, Phone, Contact Person Name</li>
+            <li><strong>❌ NOT Auto-filled:</strong> Company Name, Restaurant Name, Owner Name, Project Name</li>
+            <li><strong>📝 Manual:</strong> User must fill other fields manually</li>
+        </ul>
+    </div>
+    
+    <form id="test-form">
+        <h3>Contact Information (Should Auto-fill)</h3>
+        <div class="form-group">
+            <label for="email">Email *</label>
+            <input type="email" id="email" name="email" placeholder="Should auto-fill from user profile">
+        </div>
+        
+        <div class="form-group">
+            <label for="phone">Phone *</label>
+            <input type="tel" id="phone" name="phone" placeholder="Should auto-fill from user profile">
+        </div>
+        
+        <div class="form-group">
+            <label for="contactPerson">Contact Person *</label>
+            <input type="text" id="contactPerson" name="contactPerson" placeholder="Should auto-fill from user profile">
+        </div>
+        
+        <h3>Project Details (Should NOT Auto-fill)</h3>
+        <div class="form-group">
+            <label for="projectName">Project Name *</label>
+            <input type="text" id="projectName" name="projectName" placeholder="User must fill manually">
+        </div>
+        
+        <div class="form-group">
+            <label for="restaurantName">Restaurant Name *</label>
+            <input type="text" id="restaurantName" name="restaurantName" placeholder="User must fill manually">
+        </div>
+        
+        <div class="form-group">
+            <label for="ownerName">Owner Name *</label>
+            <input type="text" id="ownerName" name="ownerName" placeholder="User must fill manually">
+        </div>
+        
+        <div class="form-group">
+            <label for="companyName">Company Name</label>
+            <input type="text" id="companyName" name="companyName" placeholder="User must fill manually">
+        </div>
+        
+        <h3>Additional Details</h3>
+        <div class="form-group">
+            <label for="restaurantAddress">Restaurant Address</label>
+            <textarea id="restaurantAddress" name="restaurantAddress" placeholder="User must fill manually"></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="additionalRequirements">Additional Requirements</label>
+            <textarea id="additionalRequirements" name="additionalRequirements" placeholder="User must fill manually"></textarea>
+        </div>
+        
+        <button type="button" onclick="simulateAutoFill()">Simulate Auto-fill</button>
+        <button type="button" onclick="clearForm()">Clear Form</button>
+    </form>
+    
+    <div id="result" style="margin-top: 20px; padding: 15px; border-radius: 5px;"></div>
+
+    <script>
+        // Simulate user profile data (like what would come from auth manager)
+        const mockUserProfile = {
+            email: 'user@example.com',
+            phone: '+91 9876543210',
+            full_name: 'John Doe',
+            company_name: 'ABC Restaurant Group',
+            // These should NOT be auto-filled
+            projectName: '',
+            restaurantName: '',
+            ownerName: '',
+            restaurantAddress: ''
+        };
+        
+        function simulateAutoFill() {
+            console.log('🔄 Simulating auto-fill with contact details only...');
+            
+            // Clear form first
+            clearForm();
+            
+            // Auto-fill ONLY contact details (email, phone, contact person)
+            const emailField = document.getElementById('email');
+            const phoneField = document.getElementById('phone');
+            const contactPersonField = document.getElementById('contactPerson');
+            
+            if (emailField) {
+                emailField.value = mockUserProfile.email;
+                emailField.classList.add('auto-filled');
+                console.log('✅ Auto-filled email:', mockUserProfile.email);
+            }
+            
+            if (phoneField) {
+                phoneField.value = mockUserProfile.phone;
+                phoneField.classList.add('auto-filled');
+                console.log('✅ Auto-filled phone:', mockUserProfile.phone);
+            }
+            
+            if (contactPersonField) {
+                contactPersonField.value = mockUserProfile.full_name;
+                contactPersonField.classList.add('auto-filled');
+                console.log('✅ Auto-filled contact person:', mockUserProfile.full_name);
+            }
+            
+            // Mark other fields as manual (should NOT be auto-filled)
+            const manualFields = [
+                'projectName', 'restaurantName', 'ownerName', 'companyName', 
+                'restaurantAddress', 'additionalRequirements'
+            ];
+            
+            manualFields.forEach(fieldName => {
+                const field = document.getElementById(fieldName);
+                if (field) {
+                    field.classList.add('manual-field');
+                    field.placeholder = 'User must fill manually (not auto-filled)';
+                }
+            });
+            
+            // Show result
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `
+                <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 5px;">
+                    <h4>✅ Auto-fill Simulation Complete!</h4>
+                    <p><strong>Auto-filled fields:</strong> Email, Phone, Contact Person Name</p>
+                    <p><strong>Manual fields:</strong> Project Name, Restaurant Name, Owner Name, Company Name, etc.</p>
+                    <p><strong>Note:</strong> Only contact details are auto-filled from user profile. Other fields must be filled manually by the user.</p>
+                </div>
+            `;
+        }
+        
+        function clearForm() {
+            const form = document.getElementById('test-form');
+            const inputs = form.querySelectorAll('input, textarea');
+            
+            inputs.forEach(input => {
+                input.value = '';
+                input.classList.remove('auto-filled', 'manual-field');
+                input.placeholder = input.getAttribute('data-original-placeholder') || input.placeholder;
+            });
+            
+            document.getElementById('result').innerHTML = '';
+        }
+        
+        // Store original placeholders
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputs = document.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                input.setAttribute('data-original-placeholder', input.placeholder);
+            });
+        });
+    </script>
+</body>
+</html>

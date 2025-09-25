@@ -38,11 +38,16 @@ export async function saveCustomizationForm(formData, productType) {
   try {
     console.log('💾 Saving customization form to Supabase...', { formData, productType });
 
-    // Map product type
+    // Check if this is OMS (Order Menu System) - use separate table
+    if (productType === 'order-menu-system') {
+      return await saveOMSCustomization(formData);
+    }
+
+    // For other 4 products, use the original customization_forms table
     const dbProductType = PRODUCT_TYPE_MAP[productType] || productType;
 
-  // Prepare data for database
-  const dbData = {
+    // Prepare data for database
+    const dbData = {
       product_type: dbProductType,
       // Ensure product name/price are captured
       product_name: formData.productName || formData.product_name || 'Unknown Product',
@@ -70,8 +75,8 @@ export async function saveCustomizationForm(formData, productType) {
       status: 'pending'
     };
 
-    // SIMPLE INSERT - same as working debug page
-    console.log('🧩 Inserting customization form...');
+    // SIMPLE INSERT for other 4 products - same as working debug page
+    console.log('🧩 Inserting customization form for other products...');
     const { data, error } = await supabase
       .from('customization_forms')
       .insert(dbData)
@@ -332,6 +337,7 @@ console.log('Is duplicate:', duplicateCheck.isDuplicate);
 
 export default {
   saveCustomizationForm,
+  saveOMSCustomization,
   getCustomizationsByEmail,
   getCustomizationById,
   updateCustomizationStatus,
@@ -339,3 +345,83 @@ export default {
   checkDuplicate,
   getAllCustomizations
 };
+
+/**
+ * Save OMS (Order Menu System) customization form data to Supabase
+ * This uses a separate table from the other 4 products
+ * @param {Object} formData - The form data object
+ * @returns {Promise<Object>} - Result object with success status and data
+ */
+export async function saveOMSCustomization(formData) {
+  try {
+    console.log('💾 Saving OMS customization form to Supabase...', { formData });
+
+    // Call the upsert_oms_customization function
+    const { data, error } = await supabase.rpc('upsert_oms_customization', {
+      p_user_email: formData.email || formData.contact_email || formData.contactEmail || '',
+      p_project_name: formData.projectName || formData.project_name || '',
+      p_restaurant_name: formData.restaurantName || formData.restaurant_name || 'Default Restaurant',
+      p_owner_name: formData.ownerName || formData.owner_name || formData.contactPerson || formData.contact_person || '',
+      p_restaurant_address: formData.restaurantAddress || formData.restaurant_address || 'Not provided',
+      p_contact_person: formData.contactPerson || formData.contact_person || '',
+      p_phone_number: formData.phone || formData.contact_phone || formData.contactPhone || '',
+      p_user_id: null, // Will be set to null for now
+      p_logo_url: formData.logoUrl || formData.logo_url || null,
+      p_logo_filename: formData.logoFilename || formData.logo_filename || null,
+      p_logo_size: formData.logoSize || formData.logo_size || null,
+      p_menu_categories: formData.menuCategories || formData.menu_categories || [],
+      p_menu_items: formData.menuItems || formData.menu_items || [],
+      p_primary_color: formData.primaryColor || formData.primary_color || '#3B82F6',
+      p_secondary_color: formData.secondaryColor || formData.secondary_color || '#10B981',
+      p_accent_color: formData.accentColor || formData.accent_color || '#F59E0B',
+      p_text_color: formData.textColor || formData.text_color || '#1F2937',
+      p_additional_requirements: formData.additionalRequirements || formData.additional_requirements || ''
+    });
+
+    if (error) {
+      console.error('❌ Error inserting OMS customization:', error);
+      console.error('❌ Error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
+      return { success: false, error: error.message, data: null };
+    }
+
+    // Handle the new function response format
+    if (data && data.length > 0) {
+      const result = data[0];
+      console.log('✅ OMS customization result:', result);
+      
+      if (result.is_duplicate) {
+        console.log('⚠️ Duplicate data detected:', result.message);
+        return { 
+          success: true, 
+          error: null, 
+          data: { id: result.data_id },
+          isUpdate: false,
+          isDuplicate: true,
+          message: result.message
+        };
+      } else {
+        console.log('✅ OMS customization saved successfully, ID:', result.data_id);
+        return { 
+          success: true, 
+          error: null, 
+          data: { id: result.data_id },
+          isUpdate: false,
+          isDuplicate: false,
+          message: result.message
+        };
+      }
+    } else {
+      console.error('❌ No data returned from OMS function');
+      return { success: false, error: 'No data returned from OMS function', data: null };
+    }
+
+  } catch (error) {
+    console.error('❌ Unexpected error saving OMS customization form:', error);
+    return { success: false, error: error.message, data: null };
+  }
+}

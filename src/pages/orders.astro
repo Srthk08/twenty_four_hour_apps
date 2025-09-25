@@ -15,6 +15,22 @@ import AuthGuard from '../components/AuthGuard.astro';
 
         <!-- Orders Content -->
         <div id="orders-content">
+          <!-- Success Redirect Check -->
+          <script>
+            // Check for success parameter and redirect to order-success page
+            document.addEventListener('DOMContentLoaded', function() {
+              const urlParams = new URLSearchParams(window.location.search);
+              const order = urlParams.get('order');
+              const product = urlParams.get('product');
+              
+              if (order === 'success') {
+                console.log('✅ Order success detected, redirecting to congratulations page...');
+                window.location.href = '/order-success?product=' + (product || 'order-menu-system');
+                return;
+              }
+            });
+          </script>
+          
           <!-- Loading State -->
           <div id="loading-orders" class="text-center py-16">
             <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">

@@ -1842,9 +1842,46 @@ import { sharedDataStore } from '../lib/shared-data-store';
               paymentContent.style.display = 'block';
             }
             
-            // Scroll to payment section
-            paymentSection.scrollIntoView({ behavior: 'smooth' });
-            console.log('✅ Scrolled to payment page');
+            // Check if this is Order Menu System - open payment link in new tab
+            if (isOrderMenuSystem) {
+              console.log('🍽️ Order Menu System detected - opening payment in new tab...');
+              // Open payment link in new tab to avoid console errors
+              const paymentWindow = window.open('https://payments.pabbly.com/subscribe/68c084369dbcfe4b619b80ce/six-months-inr', '_blank');
+              
+              // Check if popup was blocked
+              if (!paymentWindow) {
+                alert('Please allow popups for this site to proceed with payment, or click the payment link manually.');
+                // Fallback: show payment link
+                const paymentLink = document.createElement('div');
+                paymentLink.innerHTML = `
+                  <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                              background: white; padding: 20px; border: 2px solid #4CAF50; 
+                              border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 9999;">
+                    <h3 style="color: #4CAF50; margin-bottom: 15px;">Payment Required</h3>
+                    <p style="margin-bottom: 15px;">Please complete your payment to proceed:</p>
+                    <a href="https://payments.pabbly.com/subscribe/68c084369dbcfe4b619b80ce/six-months-inr" 
+                       target="_blank" style="display: inline-block; padding: 10px 20px; 
+                       background: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">
+                      Open Payment Page
+                    </a>
+                    <button onclick="this.parentElement.remove()" style="margin-left: 10px; padding: 10px 15px; 
+                            background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                      Close
+                    </button>
+                  </div>
+                `;
+                document.body.appendChild(paymentLink);
+              } else {
+                // Show success message and redirect to congratulations page
+                setTimeout(() => {
+                  window.location.href = '/orders?order=success&product=order-menu-system';
+                }, 2000);
+              }
+            } else {
+              // Scroll to payment section for other products
+              paymentSection.scrollIntoView({ behavior: 'smooth' });
+              console.log('✅ Scrolled to payment page');
+            }
           }, 500);
           
         } else {
@@ -2691,25 +2728,56 @@ import { sharedDataStore } from '../lib/shared-data-store';
 
         // Save to appropriate table based on product type
         if (isOrderMenuSystem) {
-          // Save Order Menu System data to dedicated tables
-          console.log('🍽️ Saving Order Menu System data to dedicated tables...');
+          // Save Order Menu System data to dedicated tables using the OMS function
+          console.log('🍽️ Saving Order Menu System data to OMS table...');
           
-          // First, save the customization data
-          const { data: customizationData, error: customizationError } = await supabase
-            .from('order_menu_system_customizations')
-            .insert(cartData)
-            .select()
-            .single();
+          // Use the OMS function for proper duplicate handling
+          const { data: customizationData, error: customizationError } = await supabase.rpc('upsert_oms_customization', {
+            p_user_email: cartData.contact_email,
+            p_project_name: cartData.project_name,
+            p_restaurant_name: cartData.restaurant_name,
+            p_owner_name: cartData.owner_name,
+            p_restaurant_address: cartData.restaurant_address,
+            p_contact_person: cartData.contact_person,
+            p_phone_number: cartData.contact_phone,
+            p_user_id: cartData.user_id,
+            p_logo_url: cartData.restaurant_logo_url,
+            p_logo_filename: cartData.restaurant_logo_filename,
+            p_logo_size: cartData.restaurant_logo_size,
+            p_menu_categories: cartData.menu_categories || [],
+            p_menu_items: cartData.menu_items || [],
+            p_primary_color: cartData.primary_color,
+            p_secondary_color: cartData.secondary_color,
+            p_accent_color: cartData.accent_color,
+            p_text_color: cartData.text_color,
+            p_additional_requirements: cartData.additional_requirements
+          });
             
           if (customizationError) {
             console.error('❌ Error saving Order Menu System customization:', customizationError);
             return null;
           }
           
-          console.log('✅ Order Menu System customization saved:', customizationData);
-          console.log('✅ Menu items included in customization:', formData.menuItems ? formData.menuItems.length : 0, 'items');
-          
-          return customizationData;
+          // Handle the new function response format
+          if (customizationData && customizationData.length > 0) {
+            const result = customizationData[0];
+            console.log('✅ OMS customization result:', result);
+            
+            if (result.is_duplicate) {
+              // Show popup for duplicate data
+              alert(`⚠️ Data Already Exists!\n\n${result.message}\n\nRecord ID: ${result.data_id}`);
+              console.log('⚠️ Duplicate data detected:', result.message);
+            } else {
+              console.log('✅ Order Menu System customization saved with ID:', result.data_id);
+              console.log('✅ Menu items included in customization:', formData.menuItems ? formData.menuItems.length : 0, 'items');
+            }
+            
+            // Return the ID as data for consistency
+            return { id: result.data_id, isDuplicate: result.is_duplicate };
+          } else {
+            console.error('❌ No data returned from OMS function');
+            return null;
+          }
         } else {
           // Save standard cart data to existing table
           console.log('🔍 Testing Supabase connection for standard cart...');

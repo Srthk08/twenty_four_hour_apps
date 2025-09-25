@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test OMS Duplicate Prevention</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Test OMS Duplicate Prevention</h1>
+    
+    <div class="test-section info">
+        <h3>📋 Test Scenarios</h3>
+        <ol>
+            <li><strong>New Data:</strong> Should create new record</li>
+            <li><strong>Same Email + Different Project:</strong> Should create new record</li>
+            <li><strong>Same Email + Same Project + Same Restaurant:</strong> Should show duplicate popup</li>
+            <li><strong>Same Email + Same Project + Same Restaurant + Different Data:</strong> Should update existing record</li>
+        </ol>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test Form</h3>
+        <form id="test-form">
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" name="email" value="test@example.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="projectName">Project Name *</label>
+                <input type="text" id="projectName" name="projectName" value="Test Project" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="restaurantName">Restaurant Name *</label>
+                <input type="text" id="restaurantName" name="restaurantName" value="Test Restaurant" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="ownerName">Owner Name *</label>
+                <input type="text" id="ownerName" name="ownerName" value="Test Owner" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="restaurantAddress">Restaurant Address *</label>
+                <textarea id="restaurantAddress" name="restaurantAddress" required>123 Test Street</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="contactPerson">Contact Person *</label>
+                <input type="text" id="contactPerson" name="contactPerson" value="Test Contact" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Phone *</label>
+                <input type="tel" id="phone" name="phone" value="+91 9999999999" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="additionalRequirements">Additional Requirements</label>
+                <textarea id="additionalRequirements" name="additionalRequirements">Test requirements</textarea>
+            </div>
+            
+            <button type="submit">Test OMS Submission</button>
+        </form>
+    </div>
+    
+    <div class="test-section">
+        <h3>Quick Test Buttons</h3>
+        <button onclick="testNewData()">Test 1: New Data</button>
+        <button onclick="testDifferentProject()">Test 2: Different Project</button>
+        <button onclick="testExactDuplicate()">Test 3: Exact Duplicate</button>
+        <button onclick="testDifferentData()">Test 4: Different Data</button>
+        <button onclick="checkAllData()">Check All Data</button>
+    </div>
+    
+    <div id="result" class="test-section hidden"></div>
+
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        let testCounter = 0;
+        
+        // Test OMS submission
+        async function testOMSSubmission(formData) {
+            try {
+                console.log('🔄 Testing OMS submission...', formData);
+                
+                const { data, error } = await supabase.rpc('upsert_oms_customization', {
+                    p_user_email: formData.email,
+                    p_project_name: formData.projectName,
+                    p_restaurant_name: formData.restaurantName,
+                    p_owner_name: formData.ownerName,
+                    p_restaurant_address: formData.restaurantAddress,
+                    p_contact_person: formData.contactPerson,
+                    p_phone_number: formData.phone,
+                    p_user_id: null,
+                    p_logo_url: null,
+                    p_logo_filename: null,
+                    p_logo_size: null,
+                    p_menu_categories: [],
+                    p_menu_items: [],
+                    p_primary_color: '#FF0000',
+                    p_secondary_color: '#00FF00',
+                    p_accent_color: '#0000FF',
+                    p_text_color: '#000000',
+                    p_additional_requirements: formData.additionalRequirements
+                });
+                
+                if (error) {
+                    console.error('❌ Error:', error);
+                    throw new Error(error.message);
+                }
+                
+                if (data && data.length > 0) {
+                    const result = data[0];
+                    console.log('✅ OMS result:', result);
+                    return result;
+                } else {
+                    throw new Error('No data returned');
+                }
+                
+            } catch (error) {
+                console.error('❌ Error testing OMS submission:', error);
+                return { success: false, error: error.message };
+            }
+        }
+        
+        // Test 1: New Data
+        async function testNewData() {
+            testCounter++;
+            const formData = {
+                email: 'newuser@example.com',
+                projectName: `New Project ${testCounter}`,
+                restaurantName: `New Restaurant ${testCounter}`,
+                ownerName: 'New Owner',
+                restaurantAddress: 'New Address',
+                contactPerson: 'New Contact',
+                phone: '+91 1111111111',
+                additionalRequirements: 'New requirements'
+            };
+            
+            const result = await testOMSSubmission(formData);
+            showResult('Test 1: New Data', result, 'success');
+        }
+        
+        // Test 2: Different Project
+        async function testDifferentProject() {
+            const formData = {
+                email: 'test@example.com',
+                projectName: `Different Project ${Date.now()}`,
+                restaurantName: 'Test Restaurant',
+                ownerName: 'Test Owner',
+                restaurantAddress: '123 Test Street',
+                contactPerson: 'Test Contact',
+                phone: '+91 9999999999',
+                additionalRequirements: 'Different project requirements'
+            };
+            
+            const result = await testOMSSubmission(formData);
+            showResult('Test 2: Different Project', result, 'success');
+        }
+        
+        // Test 3: Exact Duplicate
+        async function testExactDuplicate() {
+            const formData = {
+                email: 'test@example.com',
+                projectName: 'Test Project',
+                restaurantName: 'Test Restaurant',
+                ownerName: 'Test Owner',
+                restaurantAddress: '123 Test Street',
+                contactPerson: 'Test Contact',
+                phone: '+91 9999999999',
+                additionalRequirements: 'Test requirements'
+            };
+            
+            const result = await testOMSSubmission(formData);
+            showResult('Test 3: Exact Duplicate', result, result.is_duplicate ? 'warning' : 'error');
+        }
+        
+        // Test 4: Different Data
+        async function testDifferentData() {
+            const formData = {
+                email: 'test@example.com',
+                projectName: 'Test Project',
+                restaurantName: 'Test Restaurant',
+                ownerName: 'Updated Owner',
+                restaurantAddress: '456 Updated Street',
+                contactPerson: 'Updated Contact',
+                phone: '+91 8888888888',
+                additionalRequirements: 'Updated requirements'
+            };
+            
+            const result = await testOMSSubmission(formData);
+            showResult('Test 4: Different Data', result, 'success');
+        }
+        
+        // Check all data
+        async function checkAllData() {
+            try {
+                const { data, error } = await supabase
+                    .from('oms_customizations')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) {
+                    showResult('Check All Data', { success: false, error: error.message }, 'error');
+                } else {
+                    showResult('Check All Data', { success: true, data: data, count: data.length }, 'info');
+                }
+            } catch (err) {
+                showResult('Check All Data', { success: false, error: err.message }, 'error');
+            }
+        }
+        
+        // Show result
+        function showResult(testName, result, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.classList.remove('hidden');
+            
+            let html = `<h4>${testName}</h4>`;
+            
+            if (result.success) {
+                if (result.is_duplicate) {
+                    html += `<div class="warning">⚠️ DUPLICATE DETECTED!</div>`;
+                    html += `<p><strong>Message:</strong> ${result.message}</p>`;
+                    html += `<p><strong>Record ID:</strong> ${result.data_id}</p>`;
+                } else {
+                    html += `<div class="success">✅ SUCCESS!</div>`;
+                    html += `<p><strong>Message:</strong> ${result.message}</p>`;
+                    html += `<p><strong>Record ID:</strong> ${result.data_id}</p>`;
+                }
+            } else {
+                html += `<div class="error">❌ ERROR!</div>`;
+                html += `<p><strong>Error:</strong> ${result.error}</p>`;
+            }
+            
+            if (result.data && Array.isArray(result.data)) {
+                html += `<h5>All Records (${result.count}):</h5>`;
+                html += `<pre>${JSON.stringify(result.data, null, 2)}</pre>`;
+            }
+            
+            resultDiv.innerHTML = html;
+            resultDiv.className = `test-section ${type}`;
+        }
+        
+        // Handle form submission
+        document.getElementById('test-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                email: document.getElementById('email').value,
+                projectName: document.getElementById('projectName').value,
+                restaurantName: document.getElementById('restaurantName').value,
+                ownerName: document.getElementById('ownerName').value,
+                restaurantAddress: document.getElementById('restaurantAddress').value,
+                contactPerson: document.getElementById('contactPerson').value,
+                phone: document.getElementById('phone').value,
+                additionalRequirements: document.getElementById('additionalRequirements').value
+            };
+            
+            const result = await testOMSSubmission(formData);
+            showResult('Manual Form Submission', result, result.is_duplicate ? 'warning' : 'success');
+        });
+        
+        // Check data on page load
+        checkAllData();
+    </script>
+</body>
+</html>

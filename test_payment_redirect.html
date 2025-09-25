@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Payment Redirect for Order Menu System</title>
+</head>
+<body>
+    <h1>Test Payment Redirect for Order Menu System</h1>
+    
+    <div style="padding: 20px; border: 2px solid #4CAF50; border-radius: 8px; margin: 20px 0; background-color: #f9f9f9;">
+        <h2>✅ Payment Redirection Added Successfully!</h2>
+        <p><strong>What happens now:</strong></p>
+        <ol>
+            <li>User fills out Order Menu System customization form</li>
+            <li>User clicks "Save and Make Payment" button</li>
+            <li>Data gets saved to Supabase OMS table</li>
+            <li>User gets redirected to: <a href="https://payments.pabbly.com/subscribe/68c084369dbcfe4b619b80ce/six-months-inr" target="_blank">Payment Link</a></li>
+        </ol>
+    </div>
+    
+    <div style="padding: 20px; border: 2px solid #2196F3; border-radius: 8px; margin: 20px 0; background-color: #f0f8ff;">
+        <h3>🔧 Implementation Details:</h3>
+        <ul>
+            <li><strong>Cart Page:</strong> After OMS form submission → redirects to payment</li>
+            <li><strong>Dashboard Page:</strong> After OMS form submission → redirects to payment</li>
+            <li><strong>Other Products:</strong> Still show internal payment section (no redirect)</li>
+        </ul>
+    </div>
+    
+    <div style="padding: 20px; border: 2px solid #FF9800; border-radius: 8px; margin: 20px 0; background-color: #fff3e0;">
+        <h3>🧪 Test Instructions:</h3>
+        <ol>
+            <li>Go to <code>/cart</code> and add Order Menu System</li>
+            <li>Fill out the customization form</li>
+            <li>Click "Save and Make Payment"</li>
+            <li>Should redirect to: <code>https://payments.pabbly.com/subscribe/68c084369dbcfe4b619b80ce/six-months-inr</code></li>
+        </ol>
+    </div>
+    
+    <div style="padding: 20px; border: 2px solid #9C27B0; border-radius: 8px; margin: 20px 0; background-color: #f3e5f5;">
+        <h3>📋 Payment Link Details:</h3>
+        <p><strong>URL:</strong> <code>https://payments.pabbly.com/subscribe/68c084369dbcfe4b619b80ce/six-months-inr</code></p>
+        <p><strong>Service:</strong> Six Months INR Subscription</p>
+        <p><strong>Provider:</strong> Pabbly Payments</p>
+    </div>
+    
+    <button onclick="testRedirect()" style="padding: 15px 30px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
+        Test Payment Redirect
+    </button>
+    
+    <script>
+        function testRedirect() {
+            if (confirm('This will redirect you to the payment page. Continue?')) {
+                window.location.href = 'https://payments.pabbly.com/subscribe/68c084369dbcfe4b619b80ce/six-months-inr';
+            }
+        }
+    </script>
+</body>
+</html>

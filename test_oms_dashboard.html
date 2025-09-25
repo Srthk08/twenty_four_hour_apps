@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test OMS Dashboard Form</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Test OMS Dashboard Form Submission</h1>
+    
+    <form id="test-oms-form">
+        <h2>Order Menu System Requirements</h2>
+        
+        <div>
+            <label>Project Name:</label>
+            <input type="text" name="projectName" value="Test Dashboard Project" required>
+        </div>
+        
+        <div>
+            <label>Restaurant Name:</label>
+            <input type="text" name="restaurantName" value="Test Restaurant" required>
+        </div>
+        
+        <div>
+            <label>Owner Name:</label>
+            <input type="text" name="ownerName" value="John Doe" required>
+        </div>
+        
+        <div>
+            <label>Restaurant Address:</label>
+            <textarea name="restaurantAddress" required>123 Test Street, Test City</textarea>
+        </div>
+        
+        <div>
+            <label>Contact Person:</label>
+            <input type="text" name="contactPerson" value="John Doe" required>
+        </div>
+        
+        <div>
+            <label>Email:</label>
+            <input type="email" name="email" value="test@example.com" required>
+        </div>
+        
+        <div>
+            <label>Phone:</label>
+            <input type="tel" name="phone" value="+91 9876543210" required>
+        </div>
+        
+        <div>
+            <label>Primary Color:</label>
+            <input type="color" name="primaryColor" value="#FF0000">
+        </div>
+        
+        <div>
+            <label>Secondary Color:</label>
+            <input type="color" name="secondaryColor" value="#00FF00">
+        </div>
+        
+        <div>
+            <label>Accent Color:</label>
+            <input type="color" name="accentColor" value="#0000FF">
+        </div>
+        
+        <div>
+            <label>Text Color:</label>
+            <input type="color" name="textColor" value="#000000">
+        </div>
+        
+        <div>
+            <label>Additional Requirements:</label>
+            <textarea name="additionalRequirements">Test requirements from dashboard</textarea>
+        </div>
+        
+        <div>
+            <label>Menu Items (JSON):</label>
+            <textarea name="menuItems" rows="4">[
+                {"item_name": "Test Burger", "price": "150", "item_category": "Main Course"},
+                {"item_name": "Test Pizza", "price": "200", "item_category": "Main Course"},
+                {"item_name": "Test Salad", "price": "100", "item_category": "Appetizers"}
+            ]</textarea>
+        </div>
+        
+        <button type="submit">Submit OMS Requirements</button>
+    </form>
+    
+    <div id="result"></div>
+
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        document.getElementById('test-oms-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            console.log('📝 Test OMS form data:', data);
+            
+            try {
+                // Parse menu items
+                let menuItems = [];
+                try {
+                    menuItems = JSON.parse(data.menuItems || '[]');
+                } catch (e) {
+                    console.error('Error parsing menu items:', e);
+                    menuItems = [];
+                }
+                
+                // Create categories from menu items
+                const categories = menuItems.map((item, index) => ({
+                    id: `cat_${index}`,
+                    name: item.item_category || 'Uncategorized'
+                })).filter((cat, index, arr) => 
+                    arr.findIndex(c => c.name === cat.name) === index
+                );
+                
+                console.log('📝 Categories:', categories);
+                console.log('📝 Menu items:', menuItems);
+                
+                // Call OMS function
+                const { data: customizationData, error: customizationError } = await supabase.rpc('upsert_oms_customization', {
+                    p_user_email: data.email,
+                    p_project_name: data.projectName,
+                    p_restaurant_name: data.restaurantName,
+                    p_owner_name: data.ownerName,
+                    p_restaurant_address: data.restaurantAddress,
+                    p_contact_person: data.contactPerson,
+                    p_phone_number: data.phone,
+                    p_user_id: null,
+                    p_logo_url: null,
+                    p_logo_filename: null,
+                    p_logo_size: null,
+                    p_menu_categories: JSON.stringify(categories),
+                    p_menu_items: JSON.stringify(menuItems),
+                    p_primary_color: data.primaryColor || '#3B82F6',
+                    p_secondary_color: data.secondaryColor || '#10B981',
+                    p_accent_color: data.accentColor || '#F59E0B',
+                    p_text_color: data.textColor || '#1F2937',
+                    p_additional_requirements: data.additionalRequirements || ''
+                });
+                
+                if (customizationError) {
+                    console.error('❌ Error saving to Supabase:', customizationError);
+                    document.getElementById('result').innerHTML = `
+                        <div style="color: red; padding: 10px; border: 1px solid red; margin: 10px 0;">
+                            <strong>Error:</strong> ${customizationError.message}
+                        </div>
+                    `;
+                } else if (customizationData && customizationData.length > 0) {
+                    const result = customizationData[0];
+                    console.log('✅ OMS result:', result);
+                    
+                    if (result.is_duplicate) {
+                        document.getElementById('result').innerHTML = `
+                            <div style="color: orange; padding: 10px; border: 1px solid orange; margin: 10px 0;">
+                                <strong>Duplicate Data:</strong> ${result.message}<br>
+                                <strong>Record ID:</strong> ${result.data_id}
+                            </div>
+                        `;
+                    } else {
+                        document.getElementById('result').innerHTML = `
+                            <div style="color: green; padding: 10px; border: 1px solid green; margin: 10px 0;">
+                                <strong>Success!</strong> ${result.message}<br>
+                                <strong>Record ID:</strong> ${result.data_id}
+                            </div>
+                        `;
+                    }
+                } else {
+                    console.error('❌ No data returned from OMS function');
+                    document.getElementById('result').innerHTML = `
+                        <div style="color: red; padding: 10px; border: 1px solid red; margin: 10px 0;">
+                            <strong>Error:</strong> No data returned from OMS function
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('❌ Unexpected error:', error);
+                document.getElementById('result').innerHTML = `
+                    <div style="color: red; padding: 10px; border: 1px solid red; margin: 10px 0;">
+                        <strong>Unexpected Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -642,20 +642,28 @@ import Layout from '../layouts/Layout.astro';
         
         // Store session and auto-login user after account creation
         if (data.session) {
-          // Add role to user data
-          const userWithRole = {
+          // Create complete user profile data with all details
+          const completeUserProfile = {
             ...data.user,
-            role: userRole
+            id: data.user.id,
+            email: email,
+            full_name: fullName || '',
+            phone: phone || '',
+            company_name: companyName || '',
+            role: userRole,
+            status: 'active',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
           };
           
           sessionStorage.setItem('simple-auth-session', JSON.stringify({
-            user: userWithRole,
+            user: completeUserProfile,
             access_token: data.session.access_token,
             timestamp: Date.now()
           }));
           
-          // Dispatch login event
-          window.dispatchEvent(new CustomEvent('user-logged-in', { detail: userWithRole }));
+          // Dispatch login event with complete profile
+          window.dispatchEvent(new CustomEvent('user-logged-in', { detail: completeUserProfile }));
         }
         
         // Show success message

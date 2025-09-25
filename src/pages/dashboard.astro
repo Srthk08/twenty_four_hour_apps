@@ -999,13 +999,105 @@ import AuthGuard from '../components/AuthGuard.astro';
       };
       
       try {
-        // Per requirement: DO NOT store Order Menu System in Supabase customization_forms
-        // Save only locally and continue normal flow
-        const existingRequirements = JSON.parse(localStorage.getItem('order-menu-requirements') || '[]');
-        existingRequirements.push(orderMenuRequirements);
-        localStorage.setItem('order-menu-requirements', JSON.stringify(existingRequirements));
+        // Save Order Menu System to Supabase OMS table
+        console.log('💾 Saving OMS data to Supabase...');
         
-        alert('Order Menu requirements saved successfully! Our team will contact you soon.');
+        // Get Supabase client
+        const { supabase } = await import('../lib/supabase');
+        
+        // Check if Supabase is available
+        if (!supabase) {
+          console.error('❌ Supabase not available, saving locally only');
+          const existingRequirements = JSON.parse(localStorage.getItem('order-menu-requirements') || '[]');
+          existingRequirements.push(orderMenuRequirements);
+          localStorage.setItem('order-menu-requirements', JSON.stringify(existingRequirements));
+          alert('Order Menu requirements saved locally! Our team will contact you soon.');
+        } else {
+          // Save to Supabase using OMS function
+          const { data: customizationData, error: customizationError } = await supabase.rpc('upsert_oms_customization', {
+            p_user_email: data.email,
+            p_project_name: data.projectName,
+            p_restaurant_name: data.restaurantName,
+            p_owner_name: data.ownerName,
+            p_restaurant_address: data.restaurantAddress,
+            p_contact_person: data.contactPerson,
+            p_phone_number: data.phone,
+            p_user_id: null,
+            p_logo_url: null,
+            p_logo_filename: null,
+            p_logo_size: null,
+            p_menu_categories: orderMenuRequirements.menuItems ? 
+              JSON.stringify(orderMenuRequirements.menuItems.map((item, index) => ({
+                id: `cat_${index}`,
+                name: item.item_category || 'Uncategorized'
+              })).filter((cat, index, arr) => 
+                arr.findIndex(c => c.name === cat.name) === index
+              )) : '[]',
+            p_menu_items: orderMenuRequirements.menuItems ? 
+              JSON.stringify(orderMenuRequirements.menuItems) : '[]',
+            p_primary_color: data.primaryColor || '#3B82F6',
+            p_secondary_color: data.secondaryColor || '#10B981',
+            p_accent_color: data.accentColor || '#F59E0B',
+            p_text_color: data.textColor || '#1F2937',
+            p_additional_requirements: data.additionalRequirements || ''
+          });
+          
+          if (customizationError) {
+            console.error('❌ Error saving to Supabase:', customizationError);
+            // Fallback to localStorage
+            const existingRequirements = JSON.parse(localStorage.getItem('order-menu-requirements') || '[]');
+            existingRequirements.push(orderMenuRequirements);
+            localStorage.setItem('order-menu-requirements', JSON.stringify(existingRequirements));
+            alert('Order Menu requirements saved locally! Our team will contact you soon.');
+          } else if (customizationData && customizationData.length > 0) {
+            const result = customizationData[0];
+            if (result.is_duplicate) {
+              alert(`⚠️ Data Already Exists!\n\n${result.message}\n\nRecord ID: ${result.data_id}`);
+            } else {
+              console.log('✅ OMS data saved to Supabase with ID:', result.data_id);
+              alert('Order Menu requirements saved successfully! Opening payment page...');
+              // Open payment link in new tab to avoid console errors
+              const paymentWindow = window.open('https://payments.pabbly.com/subscribe/68c084369dbcfe4b619b80ce/six-months-inr', '_blank');
+              
+              // Check if popup was blocked
+              if (!paymentWindow) {
+                alert('Please allow popups for this site to proceed with payment, or click the payment link manually.');
+                // Fallback: show payment link
+                const paymentLink = document.createElement('div');
+                paymentLink.innerHTML = `
+                  <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                              background: white; padding: 20px; border: 2px solid #4CAF50; 
+                              border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 9999;">
+                    <h3 style="color: #4CAF50; margin-bottom: 15px;">Payment Required</h3>
+                    <p style="margin-bottom: 15px;">Please complete your payment to proceed:</p>
+                    <a href="https://payments.pabbly.com/subscribe/68c084369dbcfe4b619b80ce/six-months-inr" 
+                       target="_blank" style="display: inline-block; padding: 10px 20px; 
+                       background: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">
+                      Open Payment Page
+                    </a>
+                    <button onclick="this.parentElement.remove()" style="margin-left: 10px; padding: 10px 15px; 
+                            background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                      Close
+                    </button>
+                  </div>
+                `;
+                document.body.appendChild(paymentLink);
+              } else {
+                // Show success message and redirect to congratulations page
+                setTimeout(() => {
+                  window.location.href = '/orders?order=success&product=order-menu-system';
+                }, 2000);
+              }
+            }
+          } else {
+            console.error('❌ No data returned from OMS function');
+            // Fallback to localStorage
+            const existingRequirements = JSON.parse(localStorage.getItem('order-menu-requirements') || '[]');
+            existingRequirements.push(orderMenuRequirements);
+            localStorage.setItem('order-menu-requirements', JSON.stringify(existingRequirements));
+            alert('Order Menu requirements saved locally! Our team will contact you soon.');
+          }
+        }
         
         // Clear URL parameters to show browse products section
         window.history.replaceState({}, document.title, window.location.pathname);
@@ -1334,6 +1426,10 @@ import AuthGuard from '../components/AuthGuard.astro';
           });
         }
         
+        // Note: Removed auto-filling of company name, restaurant name, and owner name
+        // Only contact details (email, phone) and contact person name are auto-filled
+        // Other fields should be filled manually by the user
+        
         console.log('✅ Auto-fill completed with auth manager data');
         return true;
       }
@@ -1385,6 +1481,10 @@ import AuthGuard from '../components/AuthGuard.astro';
                     field.dispatchEvent(new Event('change', { bubbles: true }));
                   });
                 }
+                
+                // Note: Removed auto-filling of company name, restaurant name, and owner name
+                // Only contact details (email, phone) and contact person name are auto-filled
+                // Other fields should be filled manually by the user
                 
                 console.log('✅ Auto-fill completed with session storage fallback');
         } catch (error) {
