@@ -1,5 +1,6 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
+import { supabase } from '../../lib/supabase';
 ---
 
 <AdminLayout title="Orders Management - DevExpress">
@@ -150,7 +151,24 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 </AdminLayout>
 
 <script>
-  import { supabase } from '../../lib/supabase';
+  // Use the Supabase client from AdminLayout
+  let supabase;
+  
+  // Wait for Supabase to load
+  function waitForSupabase() {
+    return new Promise((resolve) => {
+      if (window.supabase && window.supabase.createClient) {
+        // Use the same configuration as AdminLayout
+        supabase = window.supabase.createClient(
+          'https://lmrrdcaavwwletcjcpqv.supabase.co',
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ'
+        );
+        resolve(supabase);
+      } else {
+        setTimeout(() => waitForSupabase().then(resolve), 100);
+      }
+    });
+  }
 
   let currentOrders = [];
   let filteredOrders = [];
@@ -161,9 +179,18 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   let totalPages = 1;
 
   // Initialize orders page
-  function initializeOrdersPage() {
-    loadOrders();
-    setupEventListeners();
+  async function initializeOrdersPage() {
+    try {
+      // Wait for Supabase to be ready
+      console.log('⏳ Waiting for Supabase to load...');
+      await waitForSupabase();
+      console.log('✅ Supabase client ready');
+      
+      loadOrders();
+      setupEventListeners();
+    } catch (error) {
+      console.error('❌ Error initializing orders page:', error);
+    }
   }
 
   // Load all orders
