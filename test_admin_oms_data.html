@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin OMS Data Display</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        .success { border-left: 4px solid #4CAF50; }
+        .info { border-left: 4px solid #2196F3; }
+        .warning { border-left: 4px solid #FF9800; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #45a049; }
+        .data-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Admin OMS Data Display</h1>
+    
+    <div class="test-card success">
+        <h2>✅ Admin Panel OMS Data Integration Fixed!</h2>
+        <p><strong>What was fixed:</strong></p>
+        <ul>
+            <li>✅ Admin panel now fetches from both `customization_forms` AND `oms_customizations` tables</li>
+            <li>✅ OMS data is transformed to match the expected format</li>
+            <li>✅ Combined data is displayed in the admin panel</li>
+            <li>✅ Order Menu System customizations now show up in "Product Customizations"</li>
+        </ul>
+    </div>
+    
+    <div class="test-card info">
+        <h3>🔍 Test Data Fetching</h3>
+        <button onclick="testDataFetching()">Test Data Fetching</button>
+        <button onclick="testOMSData()">Test OMS Data Only</button>
+        <button onclick="testRegularData()">Test Regular Data Only</button>
+    </div>
+    
+    <div id="results" class="data-section">
+        <h3>📊 Results will appear here:</h3>
+        <div id="data-display"></div>
+    </div>
+
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function testDataFetching() {
+            console.log('🧪 Testing combined data fetching...');
+            const resultsDiv = document.getElementById('data-display');
+            resultsDiv.innerHTML = '<p>Loading data...</p>';
+            
+            try {
+                // Fetch both customization_forms and oms_customizations data
+                console.log('🔍 Fetching customization_forms data...');
+                const { data: regularCustomizations, error: regularError } = await supabase
+                    .from('customization_forms')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                console.log('🔍 Fetching oms_customizations data...');
+                const { data: omsCustomizations, error: omsError } = await supabase
+                    .from('oms_customizations')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                // Combine both datasets
+                let allCustomizations = [];
+                
+                if (regularCustomizations && !regularError) {
+                    console.log('✅ Regular customizations loaded:', regularCustomizations.length);
+                    allCustomizations = [...allCustomizations, ...regularCustomizations];
+                } else if (regularError) {
+                    console.error('❌ Error loading regular customizations:', regularError);
+                }
+
+                if (omsCustomizations && !omsError) {
+                    console.log('✅ OMS customizations loaded:', omsCustomizations.length);
+                    // Transform OMS data to match the expected format
+                    const transformedOmsData = omsCustomizations.map(oms => ({
+                        id: oms.id,
+                        contact_email: oms.user_email,
+                        product_type: oms.product_type || 'order-menu-system',
+                        product_name: oms.product_name || 'Order Menu System',
+                        project_name: oms.project_name,
+                        restaurant_name: oms.restaurant_name,
+                        owner_name: oms.owner_name,
+                        restaurant_address: oms.restaurant_address,
+                        contact_person: oms.contact_person,
+                        phone: oms.phone_number,
+                        additional_requirements: oms.additional_requirements,
+                        primary_color: oms.primary_color,
+                        secondary_color: oms.secondary_color,
+                        accent_color: oms.accent_color,
+                        text_color: oms.text_color,
+                        product_price: oms.product_price,
+                        created_at: oms.created_at,
+                        updated_at: oms.updated_at,
+                        // OMS specific fields
+                        menu_categories: oms.menu_categories,
+                        menu_items: oms.menu_items,
+                        logo_url: oms.logo_url,
+                        logo_filename: oms.logo_filename,
+                        logo_size: oms.logo_size
+                    }));
+                    allCustomizations = [...allCustomizations, ...transformedOmsData];
+                } else if (omsError) {
+                    console.error('❌ Error loading OMS customizations:', omsError);
+                }
+
+                // Sort combined data by creation date
+                allCustomizations.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+                console.log('🔍 Combined customizations data:', allCustomizations.length, 'total items');
+                
+                // Display results
+                displayResults(allCustomizations, 'Combined Data (Regular + OMS)');
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+                resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testOMSData() {
+            console.log('🧪 Testing OMS data only...');
+            const resultsDiv = document.getElementById('data-display');
+            resultsDiv.innerHTML = '<p>Loading OMS data...</p>';
+            
+            try {
+                const { data: omsCustomizations, error: omsError } = await supabase
+                    .from('oms_customizations')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (omsError) {
+                    throw omsError;
+                }
+
+                console.log('✅ OMS customizations loaded:', omsCustomizations.length);
+                displayResults(omsCustomizations, 'OMS Data Only');
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+                resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testRegularData() {
+            console.log('🧪 Testing regular data only...');
+            const resultsDiv = document.getElementById('data-display');
+            resultsDiv.innerHTML = '<p>Loading regular data...</p>';
+            
+            try {
+                const { data: regularCustomizations, error: regularError } = await supabase
+                    .from('customization_forms')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (regularError) {
+                    throw regularError;
+                }
+
+                console.log('✅ Regular customizations loaded:', regularCustomizations.length);
+                displayResults(regularCustomizations, 'Regular Data Only');
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+                resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+
+        function displayResults(data, title) {
+            const resultsDiv = document.getElementById('data-display');
+            
+            if (!data || data.length === 0) {
+                resultsDiv.innerHTML = `<p>No data found for ${title}</p>`;
+                return;
+            }
+
+            let html = `
+                <h4>${title} (${data.length} items)</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Email</th>
+                            <th>Product Type</th>
+                            <th>Product Name</th>
+                            <th>Project Name</th>
+                            <th>Restaurant Name</th>
+                            <th>Price</th>
+                            <th>Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.forEach(item => {
+                html += `
+                    <tr>
+                        <td>${item.id.substring(0, 8)}...</td>
+                        <td>${item.contact_email || item.user_email || '-'}</td>
+                        <td>${item.product_type || '-'}</td>
+                        <td>${item.product_name || '-'}</td>
+                        <td>${item.project_name || '-'}</td>
+                        <td>${item.restaurant_name || '-'}</td>
+                        <td>₹${item.product_price || 0}</td>
+                        <td>${new Date(item.created_at).toLocaleDateString()}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            resultsDiv.innerHTML = html;
+        }
+
+        // Auto-test on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🧪 Admin OMS Data Test Page Loaded');
+            console.log('✅ Admin panel now includes OMS data');
+        });
+    </script>
+</body>
+</html>

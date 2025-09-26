@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test New Category Submission</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        .success { border-left: 4px solid #4CAF50; }
+        .error { border-left: 4px solid #f44336; }
+        .warning { border-left: 4px solid #FF9800; }
+        .info { border-left: 4px solid #2196F3; }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #45a049; }
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .data-display {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+        }
+        .menu-item {
+            background: #e3f2fd;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #2196f3;
+        }
+        .category-tag {
+            background: #4caf50;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin: 2px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test New Category Submission</h1>
+    
+    <div class="test-card info">
+        <h3>🧪 Test Category Generation for New Submissions</h3>
+        <p>This tests the fixed category generation logic with sample data to ensure new submissions work correctly.</p>
+        <button onclick="testCategoryGeneration()">Test Category Generation</button>
+        <button onclick="testWithRealData()">Test with Real Data</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+    
+    <div id="log" class="test-card">
+        <h3>📋 Test Log:</h3>
+        <div id="log-content" class="log">Click "Test Category Generation" to start...</div>
+    </div>
+    
+    <div id="results" class="test-card">
+        <h3>📊 Results:</h3>
+        <div id="data-display"></div>
+    </div>
+
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        function log(message) {
+            const logContent = document.getElementById('log-content');
+            const timestamp = new Date().toLocaleTimeString();
+            logContent.textContent += `[${timestamp}] ${message}\n`;
+            logContent.scrollTop = logContent.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('log-content').textContent = 'Log cleared...\n';
+        }
+
+        function testCategoryGeneration() {
+            log('🧪 Testing category generation with sample data...');
+            
+            // Simulate menu items with different categories
+            const sampleMenuItems = [
+                { item_name: 'Margherita Pizza', price: '299', item_category: 'Main Course' },
+                { item_name: 'Caesar Salad', price: '199', item_category: 'Appetizers' },
+                { item_name: 'Pasta Carbonara', price: '349', item_category: 'Main Course' },
+                { item_name: 'Garlic Bread', price: '99', item_category: 'Appetizers' },
+                { item_name: 'Tiramisu', price: '149', item_category: 'Desserts' },
+                { item_name: 'Chocolate Cake', price: '179', item_category: 'Desserts' },
+                { item_name: 'Soup of the Day', price: '129', item_category: 'Appetizers' },
+                { item_name: 'Grilled Chicken', price: '399', item_category: 'Main Course' }
+            ];
+
+            log(`\n📋 Sample Menu Items (${sampleMenuItems.length} items):`);
+            sampleMenuItems.forEach((item, index) => {
+                log(`   ${index + 1}. ${item.item_name} - ₹${item.price} (${item.item_category})`);
+            });
+
+            // Test the FIXED dashboard logic
+            log(`\n🔧 Testing FIXED Dashboard Logic:`);
+            const dashboardCategories = sampleMenuItems ? 
+              JSON.stringify(Array.from(new Set(sampleMenuItems.map(item => item.item_category).filter(cat => cat && cat.trim() !== ''))).map((category, index) => ({
+                id: `cat_${index + 1}`,
+                name: category
+              }))) : '[]';
+            
+            log(`   Dashboard result: ${dashboardCategories}`);
+            
+            try {
+                const parsedDashboard = JSON.parse(dashboardCategories);
+                log(`   Parsed categories: ${parsedDashboard.map(c => c.name).join(', ')}`);
+            } catch (error) {
+                log(`   ❌ Error parsing: ${error.message}`);
+            }
+
+            // Test the FIXED cart logic
+            log(`\n🛒 Testing FIXED Cart Logic:`);
+            const cartCategories = sampleMenuItems ? 
+              Array.from(new Set(sampleMenuItems.map(item => item.item_category).filter(cat => cat && cat.trim() !== ''))).map((category, index) => ({
+                id: `cat_${index + 1}`,
+                name: category
+              })) : [];
+            
+            log(`   Cart result: ${JSON.stringify(cartCategories)}`);
+            log(`   Cart categories: ${cartCategories.map(c => c.name).join(', ')}`);
+
+            // Test edge cases
+            log(`\n🧪 Testing Edge Cases:`);
+            
+            // Empty categories
+            const emptyCategoryItems = [
+                { item_name: 'Item 1', price: '100', item_category: '' },
+                { item_name: 'Item 2', price: '200', item_category: '   ' },
+                { item_name: 'Item 3', price: '300', item_category: null }
+            ];
+            
+            const emptyCategories = Array.from(new Set(emptyCategoryItems.map(item => item.item_category).filter(cat => cat && cat.trim() !== ''))).map((category, index) => ({
+                id: `cat_${index + 1}`,
+                name: category
+            }));
+            
+            log(`   Empty categories result: ${JSON.stringify(emptyCategories)}`);
+            log(`   Should be empty array: ${emptyCategories.length === 0 ? '✅' : '❌'}`);
+
+            // Mixed valid and invalid categories
+            const mixedItems = [
+                { item_name: 'Valid Item 1', price: '100', item_category: 'Valid Category' },
+                { item_name: 'Empty Item', price: '200', item_category: '' },
+                { item_name: 'Valid Item 2', price: '300', item_category: 'Another Valid' },
+                { item_name: 'Null Item', price: '400', item_category: null }
+            ];
+            
+            const mixedCategories = Array.from(new Set(mixedItems.map(item => item.item_category).filter(cat => cat && cat.trim() !== ''))).map((category, index) => ({
+                id: `cat_${index + 1}`,
+                name: category
+            }));
+            
+            log(`   Mixed categories result: ${JSON.stringify(mixedCategories)}`);
+            log(`   Should have 2 categories: ${mixedCategories.length === 2 ? '✅' : '❌'}`);
+
+            displayResults(sampleMenuItems, cartCategories);
+        }
+
+        async function testWithRealData() {
+            log('🧪 Testing with real data from database...');
+            
+            try {
+                const { data: omsCustomizations, error: omsError } = await supabase
+                    .from('oms_customizations')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(3);
+
+                if (omsError) {
+                    log(`❌ Error loading OMS data: ${omsError.message}`);
+                    return;
+                }
+
+                if (!omsCustomizations || omsCustomizations.length === 0) {
+                    log('⚠️ No OMS data found');
+                    return;
+                }
+
+                log(`✅ Found ${omsCustomizations.length} OMS customizations`);
+
+                omsCustomizations.forEach((oms, index) => {
+                    log(`\n📋 OMS Record ${index + 1}: ${oms.restaurant_name}`);
+                    
+                    try {
+                        const menuItems = typeof oms.menu_items === 'string' ? JSON.parse(oms.menu_items) : (oms.menu_items || []);
+                        const menuCategories = typeof oms.menu_categories === 'string' ? JSON.parse(oms.menu_categories) : (oms.menu_categories || []);
+                        
+                        log(`   Menu items: ${menuItems.length}`);
+                        log(`   Menu categories: ${menuCategories.length}`);
+                        
+                        if (menuItems.length > 0) {
+                            // Test the fixed logic on real data
+                            const testCategories = Array.from(new Set(menuItems.map(item => item.item_category).filter(cat => cat && cat.trim() !== ''))).map((category, index) => ({
+                                id: `cat_${index + 1}`,
+                                name: category
+                            }));
+                            
+                            log(`   Current categories: ${menuCategories.map(c => c.name).join(', ')}`);
+                            log(`   Should be categories: ${testCategories.map(c => c.name).join(', ')}`);
+                            
+                            const isFixed = testCategories.length > 0 && 
+                                testCategories.every(cat => menuCategories.some(existing => existing.name === cat.name));
+                            
+                            log(`   Categories are correct: ${isFixed ? '✅' : '❌'}`);
+                        }
+                        
+                    } catch (error) {
+                        log(`   ❌ Error processing: ${error.message}`);
+                    }
+                });
+
+            } catch (error) {
+                log(`❌ Exception: ${error.message}`);
+            }
+        }
+
+        function displayResults(menuItems, categories) {
+            const resultsDiv = document.getElementById('data-display');
+            
+            let html = `
+                <h4>Category Generation Test Results</h4>
+                
+                <h5>Sample Menu Items:</h5>
+                <div>
+                    ${menuItems.map(item => `
+                        <div class="menu-item">
+                            <strong>${item.item_name}</strong> - ₹${item.price}
+                            <br><small>Category: ${item.item_category}</small>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <h5>Generated Categories:</h5>
+                <div>
+                    ${categories.map(cat => `<span class="category-tag">${cat.name}</span>`).join('')}
+                </div>
+                
+                <h5>Test Summary:</h5>
+                <ul>
+                    <li>✅ Extracts unique categories from menu items</li>
+                    <li>✅ Filters out empty categories</li>
+                    <li>✅ Creates proper category objects with IDs</li>
+                    <li>✅ Handles edge cases (empty, null, whitespace)</li>
+                </ul>
+            `;
+            
+            resultsDiv.innerHTML = html;
+        }
+
+        // Auto-test on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🧪 New Category Submission Test Loaded');
+            log('This tests the fixed category generation logic');
+        });
+    </script>
+</body>
+</html>

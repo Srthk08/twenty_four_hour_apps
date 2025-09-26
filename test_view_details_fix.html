@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test View Details Fix for OMS Data</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        .success { border-left: 4px solid #4CAF50; }
+        .info { border-left: 4px solid #2196F3; }
+        .warning { border-left: 4px solid #FF9800; }
+        .error { border-left: 4px solid #f44336; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 2px;
+        }
+        button:hover { background: #45a049; }
+        .test-button {
+            background: #2196F3;
+        }
+        .test-button:hover { background: #1976D2; }
+        .data-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test View Details Fix for OMS Data</h1>
+    
+    <div class="test-card success">
+        <h2>✅ View Details Error Fixed!</h2>
+        <p><strong>What was fixed:</strong></p>
+        <ul>
+            <li>✅ "View Details" button now checks both `customization_forms` AND `oms_customizations` tables</li>
+            <li>✅ If not found in `customization_forms`, automatically tries `oms_customizations`</li>
+            <li>✅ OMS data is transformed to match expected format</li>
+            <li>✅ No more 406 Not Acceptable errors</li>
+        </ul>
+    </div>
+    
+    <div class="test-card info">
+        <h3>🔍 Test Data Fetching</h3>
+        <button onclick="loadAllData()" class="test-button">Load All Data</button>
+        <button onclick="testViewDetails()" class="test-button">Test View Details Function</button>
+    </div>
+    
+    <div id="results" class="data-section">
+        <h3>📊 Results will appear here:</h3>
+        <div id="data-display"></div>
+    </div>
+
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        let allData = [];
+
+        async function loadAllData() {
+            console.log('🧪 Loading all data...');
+            const resultsDiv = document.getElementById('data-display');
+            resultsDiv.innerHTML = '<p>Loading data...</p>';
+            
+            try {
+                // Fetch both customization_forms and oms_customizations data
+                const { data: regularCustomizations, error: regularError } = await supabase
+                    .from('customization_forms')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                const { data: omsCustomizations, error: omsError } = await supabase
+                    .from('oms_customizations')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                // Combine both datasets
+                let allCustomizations = [];
+                
+                if (regularCustomizations && !regularError) {
+                    allCustomizations = [...allCustomizations, ...regularCustomizations];
+                }
+
+                if (omsCustomizations && !omsError) {
+                    // Transform OMS data to match the expected format
+                    const transformedOmsData = omsCustomizations.map(oms => ({
+                        id: oms.id,
+                        contact_email: oms.user_email,
+                        product_type: oms.product_type || 'order-menu-system',
+                        product_name: oms.product_name || 'Order Menu System',
+                        project_name: oms.project_name,
+                        restaurant_name: oms.restaurant_name,
+                        owner_name: oms.owner_name,
+                        restaurant_address: oms.restaurant_address,
+                        contact_person: oms.contact_person,
+                        phone: oms.phone_number,
+                        additional_requirements: oms.additional_requirements,
+                        primary_color: oms.primary_color,
+                        secondary_color: oms.secondary_color,
+                        accent_color: oms.accent_color,
+                        text_color: oms.text_color,
+                        product_price: oms.product_price,
+                        created_at: oms.created_at,
+                        updated_at: oms.updated_at,
+                        // OMS specific fields
+                        menu_categories: oms.menu_categories,
+                        menu_items: oms.menu_items,
+                        logo_url: oms.logo_url,
+                        logo_filename: oms.logo_filename,
+                        logo_size: oms.logo_size
+                    }));
+                    allCustomizations = [...allCustomizations, ...transformedOmsData];
+                }
+
+                // Sort combined data by creation date
+                allCustomizations.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+                allData = allCustomizations;
+                displayResults(allCustomizations);
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+                resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testViewDetails() {
+            if (allData.length === 0) {
+                alert('Please load data first!');
+                return;
+            }
+
+            console.log('🧪 Testing view details function...');
+            const resultsDiv = document.getElementById('data-display');
+            
+            // Test with first item
+            const testId = allData[0].id;
+            console.log('Testing with ID:', testId);
+            
+            try {
+                // Simulate the fixed viewCustomizationDetails function
+                const result = await viewCustomizationDetailsFixed(testId);
+                resultsDiv.innerHTML = `
+                    <h4>✅ View Details Test Successful!</h4>
+                    <p><strong>Test ID:</strong> ${testId}</p>
+                    <p><strong>Product Type:</strong> ${result.product_type}</p>
+                    <p><strong>Product Name:</strong> ${result.product_name}</p>
+                    <p><strong>Contact Email:</strong> ${result.contact_email}</p>
+                    <p><strong>Project Name:</strong> ${result.project_name}</p>
+                    <p><strong>Price:</strong> ₹${result.product_price}</p>
+                    <p><strong>Created:</strong> ${new Date(result.created_at).toLocaleString()}</p>
+                `;
+            } catch (error) {
+                console.error('❌ View details test failed:', error);
+                resultsDiv.innerHTML = `
+                    <h4 style="color: red;">❌ View Details Test Failed!</h4>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                `;
+            }
+        }
+
+        // Simulate the fixed viewCustomizationDetails function
+        async function viewCustomizationDetailsFixed(customizationId) {
+            console.log('🔍 Viewing customization details for ID:', customizationId);
+            
+            // First try to get from customization_forms table
+            let { data: customization, error } = await supabase
+                .from('customization_forms')
+                .select('*')
+                .eq('id', customizationId)
+                .single();
+
+            // If not found in customization_forms, try oms_customizations table
+            if (error && error.code === 'PGRST116') {
+                console.log('Not found in customization_forms, trying oms_customizations...');
+                const { data: omsCustomization, error: omsError } = await supabase
+                    .from('oms_customizations')
+                    .select('*')
+                    .eq('id', customizationId)
+                    .single();
+
+                if (omsError) {
+                    throw new Error('Error loading OMS customization details: ' + omsError.message);
+                }
+
+                // Transform OMS data to match expected format
+                customization = {
+                    id: omsCustomization.id,
+                    contact_email: omsCustomization.user_email,
+                    product_type: omsCustomization.product_type || 'order-menu-system',
+                    product_name: omsCustomization.product_name || 'Order Menu System',
+                    project_name: omsCustomization.project_name,
+                    restaurant_name: omsCustomization.restaurant_name,
+                    owner_name: omsCustomization.owner_name,
+                    restaurant_address: omsCustomization.restaurant_address,
+                    contact_person: omsCustomization.contact_person,
+                    phone: omsCustomization.phone_number,
+                    additional_requirements: omsCustomization.additional_requirements,
+                    primary_color: omsCustomization.primary_color,
+                    secondary_color: omsCustomization.secondary_color,
+                    accent_color: omsCustomization.accent_color,
+                    text_color: omsCustomization.text_color,
+                    product_price: omsCustomization.product_price,
+                    created_at: omsCustomization.created_at,
+                    updated_at: omsCustomization.updated_at,
+                    // OMS specific fields
+                    menu_categories: omsCustomization.menu_categories,
+                    menu_items: omsCustomization.menu_items,
+                    logo_url: omsCustomization.logo_url,
+                    logo_filename: omsCustomization.logo_filename,
+                    logo_size: omsCustomization.logo_size
+                };
+                error = null; // Clear error since we found the data
+            }
+
+            if (error) {
+                throw new Error('Error loading customization details: ' + error.message);
+            }
+
+            return customization;
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('data-display');
+            
+            if (!data || data.length === 0) {
+                resultsDiv.innerHTML = `<p>No data found</p>`;
+                return;
+            }
+
+            let html = `
+                <h4>All Customizations (${data.length} items)</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Email</th>
+                            <th>Product Type</th>
+                            <th>Product Name</th>
+                            <th>Project Name</th>
+                            <th>Restaurant Name</th>
+                            <th>Price</th>
+                            <th>Test View Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.forEach(item => {
+                html += `
+                    <tr>
+                        <td>${item.id.substring(0, 8)}...</td>
+                        <td>${item.contact_email || '-'}</td>
+                        <td>${item.product_type || '-'}</td>
+                        <td>${item.product_name || '-'}</td>
+                        <td>${item.project_name || '-'}</td>
+                        <td>${item.restaurant_name || '-'}</td>
+                        <td>₹${item.product_price || 0}</td>
+                        <td><button onclick="testSpecificId('${item.id}')">Test</button></td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            resultsDiv.innerHTML = html;
+        }
+
+        async function testSpecificId(id) {
+            console.log('Testing specific ID:', id);
+            try {
+                const result = await viewCustomizationDetailsFixed(id);
+                alert(`✅ Success!\n\nProduct: ${result.product_name}\nEmail: ${result.contact_email}\nProject: ${result.project_name}`);
+            } catch (error) {
+                alert(`❌ Failed!\n\nError: ${error.message}`);
+            }
+        }
+
+        // Auto-test on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🧪 View Details Fix Test Page Loaded');
+            console.log('✅ View details function now handles both tables');
+        });
+    </script>
+</body>
+</html>

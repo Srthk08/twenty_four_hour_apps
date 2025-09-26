@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin OMS Fix</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        .success { border-left: 4px solid #4CAF50; }
+        .error { border-left: 4px solid #f44336; }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #45a049; }
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Test Admin OMS Fix</h1>
+    
+    <div class="test-card">
+        <h3>🧪 Test the Fixed Admin Function</h3>
+        <p>This simulates the exact function that was fixed in the admin panel's "Product Customization" modal.</p>
+        <button onclick="testFixedLoadCustomizations()">Test Fixed loadCustomizations()</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+    
+    <div id="log" class="test-card">
+        <h3>📋 Test Log:</h3>
+        <div id="log-content" class="log">Click "Test Fixed loadCustomizations()" to test the fix...</div>
+    </div>
+    
+    <div id="results" class="test-card">
+        <h3>📊 Results:</h3>
+        <div id="data-display"></div>
+    </div>
+
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        function log(message) {
+            const logContent = document.getElementById('log-content');
+            const timestamp = new Date().toLocaleTimeString();
+            logContent.textContent += `[${timestamp}] ${message}\n`;
+            logContent.scrollTop = logContent.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('log-content').textContent = 'Log cleared...\n';
+        }
+
+        // This is the EXACT function that was fixed in admin/data.astro
+        async function loadCustomizations() {
+            try {
+                log('🔄 Loading customizations for modal...');
+                
+                // Fetch both customization_forms and oms_customizations data
+                const { data: regularCustomizations, error: regularError } = await supabase
+                    .from('customization_forms')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                const { data: omsCustomizations, error: omsError } = await supabase
+                    .from('oms_customizations')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                // Combine both datasets
+                let allCustomizations = [];
+                
+                if (regularCustomizations && !regularError) {
+                    log(`✅ Regular customizations loaded for modal: ${regularCustomizations.length}`);
+                    allCustomizations = [...allCustomizations, ...regularCustomizations];
+                } else if (regularError) {
+                    log(`❌ Error loading regular customizations for modal: ${regularError.message}`);
+                }
+
+                if (omsCustomizations && !omsError) {
+                    log(`✅ OMS customizations loaded for modal: ${omsCustomizations.length}`);
+                    // Transform OMS data to match the expected format
+                    const transformedOmsData = omsCustomizations.map(oms => ({
+                        id: oms.id,
+                        contact_email: oms.user_email,
+                        product_type: oms.product_type || 'order-menu-system',
+                        product_name: oms.product_name || 'Order Menu System',
+                        project_name: oms.project_name,
+                        restaurant_name: oms.restaurant_name,
+                        owner_name: oms.owner_name,
+                        restaurant_address: oms.restaurant_address,
+                        contact_person: oms.contact_person,
+                        phone: oms.phone_number,
+                        additional_requirements: oms.additional_requirements,
+                        primary_color: oms.primary_color,
+                        secondary_color: oms.secondary_color,
+                        accent_color: oms.accent_color,
+                        text_color: oms.text_color,
+                        product_price: oms.product_price,
+                        created_at: oms.created_at,
+                        updated_at: oms.updated_at,
+                        menu_categories: oms.menu_categories,
+                        menu_items: oms.menu_items,
+                        logo_url: oms.logo_url,
+                        logo_filename: oms.logo_filename,
+                        logo_size: oms.logo_size
+                    }));
+                    allCustomizations = [...allCustomizations, ...transformedOmsData];
+                } else if (omsError) {
+                    log(`❌ Error loading OMS customizations for modal: ${omsError.message}`);
+                }
+
+                // Sort combined data by creation date
+                allCustomizations.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+                if (!allCustomizations || allCustomizations.length === 0) {
+                    log('⚠️ No customizations found');
+                    return [];
+                }
+
+                log(`✅ Combined customizations: ${allCustomizations.length} total items`);
+                
+                const omsItems = allCustomizations.filter(c => c.product_type === 'order-menu-system');
+                log(`🍽️ OMS items in combined data: ${omsItems.length}`);
+                
+                if (omsItems.length > 0) {
+                    log(`📋 Sample OMS item:`);
+                    log(`   ID: ${omsItems[0].id}`);
+                    log(`   Email: ${omsItems[0].contact_email}`);
+                    log(`   Product: ${omsItems[0].product_name}`);
+                    log(`   Project: ${omsItems[0].project_name}`);
+                    log(`   Restaurant: ${omsItems[0].restaurant_name}`);
+                }
+
+                return allCustomizations;
+                
+            } catch (error) {
+                log(`❌ Error loading customizations for modal: ${error.message}`);
+                return [];
+            }
+        }
+
+        async function testFixedLoadCustomizations() {
+            log('🧪 Testing the fixed loadCustomizations function...');
+            const result = await loadCustomizations();
+            displayResults(result);
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('data-display');
+            if (!data || data.length === 0) {
+                resultsDiv.innerHTML = '<p>No customizations found</p>';
+                return;
+            }
+
+            let html = `
+                <h4>Combined Customizations (${data.length} items)</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>ID</th>
+                            <th>Email</th>
+                            <th>Product</th>
+                            <th>Project</th>
+                            <th>Restaurant</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.forEach(item => {
+                const typeClass = item.product_type === 'order-menu-system' ? 'OMS' : 'Regular';
+                const typeColor = item.product_type === 'order-menu-system' ? '#e3f2fd' : '#f5f5f5';
+                html += `
+                    <tr style="background-color: ${typeColor}">
+                        <td><strong>${typeClass}</strong></td>
+                        <td>${item.id.substring(0, 8)}...</td>
+                        <td>${item.contact_email || '-'}</td>
+                        <td>${item.product_name || '-'}</td>
+                        <td>${item.project_name || '-'}</td>
+                        <td>${item.restaurant_name || '-'}</td>
+                        <td>${new Date(item.created_at).toLocaleDateString()}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            resultsDiv.innerHTML = html;
+        }
+
+        // Auto-test on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🔧 Test Admin OMS Fix Page Loaded');
+            log('This tests the exact function that was fixed in admin/data.astro');
+        });
+    </script>
+</body>
+</html>

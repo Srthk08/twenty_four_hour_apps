@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Complete Admin OMS Fix</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        .success { border-left: 4px solid #4CAF50; }
+        .error { border-left: 4px solid #f44336; }
+        .warning { border-left: 4px solid #FF9800; }
+        .info { border-left: 4px solid #2196F3; }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #45a049; }
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 800px;
+            border-radius: 8px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover { color: #000; }
+        .menu-item {
+            background: #f9f9f9;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .category-tag {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin: 2px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Test Complete Admin OMS Fix</h1>
+    
+    <div class="test-card info">
+        <h3>🧪 Test Phone Number & Menu Items Display</h3>
+        <p>This tests the complete fix for phone number and menu items display in admin panel.</p>
+        <button onclick="testCompleteFix()">Test Complete Fix</button>
+        <button onclick="testModalDisplay()">Test Modal Display</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+    
+    <div id="log" class="test-card">
+        <h3>📋 Test Log:</h3>
+        <div id="log-content" class="log">Click "Test Complete Fix" to test the fix...</div>
+    </div>
+    
+    <div id="results" class="test-card">
+        <h3>📊 Results:</h3>
+        <div id="data-display"></div>
+    </div>
+
+    <!-- Modal for testing -->
+    <div id="testModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        function log(message) {
+            const logContent = document.getElementById('log-content');
+            const timestamp = new Date().toLocaleTimeString();
+            logContent.textContent += `[${timestamp}] ${message}\n`;
+            logContent.scrollTop = logContent.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('log-content').textContent = 'Log cleared...\n';
+        }
+
+        function closeModal() {
+            document.getElementById('testModal').style.display = 'none';
+        }
+
+        async function testCompleteFix() {
+            log('🧪 Testing complete fix for phone number and menu items...');
+            try {
+                // Load OMS data
+                const { data: omsCustomizations, error: omsError } = await supabase
+                    .from('oms_customizations')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (omsError) {
+                    log(`❌ Error loading OMS data: ${omsError.message}`);
+                    return;
+                }
+
+                if (!omsCustomizations || omsCustomizations.length === 0) {
+                    log('⚠️ No OMS data found');
+                    return;
+                }
+
+                log(`✅ Found ${omsCustomizations.length} OMS customizations`);
+
+                // Transform data like the admin panel does
+                const transformedData = omsCustomizations.map(oms => ({
+                    id: oms.id,
+                    contact_email: oms.user_email,
+                    product_type: oms.product_type || 'order-menu-system',
+                    product_name: oms.product_name || 'Order Menu System',
+                    project_name: oms.project_name,
+                    restaurant_name: oms.restaurant_name,
+                    owner_name: oms.owner_name,
+                    restaurant_address: oms.restaurant_address,
+                    contact_person: oms.contact_person,
+                    phone: oms.phone_number,
+                    contact_phone: oms.phone_number, // This is the fix!
+                    additional_requirements: oms.additional_requirements,
+                    primary_color: oms.primary_color,
+                    secondary_color: oms.secondary_color,
+                    accent_color: oms.accent_color,
+                    text_color: oms.text_color,
+                    product_price: oms.product_price,
+                    created_at: oms.created_at,
+                    updated_at: oms.updated_at,
+                    menu_categories: oms.menu_categories,
+                    menu_items: oms.menu_items,
+                    logo_url: oms.logo_url,
+                    logo_filename: oms.logo_filename,
+                    logo_size: oms.logo_size
+                }));
+
+                // Test phone number display
+                const sample = transformedData[0];
+                log(`📞 Phone number test:`);
+                log(`   Raw phone_number: ${omsCustomizations[0].phone_number}`);
+                log(`   Mapped phone: ${sample.phone}`);
+                log(`   Mapped contact_phone: ${sample.contact_phone}`);
+                log(`   Display logic: ${sample.contact_phone || sample.phone || 'Not provided'}`);
+
+                // Test menu items display
+                log(`🍽️ Menu items test:`);
+                log(`   Raw menu_items: ${JSON.stringify(omsCustomizations[0].menu_items)}`);
+                log(`   Mapped menu_items: ${JSON.stringify(sample.menu_items)}`);
+                log(`   Menu items length: ${sample.menu_items ? sample.menu_items.length : 'undefined'}`);
+                log(`   Menu items check: ${sample.menu_items && sample.menu_items.length > 0 ? 'HAS ITEMS' : 'NO ITEMS'}`);
+
+                // Test menu categories display
+                log(`📂 Menu categories test:`);
+                log(`   Raw menu_categories: ${JSON.stringify(omsCustomizations[0].menu_categories)}`);
+                log(`   Mapped menu_categories: ${JSON.stringify(sample.menu_categories)}`);
+                log(`   Menu categories length: ${sample.menu_categories ? sample.menu_categories.length : 'undefined'}`);
+                log(`   Menu categories check: ${sample.menu_categories && sample.menu_categories.length > 0 ? 'HAS CATEGORIES' : 'NO CATEGORIES'}`);
+
+                displayResults(transformedData);
+
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+            }
+        }
+
+        async function testModalDisplay() {
+            log('🧪 Testing modal display simulation...');
+            try {
+                const { data: omsCustomizations, error: omsError } = await supabase
+                    .from('oms_customizations')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (omsError || !omsCustomizations || omsCustomizations.length === 0) {
+                    log('❌ No OMS data to test modal');
+                    return;
+                }
+
+                const sample = omsCustomizations[0];
+                const transformed = {
+                    id: sample.id,
+                    contact_email: sample.user_email,
+                    product_type: sample.product_type || 'order-menu-system',
+                    product_name: sample.product_name || 'Order Menu System',
+                    project_name: sample.project_name,
+                    restaurant_name: sample.restaurant_name,
+                    owner_name: sample.owner_name,
+                    restaurant_address: sample.restaurant_address,
+                    contact_person: sample.contact_person,
+                    phone: sample.phone_number,
+                    contact_phone: sample.phone_number,
+                    additional_requirements: sample.additional_requirements,
+                    primary_color: sample.primary_color,
+                    secondary_color: sample.secondary_color,
+                    accent_color: sample.accent_color,
+                    text_color: sample.text_color,
+                    product_price: sample.product_price,
+                    created_at: sample.created_at,
+                    updated_at: sample.updated_at,
+                    menu_categories: sample.menu_categories,
+                    menu_items: sample.menu_items,
+                    logo_url: sample.logo_url,
+                    logo_filename: sample.logo_filename,
+                    logo_size: sample.logo_size
+                };
+
+                // Simulate the modal display
+                const modalContent = `
+                    <h2>Customization Details</h2>
+                    
+                    <div class="mt-4">
+                        <h5 class="font-semibold text-gray-700 mb-2">Product Information</h5>
+                        <p class="text-sm text-gray-600 mb-1"><strong>Product Type:</strong> ${transformed.product_type}</p>
+                        <p class="text-sm text-gray-600 mb-1"><strong>Product Name:</strong> ${transformed.product_name}</p>
+                        <p class="text-sm text-gray-600 mb-1"><strong>Price:</strong> ₹${transformed.product_price}</p>
+                        <p class="text-sm text-gray-600 mb-1"><strong>Project Name:</strong> ${transformed.project_name}</p>
+                        <p class="text-sm text-gray-600 mb-1"><strong>Restaurant Name:</strong> ${transformed.restaurant_name}</p>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5 class="font-semibold text-gray-700 mb-2">Contact Information</h5>
+                        <p class="text-sm text-gray-600 mb-1"><strong>Email:</strong> ${transformed.contact_email || 'Not provided'}</p>
+                        <p class="text-sm text-gray-600 mb-1"><strong>Phone:</strong> ${transformed.contact_phone || transformed.phone || 'Not provided'}</p>
+                    </div>
+                    
+                    ${transformed.menu_items && transformed.menu_items.length > 0 ? `
+                    <div class="mt-4">
+                        <h5 class="font-semibold text-gray-700 mb-2">Menu Items (${transformed.menu_items.length} items)</h5>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            ${transformed.menu_items.map(item => `
+                                <div class="menu-item">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h6 class="font-medium text-gray-900">${item.item_name || 'Unnamed Item'}</h6>
+                                            <p class="text-sm text-gray-600">${item.item_category || 'Uncategorized'}</p>
+                                        </div>
+                                        <span class="text-lg font-bold text-green-600">₹${item.price || '0'}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    ${transformed.menu_categories && transformed.menu_categories.length > 0 ? `
+                    <div class="mt-4">
+                        <h5 class="font-semibold text-gray-700 mb-2">Menu Categories (${transformed.menu_categories.length} categories)</h5>
+                        <div class="flex flex-wrap gap-2">
+                            ${transformed.menu_categories.map(category => `
+                                <span class="category-tag">${category.name || 'Unnamed Category'}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="mt-4">
+                        <h5 class="font-semibold text-gray-700 mb-2">Color Customization</h5>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-6 h-6 rounded border" style="background-color: ${transformed.primary_color || '#3B82F6'}"></div>
+                                <span class="text-sm text-gray-600"><strong>Primary:</strong> ${transformed.primary_color || '#3B82F6'}</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-6 h-6 rounded border" style="background-color: ${transformed.secondary_color || '#10B981'}"></div>
+                                <span class="text-sm text-gray-600"><strong>Secondary:</strong> ${transformed.secondary_color || '#10B981'}</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-6 h-6 rounded border" style="background-color: ${transformed.accent_color || '#F59E0B'}"></div>
+                                <span class="text-sm text-gray-600"><strong>Accent:</strong> ${transformed.accent_color || '#F59E0B'}</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-6 h-6 rounded border" style="background-color: ${transformed.text_color || '#1F2937'}"></div>
+                                <span class="text-sm text-gray-600"><strong>Text:</strong> ${transformed.text_color || '#1F2937'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('modal-content').innerHTML = modalContent;
+                document.getElementById('testModal').style.display = 'block';
+
+                log('✅ Modal display test completed - check the modal window');
+
+            } catch (error) {
+                log(`❌ Error testing modal display: ${error.message}`);
+            }
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('data-display');
+            if (!data || data.length === 0) {
+                resultsDiv.innerHTML = '<p>No data found</p>';
+                return;
+            }
+
+            let html = `
+                <h4>OMS Customizations (${data.length} items)</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Restaurant</th>
+                            <th>Menu Items</th>
+                            <th>Menu Categories</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.forEach(item => {
+                const menuItemsCount = item.menu_items ? item.menu_items.length : 0;
+                const menuCategoriesCount = item.menu_categories ? item.menu_categories.length : 0;
+                const phoneDisplay = item.contact_phone || item.phone || 'Not provided';
+                
+                html += `
+                    <tr>
+                        <td>${item.contact_email || '-'}</td>
+                        <td><strong>${phoneDisplay}</strong></td>
+                        <td>${item.restaurant_name || '-'}</td>
+                        <td>${menuItemsCount} items</td>
+                        <td>${menuCategoriesCount} categories</td>
+                        <td>${new Date(item.created_at).toLocaleDateString()}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            resultsDiv.innerHTML = html;
+        }
+
+        // Auto-test on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🔧 Test Complete Admin OMS Fix Page Loaded');
+            log('This tests the complete fix for phone number and menu items display');
+        });
+    </script>
+</body>
+</html>

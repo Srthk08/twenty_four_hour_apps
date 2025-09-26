@@ -2677,7 +2677,14 @@ import { sharedDataStore } from '../lib/shared-data-store';
               created_at: new Date().toISOString()
             })) : [],
             
-            // 14. Menu Items Count
+            // 14. Menu Categories (extracted from menu items)
+            menu_categories: formData.menuItems ? 
+              Array.from(new Set(formData.menuItems.map(item => item.item_category).filter(cat => cat && cat.trim() !== ''))).map((category, index) => ({
+                id: `cat_${index + 1}`,
+                name: category
+              })) : [],
+            
+            // 15. Menu Items Count
             menu_items_count: formData.menuItems ? formData.menuItems.length : 0,
             
             cart_status: 'pending'

@@ -993,7 +993,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         menuItems: Array.from(document.querySelectorAll('.menu-item-row')).map((row, index) => ({
           item_name: row.querySelector(`input[name="menuItems[${index}][item_name]"]`)?.value || '',
           price: row.querySelector(`input[name="menuItems[${index}][price]"]`)?.value || '',
-          item_category: row.querySelector(`select[name="menuItems[${index}][item_category]"]`)?.value || ''
+          item_category: row.querySelector(`input[name="menuItems[${index}][item_category]"]`)?.value || ''
         })).filter(item => item.item_name),
         timestamp: new Date().toISOString()
       };
@@ -1027,12 +1027,10 @@ import AuthGuard from '../components/AuthGuard.astro';
             p_logo_filename: null,
             p_logo_size: null,
             p_menu_categories: orderMenuRequirements.menuItems ? 
-              JSON.stringify(orderMenuRequirements.menuItems.map((item, index) => ({
-                id: `cat_${index}`,
-                name: item.item_category || 'Uncategorized'
-              })).filter((cat, index, arr) => 
-                arr.findIndex(c => c.name === cat.name) === index
-              )) : '[]',
+              JSON.stringify(Array.from(new Set(orderMenuRequirements.menuItems.map(item => item.item_category).filter(cat => cat && cat.trim() !== ''))).map((category, index) => ({
+                id: `cat_${index + 1}`,
+                name: category
+              }))) : '[]',
             p_menu_items: orderMenuRequirements.menuItems ? 
               JSON.stringify(orderMenuRequirements.menuItems) : '[]',
             p_primary_color: data.primaryColor || '#3B82F6',

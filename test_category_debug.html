@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Category Display Issue</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        .success { border-left: 4px solid #4CAF50; }
+        .error { border-left: 4px solid #f44336; }
+        .warning { border-left: 4px solid #FF9800; }
+        .info { border-left: 4px solid #2196F3; }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #45a049; }
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .data-display {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+        }
+        .menu-item {
+            background: #e3f2fd;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #2196f3;
+        }
+        .category-tag {
+            background: #4caf50;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin: 2px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Category Display Issue</h1>
+    
+    <div class="test-card info">
+        <h3>🧪 Debug Menu Categories</h3>
+        <p>This will help us understand why categories are not showing properly in the admin panel.</p>
+        <button onclick="debugCategories()">Debug Categories</button>
+        <button onclick="testDataStructure()">Test Data Structure</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+    
+    <div id="log" class="test-card">
+        <h3>📋 Debug Log:</h3>
+        <div id="log-content" class="log">Click "Debug Categories" to start...</div>
+    </div>
+    
+    <div id="results" class="test-card">
+        <h3>📊 Results:</h3>
+        <div id="data-display"></div>
+    </div>
+
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        function log(message) {
+            const logContent = document.getElementById('log-content');
+            const timestamp = new Date().toLocaleTimeString();
+            logContent.textContent += `[${timestamp}] ${message}\n`;
+            logContent.scrollTop = logContent.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('log-content').textContent = 'Log cleared...\n';
+        }
+
+        async function debugCategories() {
+            log('🔍 Debugging category display issue...');
+            
+            try {
+                // Get OMS data
+                const { data: omsCustomizations, error: omsError } = await supabase
+                    .from('oms_customizations')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(3);
+
+                if (omsError) {
+                    log(`❌ Error loading OMS data: ${omsError.message}`);
+                    return;
+                }
+
+                if (!omsCustomizations || omsCustomizations.length === 0) {
+                    log('⚠️ No OMS data found');
+                    return;
+                }
+
+                log(`✅ Found ${omsCustomizations.length} OMS customizations`);
+
+                omsCustomizations.forEach((oms, index) => {
+                    log(`\n📋 OMS Record ${index + 1}:`);
+                    log(`   Restaurant: ${oms.restaurant_name}`);
+                    log(`   Project: ${oms.project_name}`);
+                    
+                    // Debug menu_items
+                    log(`\n🍽️ Menu Items Analysis:`);
+                    log(`   Raw menu_items type: ${typeof oms.menu_items}`);
+                    log(`   Raw menu_items: ${JSON.stringify(oms.menu_items)}`);
+                    
+                    let menuItems = [];
+                    try {
+                        menuItems = typeof oms.menu_items === 'string' ? JSON.parse(oms.menu_items) : (oms.menu_items || []);
+                        log(`   Parsed menu_items type: ${typeof menuItems}`);
+                        log(`   Parsed menu_items length: ${menuItems.length}`);
+                        
+                        if (menuItems.length > 0) {
+                            log(`   Sample menu item: ${JSON.stringify(menuItems[0])}`);
+                            log(`   Sample item keys: ${Object.keys(menuItems[0]).join(', ')}`);
+                            
+                            // Check for category fields
+                            const sampleItem = menuItems[0];
+                            log(`   item_category: ${sampleItem.item_category || 'NOT FOUND'}`);
+                            log(`   category: ${sampleItem.category || 'NOT FOUND'}`);
+                            log(`   Item Category Type: ${typeof sampleItem.item_category}`);
+                            
+                            // Test all possible category field names
+                            const possibleCategoryFields = ['item_category', 'category', 'cat', 'type', 'group'];
+                            possibleCategoryFields.forEach(field => {
+                                if (sampleItem[field]) {
+                                    log(`   ✅ Found ${field}: ${sampleItem[field]}`);
+                                } else {
+                                    log(`   ❌ Missing ${field}`);
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        log(`   ❌ Error parsing menu_items: ${error.message}`);
+                    }
+                    
+                    // Debug menu_categories
+                    log(`\n📂 Menu Categories Analysis:`);
+                    log(`   Raw menu_categories type: ${typeof oms.menu_categories}`);
+                    log(`   Raw menu_categories: ${JSON.stringify(oms.menu_categories)}`);
+                    
+                    let menuCategories = [];
+                    try {
+                        menuCategories = typeof oms.menu_categories === 'string' ? JSON.parse(oms.menu_categories) : (oms.menu_categories || []);
+                        log(`   Parsed menu_categories type: ${typeof menuCategories}`);
+                        log(`   Parsed menu_categories length: ${menuCategories.length}`);
+                        
+                        if (menuCategories.length > 0) {
+                            log(`   Sample category: ${JSON.stringify(menuCategories[0])}`);
+                            log(`   Sample category keys: ${Object.keys(menuCategories[0]).join(', ')}`);
+                        }
+                    } catch (error) {
+                        log(`   ❌ Error parsing menu_categories: ${error.message}`);
+                    }
+                });
+
+                // Display the data in a readable format
+                displayData(omsCustomizations);
+
+            } catch (error) {
+                log(`❌ Exception: ${error.message}`);
+            }
+        }
+
+        async function testDataStructure() {
+            log('🧪 Testing data structure transformations...');
+            
+            try {
+                const { data: omsCustomizations, error: omsError } = await supabase
+                    .from('oms_customizations')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+
+                if (omsError || !omsCustomizations || omsCustomizations.length === 0) {
+                    log('❌ No data to test');
+                    return;
+                }
+
+                const oms = omsCustomizations[0];
+                log(`Testing with restaurant: ${oms.restaurant_name}`);
+
+                // Test the exact transformation used in admin panel
+                const transformed = {
+                    id: oms.id,
+                    contact_email: oms.user_email,
+                    product_type: oms.product_type || 'order-menu-system',
+                    product_name: oms.product_name || 'Order Menu System',
+                    project_name: oms.project_name,
+                    restaurant_name: oms.restaurant_name,
+                    owner_name: oms.owner_name,
+                    restaurant_address: oms.restaurant_address,
+                    contact_person: oms.contact_person,
+                    phone: oms.phone_number,
+                    contact_phone: oms.phone_number,
+                    additional_requirements: oms.additional_requirements,
+                    primary_color: oms.primary_color,
+                    secondary_color: oms.secondary_color,
+                    accent_color: oms.accent_color,
+                    text_color: oms.text_color,
+                    product_price: oms.product_price,
+                    created_at: oms.created_at,
+                    updated_at: oms.updated_at,
+                    menu_categories: typeof oms.menu_categories === 'string' ? JSON.parse(oms.menu_categories) : (oms.menu_categories || []),
+                    menu_items: typeof oms.menu_items === 'string' ? JSON.parse(oms.menu_items) : (oms.menu_items || []),
+                    logo_url: oms.logo_url,
+                    logo_filename: oms.logo_filename,
+                    logo_size: oms.logo_size
+                };
+
+                log(`\n📋 Transformation Test:`);
+                log(`   Menu items count: ${transformed.menu_items.length}`);
+                
+                if (transformed.menu_items.length > 0) {
+                    log(`   First item structure:`);
+                    const firstItem = transformed.menu_items[0];
+                    Object.keys(firstItem).forEach(key => {
+                        log(`     ${key}: ${firstItem[key]} (${typeof firstItem[key]})`);
+                    });
+                    
+                    // Test category display logic
+                    log(`\n🎯 Category Display Test:`);
+                    transformed.menu_items.forEach((item, index) => {
+                        const categoryDisplay = item.item_category || item.category || 'Uncategorized';
+                        log(`   Item ${index + 1}: ${item.item_name} -> Category: ${categoryDisplay}`);
+                    });
+                }
+
+                log(`\n📂 Categories Test:`);
+                log(`   Categories count: ${transformed.menu_categories.length}`);
+                if (transformed.menu_categories.length > 0) {
+                    transformed.menu_categories.forEach((cat, index) => {
+                        log(`   Category ${index + 1}: ${cat.name || 'Unnamed'}`);
+                    });
+                }
+
+            } catch (error) {
+                log(`❌ Test failed: ${error.message}`);
+            }
+        }
+
+        function displayData(omsCustomizations) {
+            const resultsDiv = document.getElementById('data-display');
+            
+            let html = '<h4>OMS Customizations Data</h4>';
+            
+            omsCustomizations.forEach((oms, index) => {
+                html += `
+                    <div class="data-display">
+                        <h5>Restaurant: ${oms.restaurant_name}</h5>
+                        <p><strong>Project:</strong> ${oms.project_name}</p>
+                `;
+                
+                // Parse and display menu items
+                try {
+                    const menuItems = typeof oms.menu_items === 'string' ? JSON.parse(oms.menu_items) : (oms.menu_items || []);
+                    if (menuItems.length > 0) {
+                        html += '<h6>Menu Items:</h6>';
+                        menuItems.forEach(item => {
+                            const category = item.item_category || item.category || 'Uncategorized';
+                            html += `
+                                <div class="menu-item">
+                                    <strong>${item.item_name || 'Unnamed'}</strong> - ₹${item.price || '0'}
+                                    <br><small>Category: ${category}</small>
+                                </div>
+                            `;
+                        });
+                    }
+                } catch (error) {
+                    html += `<p>Error parsing menu items: ${error.message}</p>`;
+                }
+                
+                // Parse and display categories
+                try {
+                    const menuCategories = typeof oms.menu_categories === 'string' ? JSON.parse(oms.menu_categories) : (oms.menu_categories || []);
+                    if (menuCategories.length > 0) {
+                        html += '<h6>Categories:</h6>';
+                        menuCategories.forEach(cat => {
+                            html += `<span class="category-tag">${cat.name || 'Unnamed'}</span>`;
+                        });
+                    }
+                } catch (error) {
+                    html += `<p>Error parsing categories: ${error.message}</p>`;
+                }
+                
+                html += '</div>';
+            });
+            
+            resultsDiv.innerHTML = html;
+        }
+
+        // Auto-test on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🔍 Category Debug Page Loaded');
+            log('This will help us understand the category display issue');
+        });
+    </script>
+</body>
+</html>
