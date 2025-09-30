@@ -583,37 +583,52 @@ const style = categoryStyles[product.category];
   // Check authentication when page loads
   document.addEventListener('DOMContentLoaded', checkAuthenticationStatus);
 
-  // Role-based access control for product pages
+  // Role-based access control for product pages - OMS bypass for deployment
   document.addEventListener('DOMContentLoaded', function() {
     // Get current product slug from URL
     const currentPath = window.location.pathname;
     const productSlug = currentPath.split('/').pop();
     
-    // Check if user is admin
-    const isAdmin = checkIfUserIsAdmin();
+    console.log('Product page loaded:', productSlug);
     
-    // If user is not admin and product is not Order Menu System, show dialog and redirect
-    if (!isAdmin && productSlug !== 'order-menu-system') {
-      // Show the dialog
+    // CRITICAL: Always allow Order Menu System - NO RESTRICTIONS
+    if (productSlug === 'order-menu-system') {
+      console.log('OMS product page - no restrictions applied');
+      return; // No restrictions for OMS
+    }
+    
+    // For other products, check admin status
+    const isAdmin = checkIfUserIsAdmin();
+    console.log('Is admin:', isAdmin);
+    
+    // If user is not admin, show dialog
+    if (!isAdmin) {
+      console.log('Non-admin user - showing dialog');
       if (window.showProductDialog) {
         window.showProductDialog();
+      } else {
+        console.log('Dialog not available - redirecting to contact');
+        window.location.href = '/contact';
       }
-      
-      // Redirect to products page after a short delay
-      setTimeout(() => {
-        window.location.href = '/products';
-      }, 3000);
+    } else {
+      console.log('Admin user - no restrictions');
     }
   });
 
-  // Function to check if user is admin
+  // Function to check if user is admin - deployment compatible
   function checkIfUserIsAdmin() {
     try {
-      // Check if user is logged in
+      // Check global auth manager first
+      if (window.globalAuthManager && window.globalAuthManager.isUserLoggedIn()) {
+        const currentUser = window.globalAuthManager.getCurrentUser();
+        if (currentUser && currentUser.role === 'admin') {
+          return true;
+        }
+      }
+      
+      // Check simple auth manager
       if (window.simpleAuthManager && window.simpleAuthManager.isUserLoggedIn()) {
         const currentUser = window.simpleAuthManager.getCurrentUser();
-        
-        // Check if user has admin role
         if (currentUser && currentUser.role === 'admin') {
           return true;
         }
@@ -622,9 +637,26 @@ const style = categoryStyles[product.category];
       // Check session storage for admin role
       const sessionData = sessionStorage.getItem('simple-auth-session');
       if (sessionData) {
-        const session = JSON.parse(sessionData);
-        if (session.user && session.user.role === 'admin') {
-          return true;
+        try {
+          const session = JSON.parse(sessionData);
+          if (session.user && session.user.role === 'admin') {
+            return true;
+          }
+        } catch (parseError) {
+          console.log('Session data parse error:', parseError);
+        }
+      }
+      
+      // Check localStorage as fallback
+      const localSessionData = localStorage.getItem('simple-auth-session');
+      if (localSessionData) {
+        try {
+          const session = JSON.parse(localSessionData);
+          if (session.user && session.user.role === 'admin') {
+            return true;
+          }
+        } catch (parseError) {
+          console.log('Local session data parse error:', parseError);
         }
       }
       

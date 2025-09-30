@@ -113,20 +113,6 @@ import { sharedDataStore } from '../lib/shared-data-store';
                   <p class="text-sm text-blue-700 mt-2">Enter the name of your restaurant</p>
                 </div>
 
-                <!-- Logo Upload -->
-                <div>
-                  <label class="block text-lg font-semibold text-blue-900 mb-3">Upload Your Logo</label>
-                  <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                    <input type="file" accept="image/*" class="logo-upload hidden" />
-                    <button type="button" class="logo-upload-btn w-full sm:w-auto px-6 py-3 border-2 border-primary-300 rounded-lg text-lg font-medium text-primary-600 hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all transform hover:scale-105">
-                      Choose Logo File
-                    </button>
-                    <div class="logo-preview w-20 h-20 bg-gray-100 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center flex-shrink-0">
-                      <span class="text-gray-400 text-sm">Logo</span>
-                    </div>
-                  </div>
-                  <p class="text-sm text-blue-700 mt-2">Upload your company or brand logo</p>
-                </div>
 
                 <!-- Color Selection -->
                 <div>
@@ -260,91 +246,77 @@ import { sharedDataStore } from '../lib/shared-data-store';
                   <input type="text" name="orderMenuRestaurantName" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter restaurant name">
                 </div>
                 
-                <div>
-                  <label class="block text-lg font-semibold text-white mb-3">
-                    Owner Name <span class="text-red-500">*</span>
+              </div>
+              
+              <!-- Professional Address -->
+              <div class="mb-6">
+                <h4 class="text-lg font-semibold text-white mb-4">Restaurant Address <span class="text-red-500">*</span></h4>
+                
+                <!-- House/Flat Number -->
+                <div class="mb-4">
+                  <label class="block text-sm font-medium text-white mb-2">
+                    House/Flat Number <span class="text-red-500">*</span>
                   </label>
-                  <input type="text" name="orderMenuOwnerName" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter owner name">
+                  <input type="text" name="houseNumber" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="e.g., 123, Flat 4B">
                 </div>
+
+                <!-- Address Line 1 -->
+                <div class="mb-4">
+                  <label class="block text-sm font-medium text-white mb-2">
+                    Address Line 1 <span class="text-red-500">*</span>
+                  </label>
+                  <input type="text" name="addressLine1" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="e.g., Main Street, Sector 15">
               </div>
               
-              <div class="mb-6">
-                <label class="block text-lg font-semibold text-white mb-3">
-                  Restaurant Address <span class="text-red-500">*</span>
+                <!-- City and State Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div class="relative">
+                    <label class="block text-sm font-medium text-white mb-2">
+                      City <span class="text-red-500">*</span>
                 </label>
-                <textarea name="orderMenuAddress" required rows="3" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter complete restaurant address"></textarea>
-              </div>
-
-              <!-- Restaurant Logo Upload for Order Menu System -->
-              <div class="mb-6">
-                <label class="block text-lg font-semibold text-white mb-3">
-                  Restaurant Logo <span class="text-gray-400">(Optional)</span>
-                </label>
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-400 transition-colors">
-                  <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
+                    <input type="text" name="city" id="cart-city-input" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="e.g., Mumbai" autocomplete="off">
+                    <div id="cart-city-suggestions" class="hidden absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto"></div>
                   </div>
-                  <p class="text-lg font-medium text-white mb-2">Upload restaurant logo or drag and drop</p>
-                  <p class="text-sm text-gray-300">PNG, JPG, GIF up to 10MB</p>
-                  <input type="file" name="orderMenuRestaurantLogo" accept="image/*" class="hidden" id="order-menu-logo-upload">
-                  <button type="button" onclick="document.getElementById('order-menu-logo-upload').click()" class="mt-4 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-all transform hover:scale-105">
-                    Choose File
-                  </button>
-                  <div id="order-menu-logo-status" class="mt-3 text-sm font-medium hidden"></div>
-                </div>
-              </div>
-              
-
-              <!-- Menu Creation Section -->
-              <div class="mb-6">
-                <h5 class="text-lg font-semibold text-white mb-4">Menu Items</h5>
-                <div id="menu-items-container">
-                  <div class="menu-item border border-gray-300 rounded-lg p-4 mb-4">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label class="block text-sm font-medium text-white mb-2">Item Name</label>
-                        <input type="text" name="menuItemName[]" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="e.g., Margherita Pizza">
-                      </div>
-                      <div>
-                        <label class="block text-sm font-medium text-white mb-2">Price (₹)</label>
-                        <input type="number" name="menuItemPrice[]" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="299">
-                      </div>
-                      <div>
-                        <label class="block text-sm font-medium text-white mb-2">Quantity Available</label>
-                        <input type="number" name="menuItemQuantity[]" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="50">
-                      </div>
-                    </div>
-                    <button type="button" onclick="removeMenuItem(this)" class="mt-2 text-red-500 hover:text-red-700 text-sm font-medium">Remove Item</button>
+                  <div class="relative">
+                    <label class="block text-sm font-medium text-white mb-2">
+                      State <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="state" id="cart-state-input" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="e.g., Maharashtra" autocomplete="off">
+                    <div id="cart-state-suggestions" class="hidden absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto"></div>
                   </div>
                 </div>
-                <button type="button" onclick="addMenuItem()" class="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-white hover:border-primary-400 transition-colors">
-                  + Add Menu Item
-                </button>
+
+                <!-- Pincode and Country Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-white mb-2">
+                      Pincode <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="pincode" id="cart-pincode-input" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="e.g., 400001" maxlength="6">
+                  </div>
+                <div>
+                  <label class="block text-sm font-medium text-white mb-2">
+                    Country <span class="text-red-500">*</span>
+                  </label>
+                  <select name="country" id="cart-country-select" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" required>
+                    <option value="India" selected>India</option>
+                    <option value="United States">United States</option>
+                    <option value="United Kingdom">United Kingdom</option>
+                    <option value="Canada">Canada</option>
+                    <option value="Australia">Australia</option>
+                    <option value="Germany">Germany</option>
+                    <option value="France">France</option>
+                    <option value="Japan">Japan</option>
+                    <option value="Singapore">Singapore</option>
+                    <option value="UAE">UAE</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                </div>
               </div>
+
             </div>
 
-            <!-- App Icon Upload Section - Only for non-Order Menu System products -->
-            <div id="logo-upload-section" class="non-order-menu-fields">
-              <label class="block text-lg font-semibold text-white mb-3">
-                <span id="upload-label">App Icon</span>
-              </label>
-              <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-400 transition-colors">
-                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                  </svg>
-                </div>
-                <p class="text-lg font-medium text-white mb-2" id="upload-text">Upload app icon or drag and drop</p>
-                <p class="text-sm text-gray-300">PNG, JPG, GIF up to 10MB</p>
-                <input type="file" name="restaurantLogo" accept="image/*" class="hidden" id="logo-upload">
-                <button type="button" onclick="document.getElementById('logo-upload').click()" class="mt-4 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-all transform hover:scale-105">
-                  Choose File
-                </button>
-                <div id="upload-status" class="mt-3 text-sm font-medium hidden"></div>
-              </div>
-            </div>
 
             <!-- Contact Information Section -->
             <div>
@@ -366,66 +338,7 @@ import { sharedDataStore } from '../lib/shared-data-store';
               </div>
             </div>
 
-            <!-- App Screenshots Upload Section - Only for non-Order Menu System products -->
-            <div id="photos-upload-section" class="non-order-menu-fields">
-              <label class="block text-lg font-semibold text-white mb-3">
-                <span id="photos-label">App Screenshots (Optional)</span>
-              </label>
-              <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-400 transition-colors">
-                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 0 002 2z"></path>
-                  </svg>
-                </div>
-                <p class="text-lg font-medium text-white mb-2" id="photos-text">Upload app screenshots or drag and drop</p>
-                <p class="text-sm text-gray-300">Multiple images allowed</p>
-                <input type="file" name="menuPhotos" accept="image/*" multiple class="hidden" id="menu-upload">
-                <button type="button" onclick="document.getElementById('menu-upload').click()" class="mt-4 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-all transform hover:scale-105">
-                  Choose Files
-                </button>
-                <div id="photos-status" class="mt-3 text-sm font-medium hidden"></div>
-              </div>
-            </div>
 
-            <!-- Brand Colors Section -->
-            <div>
-              <label class="block text-lg font-semibold text-gray-900 mb-3">
-                Brand Colors (Optional)
-              </label>
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-900 mb-2">Primary</label>
-                  <div class="flex items-center space-x-2">
-                    <div class="w-8 h-2 bg-blue-500 rounded"></div>
-                    <input type="color" name="primaryColor" value="#3B82F6" class="w-12 h-10 border-2 border-gray-300 rounded-lg cursor-pointer">
-                  </div>
-                </div>
-                
-                <div>
-                  <label class="block text-sm font-medium text-gray-900 mb-2">Secondary</label>
-                  <div class="flex items-center space-x-2">
-                    <div class="w-8 h-2 bg-yellow-500 rounded"></div>
-                    <input type="color" name="secondaryColor" value="#A5CF6" class="w-12 h-10 border-2 border-gray-300 rounded-lg cursor-pointer">
-                  </div>
-                </div>
-                
-                <div>
-                  <label class="block text-sm font-medium text-gray-900 mb-2">Accent</label>
-                  <div class="flex items-center space-x-2">
-                    <div class="w-8 h-2 bg-orange-500 rounded"></div>
-                    <input type="color" name="accentColor" value="#F59E0B" class="w-12 h-10 border-2 border-gray-300 rounded-lg cursor-pointer">
-                  </div>
-                </div>
-                
-                <div>
-                  <label class="block text-sm font-medium text-gray-900 mb-2">Text</label>
-                  <div class="flex items-center space-x-2">
-                    <div class="w-8 h-2 bg-gray-800 rounded"></div>
-                    <input type="color" name="textColor" value="#1F2937" class="w-12 h-10 border-2 border-gray-300 rounded-lg cursor-pointer">
-                  </div>
-                </div>
-              </div>
-            </div>
 
             <!-- Additional Requirements Section -->
             <div>
@@ -758,6 +671,7 @@ import { sharedDataStore } from '../lib/shared-data-store';
       
       const cart = new Cart();
       console.log('✅ Cart created, items count:', cart.items.length);
+      
       
       // Cart is ready - no automatic items added
       console.log('✅ Cart initialized with', cart.items.length, 'items');
@@ -1200,26 +1114,6 @@ import { sharedDataStore } from '../lib/shared-data-store';
         phoneInput.value = item.phone;
       }
 
-      // Populate color inputs
-      const primaryColorInput = document.querySelector('input[name="primaryColor"]') as HTMLInputElement;
-      if (primaryColorInput && item.primaryColor) {
-        primaryColorInput.value = item.primaryColor;
-      }
-
-      const secondaryColorInput = document.querySelector('input[name="secondaryColor"]') as HTMLInputElement;
-      if (secondaryColorInput && item.secondaryColor) {
-        secondaryColorInput.value = item.secondaryColor;
-      }
-
-      const accentColorInput = document.querySelector('input[name="accentColor"]') as HTMLInputElement;
-      if (accentColorInput && item.accentColor) {
-        accentColorInput.value = item.accentColor;
-      }
-
-      const textColorInput = document.querySelector('input[name="textColor"]') as HTMLInputElement;
-      if (textColorInput && item.textColor) {
-        textColorInput.value = item.textColor;
-      }
 
       const additionalRequirementsTextarea = document.getElementById('additionalRequirements') as HTMLTextAreaElement;
       if (additionalRequirementsTextarea && item.additionalRequirements) {
@@ -1636,8 +1530,11 @@ import { sharedDataStore } from '../lib/shared-data-store';
             'projectName',
             'contactPerson',
             'orderMenuRestaurantName',
-            'orderMenuOwnerName', 
-            'orderMenuAddress',
+            'orderMenuHouseNumber',
+            'orderMenuAddressLine1',
+            'orderMenuCity',
+            'orderMenuState',
+            'orderMenuPincode',
             'email',
             'phone'
           ];
@@ -1652,6 +1549,8 @@ import { sharedDataStore } from '../lib/shared-data-store';
               break;
             }
           }
+          
+
           
           if (!isValid) {
             console.log('❌ Order Menu System form validation failed');
@@ -1710,23 +1609,18 @@ import { sharedDataStore } from '../lib/shared-data-store';
           this.requirements = {
             // Order Menu System fields
             restaurantName: (form.querySelector('[name="orderMenuRestaurantName"]') as HTMLInputElement)?.value || '',
-            ownerName: (form.querySelector('[name="orderMenuOwnerName"]') as HTMLInputElement)?.value || '',
-            restaurantAddress: (form.querySelector('[name="orderMenuAddress"]') as HTMLTextAreaElement)?.value || '',
+            houseNumber: (form.querySelector('[name="houseNumber"]') as HTMLInputElement)?.value || '',
+            addressLine1: (form.querySelector('[name="addressLine1"]') as HTMLInputElement)?.value || '',
+            city: (form.querySelector('[name="city"]') as HTMLInputElement)?.value || '',
+            state: (form.querySelector('[name="state"]') as HTMLInputElement)?.value || '',
+            pincode: (form.querySelector('[name="pincode"]') as HTMLInputElement)?.value || '',
+            country: (form.querySelector('[name="country"]') as HTMLInputElement)?.value || 'India',
             email: (form.querySelector('[name="email"]') as HTMLInputElement)?.value || '',
             phone: (form.querySelector('[name="phone"]') as HTMLInputElement)?.value || '',
             additionalRequirements: (form.querySelector('[name="additionalRequirements"]') as HTMLTextAreaElement)?.value || '',
             
-            // Collect menu items
-            menuItems: collectedMenuItems,
             
-            // Brand colors
-            primaryColor: (form.querySelector('[name="primaryColor"]') as HTMLInputElement)?.value || '#3B82F6',
-            secondaryColor: (form.querySelector('[name="secondaryColor"]') as HTMLInputElement)?.value || '#000000',
-            accentColor: (form.querySelector('[name="accentColor"]') as HTMLInputElement)?.value || '#F59E0B',
-            textColor: (form.querySelector('[name="textColor"]') as HTMLInputElement)?.value || '#1F2937',
             
-            // Logo file (only for Order Menu System)
-            restaurantLogo: this.orderMenuLogoFile || null
           };
         } else {
           // Collect standard form data for other products
@@ -2068,7 +1962,7 @@ import { sharedDataStore } from '../lib/shared-data-store';
         // Update upload labels for restaurant
         if (uploadLabel) uploadLabel.textContent = 'Restaurant Logo';
         if (uploadText) uploadText.textContent = 'Upload logo or drag and drop';
-        if (photosLabel) photosLabel.textContent = 'Menu Photos (Optional)';
+        if (photosLabel) photosLabel.textContent = 'Menu Photos (Required)';
         if (photosText) photosText.textContent = 'Upload menu photos or drag and drop';
       } else if (item.id === 'order-menu-system' || item.id === '5') {
         console.log('🍽️ Showing Order Menu System fields for product:', item.id);
@@ -2088,6 +1982,18 @@ import { sharedDataStore } from '../lib/shared-data-store';
         if (restaurantCuisineFields) {
           restaurantCuisineFields.classList.add('hidden');
           restaurantCuisineFields.style.display = 'none';
+        }
+        
+        // Hide upload sections for Order Menu System
+        const logoUploadSection = document.getElementById('logo-upload-section');
+        const photosUploadSection = document.getElementById('photos-upload-section');
+        if (logoUploadSection) {
+          logoUploadSection.classList.add('hidden');
+          logoUploadSection.style.display = 'none';
+        }
+        if (photosUploadSection) {
+          photosUploadSection.classList.add('hidden');
+          photosUploadSection.style.display = 'none';
         }
         
         // Make Order Menu System fields required
@@ -2147,8 +2053,6 @@ import { sharedDataStore } from '../lib/shared-data-store';
           field.style.display = 'block';
         });
         
-        // Setup Order Menu System logo upload functionality
-        this.setupOrderMenuLogoUpload();
       } else {
         console.log('📱 Showing non-restaurant fields for product:', item.id);
         
@@ -2366,93 +2270,9 @@ import { sharedDataStore } from '../lib/shared-data-store';
       }
     }
 
-    setupOrderMenuLogoUpload() {
-      const logoUpload = document.getElementById('order-menu-logo-upload');
-      const logoStatus = document.getElementById('order-menu-logo-status');
-      
-      if (logoUpload) {
-        logoUpload.addEventListener('change', (e) => {
-          const file = e.target.files[0];
-          if (file) {
-            // Validate file type
-            if (!file.type.startsWith('image/')) {
-              logoStatus.textContent = 'Please select an image file';
-              logoStatus.className = 'mt-3 text-sm font-medium text-red-500';
-              logoStatus.classList.remove('hidden');
-              return;
-            }
-            
-            // Validate file size (10MB limit)
-            if (file.size > 10 * 1024 * 1024) {
-              logoStatus.textContent = 'File size must be less than 10MB';
-              logoStatus.className = 'mt-3 text-sm font-medium text-red-500';
-              logoStatus.classList.remove('hidden');
-              return;
-            }
-            
-            // Show success message
-            logoStatus.textContent = `Selected: ${file.name}`;
-            logoStatus.className = 'mt-3 text-sm font-medium text-green-500';
-            logoStatus.classList.remove('hidden');
-            
-            // Store file for later processing
-            this.orderMenuLogoFile = file;
-          }
-        });
-      }
-    }
 
-    collectMenuItems() {
-      const menuItems = [];
-      const menuItemElements = document.querySelectorAll('.menu-item');
-      
-      console.log('🍽️ Collecting menu items from', menuItemElements.length, 'elements');
-      
-      menuItemElements.forEach((item, index) => {
-        const itemName = item.querySelector('input[name="menuItemName[]"]')?.value?.trim();
-        const price = item.querySelector('input[name="menuItemPrice[]"]')?.value?.trim();
-        const quantity = item.querySelector('input[name="menuItemQuantity[]"]')?.value?.trim();
-        
-        console.log(`🍽️ Item ${index + 1}:`, { itemName, price, quantity });
-        
-        if (itemName && price && quantity) {
-          menuItems.push({
-            item_name: itemName,
-            price: parseFloat(price) || 0,
-            quantity_available: parseInt(quantity) || 0,
-            item_description: '',
-            item_category: 'General',
-            is_available: true
-          });
-        } else {
-          console.log(`⚠️ Skipping item ${index + 1} - missing required fields`);
-        }
-      });
-      
-      console.log('🍽️ Collected menu items:', menuItems);
-      return menuItems;
-    }
 
-    updateMenuItemsReview() {
-      const menuItemsContainer = document.getElementById('review-menu-items');
-      if (!menuItemsContainer) return;
-      
-      if (this.requirements.menuItems && this.requirements.menuItems.length > 0) {
-        menuItemsContainer.innerHTML = this.requirements.menuItems.map((item, index) => `
-          <div class="flex justify-between items-center py-3 border-b border-gray-200 ${index === this.requirements.menuItems.length - 1 ? 'border-b-0' : ''}">
-            <div class="flex-1">
-              <div class="font-medium text-gray-900">${item.item_name}</div>
-              <div class="text-sm text-gray-500">Quantity Available: ${item.quantity_available}</div>
-            </div>
-            <div class="text-right">
-              <div class="font-semibold text-lg text-gray-900">₹${item.price.toFixed(2)}</div>
-            </div>
-          </div>
-        `).join('');
-      } else {
-        menuItemsContainer.innerHTML = '<p class="text-gray-500 text-center py-4">No menu items added</p>';
-      }
-    }
+
 
     backToCart() {
       // Hide requirements form and show cart actions
@@ -2512,7 +2332,6 @@ import { sharedDataStore } from '../lib/shared-data-store';
               restaurantName: form.querySelector('[name="orderMenuRestaurantName"]')?.value || '',
               
               // 4. Owner Name
-              ownerName: form.querySelector('[name="orderMenuOwnerName"]')?.value || '',
               
               // 6. Restaurant Address
               restaurantAddress: form.querySelector('[name="orderMenuAddress"]')?.value || '',
@@ -2527,7 +2346,8 @@ import { sharedDataStore } from '../lib/shared-data-store';
               menuItems: this.collectMenuItems(),
               
               // 12. Additional Requirements
-              additionalRequirements: form.querySelector('[name="additionalRequirements"]')?.value || ''
+              additionalRequirements: form.querySelector('[name="additionalRequirements"]')?.value || '',
+              
             };
             
             console.log('🍽️ Form data collected for Order Menu System:', formData);
@@ -2547,10 +2367,6 @@ import { sharedDataStore } from '../lib/shared-data-store';
         }
 
         // Get color values
-        const primaryColor = document.querySelector('input[name="primaryColor"]')?.value || '#3B82F6';
-        const secondaryColor = document.querySelector('input[name="secondaryColor"]')?.value || '#A5CF6';
-        const accentColor = document.querySelector('input[name="accentColor"]')?.value || '#F59E0B';
-        const textColor = document.querySelector('input[name="textColor"]')?.value || '#1F2937';
 
         // Calculate total amount including features and tax
         const basePrice = item.price;
@@ -2631,7 +2447,6 @@ import { sharedDataStore } from '../lib/shared-data-store';
             restaurant_name: formData.restaurantName || '',
             
             // 4. Owner Name
-            owner_name: formData.ownerName || '',
             
             // 5. App Icon (for non-Order Menu System products - empty for Order Menu System)
             app_icon_url: null,
@@ -2639,8 +2454,13 @@ import { sharedDataStore } from '../lib/shared-data-store';
             app_icon_size: null,
             app_icon_type: null,
             
-            // 6. Restaurant Address
-            restaurant_address: formData.restaurantAddress || '',
+            // 6. Professional Address
+            house_number: formData.houseNumber || '',
+            address_line1: formData.addressLine1 || '',
+            city: formData.city || '',
+            state: formData.state || '',
+            pincode: formData.pincode || '',
+            country: formData.country || 'India',
             
             // 7. Restaurant Logo
             restaurant_logo_url: restaurantLogoUrl,
@@ -2657,35 +2477,10 @@ import { sharedDataStore } from '../lib/shared-data-store';
             // 10. App Screenshots (for non-Order Menu System products - empty for Order Menu System)
             app_screenshots: [],
             
-            // 11. Brand Colors
-            primary_color: primaryColor,
-            secondary_color: secondaryColor,
-            accent_color: accentColor,
-            text_color: textColor,
             
             // 12. Additional Requirements
             additional_requirements: formData.additionalRequirements || '',
             
-            // 13. Menu Items (JSON array)
-            menu_items: formData.menuItems ? formData.menuItems.map(item => ({
-              item_name: item.item_name,
-              price: parseFloat(item.price) || 0,
-              quantity_available: parseInt(item.quantity_available) || 0,
-              item_description: item.item_description || '',
-              item_category: item.item_category || 'General',
-              is_available: true,
-              created_at: new Date().toISOString()
-            })) : [],
-            
-            // 14. Menu Categories (extracted from menu items)
-            menu_categories: formData.menuItems ? 
-              Array.from(new Set(formData.menuItems.map(item => item.item_category).filter(cat => cat && cat.trim() !== ''))).map((category, index) => ({
-                id: `cat_${index + 1}`,
-                name: category
-              })) : [],
-            
-            // 15. Menu Items Count
-            menu_items_count: formData.menuItems ? formData.menuItems.length : 0,
             
             cart_status: 'pending'
           };
@@ -3056,19 +2851,25 @@ import { sharedDataStore } from '../lib/shared-data-store';
           
           // Update Order Menu System specific review data
           const restaurantNameEl = document.getElementById('review-restaurant-name');
-          const ownerNameEl = document.getElementById('review-owner-name');
           const restaurantAddressEl = document.getElementById('review-restaurant-address');
           const contactEmailEl = document.getElementById('review-contact-email');
           const contactPhoneEl = document.getElementById('review-contact-phone');
           
           if (restaurantNameEl) restaurantNameEl.textContent = this.requirements.restaurantName || '-';
-          if (ownerNameEl) ownerNameEl.textContent = this.requirements.ownerName || '-';
-          if (restaurantAddressEl) restaurantAddressEl.textContent = this.requirements.restaurantAddress || '-';
+          if (restaurantAddressEl) {
+            const address = [
+              this.requirements.houseNumber,
+              this.requirements.addressLine1,
+              this.requirements.city,
+              this.requirements.state,
+              this.requirements.pincode,
+              this.requirements.country
+            ].filter(Boolean).join(', ');
+            restaurantAddressEl.textContent = address || '-';
+          }
           if (contactEmailEl) contactEmailEl.textContent = this.requirements.email || '-';
           if (contactPhoneEl) contactPhoneEl.textContent = this.requirements.phone || '-';
           
-          // Update menu items display
-          this.updateMenuItemsReview();
         } else {
           // Hide Order Menu System review section for other products
           const orderMenuInfoEl = document.getElementById('review-order-menu-info');
@@ -3100,10 +2901,6 @@ import { sharedDataStore } from '../lib/shared-data-store';
       }
 
       // Update colors
-      const primaryColor = document.querySelector('input[name="primaryColor"]')?.value || '#3B82F6';
-      const secondaryColor = document.querySelector('input[name="secondaryColor"]')?.value || '#A5CF6';
-      const accentColor = document.querySelector('input[name="accentColor"]')?.value || '#F59E0B';
-      const textColor = document.querySelector('input[name="textColor"]')?.value || '#1F2937';
 
         const primaryColorEl = document.getElementById('review-primary-color');
         const secondaryColorEl = document.getElementById('review-secondary-color');
@@ -3364,10 +3161,6 @@ import { sharedDataStore } from '../lib/shared-data-store';
       const total = this.calculateTotal();
 
       // Get color values from requirements form
-      const primaryColor = document.querySelector('input[name="primaryColor"]')?.value || '#3B82F6';
-      const secondaryColor = document.querySelector('input[name="secondaryColor"]')?.value || '#A5CF6';
-      const accentColor = document.querySelector('input[name="accentColor"]')?.value || '#F59E0B';
-      const textColor = document.querySelector('input[name="textColor"]')?.value || '#1F2937';
 
       // Create order for shared data store (admin panel visibility)
       const orderData = {
@@ -3381,10 +3174,6 @@ import { sharedDataStore } from '../lib/shared-data-store';
         amount: total,
         currency: 'INR',
         requirements: {
-          primaryColor: primaryColor,
-          secondaryColor: secondaryColor,
-          accentColor: accentColor,
-          textColor: textColor,
           customName: item.customName || '',
           logo: item.logo || null,
           features: item.features || [],
@@ -3457,10 +3246,6 @@ import { sharedDataStore } from '../lib/shared-data-store';
       const total = this.calculateTotal();
 
       // Get color values from requirements form
-      const primaryColor = document.querySelector('input[name="primaryColor"]')?.value || '#3B82F6';
-      const secondaryColor = document.querySelector('input[name="secondaryColor"]')?.value || '#A5CF6';
-      const accentColor = document.querySelector('input[name="accentColor"]')?.value || '#F59E0B';
-      const textColor = document.querySelector('input[name="textColor"]')?.value || '#1F2937';
 
       // Get form data based on product type
       const form = document.getElementById('requirements-form');
@@ -3483,8 +3268,13 @@ import { sharedDataStore } from '../lib/shared-data-store';
             // 4. Owner Name
             ownerName: form.querySelector('[name="orderMenuOwnerName"]')?.value || '',
             
-            // 6. Restaurant Address
-            restaurantAddress: form.querySelector('[name="orderMenuAddress"]')?.value || '',
+            // 6. Professional Address
+            houseNumber: form.querySelector('[name="houseNumber"]')?.value || '',
+            addressLine1: form.querySelector('[name="addressLine1"]')?.value || '',
+            city: form.querySelector('[name="city"]')?.value || '',
+            state: form.querySelector('[name="state"]')?.value || '',
+            pincode: form.querySelector('[name="pincode"]')?.value || '',
+            country: form.querySelector('[name="country"]')?.value || 'India',
             
             // 9. Contact Information
             // 9.1. Email
@@ -3492,8 +3282,6 @@ import { sharedDataStore } from '../lib/shared-data-store';
             // 9.2. Phone Number
             phone: form.querySelector('[name="phone"]')?.value || '',
             
-            // 8. Menu Items
-            menuItems: this.collectMenuItems(),
             
             // 12. Additional Requirements
             additionalRequirements: form.querySelector('[name="additionalRequirements"]')?.value || ''
@@ -3752,4 +3540,418 @@ import { sharedDataStore } from '../lib/shared-data-store';
     }
     return true;
   };
+
+  // Pincode-based autocomplete functionality for cart
+  const cartPincodeData = {
+    '400001': { city: 'Mumbai', state: 'Maharashtra' },
+    '400002': { city: 'Mumbai', state: 'Maharashtra' },
+    '400003': { city: 'Mumbai', state: 'Maharashtra' },
+    '400004': { city: 'Mumbai', state: 'Maharashtra' },
+    '400005': { city: 'Mumbai', state: 'Maharashtra' },
+    '400006': { city: 'Mumbai', state: 'Maharashtra' },
+    '400007': { city: 'Mumbai', state: 'Maharashtra' },
+    '400008': { city: 'Mumbai', state: 'Maharashtra' },
+    '400009': { city: 'Mumbai', state: 'Maharashtra' },
+    '400010': { city: 'Mumbai', state: 'Maharashtra' },
+    '110001': { city: 'New Delhi', state: 'Delhi' },
+    '110002': { city: 'New Delhi', state: 'Delhi' },
+    '110003': { city: 'New Delhi', state: 'Delhi' },
+    '110004': { city: 'New Delhi', state: 'Delhi' },
+    '110005': { city: 'New Delhi', state: 'Delhi' },
+    '110006': { city: 'New Delhi', state: 'Delhi' },
+    '110007': { city: 'New Delhi', state: 'Delhi' },
+    '110008': { city: 'New Delhi', state: 'Delhi' },
+    '110009': { city: 'New Delhi', state: 'Delhi' },
+    '110010': { city: 'New Delhi', state: 'Delhi' },
+    '560001': { city: 'Bangalore', state: 'Karnataka' },
+    '560002': { city: 'Bangalore', state: 'Karnataka' },
+    '560003': { city: 'Bangalore', state: 'Karnataka' },
+    '560004': { city: 'Bangalore', state: 'Karnataka' },
+    '560005': { city: 'Bangalore', state: 'Karnataka' },
+    '560006': { city: 'Bangalore', state: 'Karnataka' },
+    '560007': { city: 'Bangalore', state: 'Karnataka' },
+    '560008': { city: 'Bangalore', state: 'Karnataka' },
+    '560009': { city: 'Bangalore', state: 'Karnataka' },
+    '560010': { city: 'Bangalore', state: 'Karnataka' },
+    '600001': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600002': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600003': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600004': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600005': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600006': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600007': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600008': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600009': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600010': { city: 'Chennai', state: 'Tamil Nadu' },
+    '700001': { city: 'Kolkata', state: 'West Bengal' },
+    '700002': { city: 'Kolkata', state: 'West Bengal' },
+    '700003': { city: 'Kolkata', state: 'West Bengal' },
+    '700004': { city: 'Kolkata', state: 'West Bengal' },
+    '700005': { city: 'Kolkata', state: 'West Bengal' },
+    '700006': { city: 'Kolkata', state: 'West Bengal' },
+    '700007': { city: 'Kolkata', state: 'West Bengal' },
+    '700008': { city: 'Kolkata', state: 'West Bengal' },
+    '700009': { city: 'Kolkata', state: 'West Bengal' },
+    '700010': { city: 'Kolkata', state: 'West Bengal' },
+    '380001': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380002': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380003': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380004': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380005': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380006': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380007': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380008': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380009': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380010': { city: 'Ahmedabad', state: 'Gujarat' },
+    '411001': { city: 'Pune', state: 'Maharashtra' },
+    '411002': { city: 'Pune', state: 'Maharashtra' },
+    '411003': { city: 'Pune', state: 'Maharashtra' },
+    '411004': { city: 'Pune', state: 'Maharashtra' },
+    '411005': { city: 'Pune', state: 'Maharashtra' },
+    '411006': { city: 'Pune', state: 'Maharashtra' },
+    '411007': { city: 'Pune', state: 'Maharashtra' },
+    '411008': { city: 'Pune', state: 'Maharashtra' },
+    '411009': { city: 'Pune', state: 'Maharashtra' },
+    '411010': { city: 'Pune', state: 'Maharashtra' },
+    // More rural pincodes
+    '302001': { city: 'Jaipur', state: 'Rajasthan' },
+    '302002': { city: 'Jaipur', state: 'Rajasthan' },
+    '302003': { city: 'Jaipur', state: 'Rajasthan' },
+    '302004': { city: 'Jaipur', state: 'Rajasthan' },
+    '302005': { city: 'Jaipur', state: 'Rajasthan' },
+    '302006': { city: 'Jaipur', state: 'Rajasthan' },
+    '302007': { city: 'Jaipur', state: 'Rajasthan' },
+    '302008': { city: 'Jaipur', state: 'Rajasthan' },
+    '302009': { city: 'Jaipur', state: 'Rajasthan' },
+    '302010': { city: 'Jaipur', state: 'Rajasthan' },
+    '641001': { city: 'Coimbatore', state: 'Tamil Nadu' },
+    '641002': { city: 'Coimbatore', state: 'Tamil Nadu' },
+    '641003': { city: 'Coimbatore', state: 'Tamil Nadu' },
+    '641004': { city: 'Coimbatore', state: 'Tamil Nadu' },
+    '641005': { city: 'Coimbatore', state: 'Tamil Nadu' },
+    '625001': { city: 'Madurai', state: 'Tamil Nadu' },
+    '625002': { city: 'Madurai', state: 'Tamil Nadu' },
+    '625003': { city: 'Madurai', state: 'Tamil Nadu' },
+    '625004': { city: 'Madurai', state: 'Tamil Nadu' },
+    '625005': { city: 'Madurai', state: 'Tamil Nadu' },
+    '570001': { city: 'Mysore', state: 'Karnataka' },
+    '570002': { city: 'Mysore', state: 'Karnataka' },
+    '570003': { city: 'Mysore', state: 'Karnataka' },
+    '570004': { city: 'Mysore', state: 'Karnataka' },
+    '570005': { city: 'Mysore', state: 'Karnataka' },
+    '580001': { city: 'Hubli', state: 'Karnataka' },
+    '580002': { city: 'Hubli', state: 'Karnataka' },
+    '580003': { city: 'Hubli', state: 'Karnataka' },
+    '580004': { city: 'Hubli', state: 'Karnataka' },
+    '580005': { city: 'Hubli', state: 'Karnataka' },
+    '500001': { city: 'Hyderabad', state: 'Telangana' },
+    '500002': { city: 'Hyderabad', state: 'Telangana' },
+    '500003': { city: 'Hyderabad', state: 'Telangana' },
+    '500004': { city: 'Hyderabad', state: 'Telangana' },
+    '500005': { city: 'Hyderabad', state: 'Telangana' },
+    '500006': { city: 'Hyderabad', state: 'Telangana' },
+    '500007': { city: 'Hyderabad', state: 'Telangana' },
+    '500008': { city: 'Hyderabad', state: 'Telangana' },
+    '500009': { city: 'Hyderabad', state: 'Telangana' },
+    '500010': { city: 'Hyderabad', state: 'Telangana' },
+    // More common Indian pincodes
+    '110001': { city: 'Delhi', state: 'Delhi' },
+    '110002': { city: 'Delhi', state: 'Delhi' },
+    '110003': { city: 'Delhi', state: 'Delhi' },
+    '110004': { city: 'Delhi', state: 'Delhi' },
+    '110005': { city: 'Delhi', state: 'Delhi' },
+    '110006': { city: 'Delhi', state: 'Delhi' },
+    '110007': { city: 'Delhi', state: 'Delhi' },
+    '110008': { city: 'Delhi', state: 'Delhi' },
+    '110009': { city: 'Delhi', state: 'Delhi' },
+    '110010': { city: 'Delhi', state: 'Delhi' },
+    '560001': { city: 'Bangalore', state: 'Karnataka' },
+    '560002': { city: 'Bangalore', state: 'Karnataka' },
+    '560003': { city: 'Bangalore', state: 'Karnataka' },
+    '560004': { city: 'Bangalore', state: 'Karnataka' },
+    '560005': { city: 'Bangalore', state: 'Karnataka' },
+    '560006': { city: 'Bangalore', state: 'Karnataka' },
+    '560007': { city: 'Bangalore', state: 'Karnataka' },
+    '560008': { city: 'Bangalore', state: 'Karnataka' },
+    '560009': { city: 'Bangalore', state: 'Karnataka' },
+    '560010': { city: 'Bangalore', state: 'Karnataka' },
+    '600001': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600002': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600003': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600004': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600005': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600006': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600007': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600008': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600009': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600010': { city: 'Chennai', state: 'Tamil Nadu' },
+    '700001': { city: 'Kolkata', state: 'West Bengal' },
+    '700002': { city: 'Kolkata', state: 'West Bengal' },
+    '700003': { city: 'Kolkata', state: 'West Bengal' },
+    '700004': { city: 'Kolkata', state: 'West Bengal' },
+    '700005': { city: 'Kolkata', state: 'West Bengal' },
+    '700006': { city: 'Kolkata', state: 'West Bengal' },
+    '700007': { city: 'Kolkata', state: 'West Bengal' },
+    '700008': { city: 'Kolkata', state: 'West Bengal' },
+    '700009': { city: 'Kolkata', state: 'West Bengal' },
+    '700010': { city: 'Kolkata', state: 'West Bengal' }
+  };
+
+  // Indian cities and states for autocomplete (including extensive rural cities)
+  const cartIndianCities = [
+    // Major Cities
+    'Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Kolkata', 'Hyderabad', 'Pune', 'Ahmedabad', 'Jaipur', 'Surat',
+    'Lucknow', 'Kanpur', 'Nagpur', 'Indore', 'Thane', 'Bhopal', 'Visakhapatnam', 'Pimpri-Chinchwad', 'Patna', 'Vadodara',
+    'Ghaziabad', 'Ludhiana', 'Agra', 'Nashik', 'Faridabad', 'Meerut', 'Rajkot', 'Kalyan-Dombivali', 'Vasai-Virar', 'Varanasi',
+    'Srinagar', 'Aurangabad', 'Navi Mumbai', 'Solapur', 'Vijayawada', 'Kolhapur', 'Amritsar', 'Sangli', 'Mira-Bhayandar',
+    
+    // Rajasthan - Extensive rural coverage
+    'Alwar', 'Bharatpur', 'Kota', 'Udaipur', 'Jodhpur', 'Bikaner', 'Ajmer', 'Pali', 'Sikar', 'Bhilwara',
+    'Kishangarh', 'Beawar', 'Hanumangarh', 'Ganganagar', 'Chittorgarh', 'Banswara', 'Dungarpur', 'Pratapgarh', 'Rajsamand',
+    'Baran', 'Jhalawar', 'Bundi', 'Sawai Madhopur', 'Karauli', 'Dholpur', 'Tonk', 'Dausa', 'Jhunjhunu', 'Churu',
+    'Nagaur', 'Jalore', 'Sirohi', 'Jaisalmer', 'Barmer', 'Jalor', 'Bharatpur', 'Karauli', 'Dholpur', 'Sawai Madhopur',
+    'Baran', 'Jhalawar', 'Bundi', 'Kota', 'Bundi', 'Sawai Madhopur', 'Karauli', 'Dholpur', 'Tonk', 'Dausa',
+    'Sikar', 'Jhunjhunu', 'Churu', 'Nagaur', 'Jalore', 'Sirohi', 'Jaisalmer', 'Barmer', 'Jalor', 'Pali',
+    'Rajsamand', 'Bhilwara', 'Kishangarh', 'Beawar', 'Hanumangarh', 'Ganganagar', 'Chittorgarh', 'Banswara', 'Dungarpur',
+    'Pratapgarh', 'Rajsamand', 'Baran', 'Jhalawar', 'Bundi', 'Sawai Madhopur', 'Karauli', 'Dholpur', 'Tonk', 'Dausa',
+    
+    // Maharashtra - Extensive rural coverage
+    'Kolhapur', 'Sangli', 'Satara', 'Pune', 'Nashik', 'Aurangabad', 'Jalgaon', 'Dhule', 'Nanded', 'Latur',
+    'Osmanabad', 'Beed', 'Jalna', 'Parbhani', 'Hingoli', 'Washim', 'Yavatmal', 'Amravati', 'Akola', 'Buldhana',
+    'Nandurbar', 'Ahmednagar', 'Solapur', 'Ratnagiri', 'Sindhudurg', 'Sangli', 'Satara', 'Kolhapur', 'Pune', 'Nashik',
+    'Aurangabad', 'Jalgaon', 'Dhule', 'Nanded', 'Latur', 'Osmanabad', 'Beed', 'Jalna', 'Parbhani', 'Hingoli',
+    'Washim', 'Yavatmal', 'Amravati', 'Akola', 'Buldhana', 'Nandurbar', 'Ahmednagar', 'Solapur', 'Ratnagiri', 'Sindhudurg',
+    'Chandrapur', 'Gadchiroli', 'Bhandara', 'Gondia', 'Wardha', 'Nagpur', 'Bhandara', 'Gondia', 'Wardha', 'Chandrapur',
+    'Gadchiroli', 'Bhandara', 'Gondia', 'Wardha', 'Nagpur', 'Bhandara', 'Gondia', 'Wardha', 'Chandrapur', 'Gadchiroli',
+    
+    // Karnataka - Extensive rural coverage
+    'Mysore', 'Hubli', 'Dharwad', 'Mangalore', 'Belgaum', 'Gulbarga', 'Davanagere', 'Bellary', 'Bijapur', 'Shimoga',
+    'Tumkur', 'Raichur', 'Bidar', 'Hospet', 'Gadag', 'Haveri', 'Bagalkot', 'Koppal', 'Chitradurga', 'Tumakuru',
+    'Chikmagalur', 'Hassan', 'Mandya', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore',
+    'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar',
+    'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu',
+    'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore',
+    
+    // Tamil Nadu - Extensive rural coverage
+    'Coimbatore', 'Madurai', 'Tiruchirappalli', 'Salem', 'Tirunelveli', 'Tiruppur', 'Erode', 'Vellore', 'Thoothukudi',
+    'Dindigul', 'Thanjavur', 'Ranipet', 'Sivakasi', 'Karur', 'Udhagamandalam', 'Hosur', 'Nagercoil', 'Kanchipuram',
+    'Cuddalore', 'Kumbakonam', 'Tiruvannamalai', 'Pollachi', 'Rajapalayam', 'Gudiyatham', 'Pudukkottai', 'Vaniyambadi',
+    'Ariyalur', 'Chengalpattu', 'Coimbatore', 'Cuddalore', 'Dharmapuri', 'Dindigul', 'Erode', 'Kallakurichi', 'Kanchipuram',
+    'Karur', 'Krishnagiri', 'Madurai', 'Mayiladuthurai', 'Nagapattinam', 'Namakkal', 'Nilgiris', 'Perambalur', 'Pudukkottai',
+    'Ramanathapuram', 'Ranipet', 'Salem', 'Sivaganga', 'Tenkasi', 'Thanjavur', 'Theni', 'Thoothukudi', 'Tiruchirappalli',
+    'Tirunelveli', 'Tirupathur', 'Tiruppur', 'Tiruvallur', 'Tiruvannamalai', 'Tiruvarur', 'Vellore', 'Viluppuram', 'Virudhunagar',
+    
+    // Uttar Pradesh - Extensive rural coverage
+    'Agra', 'Varanasi', 'Allahabad', 'Bareilly', 'Moradabad', 'Aligarh', 'Saharanpur', 'Noida', 'Firozabad', 'Banda',
+    'Etawah', 'Mirzapur', 'Mathura', 'Shahjahanpur', 'Rampur', 'Modinagar', 'Hapur', 'Etah', 'Mau', 'Ghaziabad',
+    'Sambhal', 'Amroha', 'Hardoi', 'Fatehpur', 'Raebareli', 'Orai', 'Sitapur', 'Bahraich', 'Gonda', 'Balrampur',
+    'Basti', 'Deoria', 'Gorakhpur', 'Kushinagar', 'Maharajganj', 'Siddharthnagar', 'Azamgarh', 'Ballia', 'Mau', 'Ghazipur',
+    'Chandauli', 'Jaunpur', 'Varanasi', 'Mirzapur', 'Sonbhadra', 'Banda', 'Chitrakoot', 'Hamirpur', 'Jalaun', 'Jhansi',
+    'Lalitpur', 'Mahoba', 'Agra', 'Aligarh', 'Etah', 'Firozabad', 'Hathras', 'Kasganj', 'Mathura', 'Mainpuri',
+    'Agra', 'Aligarh', 'Etah', 'Firozabad', 'Hathras', 'Kasganj', 'Mathura', 'Mainpuri', 'Agra', 'Aligarh',
+    
+    // Gujarat - Extensive rural coverage
+    'Surat', 'Vadodara', 'Rajkot', 'Bhavnagar', 'Junagadh', 'Gandhinagar', 'Nadiad', 'Morbi', 'Gandhidham', 'Bharuch',
+    'Veraval', 'Navsari', 'Bardoli', 'Palanpur', 'Godhra', 'Patan', 'Valsad', 'Anand', 'Mehsana', 'Surendranagar',
+    'Jamnagar', 'Porbandar', 'Ankleshwar', 'Vapi', 'Botad', 'Dahod', 'Narmada', 'Ahmedabad', 'Amreli', 'Anand',
+    'Banaskantha', 'Bharuch', 'Bhavnagar', 'Dahod', 'Dang', 'Gandhinagar', 'Jamnagar', 'Junagadh', 'Kheda', 'Kutch',
+    'Mehsana', 'Narmada', 'Navsari', 'Panchmahal', 'Patan', 'Porbandar', 'Rajkot', 'Sabarkantha', 'Surat', 'Surendranagar',
+    'Tapi', 'Vadodara', 'Valsad', 'Ahmedabad', 'Amreli', 'Anand', 'Banaskantha', 'Bharuch', 'Bhavnagar', 'Dahod',
+    
+    // Bihar - Rural coverage
+    'Patna', 'Gaya', 'Bhagalpur', 'Muzaffarpur', 'Darbhanga', 'Purnia', 'Arrah', 'Begusarai', 'Katihar', 'Munger',
+    'Chhapra', 'Bettiah', 'Saharsa', 'Sasaram', 'Hajipur', 'Dehri', 'Siwan', 'Motihari', 'Nawada', 'Bagaha',
+    'Buxar', 'Kishanganj', 'Sitamarhi', 'Madhubani', 'Samastipur', 'Vaishali', 'West Champaran', 'East Champaran', 'Sheikhpura', 'Lakhisarai',
+    
+    // West Bengal - Rural coverage
+    'Kolkata', 'Asansol', 'Siliguri', 'Durgapur', 'Bardhaman', 'Malda', 'Bahrampur', 'Habra', 'Kharagpur', 'Shantipur',
+    'Dankuni', 'Dhulian', 'Ranaghat', 'Haldia', 'Raiganj', 'Krishnanagar', 'Nabadwip', 'Medinipur', 'Jalpaiguri', 'Balurghat',
+    'Basirhat', 'Bankura', 'Chakdaha', 'Darjeeling', 'Kalimpong', 'Kalyani', 'Katwa', 'Kharagpur', 'Krishnanagar', 'Malda',
+    
+    // Madhya Pradesh - Rural coverage
+    'Bhopal', 'Indore', 'Gwalior', 'Jabalpur', 'Ujjain', 'Sagar', 'Dewas', 'Satna', 'Ratlam', 'Rewa',
+    'Murwara', 'Singrauli', 'Burhanpur', 'Khandwa', 'Chhindwara', 'Morena', 'Bhind', 'Guna', 'Shivpuri', 'Vidisha',
+    'Chhatarpur', 'Damoh', 'Panna', 'Tikamgarh', 'Niwari', 'Datia', 'Shivpuri', 'Guna', 'Ashoknagar', 'Guna',
+    
+    // Andhra Pradesh - Rural coverage
+    'Visakhapatnam', 'Vijayawada', 'Guntur', 'Nellore', 'Kurnool', 'Tirupati', 'Kadapa', 'Anantapur', 'Chittoor', 'Ongole',
+    'Eluru', 'Machilipatnam', 'Tenali', 'Proddatur', 'Chilakaluripet', 'Kadiri', 'Adoni', 'Nandyal', 'Kavali', 'Tadipatri',
+    'Srikakulam', 'Vizianagaram', 'Parvathipuram', 'Bobbili', 'Salur', 'Tekkali', 'Palasa', 'Sompeta', 'Ichchapuram', 'Narasannapeta',
+    
+    // Kerala - Rural coverage
+    'Thiruvananthapuram', 'Kochi', 'Kozhikode', 'Thrissur', 'Palakkad', 'Malappuram', 'Kannur', 'Kasaragod', 'Kollam', 'Alappuzha',
+    'Pathanamthitta', 'Kottayam', 'Idukki', 'Ernakulam', 'Thrissur', 'Palakkad', 'Malappuram', 'Kozhikode', 'Wayanad', 'Kannur',
+    'Kasaragod', 'Thiruvananthapuram', 'Kollam', 'Alappuzha', 'Pathanamthitta', 'Kottayam', 'Idukki', 'Ernakulam', 'Thrissur', 'Palakkad',
+    
+    // Punjab - Rural coverage
+    'Chandigarh', 'Ludhiana', 'Amritsar', 'Jalandhar', 'Patiala', 'Bathinda', 'Mohali', 'Firozpur', 'Batala', 'Pathankot',
+    'Moga', 'Abohar', 'Malerkotla', 'Khanna', 'Phagwara', 'Muktsar', 'Barnala', 'Rajpura', 'Fazilka', 'Kapurthala',
+    'Sangrur', 'Sunam', 'Nabha', 'Rampura', 'Gurdaspur', 'Tarn Taran', 'Fatehgarh Sahib', 'Muktsar', 'Faridkot', 'Moga',
+    
+    // Haryana - Rural coverage
+    'Chandigarh', 'Faridabad', 'Gurgaon', 'Panipat', 'Ambala', 'Yamunanagar', 'Rohtak', 'Hisar', 'Karnal', 'Sonipat',
+    'Panchkula', 'Bhiwani', 'Sirsa', 'Bahadurgarh', 'Jind', 'Kaithal', 'Rewari', 'Palwal', 'Narnaul', 'Hansi',
+    'Fatehabad', 'Tohana', 'Narwana', 'Mandi Dabwali', 'Safidon', 'Pehowa', 'Samalkha', 'Shahbad', 'Hodal', 'Sohna',
+    
+    // Odisha - Rural coverage
+    'Bhubaneswar', 'Cuttack', 'Rourkela', 'Berhampur', 'Sambalpur', 'Puri', 'Baleshwar', 'Bhadrak', 'Baripada', 'Balangir',
+    'Jharsuguda', 'Bargarh', 'Angul', 'Dhenkanal', 'Jajpur', 'Jagatsinghpur', 'Kendrapara', 'Khordha', 'Nayagarh', 'Puri',
+    'Sundargarh', 'Kandhamal', 'Boudh', 'Deogarh', 'Jharsuguda', 'Sambalpur', 'Subarnapur', 'Bargarh', 'Balangir', 'Nuapada',
+    
+    // Jharkhand - Rural coverage
+    'Ranchi', 'Jamshedpur', 'Dhanbad', 'Bokaro', 'Deoghar', 'Phusro', 'Hazaribagh', 'Giridih', 'Koderma', 'Ramgarh',
+    'Chatra', 'Garhwa', 'Koderma', 'Lohardaga', 'Pakur', 'Palamu', 'Sahibganj', 'Seraikela Kharsawan', 'Simdega', 'West Singhbhum',
+    'East Singhbhum', 'Dumka', 'Godda', 'Jamtara', 'Khunti', 'Latehar', 'Palamu', 'Sahibganj', 'Seraikela Kharsawan', 'Simdega',
+    
+    // Assam - Rural coverage
+    'Guwahati', 'Silchar', 'Dibrugarh', 'Jorhat', 'Nagaon', 'Tinsukia', 'Tezpur', 'Bongaigaon', 'Dhubri', 'Diphu',
+    'Goalpara', 'Hailakandi', 'Karimganj', 'Kokrajhar', 'Mangaldoi', 'Mariagaon', 'Nalbari', 'North Lakhimpur', 'Sibsagar', 'Tezpur',
+    'Tinsukia', 'Udalguri', 'Barpeta', 'Bongaigaon', 'Cachar', 'Chirang', 'Darrang', 'Dhemaji', 'Dhubri', 'Dibrugarh',
+    
+    // Chhattisgarh - Rural coverage
+    'Raipur', 'Bhilai', 'Bilaspur', 'Korba', 'Rajnandgaon', 'Durg', 'Raigarh', 'Jagdalpur', 'Ambikapur', 'Bhatapara',
+    'Bilaspur', 'Chirmiri', 'Dhamtari', 'Durg', 'Jagdalpur', 'Janjgir', 'Jashpur', 'Kabirdham', 'Kanker', 'Kondagaon',
+    'Korba', 'Koriya', 'Mahasamund', 'Mungeli', 'Narayanpur', 'Raigarh', 'Raipur', 'Rajnandgaon', 'Sukma', 'Surajpur',
+    
+    // Himachal Pradesh - Rural coverage
+    'Shimla', 'Dharamshala', 'Solan', 'Mandi', 'Palampur', 'Kullu', 'Chamba', 'Baddi', 'Nahan', 'Paonta Sahib',
+    'Una', 'Bilaspur', 'Hamirpur', 'Kangra', 'Kinnaur', 'Lahaul and Spiti', 'Mandi', 'Shimla', 'Sirmaur', 'Solan',
+    'Kullu', 'Chamba', 'Una', 'Bilaspur', 'Hamirpur', 'Kangra', 'Kinnaur', 'Lahaul and Spiti', 'Mandi', 'Shimla',
+    
+    // Uttarakhand - Rural coverage
+    'Dehradun', 'Haridwar', 'Roorkee', 'Kashipur', 'Rudrapur', 'Haldwani', 'Rishikesh', 'Kotdwar', 'Ramnagar', 'Pithoragarh',
+    'Almora', 'Nainital', 'Champawat', 'Bageshwar', 'Chamoli', 'Pauri Garhwal', 'Rudraprayag', 'Tehri Garhwal', 'Uttarkashi', 'Dehradun',
+    'Haridwar', 'Roorkee', 'Kashipur', 'Rudrapur', 'Haldwani', 'Rishikesh', 'Kotdwar', 'Ramnagar', 'Pithoragarh', 'Almora',
+    
+    // Goa - Rural coverage
+    'Panaji', 'Margao', 'Vasco da Gama', 'Mapusa', 'Ponda', 'Mormugao', 'Sanquelim', 'Bicholim', 'Curchorem', 'Cuncolim',
+    'Canacona', 'Pernem', 'Quepem', 'Sanguem', 'Satari', 'Tiswadi', 'Bardez', 'Bicholim', 'Canacona', 'Curchorem',
+    
+    // Union Territories
+    'Chandigarh', 'Delhi', 'Puducherry', 'Daman', 'Diu', 'Dadra and Nagar Haveli', 'Lakshadweep', 'Andaman and Nicobar Islands'
+  ];
+
+  const cartIndianStates = [
+    'Maharashtra', 'Delhi', 'Karnataka', 'Tamil Nadu', 'West Bengal', 'Telangana', 'Gujarat', 'Rajasthan', 'Uttar Pradesh',
+    'Madhya Pradesh', 'Andhra Pradesh', 'Bihar', 'Punjab', 'Haryana', 'Kerala', 'Odisha', 'Jharkhand', 'Assam', 'Chhattisgarh',
+    'Himachal Pradesh', 'Uttarakhand', 'Tripura', 'Meghalaya', 'Manipur', 'Nagaland', 'Goa', 'Arunachal Pradesh', 'Mizoram',
+    'Sikkim', 'Jammu and Kashmir', 'Ladakh'
+  ];
+
+  // Initialize cart autocomplete functionality
+  function initializeCartPincodeAutocomplete() {
+    const pincodeInput = document.getElementById('cart-pincode-input');
+    const cityInput = document.getElementById('cart-city-input');
+    const stateInput = document.getElementById('cart-state-input');
+    const citySuggestions = document.getElementById('cart-city-suggestions');
+    const stateSuggestions = document.getElementById('cart-state-suggestions');
+
+    if (pincodeInput && cityInput && stateInput) {
+      console.log('Initializing cart pincode autocomplete...');
+      
+      // Pincode-based autofill
+      pincodeInput.addEventListener('input', function() {
+        const pincode = this.value.trim();
+        console.log('Cart pincode entered:', pincode);
+        if (pincode.length === 6 && cartPincodeData[pincode]) {
+          console.log('Found cart pincode data:', cartPincodeData[pincode]);
+          cityInput.value = cartPincodeData[pincode].city;
+          stateInput.value = cartPincodeData[pincode].state;
+          // Set country to India when pincode is found
+          const countrySelect = document.getElementById('cart-country-select');
+          if (countrySelect) {
+            countrySelect.value = 'India';
+          }
+        }
+      });
+
+      // City autocomplete
+      cityInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        if (query.length > 0) {
+          const filtered = cartIndianCities.filter(city => 
+            city.toLowerCase().includes(query)
+          );
+          showCartSuggestions(citySuggestions, filtered, cityInput);
+        } else {
+          hideCartSuggestions(citySuggestions);
+        }
+      });
+
+      // State autocomplete
+      stateInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        if (query.length > 0) {
+          const filtered = cartIndianStates.filter(state => 
+            state.toLowerCase().includes(query)
+          );
+          showCartSuggestions(stateSuggestions, filtered, stateInput);
+        } else {
+          hideCartSuggestions(stateSuggestions);
+        }
+      });
+
+      // Hide suggestions when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!cityInput.contains(e.target) && !citySuggestions.contains(e.target)) {
+          hideCartSuggestions(citySuggestions);
+        }
+        if (!stateInput.contains(e.target) && !stateSuggestions.contains(e.target)) {
+          hideCartSuggestions(stateSuggestions);
+        }
+      });
+    }
+  }
+
+  // Initialize when DOM is loaded
+  document.addEventListener('DOMContentLoaded', function() {
+    initializeCartPincodeAutocomplete();
+    // Try again after a short delay
+    setTimeout(initializeCartPincodeAutocomplete, 500);
+    setTimeout(initializeCartPincodeAutocomplete, 1000);
+    setTimeout(initializeCartPincodeAutocomplete, 2000);
+  });
+  
+  // Also try to initialize when the form becomes visible (for dynamic forms)
+  setTimeout(initializeCartPincodeAutocomplete, 3000);
+  setTimeout(initializeCartPincodeAutocomplete, 5000);
+  
+  // Reinitialize when Order Menu System form is shown
+  function reinitializeCartPincodeAutocomplete() {
+    console.log('Reinitializing cart pincode autocomplete...');
+    initializeCartPincodeAutocomplete();
+  }
+  
+  // Make it globally available for form visibility changes
+  window.reinitializeCartPincodeAutocomplete = reinitializeCartPincodeAutocomplete;
+
+  function showCartSuggestions(container, suggestions, input) {
+    if (suggestions.length === 0) {
+      hideCartSuggestions(container);
+      return;
+    }
+
+    container.innerHTML = '';
+    suggestions.slice(0, 5).forEach(suggestion => {
+      const div = document.createElement('div');
+      div.className = 'px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200 text-gray-900';
+      div.textContent = suggestion;
+      div.addEventListener('click', function() {
+        input.value = suggestion;
+        hideCartSuggestions(container);
+      });
+      container.appendChild(div);
+    });
+
+    container.classList.remove('hidden');
+    container.style.position = 'absolute';
+    container.style.zIndex = '10';
+    container.style.width = input.offsetWidth + 'px';
+    container.style.top = (input.offsetTop + input.offsetHeight) + 'px';
+    container.style.left = input.offsetLeft + 'px';
+  }
+
+  function hideCartSuggestions(container) {
+    container.classList.add('hidden');
+  }
 </script>

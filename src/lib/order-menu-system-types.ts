@@ -23,8 +23,6 @@ export interface OrderMenuSystemCustomization {
   // 3. Restaurant Name
   restaurant_name: string;
   
-  // 4. Owner Name
-  owner_name: string;
   
   // 5. App Icon
   app_icon_url?: string;
@@ -99,8 +97,6 @@ export interface OrderMenuSystemFormData {
   // 3. Restaurant Name
   restaurant_name: string;
   
-  // 4. Owner Name
-  owner_name: string;
   
   // 5. App Icon
   app_icon?: File;

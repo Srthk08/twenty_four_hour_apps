@@ -70,22 +70,28 @@ import AuthGuard from '../components/AuthGuard.astro';
                   <input type="text" name="restaurantName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter restaurant name">
                 </div>
 
-                <!-- Logo Upload -->
+                <!-- Logo Upload (Required for all products) -->
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 mb-2">
                     Upload Logo <span class="text-red-500">*</span>
                   </label>
-                  <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-400 transition-colors">
+                  <div id="restaurant-logo-upload-area" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-400 transition-colors cursor-pointer" onclick="const el = document.getElementById('restaurant-logo-upload'); if(el) el.click(); else console.error('restaurant-logo-upload element not found in HTML onclick');">
                     <div class="flex flex-col items-center">
                       <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                </svg>
-                      <p class="text-gray-600 mb-2">Click to upload restaurant logo</p>
+                      </svg>
+                      <p class="text-gray-600 mb-2">Click to upload logo</p>
                       <p class="text-sm text-gray-500">PNG, JPG, SVG up to 10MB</p>
-              </div>
+                    </div>
                     <input type="file" name="restaurantLogo" accept="image/*" class="hidden" id="restaurant-logo-upload">
-              </div>
-            </div>
+                    <div id="restaurant-logo-preview" class="hidden mt-4">
+                      <img id="restaurant-logo-preview-img" class="w-20 h-20 object-cover rounded-lg mx-auto" alt="Logo preview">
+                      <p id="restaurant-logo-filename" class="text-sm text-gray-600 mt-2"></p>
+                      <button type="button" id="restaurant-logo-remove" class="mt-2 text-sm text-red-600 hover:text-red-800">Remove Logo</button>
+                    </div>
+                  </div>
+                </div>
+
           </div>
 
               <!-- Right Column -->
@@ -223,7 +229,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         <div id="order-menu-customization-form" class="bg-white rounded-lg shadow-sm p-8 hidden">
           <div class="flex items-center justify-between mb-8">
             <h2 class="text-3xl font-bold text-gray-900">Order Menu System Requirements</h2>
-            <button id="close-order-menu-form" class="text-gray-400 hover:text-gray-600">
+            <button id="close-order-menu-form" class="text-gray-400 hover:text-gray-600" onclick="console.log('Close button clicked directly!'); document.getElementById('order-menu-customization-form').classList.add('hidden'); window.history.replaceState({}, document.title, window.location.pathname); const recentActivity = document.getElementById('recent-activity'); if(recentActivity) { recentActivity.style.display = 'block'; recentActivity.classList.remove('hidden'); recentActivity.style.opacity = '1'; recentActivity.style.transform = 'translateY(0)'; }">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -232,22 +238,37 @@ import AuthGuard from '../components/AuthGuard.astro';
           
           <!-- Product Details Display -->
           <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-6 mb-8 border border-amber-200">
-            <div class="flex items-center justify-between">
-              <div>
-                <h3 id="order-menu-product-name" class="text-xl font-bold text-gray-900 mb-2">Order Menu System</h3>
-                <p class="text-sm text-amber-600 font-medium">Customize your order management requirements below</p>
-              </div>
-              <div class="text-right">
-                <p id="order-menu-product-price" class="text-3xl font-bold text-primary-600">₹25,000</p>
-                <p class="text-sm text-gray-500">Base Price</p>
-            </div>
+            <div class="text-center">
+              <h3 id="order-menu-product-name" class="text-2xl font-bold text-gray-900 mb-2">Order Menu System</h3>
+              <p class="text-amber-600 font-medium">Complete order management system with digital menu integration, real-time order tracking, and payment processing</p>
           </div>
         </div>
 
           <!-- Order Menu System Form -->
           <form id="order-menu-form" class="space-y-8">
+            <!-- Pricing Section - Top on Mobile, Right on Desktop -->
+            <div class="lg:hidden mb-6">
+              <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-6 border border-amber-200">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Pricing Details</h3>
+                <div class="space-y-2">
+                  <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Base Price:</span>
+                    <span class="font-medium">₹999</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-gray-600">GST (18%):</span>
+                    <span class="font-medium">₹180</span>
+                  </div>
+                  <div class="flex justify-between items-center font-bold text-lg border-t pt-2 mt-2">
+                    <span>Total Price:</span>
+                    <span class="text-amber-600">₹1,179</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <!-- Left Column -->
+              <!-- Left Column - Form Fields -->
               <div class="space-y-6">
                 <!-- Project Name -->
                 <div>
@@ -265,54 +286,17 @@ import AuthGuard from '../components/AuthGuard.astro';
                   <input type="text" name="restaurantName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter restaurant name" required>
                 </div>
 
-                <!-- Owner Name -->
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    Owner Name <span class="text-red-500">*</span>
-                  </label>
-                  <input type="text" name="ownerName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter owner name" required>
-                </div>
-
-                <!-- Restaurant Address -->
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    Restaurant Address <span class="text-red-500">*</span>
-                  </label>
-                  <textarea name="restaurantAddress" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg resize-none" placeholder="Enter complete restaurant address" required></textarea>
-                </div>
-
-                <!-- Logo Upload -->
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    Upload Logo <span class="text-red-500">*</span>
-                  </label>
-                  <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-400 transition-colors">
-                    <div class="flex flex-col items-center">
-                      <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                </svg>
-                      <p class="text-gray-600 mb-2">Click to upload restaurant logo</p>
-                      <p class="text-sm text-gray-500">PNG, JPG, SVG up to 10MB</p>
-                    </div>
-                    <input type="file" name="restaurantLogo" accept="image/*" class="hidden" id="order-menu-logo-upload">
-                  </div>
-                </div>
-              </div>
-
-              <!-- Right Column -->
-              <div class="space-y-6">
-                <!-- Contact Person -->
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    Contact Person <span class="text-red-500">*</span>
-                  </label>
-                  <input type="text" name="contactPerson" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Your full name" required>
-                </div>
-
-
                 <!-- Contact Information Section -->
                 <div class="border-t pt-6">
                   <h3 class="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
+                  
+                  <!-- Contact Person -->
+                  <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                      Contact Person <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="contactPerson" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Your full name" required>
+                  </div>
                   
                   <!-- Email -->
                   <div class="mb-4">
@@ -330,107 +314,155 @@ import AuthGuard from '../components/AuthGuard.astro';
                     <input type="tel" name="phone" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="+91 9876543210" required>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            <!-- Menu Items Section with Categories & Pagination -->
-            <div class="border-t pt-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">Menu Items</h3>
-
-              <!-- Category Management -->
-              <div class="mb-4 flex flex-wrap gap-3 items-end">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">New Category</label>
-                  <input id="oms-category-input" type="text" class="w-56 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="e.g., Starters">
-                </div>
-                <button id="oms-add-category-btn" type="button" class="px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700">Add Category</button>
-                <button id="oms-clear-all-categories-btn" type="button" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Clear All</button>
-                <div class="ml-auto flex gap-2">
-                  <button id="oms-prev-page" type="button" class="px-3 py-2 border rounded-md">Prev</button>
-                  <span id="oms-page-indicator" class="px-2 text-sm text-gray-600">Page 1</span>
-                  <button id="oms-next-page" type="button" class="px-3 py-2 border rounded-md">Next</button>
-                </div>
-              </div>
-
-              <!-- Category Pills -->
-              <div id="oms-category-pills" class="flex flex-wrap gap-2 mb-4"></div>
-              <div class="text-sm text-gray-600 mb-4">Current Category: <span id="oms-current-category" class="font-medium">Uncategorized</span></div>
-
-              <div id="menu-items-container">
-                <div class="menu-item-row grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 p-4 border border-gray-200 rounded-lg">
+                <!-- Professional Address -->
+                <div class="space-y-4 border-t pt-6">
+                  <h4 class="text-lg font-semibold text-gray-700">Restaurant Address <span class="text-red-500">*</span></h4>
+                  
+                  <!-- House/Flat Number -->
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Item Name</label>
-                    <input type="text" name="menuItems[0][item_name]" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="e.g., Margherita Pizza" required>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      House/Flat Number <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="houseNumber" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="e.g., 123, Flat 4B" required>
                   </div>
+
+                  <!-- Address Line 1 -->
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Price (₹)</label>
-                    <input type="number" name="menuItems[0][price]" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="299" step="0.01" required>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Address Line 1 <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="addressLine1" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="e.g., Main Street, Sector 15" required>
                   </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                    <input type="text" name="menuItems[0][item_category]" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 oms-category-field" placeholder="Type or pick from pills" required>
+
+                  <!-- City and State Row -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        City <span class="text-red-500">*</span>
+                      </label>
+                      <input type="text" name="city" id="city-input" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="e.g., Mumbai" required autocomplete="off">
+                      <div id="city-suggestions" class="hidden absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto"></div>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        State <span class="text-red-500">*</span>
+                      </label>
+                      <input type="text" name="state" id="state-input" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="e.g., Maharashtra" required autocomplete="off">
+                      <div id="state-suggestions" class="hidden absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto"></div>
+                    </div>
                   </div>
-                  <div class="flex items-end">
-                    <button type="button" class="remove-menu-item px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm">
-                      Remove
-              </button>
-            </div>
-                </div>
-              </div>
-              <button type="button" id="add-menu-item" class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 text-sm">
-                + Add Menu Item
-              </button>
-          </div>
 
-            <!-- Color Customization -->
-            <div class="border-t pt-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">Color Customization</h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Primary Color -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Primary Color <span class="text-red-500">*</span>
-                  </label>
-                  <div class="flex items-center space-x-3">
-                    <input type="color" name="primaryColor" value="#3B82F6" class="w-12 h-12 border border-gray-300 rounded-lg cursor-pointer">
-                    <input type="text" name="primaryColorText" value="#3B82F6" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="#3B82F6">
-              </div>
-              </div>
-
-                <!-- Secondary Color -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Secondary Color
-                  </label>
-                  <div class="flex items-center space-x-3">
-                    <input type="color" name="secondaryColor" value="#10B981" class="w-12 h-12 border border-gray-300 rounded-lg cursor-pointer">
-                    <input type="text" name="secondaryColorText" value="#10B981" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="#10B981">
-              </div>
-              </div>
-
-                <!-- Accent Color -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Accent Color
-                  </label>
-                  <div class="flex items-center space-x-3">
-                    <input type="color" name="accentColor" value="#F59E0B" class="w-12 h-12 border border-gray-300 rounded-lg cursor-pointer">
-                    <input type="text" name="accentColorText" value="#F59E0B" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="#F59E0B">
-            </div>
+                  <!-- Pincode and Country Row -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Pincode <span class="text-red-500">*</span>
+                      </label>
+                      <input type="text" name="pincode" id="pincode-input" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="e.g., 400001" required maxlength="6">
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Country <span class="text-red-500">*</span>
+                      </label>
+                      <select name="country" id="country-select" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" required>
+                        <option value="India" selected>India</option>
+                        <option value="United States">United States</option>
+                        <option value="United Kingdom">United Kingdom</option>
+                        <option value="Canada">Canada</option>
+                        <option value="Australia">Australia</option>
+                        <option value="Germany">Germany</option>
+                        <option value="France">France</option>
+                        <option value="Japan">Japan</option>
+                        <option value="Singapore">Singapore</option>
+                        <option value="UAE">UAE</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
 
-                <!-- Text Color -->
+                <!-- Logo Upload (Optional for OMS) -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Text Color
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Upload Logo <span class="text-gray-500">(Optional)</span>
                   </label>
-                  <div class="flex items-center space-x-3">
-                    <input type="color" name="textColor" value="#1F2937" class="w-12 h-12 border border-gray-300 rounded-lg cursor-pointer">
-                    <input type="text" name="textColorText" value="#1F2937" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="#1F2937">
+                  <div id="order-menu-logo-upload-area" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-400 transition-colors cursor-pointer" onclick="document.getElementById('order-menu-logo-upload').click()">
+                    <div class="flex flex-col items-center">
+                      <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                      </svg>
+                      <p class="text-gray-600 mb-2">Click to upload restaurant logo</p>
+                      <p class="text-sm text-gray-500">PNG, JPG, SVG up to 10MB</p>
+                    </div>
                   </div>
+                  <input type="file" name="restaurantLogo" accept="image/*" class="hidden" id="order-menu-logo-upload">
+                  <div id="order-menu-logo-preview" class="hidden mt-4">
+                    <img id="order-menu-logo-preview-img" class="w-20 h-20 object-cover rounded-lg mx-auto" alt="Logo preview">
+                    <p id="order-menu-logo-filename" class="text-sm text-gray-600 mt-2"></p>
+                    <button type="button" id="order-menu-logo-remove" class="mt-2 text-sm text-red-600 hover:text-red-800">Remove Logo</button>
+                  </div>
+                </div>
+
+                <!-- Menu Photos Upload (Required for OMS) -->
+                <div>
+                  <label class="block text-lg font-semibold text-gray-700 mb-2">
+                    Upload Menu Photos <span class="text-red-500">*</span>
+                  </label>
+                  <p class="text-sm text-gray-600 mb-4">Upload multiple menu photos. Max 5MB per photo. At least 1 photo required.</p>
+                  
+                  <div id="menu-photos-upload-area" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-400 transition-colors cursor-pointer bg-gray-50">
+                    <div class="flex flex-col items-center">
+                      <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                      </svg>
+                      <p class="text-gray-700 mb-2 font-medium">Click to upload menu photos</p>
+                      <p class="text-sm text-gray-500">PNG, JPG, JPEG up to 5MB each</p>
+                      <div class="mt-3 flex items-center text-xs text-gray-400">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Multiple photos allowed
+                      </div>
+                    </div>
+                    <input type="file" name="menuPhotos" accept="image/*" multiple class="hidden" id="menu-photos-upload" required>
+                  </div>
+                  
+                  <div id="menu-photos-preview" class="hidden mt-6">
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="menu-photos-grid">
+                      <!-- Photos will be added here dynamically -->
+                    </div>
+                  </div>
+                </div>
+
+
+              </div>
+
+              <!-- Right Column - Pricing & Contact -->
+              <div class="space-y-6">
+                <!-- Pricing Information - Hidden on Mobile, Visible on Desktop -->
+                <div class="hidden lg:block bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-6 border border-amber-200">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-4">Pricing Details</h3>
+                  <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                      <span class="text-gray-600">Base Price:</span>
+                      <span class="font-medium">₹999</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-gray-600">GST (18%):</span>
+                      <span class="font-medium">₹180</span>
+                    </div>
+                    <div class="flex justify-between items-center font-bold text-lg border-t pt-2 mt-2">
+                      <span>Total Price:</span>
+                      <span class="text-amber-600">₹1,179</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
             </div>
-          </div>
-            </div>
+
+
 
             <!-- Additional Requirements -->
             <div class="border-t pt-6">
@@ -442,7 +474,7 @@ import AuthGuard from '../components/AuthGuard.astro';
 
             <!-- Form Actions -->
             <div class="flex justify-end space-x-4 pt-6 border-t">
-              <button type="button" id="cancel-order-menu" class="px-8 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium">
+              <button type="button" id="cancel-order-menu" class="px-8 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium" onclick="console.log('Cancel button clicked directly!'); document.getElementById('order-menu-customization-form').classList.add('hidden'); window.history.replaceState({}, document.title, window.location.pathname); const recentActivity = document.getElementById('recent-activity'); if(recentActivity) { recentActivity.style.display = 'block'; recentActivity.classList.remove('hidden'); recentActivity.style.opacity = '1'; recentActivity.style.transform = 'translateY(0)'; }">
                 Cancel
               </button>
               <button type="submit" class="px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium">
@@ -453,7 +485,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         </div>
 
         <!-- Recent Activity -->
-        <div id="recent-activity" class="bg-white rounded-lg shadow-sm p-6" style="display: none;">
+        <div id="recent-activity" class="bg-white rounded-lg shadow-sm p-6">
           <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
           <div class="text-center py-8">
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -476,6 +508,9 @@ import AuthGuard from '../components/AuthGuard.astro';
 <script>
   // Import the FIXED database helper
   import { saveCustomizationForm } from '../lib/customization-db.js';
+
+  // Menu Photos Array
+  let menuPhotos = [];
   
   console.log('Dashboard loaded - using global auth manager');
 
@@ -671,7 +706,7 @@ import AuthGuard from '../components/AuthGuard.astro';
           if (selectedProduct.type === 'order-menu') {
             // Show Order Menu System form
             document.getElementById('order-menu-product-name').textContent = selectedProduct.name;
-            document.getElementById('order-menu-product-price').textContent = `₹${forcedPrice.toLocaleString()}`;
+            // Price is now displayed in the right column pricing section
             
             const orderMenuForm = document.getElementById('order-menu-customization-form');
             orderMenuForm.classList.remove('hidden');
@@ -682,6 +717,10 @@ import AuthGuard from '../components/AuthGuard.astro';
             setTimeout(() => {
               orderMenuForm.style.opacity = '1';
               orderMenuForm.style.transform = 'translateY(0)';
+              // Reinitialize pincode autocomplete when form becomes visible
+              if (window.reinitializePincodeAutocomplete) {
+                window.reinitializePincodeAutocomplete();
+              }
             }, 50);
     } else {
             // Show regular customization form
@@ -732,7 +771,204 @@ import AuthGuard from '../components/AuthGuard.astro';
     const closeBtn = document.getElementById('close-order-menu-form');
     const cancelBtn = document.getElementById('cancel-order-menu');
     const logoUpload = document.getElementById('order-menu-logo-upload');
-    const logoUploadArea = document.querySelector('#order-menu-customization-form .border-dashed');
+    const logoUploadArea = document.getElementById('order-menu-logo-upload-area');
+    const logoPreview = document.getElementById('order-menu-logo-preview');
+    const logoPreviewImg = document.getElementById('order-menu-logo-preview-img');
+    const logoFilename = document.getElementById('order-menu-logo-filename');
+    const logoRemoveBtn = document.getElementById('order-menu-logo-remove');
+    const menuPhotosUpload = document.getElementById('menu-photos-upload');
+    const menuPhotosUploadArea = document.getElementById('menu-photos-upload-area');
+    const menuPhotosPreview = document.getElementById('menu-photos-preview');
+    const menuPhotosGrid = document.getElementById('menu-photos-grid');
+    
+    console.log('menuPhotosPreview element found:', menuPhotosPreview);
+    console.log('menuPhotosGrid element found:', menuPhotosGrid);
+    console.log('menuPhotosUpload element found:', menuPhotosUpload);
+    
+    // Test if file input exists
+    if (!menuPhotosUpload) {
+      console.error('CRITICAL: File input element not found! Creating fallback...');
+      
+      // Create a fallback file input
+      const fallbackInput = document.createElement('input');
+      fallbackInput.type = 'file';
+      fallbackInput.name = 'menuPhotos';
+      fallbackInput.accept = 'image/*';
+      fallbackInput.multiple = true;
+      fallbackInput.className = 'hidden';
+      fallbackInput.id = 'menu-photos-upload';
+      
+      // Add it to the form
+      const form = document.getElementById('order-menu-form');
+      if (form) {
+        form.appendChild(fallbackInput);
+        console.log('Fallback file input created and added to form');
+      }
+    } else {
+      console.log('File input element found successfully');
+    }
+    const removeAllMenuPhotosBtn = document.getElementById('remove-all-menu-photos');
+    
+    // Menu Photos Upload Functionality
+    if (menuPhotosUploadArea && menuPhotosUpload) {
+      menuPhotosUploadArea.addEventListener('click', () => {
+        menuPhotosUpload.click();
+      });
+
+      // File input change handler
+      menuPhotosUpload.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files);
+        
+        if (files.length > 0) {
+          // Validate file sizes (5MB max per file)
+          const validFiles = files.filter(file => {
+            const fileSizeMB = file.size / (1024 * 1024);
+            return fileSizeMB <= 5;
+          });
+          
+          if (validFiles.length !== files.length) {
+            alert(`Some files were too large. Only files under 5MB are allowed. ${validFiles.length}/${files.length} files uploaded.`);
+          }
+          
+          // Add all valid files to the array
+          menuPhotos = [...menuPhotos, ...validFiles];
+          
+          // Update preview
+          updateMenuPhotosPreview();
+          
+          // Show success message and add more button
+          menuPhotosUploadArea.innerHTML = `
+            <div class="flex flex-col items-center">
+              <svg class="w-16 h-16 text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <p class="text-green-600 mb-2 font-medium">${validFiles.length} photo(s) uploaded successfully</p>
+              <p class="text-sm text-gray-500">Total: ${menuPhotos.length} photos uploaded</p>
+              <button type="button" onclick="document.getElementById('menu-photos-upload').click()" class="mt-4 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-all transform hover:scale-105 shadow-lg">
+                <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Add More Photos
+              </button>
+            </div>
+          `;
+          
+          // Reset file input
+          menuPhotosUpload.value = '';
+        }
+      });
+    }
+
+    // Update menu photos preview
+    function updateMenuPhotosPreview() {
+      if (menuPhotos.length > 0) {
+        menuPhotosPreview.classList.remove('hidden');
+        menuPhotosGrid.innerHTML = '';
+        
+        // Add photo counter header
+        const counterDiv = document.createElement('div');
+        counterDiv.className = 'col-span-full mb-4 p-4 bg-green-50 border border-green-200 rounded-lg';
+        counterDiv.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <svg class="w-6 h-6 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <div>
+                <span class="text-green-800 font-semibold text-lg">${menuPhotos.length} Photo(s) Uploaded</span>
+                <p class="text-sm text-green-600">Menu photos ready for your order system</p>
+              </div>
+            </div>
+            <button type="button" onclick="removeAllMenuPhotos()" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-colors">
+              <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+              Remove All
+            </button>
+          </div>
+        `;
+        menuPhotosGrid.appendChild(counterDiv);
+        
+        // Add individual photo previews
+        menuPhotos.forEach((file, index) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const photoDiv = document.createElement('div');
+            photoDiv.className = 'relative group bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow';
+            photoDiv.innerHTML = `
+              <div class="relative">
+                <img src="${e.target.result}" alt="Menu photo ${index + 1}" class="w-full h-32 object-cover">
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
+                  <button type="button" class="opacity-0 group-hover:opacity-100 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm hover:bg-red-600 transition-all duration-200 shadow-lg" onclick="removeMenuPhoto(${index})">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="p-3">
+                <p class="text-sm text-gray-700 font-medium truncate">${file.name}</p>
+                <p class="text-xs text-gray-500">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+              </div>
+            `;
+            menuPhotosGrid.appendChild(photoDiv);
+          };
+          reader.readAsDataURL(file);
+        });
+      } else {
+        menuPhotosPreview.classList.add('hidden');
+      }
+    }
+
+    // Remove individual menu photo
+    window.removeMenuPhoto = (index) => {
+      menuPhotos.splice(index, 1);
+      updateMenuPhotosPreview();
+      
+      // Reset upload area if no photos
+      if (menuPhotos.length === 0) {
+        menuPhotosUploadArea.innerHTML = `
+          <div class="flex flex-col items-center">
+            <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <p class="text-gray-700 mb-2 font-medium">Click to upload menu photos</p>
+            <p class="text-sm text-gray-500">PNG, JPG, JPEG up to 5MB each</p>
+            <div class="mt-3 flex items-center text-xs text-gray-400">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              Multiple photos allowed
+            </div>
+          </div>
+        `;
+      }
+    };
+
+    // Remove all menu photos
+    window.removeAllMenuPhotos = () => {
+      menuPhotos = [];
+      updateMenuPhotosPreview();
+      menuPhotosUpload.value = '';
+      
+      // Reset upload area
+      menuPhotosUploadArea.innerHTML = `
+        <div class="flex flex-col items-center">
+          <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          <p class="text-gray-700 mb-2 font-medium">Click to upload menu photos</p>
+          <p class="text-sm text-gray-500">PNG, JPG, JPEG up to 5MB each</p>
+          <div class="mt-3 flex items-center text-xs text-gray-400">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Multiple photos allowed
+          </div>
+        </div>
+      `;
+    };
+
     const addMenuItemBtn = document.getElementById('add-menu-item');
     const menuItemsContainer = document.getElementById('menu-items-container');
     const categoryInput = document.getElementById('oms-category-input');
@@ -856,11 +1092,6 @@ import AuthGuard from '../components/AuthGuard.astro';
       filterItemsByCategory();
     });
     
-    // Logo upload functionality
-    logoUploadArea?.addEventListener('click', () => {
-      logoUpload?.click();
-    });
-    
     logoUpload?.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) {
@@ -876,6 +1107,29 @@ import AuthGuard from '../components/AuthGuard.astro';
           </div>
         `;
       }
+    });
+
+
+    // Menu style selection functionality
+    const menuStyleOptions = document.querySelectorAll('.menu-style-option');
+    menuStyleOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        // Remove selected class from all options
+        menuStyleOptions.forEach(opt => {
+          opt.classList.remove('border-primary-500', 'bg-primary-50');
+          opt.classList.add('border-gray-200');
+        });
+        
+        // Add selected class to clicked option
+        option.classList.remove('border-gray-200');
+        option.classList.add('border-primary-500', 'bg-primary-50');
+        
+        // Check the radio button
+        const radio = option.querySelector('input[type="radio"]');
+        if (radio) {
+          radio.checked = true;
+        }
+      });
     });
     
     // Color picker synchronization for Order Menu form
@@ -967,34 +1221,70 @@ import AuthGuard from '../components/AuthGuard.astro';
       e.preventDefault();
       
       const formData = new FormData(form);
-      const data = Object.fromEntries(formData);
+      const formDataObj = Object.fromEntries(formData);
       
-      console.log('📝 Order Menu requirements saved:', data);
+      // Validate menu photos are uploaded (Required for Order Menu System)
+      if (menuPhotos.length === 0) {
+        alert('Please upload at least one menu photo. This field is required for Order Menu System.');
+        return;
+      }
+
+      // Validate phone number
+      if (!formDataObj.phone || formDataObj.phone.trim() === '') {
+        alert('Please enter your phone number. This field is required.');
+        return;
+      }
+
+      // Validate restaurant address fields
+      if (!formDataObj.houseNumber || formDataObj.houseNumber.trim() === '') {
+        alert('Please enter house/flat number. This field is required.');
+        return;
+      }
+      if (!formDataObj.addressLine1 || formDataObj.addressLine1.trim() === '') {
+        alert('Please enter address line 1. This field is required.');
+        return;
+      }
+      if (!formDataObj.city || formDataObj.city.trim() === '') {
+        alert('Please enter city. This field is required.');
+        return;
+      }
+      if (!formDataObj.state || formDataObj.state.trim() === '') {
+        alert('Please enter state. This field is required.');
+        return;
+      }
+      if (!formDataObj.pincode || formDataObj.pincode.trim() === '') {
+        alert('Please enter pincode. This field is required.');
+        return;
+      }
+
+      // Validate email
+      if (!formDataObj.email || formDataObj.email.trim() === '') {
+        alert('Please enter your email address. This field is required.');
+        return;
+      }
+      
+      console.log('📝 Order Menu requirements saved:', formDataObj);
       
       // Create order menu requirements object
       const orderMenuRequirements = {
         productId: '5',
         productName: 'Order Menu System',
         productDescription: 'Complete order management system with digital menu integration, real-time order tracking, and payment processing. Perfect for restaurants looking to streamline their ordering process.',
-        productPrice: '₹25,000',
-        projectName: data.projectName,
-        restaurantName: data.restaurantName,
-        ownerName: data.ownerName,
-        restaurantAddress: data.restaurantAddress,
-        contactPerson: data.contactPerson,
-        email: data.email,
-        phone: data.phone,
-        additionalRequirements: data.additionalRequirements,
-        restaurantLogo: data.restaurantLogo,
-        primaryColor: data.primaryColor,
-        secondaryColor: data.secondaryColor,
-        accentColor: data.accentColor,
-        textColor: data.textColor,
-        menuItems: Array.from(document.querySelectorAll('.menu-item-row')).map((row, index) => ({
-          item_name: row.querySelector(`input[name="menuItems[${index}][item_name]"]`)?.value || '',
-          price: row.querySelector(`input[name="menuItems[${index}][price]"]`)?.value || '',
-          item_category: row.querySelector(`input[name="menuItems[${index}][item_category]"]`)?.value || ''
-        })).filter(item => item.item_name),
+        productPrice: '₹1,179',
+        projectName: formDataObj.projectName,
+        restaurantName: formDataObj.restaurantName,
+        houseNumber: formDataObj.houseNumber,
+        addressLine1: formDataObj.addressLine1,
+        city: formDataObj.city,
+        state: formDataObj.state,
+        pincode: formDataObj.pincode,
+        country: formDataObj.country,
+        contactPerson: formDataObj.contactPerson,
+        email: formDataObj.email,
+        phone: formDataObj.phone,
+        additionalRequirements: formDataObj.additionalRequirements,
+        restaurantLogo: formDataObj.restaurantLogo,
+        menuPhotos: menuPhotos || [],
         timestamp: new Date().toISOString()
       };
       
@@ -1019,24 +1309,18 @@ import AuthGuard from '../components/AuthGuard.astro';
             p_project_name: data.projectName,
             p_restaurant_name: data.restaurantName,
             p_owner_name: data.ownerName,
-            p_restaurant_address: data.restaurantAddress,
+            p_house_number: data.houseNumber,
+            p_address_line1: data.addressLine1,
+            p_city: data.city,
+            p_state: data.state,
+            p_pincode: data.pincode,
+            p_country: data.country,
             p_contact_person: data.contactPerson,
             p_phone_number: data.phone,
             p_user_id: null,
             p_logo_url: null,
             p_logo_filename: null,
             p_logo_size: null,
-            p_menu_categories: orderMenuRequirements.menuItems ? 
-              JSON.stringify(Array.from(new Set(orderMenuRequirements.menuItems.map(item => item.item_category).filter(cat => cat && cat.trim() !== ''))).map((category, index) => ({
-                id: `cat_${index + 1}`,
-                name: category
-              }))) : '[]',
-            p_menu_items: orderMenuRequirements.menuItems ? 
-              JSON.stringify(orderMenuRequirements.menuItems) : '[]',
-            p_primary_color: data.primaryColor || '#3B82F6',
-            p_secondary_color: data.secondaryColor || '#10B981',
-            p_accent_color: data.accentColor || '#F59E0B',
-            p_text_color: data.textColor || '#1F2937',
             p_additional_requirements: data.additionalRequirements || ''
           });
           
@@ -1108,6 +1392,160 @@ import AuthGuard from '../components/AuthGuard.astro';
         alert('Error saving order menu requirements. Please try again.');
       }
     });
+
+
+    // Logo upload functionality for Order Menu System
+    console.log('OMS Logo upload elements:', {
+      logoUpload: !!logoUpload,
+      logoUploadArea: !!logoUploadArea,
+      logoPreview: !!logoPreview,
+      logoPreviewImg: !!logoPreviewImg,
+      logoFilename: !!logoFilename,
+      logoRemoveBtn: !!logoRemoveBtn
+    });
+    
+    // Setup logo upload functionality
+    function setupLogoUpload() {
+      const logoUpload = document.getElementById('order-menu-logo-upload');
+      const logoUploadArea = document.getElementById('order-menu-logo-upload-area');
+      
+      console.log('Setting up logo upload - elements found:', {
+        logoUpload: !!logoUpload,
+        logoUploadArea: !!logoUploadArea
+      });
+      
+      if (logoUpload && logoUploadArea) {
+        // Remove any existing event listeners
+        logoUploadArea.replaceWith(logoUploadArea.cloneNode(true));
+        const newLogoUploadArea = document.getElementById('order-menu-logo-upload-area');
+        
+        // Add click handler
+        newLogoUploadArea.addEventListener('click', (e) => {
+          console.log('Logo upload area clicked!');
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('Triggering file input click...');
+          logoUpload.click();
+          console.log('File input click triggered');
+        });
+        
+        console.log('Logo upload click handler attached successfully');
+      } else {
+        console.error('Logo upload elements not found!');
+      }
+    }
+    
+    // Setup logo upload immediately
+    setupLogoUpload();
+    
+    // Also setup when form becomes visible
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          const form = document.getElementById('order-menu-customization-form');
+          if (form && !form.classList.contains('hidden')) {
+            console.log('Order menu form is now visible, setting up logo upload...');
+            setupLogoUpload();
+          }
+        }
+      });
+    });
+    
+    const orderMenuForm = document.getElementById('order-menu-customization-form');
+    if (orderMenuForm) {
+      observer.observe(orderMenuForm, { attributes: true, attributeFilter: ['class'] });
+    }
+    
+    // Logo upload change handler
+    if (logoUpload) {
+      logoUpload.addEventListener('change', (e) => {
+        console.log('OMS Logo upload change event triggered');
+        const file = e.target.files[0];
+        if (file) {
+          console.log('File selected:', file.name);
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            console.log('File reader onload triggered');
+            logoPreviewImg.src = e.target.result;
+            logoFilename.textContent = file.name;
+            logoPreview.classList.remove('hidden');
+            // Update upload area to show success state instead of hiding it
+            console.log('Updating logoUploadArea innerHTML');
+            logoUploadArea.innerHTML = `
+              <div class="flex flex-col items-center">
+                <svg class="w-12 h-12 text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <p class="text-green-600 mb-1 font-medium">Logo uploaded successfully</p>
+                <p class="text-sm text-gray-500">${file.name}</p>
+                <button type="button" id="change-logo-btn-oms" class="mt-2 text-sm text-blue-600 hover:text-blue-800 underline" style="display: block !important; visibility: visible !important;">Change Logo</button>
+              </div>
+            `;
+            
+            // Add event listener to the new button
+            const changeLogoBtn = document.getElementById('change-logo-btn-oms');
+            if (changeLogoBtn) {
+              changeLogoBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const fileInput = document.getElementById('order-menu-logo-upload');
+                if (fileInput) {
+                  fileInput.click();
+                } else {
+                  console.error('order-menu-logo-upload element not found when clicking change logo button');
+                }
+              });
+            }
+            
+            console.log('LogoUploadArea innerHTML updated');
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // Remove logo functionality
+      logoRemoveBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        logoUpload.value = '';
+        logoPreview.classList.add('hidden');
+        // Reset upload area to original state
+        logoUploadArea.innerHTML = `
+          <div class="flex flex-col items-center">
+            <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            <p class="text-gray-600 mb-2">Click to upload restaurant logo</p>
+            <p class="text-sm text-gray-500">PNG, JPG, SVG up to 10MB</p>
+          </div>
+        `;
+      });
+    }
+
+
+    // Close form handlers using event delegation
+    console.log('Setting up Order Menu form event listeners...');
+    console.log('Close button found:', closeBtn);
+    console.log('Cancel button found:', cancelBtn);
+    
+    // Use event delegation to ensure buttons work even if they're not immediately available
+    document.addEventListener('click', (e) => {
+      if (e.target && e.target.id === 'close-order-menu-form') {
+        console.log('Close button clicked via delegation!');
+        e.preventDefault();
+        document.getElementById('order-menu-customization-form').classList.add('hidden');
+        window.history.replaceState({}, document.title, window.location.pathname);
+        setTimeout(() => showBrowseProductsSection(), 100);
+      }
+      
+      if (e.target && e.target.id === 'cancel-order-menu') {
+        console.log('Cancel button clicked via delegation!');
+        e.preventDefault();
+        document.getElementById('order-menu-customization-form').classList.add('hidden');
+        window.history.replaceState({}, document.title, window.location.pathname);
+        setTimeout(() => showBrowseProductsSection(), 100);
+      }
+    });
   }
 
   // Handle form submission
@@ -1116,28 +1554,67 @@ import AuthGuard from '../components/AuthGuard.astro';
     const closeBtn = document.getElementById('close-customization-form');
     const cancelBtn = document.getElementById('cancel-customization');
     const logoUpload = document.getElementById('restaurant-logo-upload');
-    const logoUploadArea = document.querySelector('#product-customization-form .border-dashed');
+    const logoUploadArea = document.getElementById('restaurant-logo-upload-area');
+    const logoPreview = document.getElementById('restaurant-logo-preview');
+    const logoPreviewImg = document.getElementById('restaurant-logo-preview-img');
+    const logoFilename = document.getElementById('restaurant-logo-filename');
+    const logoRemoveBtn = document.getElementById('restaurant-logo-remove');
     
-    // Logo upload functionality
-    logoUploadArea?.addEventListener('click', () => {
-      logoUpload?.click();
-    });
-    
+    // Initialize logo upload area click handler
+    if (logoUploadArea) {
+      logoUploadArea.onclick = () => {
+        const el = document.getElementById('restaurant-logo-upload');
+        if (el) el.click();
+        else console.error('restaurant-logo-upload element not found in initial handler');
+      };
+    }
+
     logoUpload?.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) {
-        const fileName = file.name;
-        const fileSize = (file.size / 1024 / 1024).toFixed(2);
-        logoUploadArea.innerHTML = `
-          <div class="flex flex-col items-center">
-            <svg class="w-12 h-12 text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            <p class="text-green-600 mb-1 font-medium">Logo uploaded successfully</p>
-            <p class="text-sm text-gray-500">${fileName} (${fileSize} MB)</p>
-          </div>
-        `;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          logoPreviewImg.src = e.target.result;
+          logoFilename.textContent = file.name;
+          logoPreview.classList.remove('hidden');
+          // Update upload area to show success state instead of hiding it
+          logoUploadArea.innerHTML = `
+            <div class="flex flex-col items-center">
+              <svg class="w-12 h-12 text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <p class="text-green-600 mb-1 font-medium">Logo uploaded successfully</p>
+              <p class="text-sm text-gray-500">${file.name}</p>
+              <button type="button" onclick="const el = document.getElementById('restaurant-logo-upload'); if(el) el.click(); else console.error('restaurant-logo-upload element not found in button onclick');" class="mt-2 text-sm text-blue-600 hover:text-blue-800">Change Logo</button>
+            </div>
+          `;
+        };
+        reader.readAsDataURL(file);
       }
+    });
+
+    // Remove logo functionality
+    logoRemoveBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      logoUpload.value = '';
+      logoPreview.classList.add('hidden');
+      // Reset upload area to original state
+      logoUploadArea.innerHTML = `
+        <div class="flex flex-col items-center">
+          <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          <p class="text-gray-600 mb-2">Click to upload logo</p>
+          <p class="text-sm text-gray-500">PNG, JPG, SVG up to 10MB</p>
+        </div>
+      `;
+      // Re-add click handler
+      logoUploadArea.onclick = () => {
+        const el = document.getElementById('restaurant-logo-upload');
+        if (el) el.click();
+        else console.error('restaurant-logo-upload element not found in reset handler');
+      };
     });
     
     // Color picker synchronization
@@ -1205,10 +1682,6 @@ import AuthGuard from '../components/AuthGuard.astro';
         phone: data.phone,
         additionalRequirements: data.additionalRequirements,
         restaurantLogo: data.restaurantLogo,
-        primaryColor: data.primaryColor,
-        secondaryColor: data.secondaryColor,
-        accentColor: data.accentColor,
-        textColor: data.textColor,
         timestamp: new Date().toISOString()
       };
       
@@ -1270,6 +1743,34 @@ import AuthGuard from '../components/AuthGuard.astro';
           console.warn('Logo upload skipped:', e);
         }
         
+        // Upload menu photos to Supabase Storage (Required for Order Menu System)
+        let menuPhotosUrls = [];
+        if (name.includes('order menu') && menuPhotos.length > 0) {
+          try {
+            const { supabase } = await import('../lib/supabase');
+            for (let i = 0; i < menuPhotos.length; i++) {
+              const photo = menuPhotos[i];
+              const safeName = photo.name.replace(/\s+/g, '_');
+              const path = `menu_photos/${Date.now()}_${i}_${safeName}`;
+              const fileBuffer = await photo.arrayBuffer();
+              const { error: upErr } = await supabase.storage
+                .from('logos')
+                .upload(path, fileBuffer, { upsert: true, contentType: photo.type, cacheControl: '3600' });
+              if (!upErr) {
+                const { data: pub } = supabase.storage.from('logos').getPublicUrl(path);
+                menuPhotosUrls.push({
+                  url: pub?.publicUrl || null,
+                  filename: photo.name,
+                  mimeType: photo.type,
+                  size: photo.size
+                });
+              }
+            }
+          } catch (e) {
+            console.warn('Menu photos upload skipped:', e);
+          }
+        }
+        
         const formData = {
           productName,
           productPrice,
@@ -1290,7 +1791,9 @@ import AuthGuard from '../components/AuthGuard.astro';
           logoUrl,
           logoFilename,
           logoMimeType,
-          logoSize
+          logoSize,
+          // menu photos info
+          menuPhotosUrls: JSON.stringify(menuPhotosUrls)
         };
 
         const result = await saveCustomizationForm(formData, productType);
@@ -1342,12 +1845,16 @@ import AuthGuard from '../components/AuthGuard.astro';
 
   // Show Browse Products section with smooth transition
   function showBrowseProductsSection() {
+    console.log('🔄 Showing browse products section...');
     const productForm = document.getElementById('product-customization-form');
     const orderMenuForm = document.getElementById('order-menu-customization-form');
     const recentActivity = document.getElementById('recent-activity');
     
+    console.log('Recent activity element found:', recentActivity);
+    
     // Hide forms with smooth transition
     if (productForm && !productForm.classList.contains('hidden')) {
+      console.log('Hiding product form...');
       productForm.style.transition = 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out';
       productForm.style.opacity = '0';
       productForm.style.transform = 'translateY(-10px)';
@@ -1355,6 +1862,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     }
     
     if (orderMenuForm && !orderMenuForm.classList.contains('hidden')) {
+      console.log('Hiding order menu form...');
       orderMenuForm.style.transition = 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out';
       orderMenuForm.style.opacity = '0';
       orderMenuForm.style.transform = 'translateY(-10px)';
@@ -1364,6 +1872,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     // Show Browse Products section with smooth transition
     setTimeout(() => {
       if (recentActivity) {
+        console.log('Showing recent activity section...');
         recentActivity.style.display = 'block'; // Ensure it's visible
         recentActivity.classList.remove('hidden');
         recentActivity.style.transition = 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out';
@@ -1373,10 +1882,18 @@ import AuthGuard from '../components/AuthGuard.astro';
         setTimeout(() => {
           recentActivity.style.opacity = '1';
           recentActivity.style.transform = 'translateY(0)';
+          console.log('✅ Browse products section is now visible');
+          console.log('Recent activity display style:', recentActivity.style.display);
+          console.log('Recent activity class list:', recentActivity.classList.toString());
         }, 50);
+      } else {
+        console.error('❌ Recent activity element not found!');
       }
     }, 350);
   }
+
+  // Make function globally accessible
+  window.showBrowseProductsSection = showBrowseProductsSection;
 
   // Auto-fill user details in forms
   function autofillUserDetails() {
@@ -1508,27 +2025,29 @@ import AuthGuard from '../components/AuthGuard.astro';
     if (!productId || !price) {
       if (recentActivity) {
         recentActivity.style.display = 'block';
+        recentActivity.classList.remove('hidden');
         console.log('✅ Showing browse products section - no product selected');
       }
+      // Ensure forms are hidden when no product is selected
+      const productForm = document.getElementById('product-customization-form');
+      const orderMenuForm = document.getElementById('order-menu-customization-form');
+      if (productForm) productForm.classList.add('hidden');
+      if (orderMenuForm) orderMenuForm.classList.add('hidden');
     } else {
       // Hide recent activity if there are URL parameters (product selected)
       if (recentActivity) {
         recentActivity.style.display = 'none';
+        recentActivity.classList.add('hidden');
         console.log('✅ Hiding browse products section - product selected');
       }
     }
     
-    // Smooth page load transition
-    document.body.style.transition = 'opacity 0.3s ease-in-out';
-    document.body.style.opacity = '0';
-    
-    // Fade in the page
-    setTimeout(() => {
+    // Remove page load transition to prevent bluish screen
       document.body.style.opacity = '1';
-    }, 50);
     
     // Check if we should show a form based on URL parameters (fix refresh issue)
     if (productId && price) {
+      console.log('URL parameters detected - showing form for product:', productId);
       // Show the appropriate form based on product ID
       const products = [
         { id: '1', name: 'Restaurant Menu System', description: 'Digital menu system with QR code integration, online ordering, and real-time updates. Perfect for restaurants looking to modernize their customer experience.', price: 25000, type: 'restaurant' },
@@ -1546,7 +2065,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         
         // Update Order Menu System product details
         document.getElementById('order-menu-product-name').textContent = selectedProduct.name;
-        document.getElementById('order-menu-product-price').textContent = `₹${selectedProduct.price.toLocaleString()}`;
+        // Price is now displayed in the right column pricing section
         
         // Show appropriate form with smooth transition
         const recentActivity = document.getElementById('recent-activity');
@@ -1716,4 +2235,418 @@ import AuthGuard from '../components/AuthGuard.astro';
   
   
   console.log('✅ Dashboard script initialized with global auth manager');
+
+  // Pincode-based autocomplete functionality
+  const pincodeData = {
+    '400001': { city: 'Mumbai', state: 'Maharashtra' },
+    '400002': { city: 'Mumbai', state: 'Maharashtra' },
+    '400003': { city: 'Mumbai', state: 'Maharashtra' },
+    '400004': { city: 'Mumbai', state: 'Maharashtra' },
+    '400005': { city: 'Mumbai', state: 'Maharashtra' },
+    '400006': { city: 'Mumbai', state: 'Maharashtra' },
+    '400007': { city: 'Mumbai', state: 'Maharashtra' },
+    '400008': { city: 'Mumbai', state: 'Maharashtra' },
+    '400009': { city: 'Mumbai', state: 'Maharashtra' },
+    '400010': { city: 'Mumbai', state: 'Maharashtra' },
+    '110001': { city: 'New Delhi', state: 'Delhi' },
+    '110002': { city: 'New Delhi', state: 'Delhi' },
+    '110003': { city: 'New Delhi', state: 'Delhi' },
+    '110004': { city: 'New Delhi', state: 'Delhi' },
+    '110005': { city: 'New Delhi', state: 'Delhi' },
+    '110006': { city: 'New Delhi', state: 'Delhi' },
+    '110007': { city: 'New Delhi', state: 'Delhi' },
+    '110008': { city: 'New Delhi', state: 'Delhi' },
+    '110009': { city: 'New Delhi', state: 'Delhi' },
+    '110010': { city: 'New Delhi', state: 'Delhi' },
+    '560001': { city: 'Bangalore', state: 'Karnataka' },
+    '560002': { city: 'Bangalore', state: 'Karnataka' },
+    '560003': { city: 'Bangalore', state: 'Karnataka' },
+    '560004': { city: 'Bangalore', state: 'Karnataka' },
+    '560005': { city: 'Bangalore', state: 'Karnataka' },
+    '560006': { city: 'Bangalore', state: 'Karnataka' },
+    '560007': { city: 'Bangalore', state: 'Karnataka' },
+    '560008': { city: 'Bangalore', state: 'Karnataka' },
+    '560009': { city: 'Bangalore', state: 'Karnataka' },
+    '560010': { city: 'Bangalore', state: 'Karnataka' },
+    '600001': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600002': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600003': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600004': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600005': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600006': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600007': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600008': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600009': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600010': { city: 'Chennai', state: 'Tamil Nadu' },
+    '700001': { city: 'Kolkata', state: 'West Bengal' },
+    '700002': { city: 'Kolkata', state: 'West Bengal' },
+    '700003': { city: 'Kolkata', state: 'West Bengal' },
+    '700004': { city: 'Kolkata', state: 'West Bengal' },
+    '700005': { city: 'Kolkata', state: 'West Bengal' },
+    '700006': { city: 'Kolkata', state: 'West Bengal' },
+    '700007': { city: 'Kolkata', state: 'West Bengal' },
+    '700008': { city: 'Kolkata', state: 'West Bengal' },
+    '700009': { city: 'Kolkata', state: 'West Bengal' },
+    '700010': { city: 'Kolkata', state: 'West Bengal' },
+    '380001': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380002': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380003': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380004': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380005': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380006': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380007': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380008': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380009': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380010': { city: 'Ahmedabad', state: 'Gujarat' },
+    '411001': { city: 'Pune', state: 'Maharashtra' },
+    '411002': { city: 'Pune', state: 'Maharashtra' },
+    '411003': { city: 'Pune', state: 'Maharashtra' },
+    '411004': { city: 'Pune', state: 'Maharashtra' },
+    '411005': { city: 'Pune', state: 'Maharashtra' },
+    '411006': { city: 'Pune', state: 'Maharashtra' },
+    '411007': { city: 'Pune', state: 'Maharashtra' },
+    '411008': { city: 'Pune', state: 'Maharashtra' },
+    '411009': { city: 'Pune', state: 'Maharashtra' },
+    '411010': { city: 'Pune', state: 'Maharashtra' },
+    // More rural pincodes
+    '302001': { city: 'Jaipur', state: 'Rajasthan' },
+    '302002': { city: 'Jaipur', state: 'Rajasthan' },
+    '302003': { city: 'Jaipur', state: 'Rajasthan' },
+    '302004': { city: 'Jaipur', state: 'Rajasthan' },
+    '302005': { city: 'Jaipur', state: 'Rajasthan' },
+    '302006': { city: 'Jaipur', state: 'Rajasthan' },
+    '302007': { city: 'Jaipur', state: 'Rajasthan' },
+    '302008': { city: 'Jaipur', state: 'Rajasthan' },
+    '302009': { city: 'Jaipur', state: 'Rajasthan' },
+    '302010': { city: 'Jaipur', state: 'Rajasthan' },
+    '641001': { city: 'Coimbatore', state: 'Tamil Nadu' },
+    '641002': { city: 'Coimbatore', state: 'Tamil Nadu' },
+    '641003': { city: 'Coimbatore', state: 'Tamil Nadu' },
+    '641004': { city: 'Coimbatore', state: 'Tamil Nadu' },
+    '641005': { city: 'Coimbatore', state: 'Tamil Nadu' },
+    '625001': { city: 'Madurai', state: 'Tamil Nadu' },
+    '625002': { city: 'Madurai', state: 'Tamil Nadu' },
+    '625003': { city: 'Madurai', state: 'Tamil Nadu' },
+    '625004': { city: 'Madurai', state: 'Tamil Nadu' },
+    '625005': { city: 'Madurai', state: 'Tamil Nadu' },
+    '570001': { city: 'Mysore', state: 'Karnataka' },
+    '570002': { city: 'Mysore', state: 'Karnataka' },
+    '570003': { city: 'Mysore', state: 'Karnataka' },
+    '570004': { city: 'Mysore', state: 'Karnataka' },
+    '570005': { city: 'Mysore', state: 'Karnataka' },
+    '580001': { city: 'Hubli', state: 'Karnataka' },
+    '580002': { city: 'Hubli', state: 'Karnataka' },
+    '580003': { city: 'Hubli', state: 'Karnataka' },
+    '580004': { city: 'Hubli', state: 'Karnataka' },
+    '580005': { city: 'Hubli', state: 'Karnataka' },
+    '500001': { city: 'Hyderabad', state: 'Telangana' },
+    '500002': { city: 'Hyderabad', state: 'Telangana' },
+    '500003': { city: 'Hyderabad', state: 'Telangana' },
+    '500004': { city: 'Hyderabad', state: 'Telangana' },
+    '500005': { city: 'Hyderabad', state: 'Telangana' },
+    '500006': { city: 'Hyderabad', state: 'Telangana' },
+    '500007': { city: 'Hyderabad', state: 'Telangana' },
+    '500008': { city: 'Hyderabad', state: 'Telangana' },
+    '500009': { city: 'Hyderabad', state: 'Telangana' },
+    '500010': { city: 'Hyderabad', state: 'Telangana' },
+    // More common Indian pincodes
+    '110001': { city: 'Delhi', state: 'Delhi' },
+    '110002': { city: 'Delhi', state: 'Delhi' },
+    '110003': { city: 'Delhi', state: 'Delhi' },
+    '110004': { city: 'Delhi', state: 'Delhi' },
+    '110005': { city: 'Delhi', state: 'Delhi' },
+    '110006': { city: 'Delhi', state: 'Delhi' },
+    '110007': { city: 'Delhi', state: 'Delhi' },
+    '110008': { city: 'Delhi', state: 'Delhi' },
+    '110009': { city: 'Delhi', state: 'Delhi' },
+    '110010': { city: 'Delhi', state: 'Delhi' },
+    '560001': { city: 'Bangalore', state: 'Karnataka' },
+    '560002': { city: 'Bangalore', state: 'Karnataka' },
+    '560003': { city: 'Bangalore', state: 'Karnataka' },
+    '560004': { city: 'Bangalore', state: 'Karnataka' },
+    '560005': { city: 'Bangalore', state: 'Karnataka' },
+    '560006': { city: 'Bangalore', state: 'Karnataka' },
+    '560007': { city: 'Bangalore', state: 'Karnataka' },
+    '560008': { city: 'Bangalore', state: 'Karnataka' },
+    '560009': { city: 'Bangalore', state: 'Karnataka' },
+    '560010': { city: 'Bangalore', state: 'Karnataka' },
+    '600001': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600002': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600003': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600004': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600005': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600006': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600007': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600008': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600009': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600010': { city: 'Chennai', state: 'Tamil Nadu' },
+    '700001': { city: 'Kolkata', state: 'West Bengal' },
+    '700002': { city: 'Kolkata', state: 'West Bengal' },
+    '700003': { city: 'Kolkata', state: 'West Bengal' },
+    '700004': { city: 'Kolkata', state: 'West Bengal' },
+    '700005': { city: 'Kolkata', state: 'West Bengal' },
+    '700006': { city: 'Kolkata', state: 'West Bengal' },
+    '700007': { city: 'Kolkata', state: 'West Bengal' },
+    '700008': { city: 'Kolkata', state: 'West Bengal' },
+    '700009': { city: 'Kolkata', state: 'West Bengal' },
+    '700010': { city: 'Kolkata', state: 'West Bengal' }
+  };
+
+  // Indian cities and states for autocomplete (including extensive rural cities)
+  const indianCities = [
+    // Major Cities
+    'Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Kolkata', 'Hyderabad', 'Pune', 'Ahmedabad', 'Jaipur', 'Surat',
+    'Lucknow', 'Kanpur', 'Nagpur', 'Indore', 'Thane', 'Bhopal', 'Visakhapatnam', 'Pimpri-Chinchwad', 'Patna', 'Vadodara',
+    'Ghaziabad', 'Ludhiana', 'Agra', 'Nashik', 'Faridabad', 'Meerut', 'Rajkot', 'Kalyan-Dombivali', 'Vasai-Virar', 'Varanasi',
+    'Srinagar', 'Aurangabad', 'Navi Mumbai', 'Solapur', 'Vijayawada', 'Kolhapur', 'Amritsar', 'Sangli', 'Mira-Bhayandar',
+    
+    // Rajasthan - Extensive rural coverage
+    'Alwar', 'Bharatpur', 'Kota', 'Udaipur', 'Jodhpur', 'Bikaner', 'Ajmer', 'Pali', 'Sikar', 'Bhilwara',
+    'Kishangarh', 'Beawar', 'Hanumangarh', 'Ganganagar', 'Chittorgarh', 'Banswara', 'Dungarpur', 'Pratapgarh', 'Rajsamand',
+    'Baran', 'Jhalawar', 'Bundi', 'Sawai Madhopur', 'Karauli', 'Dholpur', 'Tonk', 'Dausa', 'Jhunjhunu', 'Churu',
+    'Nagaur', 'Jalore', 'Sirohi', 'Jaisalmer', 'Barmer', 'Jalor', 'Bharatpur', 'Karauli', 'Dholpur', 'Sawai Madhopur',
+    'Baran', 'Jhalawar', 'Bundi', 'Kota', 'Bundi', 'Sawai Madhopur', 'Karauli', 'Dholpur', 'Tonk', 'Dausa',
+    'Sikar', 'Jhunjhunu', 'Churu', 'Nagaur', 'Jalore', 'Sirohi', 'Jaisalmer', 'Barmer', 'Jalor', 'Pali',
+    'Rajsamand', 'Bhilwara', 'Kishangarh', 'Beawar', 'Hanumangarh', 'Ganganagar', 'Chittorgarh', 'Banswara', 'Dungarpur',
+    'Pratapgarh', 'Rajsamand', 'Baran', 'Jhalawar', 'Bundi', 'Sawai Madhopur', 'Karauli', 'Dholpur', 'Tonk', 'Dausa',
+    
+    // Maharashtra - Extensive rural coverage
+    'Kolhapur', 'Sangli', 'Satara', 'Pune', 'Nashik', 'Aurangabad', 'Jalgaon', 'Dhule', 'Nanded', 'Latur',
+    'Osmanabad', 'Beed', 'Jalna', 'Parbhani', 'Hingoli', 'Washim', 'Yavatmal', 'Amravati', 'Akola', 'Buldhana',
+    'Nandurbar', 'Ahmednagar', 'Solapur', 'Ratnagiri', 'Sindhudurg', 'Sangli', 'Satara', 'Kolhapur', 'Pune', 'Nashik',
+    'Aurangabad', 'Jalgaon', 'Dhule', 'Nanded', 'Latur', 'Osmanabad', 'Beed', 'Jalna', 'Parbhani', 'Hingoli',
+    'Washim', 'Yavatmal', 'Amravati', 'Akola', 'Buldhana', 'Nandurbar', 'Ahmednagar', 'Solapur', 'Ratnagiri', 'Sindhudurg',
+    'Chandrapur', 'Gadchiroli', 'Bhandara', 'Gondia', 'Wardha', 'Nagpur', 'Bhandara', 'Gondia', 'Wardha', 'Chandrapur',
+    'Gadchiroli', 'Bhandara', 'Gondia', 'Wardha', 'Nagpur', 'Bhandara', 'Gondia', 'Wardha', 'Chandrapur', 'Gadchiroli',
+    
+    // Karnataka - Extensive rural coverage
+    'Mysore', 'Hubli', 'Dharwad', 'Mangalore', 'Belgaum', 'Gulbarga', 'Davanagere', 'Bellary', 'Bijapur', 'Shimoga',
+    'Tumkur', 'Raichur', 'Bidar', 'Hospet', 'Gadag', 'Haveri', 'Bagalkot', 'Koppal', 'Chitradurga', 'Tumakuru',
+    'Chikmagalur', 'Hassan', 'Mandya', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore',
+    'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar',
+    'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu',
+    'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore',
+    
+    // Tamil Nadu - Extensive rural coverage
+    'Coimbatore', 'Madurai', 'Tiruchirappalli', 'Salem', 'Tirunelveli', 'Tiruppur', 'Erode', 'Vellore', 'Thoothukudi',
+    'Dindigul', 'Thanjavur', 'Ranipet', 'Sivakasi', 'Karur', 'Udhagamandalam', 'Hosur', 'Nagercoil', 'Kanchipuram',
+    'Cuddalore', 'Kumbakonam', 'Tiruvannamalai', 'Pollachi', 'Rajapalayam', 'Gudiyatham', 'Pudukkottai', 'Vaniyambadi',
+    'Ariyalur', 'Chengalpattu', 'Coimbatore', 'Cuddalore', 'Dharmapuri', 'Dindigul', 'Erode', 'Kallakurichi', 'Kanchipuram',
+    'Karur', 'Krishnagiri', 'Madurai', 'Mayiladuthurai', 'Nagapattinam', 'Namakkal', 'Nilgiris', 'Perambalur', 'Pudukkottai',
+    'Ramanathapuram', 'Ranipet', 'Salem', 'Sivaganga', 'Tenkasi', 'Thanjavur', 'Theni', 'Thoothukudi', 'Tiruchirappalli',
+    'Tirunelveli', 'Tirupathur', 'Tiruppur', 'Tiruvallur', 'Tiruvannamalai', 'Tiruvarur', 'Vellore', 'Viluppuram', 'Virudhunagar',
+    
+    // Uttar Pradesh - Extensive rural coverage
+    'Agra', 'Varanasi', 'Allahabad', 'Bareilly', 'Moradabad', 'Aligarh', 'Saharanpur', 'Noida', 'Firozabad', 'Banda',
+    'Etawah', 'Mirzapur', 'Mathura', 'Shahjahanpur', 'Rampur', 'Modinagar', 'Hapur', 'Etah', 'Mau', 'Ghaziabad',
+    'Sambhal', 'Amroha', 'Hardoi', 'Fatehpur', 'Raebareli', 'Orai', 'Sitapur', 'Bahraich', 'Gonda', 'Balrampur',
+    'Basti', 'Deoria', 'Gorakhpur', 'Kushinagar', 'Maharajganj', 'Siddharthnagar', 'Azamgarh', 'Ballia', 'Mau', 'Ghazipur',
+    'Chandauli', 'Jaunpur', 'Varanasi', 'Mirzapur', 'Sonbhadra', 'Banda', 'Chitrakoot', 'Hamirpur', 'Jalaun', 'Jhansi',
+    'Lalitpur', 'Mahoba', 'Agra', 'Aligarh', 'Etah', 'Firozabad', 'Hathras', 'Kasganj', 'Mathura', 'Mainpuri',
+    'Agra', 'Aligarh', 'Etah', 'Firozabad', 'Hathras', 'Kasganj', 'Mathura', 'Mainpuri', 'Agra', 'Aligarh',
+    
+    // Gujarat - Extensive rural coverage
+    'Surat', 'Vadodara', 'Rajkot', 'Bhavnagar', 'Junagadh', 'Gandhinagar', 'Nadiad', 'Morbi', 'Gandhidham', 'Bharuch',
+    'Veraval', 'Navsari', 'Bardoli', 'Palanpur', 'Godhra', 'Patan', 'Valsad', 'Anand', 'Mehsana', 'Surendranagar',
+    'Jamnagar', 'Porbandar', 'Ankleshwar', 'Vapi', 'Botad', 'Dahod', 'Narmada', 'Ahmedabad', 'Amreli', 'Anand',
+    'Banaskantha', 'Bharuch', 'Bhavnagar', 'Dahod', 'Dang', 'Gandhinagar', 'Jamnagar', 'Junagadh', 'Kheda', 'Kutch',
+    'Mehsana', 'Narmada', 'Navsari', 'Panchmahal', 'Patan', 'Porbandar', 'Rajkot', 'Sabarkantha', 'Surat', 'Surendranagar',
+    'Tapi', 'Vadodara', 'Valsad', 'Ahmedabad', 'Amreli', 'Anand', 'Banaskantha', 'Bharuch', 'Bhavnagar', 'Dahod',
+    
+    // Bihar - Rural coverage
+    'Patna', 'Gaya', 'Bhagalpur', 'Muzaffarpur', 'Darbhanga', 'Purnia', 'Arrah', 'Begusarai', 'Katihar', 'Munger',
+    'Chhapra', 'Bettiah', 'Saharsa', 'Sasaram', 'Hajipur', 'Dehri', 'Siwan', 'Motihari', 'Nawada', 'Bagaha',
+    'Buxar', 'Kishanganj', 'Sitamarhi', 'Madhubani', 'Samastipur', 'Vaishali', 'West Champaran', 'East Champaran', 'Sheikhpura', 'Lakhisarai',
+    
+    // West Bengal - Rural coverage
+    'Kolkata', 'Asansol', 'Siliguri', 'Durgapur', 'Bardhaman', 'Malda', 'Bahrampur', 'Habra', 'Kharagpur', 'Shantipur',
+    'Dankuni', 'Dhulian', 'Ranaghat', 'Haldia', 'Raiganj', 'Krishnanagar', 'Nabadwip', 'Medinipur', 'Jalpaiguri', 'Balurghat',
+    'Basirhat', 'Bankura', 'Chakdaha', 'Darjeeling', 'Kalimpong', 'Kalyani', 'Katwa', 'Kharagpur', 'Krishnanagar', 'Malda',
+    
+    // Madhya Pradesh - Rural coverage
+    'Bhopal', 'Indore', 'Gwalior', 'Jabalpur', 'Ujjain', 'Sagar', 'Dewas', 'Satna', 'Ratlam', 'Rewa',
+    'Murwara', 'Singrauli', 'Burhanpur', 'Khandwa', 'Chhindwara', 'Morena', 'Bhind', 'Guna', 'Shivpuri', 'Vidisha',
+    'Chhatarpur', 'Damoh', 'Panna', 'Tikamgarh', 'Niwari', 'Datia', 'Shivpuri', 'Guna', 'Ashoknagar', 'Guna',
+    
+    // Andhra Pradesh - Rural coverage
+    'Visakhapatnam', 'Vijayawada', 'Guntur', 'Nellore', 'Kurnool', 'Tirupati', 'Kadapa', 'Anantapur', 'Chittoor', 'Ongole',
+    'Eluru', 'Machilipatnam', 'Tenali', 'Proddatur', 'Chilakaluripet', 'Kadiri', 'Adoni', 'Nandyal', 'Kavali', 'Tadipatri',
+    'Srikakulam', 'Vizianagaram', 'Parvathipuram', 'Bobbili', 'Salur', 'Tekkali', 'Palasa', 'Sompeta', 'Ichchapuram', 'Narasannapeta',
+    
+    // Kerala - Rural coverage
+    'Thiruvananthapuram', 'Kochi', 'Kozhikode', 'Thrissur', 'Palakkad', 'Malappuram', 'Kannur', 'Kasaragod', 'Kollam', 'Alappuzha',
+    'Pathanamthitta', 'Kottayam', 'Idukki', 'Ernakulam', 'Thrissur', 'Palakkad', 'Malappuram', 'Kozhikode', 'Wayanad', 'Kannur',
+    'Kasaragod', 'Thiruvananthapuram', 'Kollam', 'Alappuzha', 'Pathanamthitta', 'Kottayam', 'Idukki', 'Ernakulam', 'Thrissur', 'Palakkad',
+    
+    // Punjab - Rural coverage
+    'Chandigarh', 'Ludhiana', 'Amritsar', 'Jalandhar', 'Patiala', 'Bathinda', 'Mohali', 'Firozpur', 'Batala', 'Pathankot',
+    'Moga', 'Abohar', 'Malerkotla', 'Khanna', 'Phagwara', 'Muktsar', 'Barnala', 'Rajpura', 'Fazilka', 'Kapurthala',
+    'Sangrur', 'Sunam', 'Nabha', 'Rampura', 'Gurdaspur', 'Tarn Taran', 'Fatehgarh Sahib', 'Muktsar', 'Faridkot', 'Moga',
+    
+    // Haryana - Rural coverage
+    'Chandigarh', 'Faridabad', 'Gurgaon', 'Panipat', 'Ambala', 'Yamunanagar', 'Rohtak', 'Hisar', 'Karnal', 'Sonipat',
+    'Panchkula', 'Bhiwani', 'Sirsa', 'Bahadurgarh', 'Jind', 'Kaithal', 'Rewari', 'Palwal', 'Narnaul', 'Hansi',
+    'Fatehabad', 'Tohana', 'Narwana', 'Mandi Dabwali', 'Safidon', 'Pehowa', 'Samalkha', 'Shahbad', 'Hodal', 'Sohna',
+    
+    // Odisha - Rural coverage
+    'Bhubaneswar', 'Cuttack', 'Rourkela', 'Berhampur', 'Sambalpur', 'Puri', 'Baleshwar', 'Bhadrak', 'Baripada', 'Balangir',
+    'Jharsuguda', 'Bargarh', 'Angul', 'Dhenkanal', 'Jajpur', 'Jagatsinghpur', 'Kendrapara', 'Khordha', 'Nayagarh', 'Puri',
+    'Sundargarh', 'Kandhamal', 'Boudh', 'Deogarh', 'Jharsuguda', 'Sambalpur', 'Subarnapur', 'Bargarh', 'Balangir', 'Nuapada',
+    
+    // Jharkhand - Rural coverage
+    'Ranchi', 'Jamshedpur', 'Dhanbad', 'Bokaro', 'Deoghar', 'Phusro', 'Hazaribagh', 'Giridih', 'Koderma', 'Ramgarh',
+    'Chatra', 'Garhwa', 'Koderma', 'Lohardaga', 'Pakur', 'Palamu', 'Sahibganj', 'Seraikela Kharsawan', 'Simdega', 'West Singhbhum',
+    'East Singhbhum', 'Dumka', 'Godda', 'Jamtara', 'Khunti', 'Latehar', 'Palamu', 'Sahibganj', 'Seraikela Kharsawan', 'Simdega',
+    
+    // Assam - Rural coverage
+    'Guwahati', 'Silchar', 'Dibrugarh', 'Jorhat', 'Nagaon', 'Tinsukia', 'Tezpur', 'Bongaigaon', 'Dhubri', 'Diphu',
+    'Goalpara', 'Hailakandi', 'Karimganj', 'Kokrajhar', 'Mangaldoi', 'Mariagaon', 'Nalbari', 'North Lakhimpur', 'Sibsagar', 'Tezpur',
+    'Tinsukia', 'Udalguri', 'Barpeta', 'Bongaigaon', 'Cachar', 'Chirang', 'Darrang', 'Dhemaji', 'Dhubri', 'Dibrugarh',
+    
+    // Chhattisgarh - Rural coverage
+    'Raipur', 'Bhilai', 'Bilaspur', 'Korba', 'Rajnandgaon', 'Durg', 'Raigarh', 'Jagdalpur', 'Ambikapur', 'Bhatapara',
+    'Bilaspur', 'Chirmiri', 'Dhamtari', 'Durg', 'Jagdalpur', 'Janjgir', 'Jashpur', 'Kabirdham', 'Kanker', 'Kondagaon',
+    'Korba', 'Koriya', 'Mahasamund', 'Mungeli', 'Narayanpur', 'Raigarh', 'Raipur', 'Rajnandgaon', 'Sukma', 'Surajpur',
+    
+    // Himachal Pradesh - Rural coverage
+    'Shimla', 'Dharamshala', 'Solan', 'Mandi', 'Palampur', 'Kullu', 'Chamba', 'Baddi', 'Nahan', 'Paonta Sahib',
+    'Una', 'Bilaspur', 'Hamirpur', 'Kangra', 'Kinnaur', 'Lahaul and Spiti', 'Mandi', 'Shimla', 'Sirmaur', 'Solan',
+    'Kullu', 'Chamba', 'Una', 'Bilaspur', 'Hamirpur', 'Kangra', 'Kinnaur', 'Lahaul and Spiti', 'Mandi', 'Shimla',
+    
+    // Uttarakhand - Rural coverage
+    'Dehradun', 'Haridwar', 'Roorkee', 'Kashipur', 'Rudrapur', 'Haldwani', 'Rishikesh', 'Kotdwar', 'Ramnagar', 'Pithoragarh',
+    'Almora', 'Nainital', 'Champawat', 'Bageshwar', 'Chamoli', 'Pauri Garhwal', 'Rudraprayag', 'Tehri Garhwal', 'Uttarkashi', 'Dehradun',
+    'Haridwar', 'Roorkee', 'Kashipur', 'Rudrapur', 'Haldwani', 'Rishikesh', 'Kotdwar', 'Ramnagar', 'Pithoragarh', 'Almora',
+    
+    // Goa - Rural coverage
+    'Panaji', 'Margao', 'Vasco da Gama', 'Mapusa', 'Ponda', 'Mormugao', 'Sanquelim', 'Bicholim', 'Curchorem', 'Cuncolim',
+    'Canacona', 'Pernem', 'Quepem', 'Sanguem', 'Satari', 'Tiswadi', 'Bardez', 'Bicholim', 'Canacona', 'Curchorem',
+    
+    // Union Territories
+    'Chandigarh', 'Delhi', 'Puducherry', 'Daman', 'Diu', 'Dadra and Nagar Haveli', 'Lakshadweep', 'Andaman and Nicobar Islands'
+  ];
+
+  const indianStates = [
+    'Maharashtra', 'Delhi', 'Karnataka', 'Tamil Nadu', 'West Bengal', 'Telangana', 'Gujarat', 'Rajasthan', 'Uttar Pradesh',
+    'Madhya Pradesh', 'Andhra Pradesh', 'Bihar', 'Punjab', 'Haryana', 'Kerala', 'Odisha', 'Jharkhand', 'Assam', 'Chhattisgarh',
+    'Himachal Pradesh', 'Uttarakhand', 'Tripura', 'Meghalaya', 'Manipur', 'Nagaland', 'Goa', 'Arunachal Pradesh', 'Mizoram',
+    'Sikkim', 'Jammu and Kashmir', 'Ladakh'
+  ];
+
+  // Pincode autocomplete functionality
+  function initializePincodeAutocomplete() {
+    const pincodeInput = document.getElementById('pincode-input');
+    const cityInput = document.getElementById('city-input');
+    const stateInput = document.getElementById('state-input');
+    const citySuggestions = document.getElementById('city-suggestions');
+    const stateSuggestions = document.getElementById('state-suggestions');
+
+    if (pincodeInput && cityInput && stateInput) {
+      console.log('Initializing pincode autocomplete...');
+      
+      // Pincode-based autofill
+      pincodeInput.addEventListener('input', function() {
+        const pincode = this.value.trim();
+        console.log('Pincode entered:', pincode);
+        if (pincode.length === 6 && pincodeData[pincode]) {
+          console.log('Found pincode data:', pincodeData[pincode]);
+          cityInput.value = pincodeData[pincode].city;
+          stateInput.value = pincodeData[pincode].state;
+          // Set country to India when pincode is found
+          const countrySelect = document.getElementById('country-select');
+          if (countrySelect) {
+            countrySelect.value = 'India';
+          }
+        }
+      });
+
+      // City autocomplete
+      cityInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        if (query.length > 0) {
+          const filtered = indianCities.filter(city => 
+            city.toLowerCase().includes(query)
+          );
+          showSuggestions(citySuggestions, filtered, cityInput);
+        } else {
+          hideSuggestions(citySuggestions);
+        }
+      });
+
+      // State autocomplete
+      stateInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        if (query.length > 0) {
+          const filtered = indianStates.filter(state => 
+            state.toLowerCase().includes(query)
+          );
+          showSuggestions(stateSuggestions, filtered, stateInput);
+        } else {
+          hideSuggestions(stateSuggestions);
+        }
+      });
+
+      // Hide suggestions when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!cityInput.contains(e.target) && !citySuggestions.contains(e.target)) {
+          hideSuggestions(citySuggestions);
+        }
+        if (!stateInput.contains(e.target) && !stateSuggestions.contains(e.target)) {
+          hideSuggestions(stateSuggestions);
+        }
+      });
+    }
+  }
+
+  // Initialize when DOM is loaded
+  document.addEventListener('DOMContentLoaded', function() {
+    initializePincodeAutocomplete();
+    // Try again after a short delay
+    setTimeout(initializePincodeAutocomplete, 500);
+    setTimeout(initializePincodeAutocomplete, 1000);
+    setTimeout(initializePincodeAutocomplete, 2000);
+  });
+  
+  // Also try to initialize when the form becomes visible (for dynamic forms)
+  setTimeout(initializePincodeAutocomplete, 3000);
+  setTimeout(initializePincodeAutocomplete, 5000);
+  
+  // Reinitialize when Order Menu System form is shown
+  function reinitializePincodeAutocomplete() {
+    console.log('Reinitializing pincode autocomplete...');
+    initializePincodeAutocomplete();
+  }
+  
+  // Make it globally available for form visibility changes
+  window.reinitializePincodeAutocomplete = reinitializePincodeAutocomplete;
+
+  function showSuggestions(container, suggestions, input) {
+    if (suggestions.length === 0) {
+      hideSuggestions(container);
+      return;
+    }
+
+    container.innerHTML = '';
+    suggestions.slice(0, 5).forEach(suggestion => {
+      const div = document.createElement('div');
+      div.className = 'px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200';
+      div.textContent = suggestion;
+      div.addEventListener('click', function() {
+        input.value = suggestion;
+        hideSuggestions(container);
+      });
+      container.appendChild(div);
+    });
+
+    container.classList.remove('hidden');
+    container.style.position = 'absolute';
+    container.style.zIndex = '10';
+    container.style.width = input.offsetWidth + 'px';
+    container.style.top = (input.offsetTop + input.offsetHeight) + 'px';
+    container.style.left = input.offsetLeft + 'px';
+  }
+
+  function hideSuggestions(container) {
+    container.classList.add('hidden');
+  }
 </script>

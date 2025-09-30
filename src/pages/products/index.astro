@@ -283,7 +283,7 @@ const processedProducts = products
     }
   });
 
-  // Product click handler with role-based access
+  // Product click handler - OMS bypass for deployment
   document.addEventListener('DOMContentLoaded', function() {
     const productButtons = document.querySelectorAll('.product-view-btn');
     
@@ -294,37 +294,51 @@ const processedProducts = products
         const productSlug = this.getAttribute('data-product-slug');
         const productName = this.getAttribute('data-product-name');
         
-        // Check if user is admin
-        const isAdmin = checkIfUserIsAdmin();
+        console.log('Product clicked:', productSlug);
         
-        // If user is admin, allow access to all products
-        if (isAdmin) {
+        // CRITICAL: Always allow Order Menu System - NO CHECKS
+        if (productSlug === 'order-menu-system') {
+          console.log('OMS product - direct redirect');
           window.location.href = `/products/${productSlug}`;
           return;
         }
         
-        // If user is not admin and product is not Order Menu System, show dialog
-        if (productSlug !== 'order-menu-system') {
-          if (window.showProductDialog) {
-            window.showProductDialog();
-          }
+        // For other products, check admin status
+        const isAdmin = checkIfUserIsAdmin();
+        console.log('Is admin:', isAdmin);
+        
+        if (isAdmin) {
+          console.log('Admin user - allowing access');
+          window.location.href = `/products/${productSlug}`;
           return;
         }
         
-        // If product is Order Menu System, allow access for all users
-        window.location.href = `/products/${productSlug}`;
+        // Non-admin users see dialog for other products
+        console.log('Non-admin user - showing dialog');
+        if (window.showProductDialog) {
+          window.showProductDialog();
+        } else {
+          console.log('Dialog not available - redirecting to contact');
+          window.location.href = '/contact';
+        }
       });
     });
   });
 
-  // Function to check if user is admin
+  // Function to check if user is admin - deployment compatible
   function checkIfUserIsAdmin() {
     try {
-      // Check if user is logged in
+      // Check global auth manager first
+      if (window.globalAuthManager && window.globalAuthManager.isUserLoggedIn()) {
+        const currentUser = window.globalAuthManager.getCurrentUser();
+        if (currentUser && currentUser.role === 'admin') {
+          return true;
+        }
+      }
+      
+      // Check simple auth manager
       if (window.simpleAuthManager && window.simpleAuthManager.isUserLoggedIn()) {
         const currentUser = window.simpleAuthManager.getCurrentUser();
-        
-        // Check if user has admin role
         if (currentUser && currentUser.role === 'admin') {
           return true;
         }
@@ -333,9 +347,26 @@ const processedProducts = products
       // Check session storage for admin role
       const sessionData = sessionStorage.getItem('simple-auth-session');
       if (sessionData) {
-        const session = JSON.parse(sessionData);
-        if (session.user && session.user.role === 'admin') {
-          return true;
+        try {
+          const session = JSON.parse(sessionData);
+          if (session.user && session.user.role === 'admin') {
+            return true;
+          }
+        } catch (parseError) {
+          console.log('Session data parse error:', parseError);
+        }
+      }
+      
+      // Check localStorage as fallback
+      const localSessionData = localStorage.getItem('simple-auth-session');
+      if (localSessionData) {
+        try {
+          const session = JSON.parse(localSessionData);
+          if (session.user && session.user.role === 'admin') {
+            return true;
+          }
+        } catch (parseError) {
+          console.log('Local session data parse error:', parseError);
         }
       }
       

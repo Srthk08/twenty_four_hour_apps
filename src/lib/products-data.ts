@@ -89,7 +89,7 @@ const mockProducts: Product[] = [
     description: 'Complete order management system with digital menu integration, real-time order tracking, and payment processing. Perfect for restaurants looking to streamline their ordering process.',
     short_description: 'Complete order management system with digital menu integration',
     category: 'web',
-    base_price: 25000,
+    base_price: 999,
     featured_image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop&crop=center',
     gallery: [],
     features: ['Order Management', 'Digital Menu Integration', 'Real-time Tracking', 'Payment Processing', 'Analytics Dashboard'],
