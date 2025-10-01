@@ -118,16 +118,25 @@ import Layout from '../layouts/Layout.astro';
           <!-- Phone -->
           <div>
             <label for="phone" class="block text-sm font-medium text-gray-700">
-              Phone Number
+              Phone Number *
             </label>
             <div class="mt-1">
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                placeholder="+91 98765 43210"
-              />
+              <div class="flex">
+                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                  +91
+                </span>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  required
+                  maxlength="10"
+                  pattern="[0-9]{10}"
+                  class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-r-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  placeholder="9876543210"
+                />
+              </div>
+              <div id="phone-error" class="hidden text-red-500 text-sm mt-1">Please enter a valid 10-digit phone number</div>
             </div>
           </div>
 
@@ -490,6 +499,7 @@ import Layout from '../layouts/Layout.astro';
     const phoneInput = document.getElementById('phone') as HTMLInputElement;
     const companyNameInput = document.getElementById('company_name') as HTMLInputElement;
     const adminCodeSection = document.getElementById('admin-code-section');
+    const phoneError = document.getElementById('phone-error');
     
     // Clear all input fields
     if (emailInput) emailInput.value = '';
@@ -498,6 +508,28 @@ import Layout from '../layouts/Layout.astro';
     if (confirmPasswordInput) confirmPasswordInput.value = '';
     if (phoneInput) phoneInput.value = '';
     if (companyNameInput) companyNameInput.value = '';
+    
+    // Phone number validation
+    if (phoneInput) {
+      phoneInput.addEventListener('input', function(e) {
+        // Remove any non-numeric characters
+        e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        
+        // Limit to 10 digits
+        if (e.target.value.length > 10) {
+          e.target.value = e.target.value.slice(0, 10);
+        }
+        
+        // Show/hide error message
+        if (phoneError) {
+          if (e.target.value.length > 0 && e.target.value.length !== 10) {
+            phoneError.classList.remove('hidden');
+          } else {
+            phoneError.classList.add('hidden');
+          }
+        }
+      });
+    }
     
     // Check for admin signup URL parameter
     const urlParams = new URLSearchParams(window.location.search);
@@ -578,6 +610,15 @@ import Layout from '../layouts/Layout.astro';
       return;
     }
 
+    // Validate phone number
+    if (!phone || phone.length !== 10 || !/^[0-9]{10}$/.test(phone)) {
+      if (errorText) {
+        errorText.textContent = 'Please enter a valid 10-digit phone number.';
+      }
+      errorMessage?.classList.remove('hidden');
+      return;
+    }
+
     // Show loading state - center icon and hide text
     const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
     const originalText = submitButton.textContent;
@@ -599,7 +640,7 @@ import Layout from '../layouts/Layout.astro';
         options: {
           data: {
             full_name: fullName,
-            phone: phone,
+            phone: phone ? `+91${phone}` : '',
             company_name: companyName,
           }
         }
@@ -626,7 +667,7 @@ import Layout from '../layouts/Layout.astro';
             id: data.user.id,
             email: email,
             full_name: fullName || '',
-            phone: phone || '',
+            phone: phone ? `+91${phone}` : '',
             company_name: companyName || '',
             role: userRole,
             status: 'pending_verification',
@@ -648,7 +689,7 @@ import Layout from '../layouts/Layout.astro';
             id: data.user.id,
             email: email,
             full_name: fullName || '',
-            phone: phone || '',
+            phone: phone ? `+91${phone}` : '',
             company_name: companyName || '',
             role: userRole,
             status: 'active',

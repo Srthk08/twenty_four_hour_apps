@@ -311,7 +311,8 @@ import AuthGuard from '../components/AuthGuard.astro';
                     <label class="block text-sm font-semibold text-gray-700 mb-2">
                       Phone Number <span class="text-red-500">*</span>
                     </label>
-                    <input type="tel" name="phone" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="+91 9876543210" required>
+                    <input type="tel" name="phone" id="phone-input" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="+91 9876543210" required maxlength="15" pattern="(\+91[0-9]{10}|[0-9]{10})" title="Please enter 10 digits or +91 followed by 10 digits">
+                    <div id="phone-error" class="hidden text-red-500 text-sm mt-1">Phone number must be 10 digits or +91 followed by 10 digits</div>
                   </div>
                 </div>
 
@@ -337,30 +338,37 @@ import AuthGuard from '../components/AuthGuard.astro';
 
                   <!-- City and State Row -->
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        City <span class="text-red-500">*</span>
-                      </label>
-                      <input type="text" name="city" id="city-input" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="e.g., Mumbai" required autocomplete="off">
-                      <div id="city-suggestions" class="hidden absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto"></div>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        State <span class="text-red-500">*</span>
-                      </label>
-                      <input type="text" name="state" id="state-input" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="e.g., Maharashtra" required autocomplete="off">
-                      <div id="state-suggestions" class="hidden absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto"></div>
-                    </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              City <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <input type="text" name="city" id="city-input" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Type to search city..." required autocomplete="off">
+              <div id="city-suggestions" class="hidden absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto mt-1"></div>
+            </div>
+            <div id="city-error" class="hidden text-red-500 text-sm mt-1">Please select a valid city</div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              State <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <input type="text" name="state" id="state-input" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Type to search state..." required autocomplete="off">
+              <div id="state-suggestions" class="hidden absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto mt-1"></div>
+            </div>
+            <div id="state-error" class="hidden text-red-500 text-sm mt-1">Please select a valid state</div>
+          </div>
                   </div>
 
-                  <!-- Pincode and Country Row -->
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Pincode <span class="text-red-500">*</span>
-                      </label>
-                      <input type="text" name="pincode" id="pincode-input" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="e.g., 400001" required maxlength="6">
-                    </div>
+        <!-- Pincode and Country Row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Pincode <span class="text-red-500">*</span>
+            </label>
+            <input type="text" name="pincode" id="pincode-input" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="e.g., 400001" required maxlength="6" pattern="[0-9]{6}" title="Please enter exactly 6 digits">
+            <div id="pincode-error" class="hidden text-red-500 text-sm mt-1">Pincode must be exactly 6 digits</div>
+          </div>
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">
                         Country <span class="text-red-500">*</span>
@@ -441,20 +449,90 @@ import AuthGuard from '../components/AuthGuard.astro';
               <!-- Right Column - Pricing & Contact -->
               <div class="space-y-6">
                 <!-- Pricing Information - Hidden on Mobile, Visible on Desktop -->
-                <div class="hidden lg:block bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-6 border border-amber-200">
-                  <h3 class="text-lg font-semibold text-gray-900 mb-4">Pricing Details</h3>
-                  <div class="space-y-2">
-                    <div class="flex justify-between items-center">
-                      <span class="text-gray-600">Base Price:</span>
-                      <span class="font-medium">₹999</span>
+                <div class="hidden lg:block bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                  <!-- Header -->
+                  <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <h3 class="text-xl font-bold text-white">Order Summary</h3>
+                        <p class="text-blue-100 text-sm">Order Menu System</p>
+                      </div>
+                      <div class="bg-white bg-opacity-20 rounded-lg p-2">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                      </div>
                     </div>
-                    <div class="flex justify-between items-center">
-                      <span class="text-gray-600">GST (18%):</span>
-                      <span class="font-medium">₹180</span>
-                    </div>
-                    <div class="flex justify-between items-center font-bold text-lg border-t pt-2 mt-2">
-                      <span>Total Price:</span>
-                      <span class="text-amber-600">₹1,179</span>
+                  </div>
+                  
+                  <!-- Pricing Details -->
+                  <div class="p-6">
+                    <div class="space-y-4">
+                      <!-- Base Price -->
+                      <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                        <div class="flex items-center space-x-3">
+                          <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span class="text-gray-700 font-medium">Base Package</span>
+                        </div>
+                        <span class="text-lg font-semibold text-gray-900">₹999</span>
+                      </div>
+                      
+                      <!-- GST -->
+                      <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                        <div class="flex items-center space-x-3">
+                          <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <span class="text-gray-700 font-medium">GST (18%)</span>
+                        </div>
+                        <span class="text-lg font-semibold text-gray-900">₹180</span>
+                      </div>
+                      
+                      <!-- Features -->
+                      <div class="py-3 border-b border-gray-100">
+                        <div class="flex items-center space-x-3 mb-3">
+                          <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
+                          <span class="text-gray-700 font-medium">Included Features</span>
+                        </div>
+                        <div class="ml-5 space-y-2">
+                          <div class="flex items-center text-sm text-gray-600">
+                            <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Custom Menu Design
+                          </div>
+                          <div class="flex items-center text-sm text-gray-600">
+                            <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Online Ordering System
+                          </div>
+                          <div class="flex items-center text-sm text-gray-600">
+                            <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Admin Dashboard
+                          </div>
+                          <div class="flex items-center text-sm text-gray-600">
+                            <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Mobile Responsive
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Total -->
+                      <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-4">
+                        <div class="flex items-center justify-between">
+                          <div>
+                            <span class="text-lg font-bold text-gray-900">Total Amount</span>
+                            <p class="text-sm text-gray-600">Including all taxes</p>
+                          </div>
+                          <div class="text-right">
+                            <span class="text-3xl font-bold text-indigo-600">₹1,179</span>
+                            <p class="text-sm text-gray-500">One-time payment</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -765,9 +843,237 @@ import AuthGuard from '../components/AuthGuard.astro';
     }
   }
 
+  // City and State data arrays
+  const indianCities = [
+    'Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad', 'Jaipur', 'Surat',
+    'Lucknow', 'Kanpur', 'Nagpur', 'Indore', 'Thane', 'Bhopal', 'Visakhapatnam', 'Pimpri-Chinchwad', 'Patna', 'Vadodara',
+    'Ghaziabad', 'Ludhiana', 'Agra', 'Nashik', 'Faridabad', 'Meerut', 'Rajkot', 'Kalyan-Dombivali', 'Vasai-Virar', 'Varanasi',
+    'Srinagar', 'Aurangabad', 'Navi Mumbai', 'Solapur', 'Vijayawada', 'Kolhapur', 'Amritsar', 'Noida', 'Ranchi', 'Howrah',
+    'Coimbatore', 'Raipur', 'Jabalpur', 'Gwalior', 'Chandigarh', 'Tiruchirappalli', 'Mysore', 'Bhubaneswar', 'Kochi', 'Bhavnagar',
+    'Salem', 'Warangal', 'Guntur', 'Bhiwandi', 'Amravati', 'Nanded', 'Sangli', 'Malegaon', 'Ulhasnagar', 'Jalgaon',
+    'Latur', 'Ahmadnagar', 'Dhule', 'Ichalkaranji', 'Parbhani', 'Jalna', 'Bhusawal', 'Panvel', 'Satara', 'Beed',
+    'Yavatmal', 'Kamptee', 'Gondia', 'Barshi', 'Achalpur', 'Osmanabad', 'Nandurbar', 'Wardha', 'Udgir', 'Amalner',
+    'Akot', 'Pandharpur', 'Shirpur', 'Parli', 'Pathri', 'Sinnar', 'Shirur', 'Mangrulpir', 'Phaltan', 'Pulgaon',
+    'Pimpri', 'Pachora', 'Paratwada', 'Pusad', 'Purna', 'Rahuri', 'Rajura', 'Ramtek', 'Ratnagiri', 'Raver',
+    'Risod', 'Sailu', 'Sangamner', 'Sasvad', 'Satana', 'Shahpur', 'Shegaon', 'Shendurjana', 'Shirdi', 'Shrigonda',
+    'Shrirampur', 'Sillod', 'Soyagaon', 'Talegaon Dabhade', 'Talode', 'Tasgaon', 'Telhara', 'Tirora', 'Tuljapur', 'Tumsar',
+    'Uchgaon', 'Umarga', 'Umarkhed', 'Umred', 'Uran', 'Uran Islampur', 'Vadgaon Kasba', 'Vaijapur', 'Vasai', 'Virar',
+    'Vita', 'Wadgaon Road', 'Wai', 'Wani', 'Warora', 'Warud', 'Washim', 'Yawal', 'Yevla'
+  ];
+
+  const indianStates = [
+    'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand',
+    'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
+    'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+    'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu', 'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
+  ];
+
+  // Form validation functions
+  function setupFormValidation() {
+    const pincodeInput = document.getElementById('pincode-input');
+    const cityInput = document.getElementById('city-input');
+    const stateInput = document.getElementById('state-input');
+    const phoneInput = document.getElementById('phone-input');
+    
+    // Pincode validation - only allow numbers and exactly 6 digits
+    if (pincodeInput) {
+      pincodeInput.addEventListener('input', function(e) {
+        // Remove any non-numeric characters
+        e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        
+        // Limit to 6 digits
+        if (e.target.value.length > 6) {
+          e.target.value = e.target.value.slice(0, 6);
+        }
+        
+        // Show/hide error message
+        const errorDiv = document.getElementById('pincode-error');
+        if (e.target.value.length > 0 && e.target.value.length !== 6) {
+          errorDiv.classList.remove('hidden');
+        } else {
+          errorDiv.classList.add('hidden');
+        }
+      });
+    }
+    
+    // City validation - searchable dropdown
+    if (cityInput) {
+      const citySuggestions = document.getElementById('city-suggestions');
+      
+      cityInput.addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase();
+        const filteredCities = indianCities.filter(city => 
+          city.toLowerCase().includes(query)
+        );
+        
+        // Show/hide suggestions
+        if (query.length > 0 && filteredCities.length > 0) {
+          citySuggestions.innerHTML = filteredCities.map(city => 
+            `<div class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-value="${city}">${city}</div>`
+          ).join('');
+          citySuggestions.classList.remove('hidden');
+        } else {
+          citySuggestions.classList.add('hidden');
+        }
+        
+        // Show/hide error message
+        const errorDiv = document.getElementById('city-error');
+        if (e.target.value === '' || !indianCities.includes(e.target.value)) {
+          errorDiv.classList.remove('hidden');
+        } else {
+          errorDiv.classList.add('hidden');
+        }
+      });
+      
+      // Handle suggestion clicks
+      citySuggestions.addEventListener('click', function(e) {
+        if (e.target.dataset.value) {
+          cityInput.value = e.target.dataset.value;
+          citySuggestions.classList.add('hidden');
+          // Hide error message
+          document.getElementById('city-error').classList.add('hidden');
+        }
+      });
+      
+      // Hide suggestions when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!cityInput.contains(e.target) && !citySuggestions.contains(e.target)) {
+          citySuggestions.classList.add('hidden');
+        }
+      });
+    }
+    
+    // State validation - searchable dropdown
+    if (stateInput) {
+      const stateSuggestions = document.getElementById('state-suggestions');
+      
+      stateInput.addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase();
+        const filteredStates = indianStates.filter(state => 
+          state.toLowerCase().includes(query)
+        );
+        
+        // Show/hide suggestions
+        if (query.length > 0 && filteredStates.length > 0) {
+          stateSuggestions.innerHTML = filteredStates.map(state => 
+            `<div class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" data-value="${state}">${state}</div>`
+          ).join('');
+          stateSuggestions.classList.remove('hidden');
+        } else {
+          stateSuggestions.classList.add('hidden');
+        }
+        
+        // Show/hide error message
+        const errorDiv = document.getElementById('state-error');
+        if (e.target.value === '' || !indianStates.includes(e.target.value)) {
+          errorDiv.classList.remove('hidden');
+        } else {
+          errorDiv.classList.add('hidden');
+        }
+      });
+      
+      // Handle suggestion clicks
+      stateSuggestions.addEventListener('click', function(e) {
+        if (e.target.dataset.value) {
+          stateInput.value = e.target.dataset.value;
+          stateSuggestions.classList.add('hidden');
+          // Hide error message
+          document.getElementById('state-error').classList.add('hidden');
+        }
+      });
+      
+      // Hide suggestions when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!stateInput.contains(e.target) && !stateSuggestions.contains(e.target)) {
+          stateSuggestions.classList.add('hidden');
+        }
+      });
+    }
+    
+    // Phone number validation - allow 10 digits or +91 + 10 digits
+    if (phoneInput) {
+      phoneInput.addEventListener('input', function(e) {
+        let value = e.target.value;
+        
+        // Allow +91 at the beginning, then only numbers
+        if (value.startsWith('+91')) {
+          // Keep +91 and allow only numbers after it
+          value = '+91' + value.substring(3).replace(/[^0-9]/g, '');
+          // Limit to +91 + 10 digits = 13 characters total
+          if (value.length > 13) {
+            value = value.slice(0, 13);
+          }
+        } else {
+          // If not starting with +91, allow only numbers
+          value = value.replace(/[^0-9]/g, '');
+          // Limit to 10 digits
+          if (value.length > 10) {
+            value = value.slice(0, 10);
+          }
+        }
+        
+        e.target.value = value;
+        
+        // Show/hide error message
+        const errorDiv = document.getElementById('phone-error');
+        const isValid = (value.length === 10) || (value.length === 13 && value.startsWith('+91'));
+        
+        if (value.length > 0 && !isValid) {
+          errorDiv.classList.remove('hidden');
+        } else {
+          errorDiv.classList.add('hidden');
+        }
+      });
+    }
+  }
+  
+  function validateFormFields() {
+    const pincodeInput = document.getElementById('pincode-input');
+    const cityInput = document.getElementById('city-input');
+    const stateInput = document.getElementById('state-input');
+    const phoneInput = document.getElementById('phone-input');
+    
+    let isValid = true;
+    
+    // Validate pincode
+    if (pincodeInput && (!pincodeInput.value || pincodeInput.value.length !== 6 || !/^[0-9]{6}$/.test(pincodeInput.value))) {
+      const errorDiv = document.getElementById('pincode-error');
+      errorDiv.classList.remove('hidden');
+      isValid = false;
+    }
+    
+    // Validate city - must be from valid cities list
+    if (cityInput && (!cityInput.value || !indianCities.includes(cityInput.value))) {
+      const errorDiv = document.getElementById('city-error');
+      errorDiv.classList.remove('hidden');
+      isValid = false;
+    }
+    
+    // Validate state - must be from valid states list
+    if (stateInput && (!stateInput.value || !indianStates.includes(stateInput.value))) {
+      const errorDiv = document.getElementById('state-error');
+      errorDiv.classList.remove('hidden');
+      isValid = false;
+    }
+    
+    // Validate phone number - accept 10 digits or +91 + 10 digits
+    if (phoneInput && (!phoneInput.value || !(/^[0-9]{10}$/.test(phoneInput.value) || /^\+91[0-9]{10}$/.test(phoneInput.value)))) {
+      const errorDiv = document.getElementById('phone-error');
+      errorDiv.classList.remove('hidden');
+      isValid = false;
+    }
+    
+    if (!isValid) {
+      alert('Please fix the validation errors before submitting the form.');
+    }
+    
+    return isValid;
+  }
+
   // Handle Order Menu System form
   function handleOrderMenuForm() {
     const form = document.getElementById('order-menu-form');
+    console.log('handleOrderMenuForm called - form found:', form);
     const closeBtn = document.getElementById('close-order-menu-form');
     const cancelBtn = document.getElementById('cancel-order-menu');
     const logoUpload = document.getElementById('order-menu-logo-upload');
@@ -835,6 +1141,10 @@ import AuthGuard from '../components/AuthGuard.astro';
           
           // Update preview
           updateMenuPhotosPreview();
+          
+          // Reset visual warning styles
+          menuPhotosUploadArea.classList.remove('border-red-300', 'bg-red-50');
+          menuPhotosUploadArea.classList.add('border-gray-300', 'bg-gray-50');
           
           // Show success message and add more button
           menuPhotosUploadArea.innerHTML = `
@@ -922,51 +1232,63 @@ import AuthGuard from '../components/AuthGuard.astro';
 
     // Remove individual menu photo
     window.removeMenuPhoto = (index) => {
+      console.log('removeMenuPhoto called, index:', index);
+      console.log('Before removal - menuPhotos length:', menuPhotos.length);
       menuPhotos.splice(index, 1);
+      console.log('After removal - menuPhotos length:', menuPhotos.length);
       updateMenuPhotosPreview();
       
       // Reset upload area if no photos
       if (menuPhotos.length === 0) {
         menuPhotosUploadArea.innerHTML = `
           <div class="flex flex-col items-center">
-            <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            <svg class="w-16 h-16 text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
             </svg>
-            <p class="text-gray-700 mb-2 font-medium">Click to upload menu photos</p>
-            <p class="text-sm text-gray-500">PNG, JPG, JPEG up to 5MB each</p>
-            <div class="mt-3 flex items-center text-xs text-gray-400">
+            <p class="text-red-600 mb-2 font-medium">Menu photos required!</p>
+            <p class="text-sm text-gray-500 mb-2">Please upload at least one menu photo to continue</p>
+            <div class="mt-3 flex items-center text-xs text-red-500 font-medium">
               <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
-              Multiple photos allowed
+              This field is mandatory
             </div>
           </div>
         `;
+        // Add red border to indicate required field
+        menuPhotosUploadArea.classList.add('border-red-300', 'bg-red-50');
+        menuPhotosUploadArea.classList.remove('border-gray-300', 'bg-gray-50');
       }
     };
 
     // Remove all menu photos
     window.removeAllMenuPhotos = () => {
+      console.log('removeAllMenuPhotos called');
+      console.log('Before removal - menuPhotos length:', menuPhotos.length);
       menuPhotos = [];
+      console.log('After removal - menuPhotos length:', menuPhotos.length);
       updateMenuPhotosPreview();
       menuPhotosUpload.value = '';
       
-      // Reset upload area
+      // Reset upload area with warning
       menuPhotosUploadArea.innerHTML = `
         <div class="flex flex-col items-center">
-          <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          <svg class="w-16 h-16 text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
           </svg>
-          <p class="text-gray-700 mb-2 font-medium">Click to upload menu photos</p>
-          <p class="text-sm text-gray-500">PNG, JPG, JPEG up to 5MB each</p>
-          <div class="mt-3 flex items-center text-xs text-gray-400">
+          <p class="text-red-600 mb-2 font-medium">Menu photos required!</p>
+          <p class="text-sm text-gray-500 mb-2">Please upload at least one menu photo to continue</p>
+          <div class="mt-3 flex items-center text-xs text-red-500 font-medium">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            Multiple photos allowed
+            This field is mandatory
           </div>
         </div>
       `;
+      // Add red border to indicate required field
+      menuPhotosUploadArea.classList.add('border-red-300', 'bg-red-50');
+      menuPhotosUploadArea.classList.remove('border-gray-300', 'bg-gray-50');
     };
 
     const addMenuItemBtn = document.getElementById('add-menu-item');
@@ -1216,18 +1538,24 @@ import AuthGuard from '../components/AuthGuard.astro';
       window.history.replaceState({}, document.title, window.location.pathname);
     });
     
-    // Form submission
-    form?.addEventListener('submit', async (e) => {
-      e.preventDefault();
+    // Form submission - simplified validation
+    console.log('Adding form submission event listener to form:', form);
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        console.log('Form submit event triggered!');
+        e.preventDefault();
       
       const formData = new FormData(form);
       const formDataObj = Object.fromEntries(formData);
       
       // Validate menu photos are uploaded (Required for Order Menu System)
+      console.log('Form submission - menuPhotos length:', menuPhotos.length);
       if (menuPhotos.length === 0) {
         alert('Please upload at least one menu photo. This field is required for Order Menu System.');
+        console.log('Form submission blocked - no menu photos');
         return;
       }
+      console.log('Form submission allowed - menu photos present');
 
       // Validate phone number
       if (!formDataObj.phone || formDataObj.phone.trim() === '') {
@@ -1546,6 +1874,41 @@ import AuthGuard from '../components/AuthGuard.astro';
         setTimeout(() => showBrowseProductsSection(), 100);
       }
     });
+    } else {
+      console.error('Form not found - cannot add event listener');
+    }
+    
+    // Add real-time validation for form fields
+    setupFormValidation();
+    
+    // Add click listener to submit button as primary validation
+    const submitButton = form?.querySelector('button[type="submit"]');
+    if (submitButton) {
+      console.log('Adding click listener to submit button:', submitButton);
+      submitButton.addEventListener('click', (e) => {
+        console.log('Submit button clicked!');
+        
+        // Check menu photos validation
+        if (menuPhotos.length === 0) {
+          alert('Please upload at least one menu photo. This field is required for Order Menu System.');
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+        
+        // Validate form fields before submission
+        if (!validateFormFields()) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+        
+        console.log('Menu photos validation passed, allowing submission');
+        // Let the form submit normally
+      });
+    } else {
+      console.error('Submit button not found');
+    }
   }
 
   // Handle form submission
@@ -2392,146 +2755,6 @@ import AuthGuard from '../components/AuthGuard.astro';
     '700010': { city: 'Kolkata', state: 'West Bengal' }
   };
 
-  // Indian cities and states for autocomplete (including extensive rural cities)
-  const indianCities = [
-    // Major Cities
-    'Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Kolkata', 'Hyderabad', 'Pune', 'Ahmedabad', 'Jaipur', 'Surat',
-    'Lucknow', 'Kanpur', 'Nagpur', 'Indore', 'Thane', 'Bhopal', 'Visakhapatnam', 'Pimpri-Chinchwad', 'Patna', 'Vadodara',
-    'Ghaziabad', 'Ludhiana', 'Agra', 'Nashik', 'Faridabad', 'Meerut', 'Rajkot', 'Kalyan-Dombivali', 'Vasai-Virar', 'Varanasi',
-    'Srinagar', 'Aurangabad', 'Navi Mumbai', 'Solapur', 'Vijayawada', 'Kolhapur', 'Amritsar', 'Sangli', 'Mira-Bhayandar',
-    
-    // Rajasthan - Extensive rural coverage
-    'Alwar', 'Bharatpur', 'Kota', 'Udaipur', 'Jodhpur', 'Bikaner', 'Ajmer', 'Pali', 'Sikar', 'Bhilwara',
-    'Kishangarh', 'Beawar', 'Hanumangarh', 'Ganganagar', 'Chittorgarh', 'Banswara', 'Dungarpur', 'Pratapgarh', 'Rajsamand',
-    'Baran', 'Jhalawar', 'Bundi', 'Sawai Madhopur', 'Karauli', 'Dholpur', 'Tonk', 'Dausa', 'Jhunjhunu', 'Churu',
-    'Nagaur', 'Jalore', 'Sirohi', 'Jaisalmer', 'Barmer', 'Jalor', 'Bharatpur', 'Karauli', 'Dholpur', 'Sawai Madhopur',
-    'Baran', 'Jhalawar', 'Bundi', 'Kota', 'Bundi', 'Sawai Madhopur', 'Karauli', 'Dholpur', 'Tonk', 'Dausa',
-    'Sikar', 'Jhunjhunu', 'Churu', 'Nagaur', 'Jalore', 'Sirohi', 'Jaisalmer', 'Barmer', 'Jalor', 'Pali',
-    'Rajsamand', 'Bhilwara', 'Kishangarh', 'Beawar', 'Hanumangarh', 'Ganganagar', 'Chittorgarh', 'Banswara', 'Dungarpur',
-    'Pratapgarh', 'Rajsamand', 'Baran', 'Jhalawar', 'Bundi', 'Sawai Madhopur', 'Karauli', 'Dholpur', 'Tonk', 'Dausa',
-    
-    // Maharashtra - Extensive rural coverage
-    'Kolhapur', 'Sangli', 'Satara', 'Pune', 'Nashik', 'Aurangabad', 'Jalgaon', 'Dhule', 'Nanded', 'Latur',
-    'Osmanabad', 'Beed', 'Jalna', 'Parbhani', 'Hingoli', 'Washim', 'Yavatmal', 'Amravati', 'Akola', 'Buldhana',
-    'Nandurbar', 'Ahmednagar', 'Solapur', 'Ratnagiri', 'Sindhudurg', 'Sangli', 'Satara', 'Kolhapur', 'Pune', 'Nashik',
-    'Aurangabad', 'Jalgaon', 'Dhule', 'Nanded', 'Latur', 'Osmanabad', 'Beed', 'Jalna', 'Parbhani', 'Hingoli',
-    'Washim', 'Yavatmal', 'Amravati', 'Akola', 'Buldhana', 'Nandurbar', 'Ahmednagar', 'Solapur', 'Ratnagiri', 'Sindhudurg',
-    'Chandrapur', 'Gadchiroli', 'Bhandara', 'Gondia', 'Wardha', 'Nagpur', 'Bhandara', 'Gondia', 'Wardha', 'Chandrapur',
-    'Gadchiroli', 'Bhandara', 'Gondia', 'Wardha', 'Nagpur', 'Bhandara', 'Gondia', 'Wardha', 'Chandrapur', 'Gadchiroli',
-    
-    // Karnataka - Extensive rural coverage
-    'Mysore', 'Hubli', 'Dharwad', 'Mangalore', 'Belgaum', 'Gulbarga', 'Davanagere', 'Bellary', 'Bijapur', 'Shimoga',
-    'Tumkur', 'Raichur', 'Bidar', 'Hospet', 'Gadag', 'Haveri', 'Bagalkot', 'Koppal', 'Chitradurga', 'Tumakuru',
-    'Chikmagalur', 'Hassan', 'Mandya', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore',
-    'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar',
-    'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu',
-    'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore',
-    
-    // Tamil Nadu - Extensive rural coverage
-    'Coimbatore', 'Madurai', 'Tiruchirappalli', 'Salem', 'Tirunelveli', 'Tiruppur', 'Erode', 'Vellore', 'Thoothukudi',
-    'Dindigul', 'Thanjavur', 'Ranipet', 'Sivakasi', 'Karur', 'Udhagamandalam', 'Hosur', 'Nagercoil', 'Kanchipuram',
-    'Cuddalore', 'Kumbakonam', 'Tiruvannamalai', 'Pollachi', 'Rajapalayam', 'Gudiyatham', 'Pudukkottai', 'Vaniyambadi',
-    'Ariyalur', 'Chengalpattu', 'Coimbatore', 'Cuddalore', 'Dharmapuri', 'Dindigul', 'Erode', 'Kallakurichi', 'Kanchipuram',
-    'Karur', 'Krishnagiri', 'Madurai', 'Mayiladuthurai', 'Nagapattinam', 'Namakkal', 'Nilgiris', 'Perambalur', 'Pudukkottai',
-    'Ramanathapuram', 'Ranipet', 'Salem', 'Sivaganga', 'Tenkasi', 'Thanjavur', 'Theni', 'Thoothukudi', 'Tiruchirappalli',
-    'Tirunelveli', 'Tirupathur', 'Tiruppur', 'Tiruvallur', 'Tiruvannamalai', 'Tiruvarur', 'Vellore', 'Viluppuram', 'Virudhunagar',
-    
-    // Uttar Pradesh - Extensive rural coverage
-    'Agra', 'Varanasi', 'Allahabad', 'Bareilly', 'Moradabad', 'Aligarh', 'Saharanpur', 'Noida', 'Firozabad', 'Banda',
-    'Etawah', 'Mirzapur', 'Mathura', 'Shahjahanpur', 'Rampur', 'Modinagar', 'Hapur', 'Etah', 'Mau', 'Ghaziabad',
-    'Sambhal', 'Amroha', 'Hardoi', 'Fatehpur', 'Raebareli', 'Orai', 'Sitapur', 'Bahraich', 'Gonda', 'Balrampur',
-    'Basti', 'Deoria', 'Gorakhpur', 'Kushinagar', 'Maharajganj', 'Siddharthnagar', 'Azamgarh', 'Ballia', 'Mau', 'Ghazipur',
-    'Chandauli', 'Jaunpur', 'Varanasi', 'Mirzapur', 'Sonbhadra', 'Banda', 'Chitrakoot', 'Hamirpur', 'Jalaun', 'Jhansi',
-    'Lalitpur', 'Mahoba', 'Agra', 'Aligarh', 'Etah', 'Firozabad', 'Hathras', 'Kasganj', 'Mathura', 'Mainpuri',
-    'Agra', 'Aligarh', 'Etah', 'Firozabad', 'Hathras', 'Kasganj', 'Mathura', 'Mainpuri', 'Agra', 'Aligarh',
-    
-    // Gujarat - Extensive rural coverage
-    'Surat', 'Vadodara', 'Rajkot', 'Bhavnagar', 'Junagadh', 'Gandhinagar', 'Nadiad', 'Morbi', 'Gandhidham', 'Bharuch',
-    'Veraval', 'Navsari', 'Bardoli', 'Palanpur', 'Godhra', 'Patan', 'Valsad', 'Anand', 'Mehsana', 'Surendranagar',
-    'Jamnagar', 'Porbandar', 'Ankleshwar', 'Vapi', 'Botad', 'Dahod', 'Narmada', 'Ahmedabad', 'Amreli', 'Anand',
-    'Banaskantha', 'Bharuch', 'Bhavnagar', 'Dahod', 'Dang', 'Gandhinagar', 'Jamnagar', 'Junagadh', 'Kheda', 'Kutch',
-    'Mehsana', 'Narmada', 'Navsari', 'Panchmahal', 'Patan', 'Porbandar', 'Rajkot', 'Sabarkantha', 'Surat', 'Surendranagar',
-    'Tapi', 'Vadodara', 'Valsad', 'Ahmedabad', 'Amreli', 'Anand', 'Banaskantha', 'Bharuch', 'Bhavnagar', 'Dahod',
-    
-    // Bihar - Rural coverage
-    'Patna', 'Gaya', 'Bhagalpur', 'Muzaffarpur', 'Darbhanga', 'Purnia', 'Arrah', 'Begusarai', 'Katihar', 'Munger',
-    'Chhapra', 'Bettiah', 'Saharsa', 'Sasaram', 'Hajipur', 'Dehri', 'Siwan', 'Motihari', 'Nawada', 'Bagaha',
-    'Buxar', 'Kishanganj', 'Sitamarhi', 'Madhubani', 'Samastipur', 'Vaishali', 'West Champaran', 'East Champaran', 'Sheikhpura', 'Lakhisarai',
-    
-    // West Bengal - Rural coverage
-    'Kolkata', 'Asansol', 'Siliguri', 'Durgapur', 'Bardhaman', 'Malda', 'Bahrampur', 'Habra', 'Kharagpur', 'Shantipur',
-    'Dankuni', 'Dhulian', 'Ranaghat', 'Haldia', 'Raiganj', 'Krishnanagar', 'Nabadwip', 'Medinipur', 'Jalpaiguri', 'Balurghat',
-    'Basirhat', 'Bankura', 'Chakdaha', 'Darjeeling', 'Kalimpong', 'Kalyani', 'Katwa', 'Kharagpur', 'Krishnanagar', 'Malda',
-    
-    // Madhya Pradesh - Rural coverage
-    'Bhopal', 'Indore', 'Gwalior', 'Jabalpur', 'Ujjain', 'Sagar', 'Dewas', 'Satna', 'Ratlam', 'Rewa',
-    'Murwara', 'Singrauli', 'Burhanpur', 'Khandwa', 'Chhindwara', 'Morena', 'Bhind', 'Guna', 'Shivpuri', 'Vidisha',
-    'Chhatarpur', 'Damoh', 'Panna', 'Tikamgarh', 'Niwari', 'Datia', 'Shivpuri', 'Guna', 'Ashoknagar', 'Guna',
-    
-    // Andhra Pradesh - Rural coverage
-    'Visakhapatnam', 'Vijayawada', 'Guntur', 'Nellore', 'Kurnool', 'Tirupati', 'Kadapa', 'Anantapur', 'Chittoor', 'Ongole',
-    'Eluru', 'Machilipatnam', 'Tenali', 'Proddatur', 'Chilakaluripet', 'Kadiri', 'Adoni', 'Nandyal', 'Kavali', 'Tadipatri',
-    'Srikakulam', 'Vizianagaram', 'Parvathipuram', 'Bobbili', 'Salur', 'Tekkali', 'Palasa', 'Sompeta', 'Ichchapuram', 'Narasannapeta',
-    
-    // Kerala - Rural coverage
-    'Thiruvananthapuram', 'Kochi', 'Kozhikode', 'Thrissur', 'Palakkad', 'Malappuram', 'Kannur', 'Kasaragod', 'Kollam', 'Alappuzha',
-    'Pathanamthitta', 'Kottayam', 'Idukki', 'Ernakulam', 'Thrissur', 'Palakkad', 'Malappuram', 'Kozhikode', 'Wayanad', 'Kannur',
-    'Kasaragod', 'Thiruvananthapuram', 'Kollam', 'Alappuzha', 'Pathanamthitta', 'Kottayam', 'Idukki', 'Ernakulam', 'Thrissur', 'Palakkad',
-    
-    // Punjab - Rural coverage
-    'Chandigarh', 'Ludhiana', 'Amritsar', 'Jalandhar', 'Patiala', 'Bathinda', 'Mohali', 'Firozpur', 'Batala', 'Pathankot',
-    'Moga', 'Abohar', 'Malerkotla', 'Khanna', 'Phagwara', 'Muktsar', 'Barnala', 'Rajpura', 'Fazilka', 'Kapurthala',
-    'Sangrur', 'Sunam', 'Nabha', 'Rampura', 'Gurdaspur', 'Tarn Taran', 'Fatehgarh Sahib', 'Muktsar', 'Faridkot', 'Moga',
-    
-    // Haryana - Rural coverage
-    'Chandigarh', 'Faridabad', 'Gurgaon', 'Panipat', 'Ambala', 'Yamunanagar', 'Rohtak', 'Hisar', 'Karnal', 'Sonipat',
-    'Panchkula', 'Bhiwani', 'Sirsa', 'Bahadurgarh', 'Jind', 'Kaithal', 'Rewari', 'Palwal', 'Narnaul', 'Hansi',
-    'Fatehabad', 'Tohana', 'Narwana', 'Mandi Dabwali', 'Safidon', 'Pehowa', 'Samalkha', 'Shahbad', 'Hodal', 'Sohna',
-    
-    // Odisha - Rural coverage
-    'Bhubaneswar', 'Cuttack', 'Rourkela', 'Berhampur', 'Sambalpur', 'Puri', 'Baleshwar', 'Bhadrak', 'Baripada', 'Balangir',
-    'Jharsuguda', 'Bargarh', 'Angul', 'Dhenkanal', 'Jajpur', 'Jagatsinghpur', 'Kendrapara', 'Khordha', 'Nayagarh', 'Puri',
-    'Sundargarh', 'Kandhamal', 'Boudh', 'Deogarh', 'Jharsuguda', 'Sambalpur', 'Subarnapur', 'Bargarh', 'Balangir', 'Nuapada',
-    
-    // Jharkhand - Rural coverage
-    'Ranchi', 'Jamshedpur', 'Dhanbad', 'Bokaro', 'Deoghar', 'Phusro', 'Hazaribagh', 'Giridih', 'Koderma', 'Ramgarh',
-    'Chatra', 'Garhwa', 'Koderma', 'Lohardaga', 'Pakur', 'Palamu', 'Sahibganj', 'Seraikela Kharsawan', 'Simdega', 'West Singhbhum',
-    'East Singhbhum', 'Dumka', 'Godda', 'Jamtara', 'Khunti', 'Latehar', 'Palamu', 'Sahibganj', 'Seraikela Kharsawan', 'Simdega',
-    
-    // Assam - Rural coverage
-    'Guwahati', 'Silchar', 'Dibrugarh', 'Jorhat', 'Nagaon', 'Tinsukia', 'Tezpur', 'Bongaigaon', 'Dhubri', 'Diphu',
-    'Goalpara', 'Hailakandi', 'Karimganj', 'Kokrajhar', 'Mangaldoi', 'Mariagaon', 'Nalbari', 'North Lakhimpur', 'Sibsagar', 'Tezpur',
-    'Tinsukia', 'Udalguri', 'Barpeta', 'Bongaigaon', 'Cachar', 'Chirang', 'Darrang', 'Dhemaji', 'Dhubri', 'Dibrugarh',
-    
-    // Chhattisgarh - Rural coverage
-    'Raipur', 'Bhilai', 'Bilaspur', 'Korba', 'Rajnandgaon', 'Durg', 'Raigarh', 'Jagdalpur', 'Ambikapur', 'Bhatapara',
-    'Bilaspur', 'Chirmiri', 'Dhamtari', 'Durg', 'Jagdalpur', 'Janjgir', 'Jashpur', 'Kabirdham', 'Kanker', 'Kondagaon',
-    'Korba', 'Koriya', 'Mahasamund', 'Mungeli', 'Narayanpur', 'Raigarh', 'Raipur', 'Rajnandgaon', 'Sukma', 'Surajpur',
-    
-    // Himachal Pradesh - Rural coverage
-    'Shimla', 'Dharamshala', 'Solan', 'Mandi', 'Palampur', 'Kullu', 'Chamba', 'Baddi', 'Nahan', 'Paonta Sahib',
-    'Una', 'Bilaspur', 'Hamirpur', 'Kangra', 'Kinnaur', 'Lahaul and Spiti', 'Mandi', 'Shimla', 'Sirmaur', 'Solan',
-    'Kullu', 'Chamba', 'Una', 'Bilaspur', 'Hamirpur', 'Kangra', 'Kinnaur', 'Lahaul and Spiti', 'Mandi', 'Shimla',
-    
-    // Uttarakhand - Rural coverage
-    'Dehradun', 'Haridwar', 'Roorkee', 'Kashipur', 'Rudrapur', 'Haldwani', 'Rishikesh', 'Kotdwar', 'Ramnagar', 'Pithoragarh',
-    'Almora', 'Nainital', 'Champawat', 'Bageshwar', 'Chamoli', 'Pauri Garhwal', 'Rudraprayag', 'Tehri Garhwal', 'Uttarkashi', 'Dehradun',
-    'Haridwar', 'Roorkee', 'Kashipur', 'Rudrapur', 'Haldwani', 'Rishikesh', 'Kotdwar', 'Ramnagar', 'Pithoragarh', 'Almora',
-    
-    // Goa - Rural coverage
-    'Panaji', 'Margao', 'Vasco da Gama', 'Mapusa', 'Ponda', 'Mormugao', 'Sanquelim', 'Bicholim', 'Curchorem', 'Cuncolim',
-    'Canacona', 'Pernem', 'Quepem', 'Sanguem', 'Satari', 'Tiswadi', 'Bardez', 'Bicholim', 'Canacona', 'Curchorem',
-    
-    // Union Territories
-    'Chandigarh', 'Delhi', 'Puducherry', 'Daman', 'Diu', 'Dadra and Nagar Haveli', 'Lakshadweep', 'Andaman and Nicobar Islands'
-  ];
-
-  const indianStates = [
-    'Maharashtra', 'Delhi', 'Karnataka', 'Tamil Nadu', 'West Bengal', 'Telangana', 'Gujarat', 'Rajasthan', 'Uttar Pradesh',
-    'Madhya Pradesh', 'Andhra Pradesh', 'Bihar', 'Punjab', 'Haryana', 'Kerala', 'Odisha', 'Jharkhand', 'Assam', 'Chhattisgarh',
-    'Himachal Pradesh', 'Uttarakhand', 'Tripura', 'Meghalaya', 'Manipur', 'Nagaland', 'Goa', 'Arunachal Pradesh', 'Mizoram',
-    'Sikkim', 'Jammu and Kashmir', 'Ladakh'
-  ];
 
   // Pincode autocomplete functionality
   function initializePincodeAutocomplete() {
