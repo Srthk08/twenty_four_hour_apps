@@ -71,6 +71,15 @@
 
     // Show dialog function
     function showDialog() {
+      // Check if we're on OMS product page - if so, don't show dialog
+      const currentPath = window.location.pathname;
+      const productSlug = currentPath.split('/').pop();
+      
+      if (productSlug === 'order-menu-system') {
+        console.log('ProductDialog: OMS page detected, not showing dialog');
+        return;
+      }
+      
       dialog.classList.remove('hidden');
       // Trigger animation
       setTimeout(() => {
@@ -114,6 +123,15 @@
 
     // Make showDialog globally available
     window.showProductDialog = showDialog;
+    
+    // Check if we're on OMS page and hide dialog if so
+    const currentPath = window.location.pathname;
+    const productSlug = currentPath.split('/').pop();
+    
+    if (productSlug === 'order-menu-system') {
+      console.log('ProductDialog: OMS page detected on load, hiding dialog');
+      dialog.classList.add('hidden');
+    }
   });
 </script>
 

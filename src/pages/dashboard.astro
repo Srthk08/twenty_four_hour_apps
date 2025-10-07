@@ -286,6 +286,14 @@ import AuthGuard from '../components/AuthGuard.astro';
                   <input type="text" name="restaurantName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter restaurant name" required>
                 </div>
 
+                <!-- Owner Name -->
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Owner Name <span class="text-red-500">*</span>
+                  </label>
+                  <input type="text" name="ownerName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter owner name" required>
+                </div>
+
                 <!-- Contact Information Section -->
                 <div class="border-t pt-6">
                   <h3 class="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
@@ -443,6 +451,37 @@ import AuthGuard from '../components/AuthGuard.astro';
                   </div>
                 </div>
 
+                <!-- Error and Success Messages -->
+                <div id="validation-errors" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+                  <!-- Validation errors will appear here -->
+                </div>
+                <div id="menu-photos-error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+                  <!-- Menu photos errors will appear here -->
+                </div>
+                <div id="phone-validation-error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+                  <!-- Phone validation errors will appear here -->
+                </div>
+                <div id="address-validation-error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+                  <!-- Address validation errors will appear here -->
+                </div>
+                <div id="email-validation-error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+                  <!-- Email validation errors will appear here -->
+                </div>
+                <div id="file-size-error" class="hidden bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded mb-4">
+                  <!-- File size errors will appear here -->
+                </div>
+                <div id="success-message" class="hidden bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-4">
+                  <!-- Success messages will appear here -->
+                </div>
+                <div id="warning-message" class="hidden bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded mb-4">
+                  <!-- Warning messages will appear here -->
+                </div>
+                <div id="popup-message" class="hidden bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded mb-4">
+                  <!-- Popup messages will appear here -->
+                </div>
+                <div id="error-message" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+                  <!-- Error messages will appear here -->
+                </div>
 
               </div>
 
@@ -1064,7 +1103,12 @@ import AuthGuard from '../components/AuthGuard.astro';
     }
     
     if (!isValid) {
-      alert('Please fix the validation errors before submitting the form.');
+      // Show validation errors inline instead of alert
+      const errorDiv = document.getElementById('validation-errors');
+      if (errorDiv) {
+        errorDiv.classList.remove('hidden');
+        errorDiv.textContent = 'Please fix the validation errors before submitting the form.';
+      }
     }
     
     return isValid;
@@ -1133,7 +1177,12 @@ import AuthGuard from '../components/AuthGuard.astro';
           });
           
           if (validFiles.length !== files.length) {
-            alert(`Some files were too large. Only files under 5MB are allowed. ${validFiles.length}/${files.length} files uploaded.`);
+            // Show file size error inline instead of alert
+            const errorDiv = document.getElementById('file-size-error');
+            if (errorDiv) {
+              errorDiv.classList.remove('hidden');
+              errorDiv.textContent = `Some files were too large. Only files under 5MB are allowed. ${validFiles.length}/${files.length} files uploaded.`;
+            }
           }
           
           // Add all valid files to the array
@@ -1551,7 +1600,12 @@ import AuthGuard from '../components/AuthGuard.astro';
       // Validate menu photos are uploaded (Required for Order Menu System)
       console.log('Form submission - menuPhotos length:', menuPhotos.length);
       if (menuPhotos.length === 0) {
-        alert('Please upload at least one menu photo. This field is required for Order Menu System.');
+        // Show menu photos error inline instead of alert
+        const errorDiv = document.getElementById('menu-photos-error');
+        if (errorDiv) {
+          errorDiv.classList.remove('hidden');
+          errorDiv.textContent = 'Please upload at least one menu photo. This field is required for Order Menu System.';
+        }
         console.log('Form submission blocked - no menu photos');
         return;
       }
@@ -1559,39 +1613,77 @@ import AuthGuard from '../components/AuthGuard.astro';
 
       // Validate phone number
       if (!formDataObj.phone || formDataObj.phone.trim() === '') {
-        alert('Please enter your phone number. This field is required.');
+        // Show phone error inline instead of alert
+        const errorDiv = document.getElementById('phone-validation-error');
+        if (errorDiv) {
+          errorDiv.classList.remove('hidden');
+          errorDiv.textContent = 'Please enter your phone number. This field is required.';
+        }
         return;
       }
 
       // Validate restaurant address fields
       if (!formDataObj.houseNumber || formDataObj.houseNumber.trim() === '') {
-        alert('Please enter house/flat number. This field is required.');
+        // Show address error inline instead of alert
+        const errorDiv = document.getElementById('address-validation-error');
+        if (errorDiv) {
+          errorDiv.classList.remove('hidden');
+          errorDiv.textContent = 'Please enter house/flat number. This field is required.';
+        }
         return;
       }
       if (!formDataObj.addressLine1 || formDataObj.addressLine1.trim() === '') {
-        alert('Please enter address line 1. This field is required.');
+        const errorDiv = document.getElementById('address-validation-error');
+        if (errorDiv) {
+          errorDiv.classList.remove('hidden');
+          errorDiv.textContent = 'Please enter address line 1. This field is required.';
+        }
         return;
       }
       if (!formDataObj.city || formDataObj.city.trim() === '') {
-        alert('Please enter city. This field is required.');
+        const errorDiv = document.getElementById('address-validation-error');
+        if (errorDiv) {
+          errorDiv.classList.remove('hidden');
+          errorDiv.textContent = 'Please enter city. This field is required.';
+        }
         return;
       }
       if (!formDataObj.state || formDataObj.state.trim() === '') {
-        alert('Please enter state. This field is required.');
+        const errorDiv = document.getElementById('address-validation-error');
+        if (errorDiv) {
+          errorDiv.classList.remove('hidden');
+          errorDiv.textContent = 'Please enter state. This field is required.';
+        }
         return;
       }
       if (!formDataObj.pincode || formDataObj.pincode.trim() === '') {
-        alert('Please enter pincode. This field is required.');
+        const errorDiv = document.getElementById('address-validation-error');
+        if (errorDiv) {
+          errorDiv.classList.remove('hidden');
+          errorDiv.textContent = 'Please enter pincode. This field is required.';
+        }
         return;
       }
 
       // Validate email
       if (!formDataObj.email || formDataObj.email.trim() === '') {
-        alert('Please enter your email address. This field is required.');
+        // Show email error inline instead of alert
+        const errorDiv = document.getElementById('email-validation-error');
+        if (errorDiv) {
+          errorDiv.classList.remove('hidden');
+          errorDiv.textContent = 'Please enter your email address. This field is required.';
+        }
         return;
       }
       
       console.log('📝 Order Menu requirements saved:', formDataObj);
+      
+      // Clear all error messages
+      const errorDivs = ['validation-errors', 'menu-photos-error', 'phone-validation-error', 'address-validation-error', 'email-validation-error', 'file-size-error', 'warning-message', 'popup-message', 'error-message'];
+      errorDivs.forEach(id => {
+        const div = document.getElementById(id);
+        if (div) div.classList.add('hidden');
+      });
       
       // Create order menu requirements object
       const orderMenuRequirements = {
@@ -1601,6 +1693,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         productPrice: '₹1,179',
         projectName: formDataObj.projectName,
         restaurantName: formDataObj.restaurantName,
+        ownerName: formDataObj.ownerName,
         houseNumber: formDataObj.houseNumber,
         addressLine1: formDataObj.addressLine1,
         city: formDataObj.city,
@@ -1629,7 +1722,12 @@ import AuthGuard from '../components/AuthGuard.astro';
           const existingRequirements = JSON.parse(localStorage.getItem('order-menu-requirements') || '[]');
           existingRequirements.push(orderMenuRequirements);
           localStorage.setItem('order-menu-requirements', JSON.stringify(existingRequirements));
-          alert('Order Menu requirements saved locally! Our team will contact you soon.');
+          // Show success message inline instead of alert
+          const successDiv = document.getElementById('success-message');
+          if (successDiv) {
+            successDiv.classList.remove('hidden');
+            successDiv.textContent = 'Order Menu requirements saved locally! Our team will contact you soon.';
+          }
         } else {
           // Save to Supabase using OMS function
           const { data: customizationData, error: customizationError } = await supabase.rpc('upsert_oms_customization', {
@@ -1637,6 +1735,9 @@ import AuthGuard from '../components/AuthGuard.astro';
             p_project_name: data.projectName,
             p_restaurant_name: data.restaurantName,
             p_owner_name: data.ownerName,
+            p_restaurant_address: `${data.houseNumber}, ${data.addressLine1}, ${data.city}, ${data.state} ${data.pincode}, ${data.country}`,
+            p_contact_person: data.contactPerson,
+            p_phone_number: data.phone,
             p_house_number: data.houseNumber,
             p_address_line1: data.addressLine1,
             p_city: data.city,
@@ -1658,20 +1759,51 @@ import AuthGuard from '../components/AuthGuard.astro';
             const existingRequirements = JSON.parse(localStorage.getItem('order-menu-requirements') || '[]');
             existingRequirements.push(orderMenuRequirements);
             localStorage.setItem('order-menu-requirements', JSON.stringify(existingRequirements));
-            alert('Order Menu requirements saved locally! Our team will contact you soon.');
+            // Show success message inline instead of alert
+          const successDiv = document.getElementById('success-message');
+          if (successDiv) {
+            successDiv.classList.remove('hidden');
+            successDiv.textContent = 'Order Menu requirements saved locally! Our team will contact you soon.';
+          }
           } else if (customizationData && customizationData.length > 0) {
             const result = customizationData[0];
             if (result.is_duplicate) {
-              alert(`⚠️ Data Already Exists!\n\n${result.message}\n\nRecord ID: ${result.data_id}`);
+              // Show duplicate data warning based on duplicate type
+              let duplicateMessage = '';
+              if (result.duplicate_type === 'exact') {
+                duplicateMessage = 'This exact data has already been submitted. Please check your existing orders or contact support if you need to make changes.';
+              } else if (result.duplicate_type === 'contact') {
+                duplicateMessage = 'Data with the same contact person and phone number already exists. The existing record has been updated with your new project information.';
+              } else if (result.duplicate_type === 'restaurant') {
+                duplicateMessage = 'A restaurant with this name already exists, but your project name is different. A new record has been created.';
+              } else {
+                duplicateMessage = 'This data has already been submitted. Please check your existing orders or contact support if you need to make changes.';
+              }
+              
+              const warningDiv = document.getElementById('warning-message');
+              if (warningDiv) {
+                warningDiv.classList.remove('hidden');
+                warningDiv.textContent = `⚠️ ${duplicateMessage}`;
+              }
             } else {
               console.log('✅ OMS data saved to Supabase with ID:', result.data_id);
-              alert('Order Menu requirements saved successfully! Opening payment page...');
+              // Show success message inline instead of alert
+              const successDiv = document.getElementById('success-message');
+              if (successDiv) {
+                successDiv.classList.remove('hidden');
+                successDiv.textContent = 'Order Menu requirements saved successfully! Opening payment page...';
+              }
               // Open payment link in new tab to avoid console errors
               const paymentWindow = window.open('https://payments.pabbly.com/subscribe/68c084369dbcfe4b619b80ce/six-months-inr', '_blank');
               
               // Check if popup was blocked
               if (!paymentWindow) {
-                alert('Please allow popups for this site to proceed with payment, or click the payment link manually.');
+                // Show popup blocked message inline instead of alert
+                const popupDiv = document.getElementById('popup-message');
+                if (popupDiv) {
+                  popupDiv.classList.remove('hidden');
+                  popupDiv.textContent = 'Please allow popups for this site to proceed with payment, or click the payment link manually.';
+                }
                 // Fallback: show payment link
                 const paymentLink = document.createElement('div');
                 paymentLink.innerHTML = `
@@ -1705,7 +1837,12 @@ import AuthGuard from '../components/AuthGuard.astro';
             const existingRequirements = JSON.parse(localStorage.getItem('order-menu-requirements') || '[]');
             existingRequirements.push(orderMenuRequirements);
             localStorage.setItem('order-menu-requirements', JSON.stringify(existingRequirements));
-            alert('Order Menu requirements saved locally! Our team will contact you soon.');
+            // Show success message inline instead of alert
+          const successDiv = document.getElementById('success-message');
+          if (successDiv) {
+            successDiv.classList.remove('hidden');
+            successDiv.textContent = 'Order Menu requirements saved locally! Our team will contact you soon.';
+          }
           }
         }
         
@@ -1717,7 +1854,12 @@ import AuthGuard from '../components/AuthGuard.astro';
         form.reset();
       } catch (error) {
         console.error('Error saving order menu requirements:', error);
-        alert('Error saving order menu requirements. Please try again.');
+        // Show error message inline instead of alert
+        const errorDiv = document.getElementById('error-message');
+        if (errorDiv) {
+          errorDiv.classList.remove('hidden');
+          errorDiv.textContent = 'Error saving order menu requirements. Please try again.';
+        }
       }
     });
 
@@ -1890,7 +2032,12 @@ import AuthGuard from '../components/AuthGuard.astro';
         
         // Check menu photos validation
         if (menuPhotos.length === 0) {
-          alert('Please upload at least one menu photo. This field is required for Order Menu System.');
+          // Show menu photos error inline instead of alert
+          const errorDiv = document.getElementById('menu-photos-error');
+          if (errorDiv) {
+            errorDiv.classList.remove('hidden');
+            errorDiv.textContent = 'Please upload at least one menu photo. This field is required for Order Menu System.';
+          }
           e.preventDefault();
           e.stopPropagation();
           return false;

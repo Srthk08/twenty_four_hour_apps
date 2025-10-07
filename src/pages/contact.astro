@@ -462,6 +462,24 @@ import Layout from '../layouts/Layout.astro';
     console.log('✅ Contact form cleared');
   };
 
+  // Function to refresh user data from session storage
+  function refreshUserData() {
+    try {
+      const sessionData = JSON.parse(sessionStorage.getItem('simple-auth-session') || '{}');
+      if (sessionData.user) {
+        console.log('🔄 Refreshed user data from session:', {
+          phone: sessionData.user.phone,
+          company_name: sessionData.user.company_name,
+          full_name: sessionData.user.full_name
+        });
+        return sessionData.user;
+      }
+    } catch (e) {
+      console.log('⚠️ Could not refresh user data from session');
+    }
+    return null;
+  }
+
   // Pre-fill form with project details and user info
   window.prefillForm = async function prefillForm() {
     try {
@@ -562,6 +580,12 @@ import Layout from '../layouts/Layout.astro';
       if (authManager && authManager.isUserLoggedIn()) {
         const currentUser = authManager.getCurrentUser();
         console.log('👤 User found via global auth manager:', currentUser?.email);
+        console.log('👤 User data details:', {
+          full_name: currentUser?.full_name,
+          phone: currentUser?.phone,
+          company_name: currentUser?.company_name,
+          email: currentUser?.email
+        });
         
         // Only prefill if user is actually logged in and has valid data
         if (currentUser && currentUser.email) {
@@ -572,6 +596,20 @@ import Layout from '../layouts/Layout.astro';
         const emailInput = document.getElementById('email') as HTMLInputElement;
         const phoneInput = document.getElementById('phone') as HTMLInputElement;
         const companyInput = document.getElementById('company') as HTMLInputElement;
+        
+        // Fallback: Check session storage directly if auth manager data is incomplete
+        let userData = currentUser;
+        if (!userData.phone && !userData.company_name) {
+          const refreshedData = refreshUserData();
+          if (refreshedData) {
+            userData = { ...userData, ...refreshedData };
+            console.log('🔄 Using refreshed session storage data:', {
+              phone: userData.phone,
+              company_name: userData.company_name,
+              full_name: userData.full_name
+            });
+          }
+        }
 
         // Enable fields when logged in
         [firstNameInput, lastNameInput, emailInput, phoneInput, companyInput].forEach((el) => {
@@ -579,8 +617,8 @@ import Layout from '../layouts/Layout.astro';
         });
 
         // Pre-fill first name and last name
-        if (currentUser && currentUser.full_name) {
-          const names = currentUser.full_name.split(' ');
+        if (userData && userData.full_name) {
+          const names = userData.full_name.split(' ');
           if (firstNameInput) {
             firstNameInput.value = names[0] || '';
             // Trigger validation events to ensure browser recognizes the field as valid
@@ -599,16 +637,27 @@ import Layout from '../layouts/Layout.astro';
         
         // Pre-fill email, phone and company
         if (emailInput) {
-          emailInput.value = currentUser.email || '';
+          emailInput.value = userData.email || '';
           emailInput.dispatchEvent(new Event('input', { bubbles: true }));
           emailInput.dispatchEvent(new Event('change', { bubbles: true }));
-          console.log('✅ Pre-filled email:', currentUser.email);
+          console.log('✅ Pre-filled email:', userData.email);
         }
-        if (phoneInput && currentUser.phone) {
-          phoneInput.value = currentUser.phone;
+        if (phoneInput && userData.phone) {
+          // Remove +91 prefix for display in form
+          let phoneValue = userData.phone;
+          if (phoneValue.startsWith('+91')) {
+            phoneValue = phoneValue.substring(3);
+          }
+          phoneInput.value = phoneValue;
+          phoneInput.dispatchEvent(new Event('input', { bubbles: true }));
+          phoneInput.dispatchEvent(new Event('change', { bubbles: true }));
+          console.log('✅ Pre-filled phone:', phoneValue);
         }
-        if (companyInput && currentUser.company_name) {
-          companyInput.value = currentUser.company_name;
+        if (companyInput && userData.company_name) {
+          companyInput.value = userData.company_name;
+          companyInput.dispatchEvent(new Event('input', { bubbles: true }));
+          companyInput.dispatchEvent(new Event('change', { bubbles: true }));
+          console.log('✅ Pre-filled company:', userData.company_name);
         }
         
         }
@@ -689,11 +738,16 @@ import Layout from '../layouts/Layout.astro';
 
                 // Pre-fill phone
                 if (phoneInput && profile.phone) {
-                  phoneInput.value = profile.phone;
+                  // Remove +91 prefix for display in form
+                  let phoneValue = profile.phone;
+                  if (phoneValue.startsWith('+91')) {
+                    phoneValue = phoneValue.substring(3);
+                  }
+                  phoneInput.value = phoneValue;
                   // Trigger validation events
                   phoneInput.dispatchEvent(new Event('input', { bubbles: true }));
                   phoneInput.dispatchEvent(new Event('change', { bubbles: true }));
-                  console.log('✅ Pre-filled phone:', profile.phone);
+                  console.log('✅ Pre-filled phone:', phoneValue);
                 }
 
                 // Pre-fill company

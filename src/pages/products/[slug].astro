@@ -593,7 +593,12 @@ const style = categoryStyles[product.category];
     
     // CRITICAL: Always allow Order Menu System - NO RESTRICTIONS
     if (productSlug === 'order-menu-system') {
-      console.log('OMS product page - no restrictions applied');
+      console.log('OMS product page - no restrictions applied, ensuring dialog is hidden');
+      // Explicitly hide the dialog if it exists
+      const dialog = document.getElementById('product-dialog');
+      if (dialog) {
+        dialog.classList.add('hidden');
+      }
       return; // No restrictions for OMS
     }
     
