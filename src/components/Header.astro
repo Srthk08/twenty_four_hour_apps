@@ -98,6 +98,15 @@
               </svg>
               Support
             </a>
+            <!-- Menu Operator Link - Only visible for menu operator users -->
+            <div id="menu-operator-link" class="hidden">
+              <a href="/menu-operator" class="flex items-center px-6 py-4 text-base text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200">
+                <svg class="w-6 h-6 mr-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                Menu Operator Dashboard
+              </a>
+            </div>
             <!-- Admin Panel Link - Only visible for admin users -->
             <div id="admin-panel-link" class="hidden">
               <a href="/admin/data" class="flex items-center px-6 py-4 text-base text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200">
@@ -212,6 +221,15 @@
               </svg>
               <span class="flex-1">Support</span>
             </a>
+            <!-- Menu Operator Link - Only visible for menu operator users -->
+            <div id="mobile-menu-operator-link" class="hidden">
+              <a href="/menu-operator" class="flex items-center w-full px-4 py-4 text-lg font-medium text-white text-opacity-90 hover:text-white hover:bg-white hover:bg-opacity-20 rounded-xl transition-all duration-300">
+                <svg class="w-6 h-6 mr-4 text-white text-opacity-70 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <span class="flex-1">Menu Operator Dashboard</span>
+              </a>
+            </div>
             <!-- Admin Panel Link - Only visible for admin users -->
             <div id="mobile-admin-panel-link" class="hidden">
               <a href="/admin/data" class="flex items-center w-full px-4 py-4 text-lg font-medium text-white text-opacity-90 hover:text-white hover:bg-white hover:bg-opacity-20 rounded-xl transition-all duration-300">
@@ -571,6 +589,54 @@
     if (userName) userName.textContent = user.full_name || user.email?.split('@')[0] || 'User';
     if (userAvatar) userAvatar.textContent = (user.full_name || user.email || 'U').charAt(0).toUpperCase();
     if (mobileUserEmail) mobileUserEmail.textContent = user.email || '';
+
+    // Show/hide role-based links
+    const menuOperatorLink = document.getElementById('menu-operator-link');
+    const mobileMenuOperatorLink = document.getElementById('mobile-menu-operator-link');
+    const adminPanelLink = document.getElementById('admin-panel-link');
+    const mobileAdminPanelLink = document.getElementById('mobile-admin-panel-link');
+
+    // Check if user has menu operator role
+    if (user.role === 'menu_operator' || user.role === 'menu operator') {
+      if (menuOperatorLink) {
+        menuOperatorLink.classList.remove('hidden');
+        menuOperatorLink.style.display = 'block';
+      }
+      if (mobileMenuOperatorLink) {
+        mobileMenuOperatorLink.classList.remove('hidden');
+        mobileMenuOperatorLink.style.display = 'block';
+      }
+    } else {
+      if (menuOperatorLink) {
+        menuOperatorLink.classList.add('hidden');
+        menuOperatorLink.style.display = 'none';
+      }
+      if (mobileMenuOperatorLink) {
+        mobileMenuOperatorLink.classList.add('hidden');
+        mobileMenuOperatorLink.style.display = 'none';
+      }
+    }
+
+    // Check if user has admin role
+    if (user.role === 'admin' || user.role === 'administrator') {
+      if (adminPanelLink) {
+        adminPanelLink.classList.remove('hidden');
+        adminPanelLink.style.display = 'block';
+      }
+      if (mobileAdminPanelLink) {
+        mobileAdminPanelLink.classList.remove('hidden');
+        mobileAdminPanelLink.style.display = 'block';
+      }
+    } else {
+      if (adminPanelLink) {
+        adminPanelLink.classList.add('hidden');
+        adminPanelLink.style.display = 'none';
+      }
+      if (mobileAdminPanelLink) {
+        mobileAdminPanelLink.classList.add('hidden');
+        mobileAdminPanelLink.style.display = 'none';
+      }
+    }
   }
 
   // Function to set initial UI state using the global auth manager

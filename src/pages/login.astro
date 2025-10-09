@@ -456,12 +456,17 @@ import Layout from '../layouts/Layout.astro';
             
             if (!profileError && profileData) {
               console.log('✅ User profile found:', profileData);
+              console.log('🔍 Role value from database:', JSON.stringify(profileData.role));
               
               // Role-based redirect - ADMIN ROLE TAKES PRIORITY OVER STATUS
               if (profileData.role === 'admin' || profileData.role === 'developer' || profileData.role === 'support') {
                 redirectUrl = '/admin';
                 console.log(`🎉 ADMIN USER DETECTED: ${profileData.full_name} (${profileData.role})`);
                 console.log(`🚀 Redirecting to admin panel: ${redirectUrl}`);
+              } else if (profileData.role && profileData.role.toLowerCase().trim() === 'menu_operator') {
+                redirectUrl = '/menu-operator';
+                console.log(`🍽️ MENU OPERATOR DETECTED: ${profileData.full_name} (${profileData.role})`);
+                console.log(`🚀 Redirecting to menu operator dashboard: ${redirectUrl}`);
               } else {
                 // For non-admin users, check status (if status field exists)
                 if (profileData.status && profileData.status === 'pending_verification') {

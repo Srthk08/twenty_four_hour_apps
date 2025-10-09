@@ -143,8 +143,8 @@ const style = categoryStyles[product.category];
 </style>
 
 <Layout title={`${product.name} - DevExpress`} description={product.description}>
-  <!-- Full Page Gradient Background for Special Products -->
-  <div class={`${isRestaurantMenuSystem ? 'bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100 min-h-screen restaurant-menu-system-page' : ''} ${isAndroidTVApp ? 'bg-gradient-to-br from-purple-50 via-violet-50 to-purple-100 min-h-screen android-tv-app-page' : ''} ${isStreamingMobileApp ? 'bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100 min-h-screen streaming-mobile-app-page' : ''} ${isRestaurantWebsite ? 'bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-100 min-h-screen restaurant-website-page' : ''} ${isOrderMenuSystem ? 'bg-gradient-to-br from-amber-50 via-orange-50 to-red-100 min-h-screen order-menu-system-page' : ''}`} style="color: ${isRestaurantMenuSystem ? '#1e40af' : isAndroidTVApp ? '#7c3aed' : isStreamingMobileApp ? '#be185d' : isRestaurantWebsite ? '#065f46' : isOrderMenuSystem ? '#92400e' : 'inherit'};">
+    <!-- Full Page Gradient Background for Special Products -->
+    <div class={`${isRestaurantMenuSystem ? 'bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100 min-h-screen restaurant-menu-system-page' : ''} ${isAndroidTVApp ? 'bg-gradient-to-br from-purple-50 via-violet-50 to-purple-100 min-h-screen android-tv-app-page' : ''} ${isStreamingMobileApp ? 'bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100 min-h-screen streaming-mobile-app-page' : ''} ${isRestaurantWebsite ? 'bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-100 min-h-screen restaurant-website-page' : ''} ${isOrderMenuSystem ? 'bg-gradient-to-br from-amber-50 via-orange-50 to-red-100 min-h-screen order-menu-system-page' : ''}`} style="color: ${isRestaurantMenuSystem ? '#1e40af' : isAndroidTVApp ? '#7c3aed' : isStreamingMobileApp ? '#be185d' : isRestaurantWebsite ? '#065f46' : isOrderMenuSystem ? '#92400e' : 'inherit'};">
   <!-- Hero Section -->
   <section class={`bg-gradient-to-br ${isRestaurantMenuSystem ? restaurantMenuGradient : isAndroidTVApp ? androidTVGradient : isStreamingMobileApp ? streamingMobileGradient : isRestaurantWebsite ? restaurantWebsiteGradient : isOrderMenuSystem ? orderMenuSystemGradient : style.gradient} text-white py-20`}>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -395,6 +395,12 @@ const style = categoryStyles[product.category];
               >
                 Choose {plan.name}
               </button>
+              <p class="text-xs text-gray-500 mt-2 text-center">
+                <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+                Login required to select
+              </p>
             </div>
           ))}
         </div>
@@ -462,6 +468,12 @@ const style = categoryStyles[product.category];
         >
           Add to Cart - ₹{isOrderMenuSystem ? '999' : productPlans[0]?.price.toLocaleString()}
         </button>
+        <p class="text-xs text-white/70 mt-2 text-center">
+          <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+          Login required to add to cart
+        </p>
         <a href={`/contact?product=${encodeURIComponent(product.name)}&project_type=${product.category}&project_details=${encodeURIComponent(`I'm interested in the ${product.name}. ${product.description}`)}&price=${isOrderMenuSystem ? 999 : productPlans[0]?.price || product.base_price}`} class="contact-us-btn border-2 border-white text-white hover:bg-white hover:text-black px-8 py-3 rounded-lg font-semibold transition-all">
           Contact Us
         </a>

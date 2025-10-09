@@ -1,0 +1,477 @@
+---
+import MenuOperatorLayout from '../../layouts/MenuOperatorLayout.astro';
+import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
+---
+
+<MenuOperatorGuard />
+
+<MenuOperatorLayout title="Menu Operator Dashboard - 24HourApps">
+  <div class="space-y-6">
+    <!-- Header Section -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">Menu Operator Dashboard</h2>
+          <p class="text-gray-600">Manage OMS customization forms and menu photos</p>
+        </div>
+        <div class="text-right">
+          <p class="text-sm text-gray-500">Last updated</p>
+          <p class="text-sm font-medium text-gray-900" id="last-updated">Just now</p>
+        </div>
+      </div>
+      </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- OMS Forms Card -->
+      <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+        <div class="flex items-center">
+          <div class="p-2 bg-blue-100 rounded-lg">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+        </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-blue-600">OMS Forms</p>
+            <p class="text-2xl font-bold text-blue-900" id="total-oms-forms">0</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Menu Photos Card -->
+      <div class="bg-green-50 rounded-lg p-6 border border-green-200">
+        <div class="flex items-center">
+          <div class="p-2 bg-green-100 rounded-lg">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-green-600">Menu Photos</p>
+            <p class="text-2xl font-bold text-green-900" id="total-menu-photos">0</p>
+              </div>
+            </div>
+          </div>
+          
+      <!-- Processed Photos Card -->
+      <div class="bg-purple-50 rounded-lg p-6 border border-purple-200">
+        <div class="flex items-center">
+          <div class="p-2 bg-purple-100 rounded-lg">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+            </svg>
+            </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-purple-600">Processed</p>
+            <p class="text-2xl font-bold text-purple-900" id="total-processed">0</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending Card -->
+      <div class="bg-orange-50 rounded-lg p-6 border border-orange-200">
+        <div class="flex items-center">
+          <div class="p-2 bg-orange-100 rounded-lg">
+            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-orange-600">Pending</p>
+            <p class="text-2xl font-bold text-orange-900" id="total-pending">0</p>
+          </div>
+          </div>
+        </div>
+      </div>
+
+    <!-- OMS Customization Forms Section -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-medium text-gray-900">OMS Customization Forms</h3>
+          <div class="flex items-center space-x-2">
+            <button id="refresh-oms" class="text-gray-400 hover:text-gray-600 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Restaurant</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Logo</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="oms-forms-table-body" class="bg-white divide-y divide-gray-200">
+            <tr>
+              <td colspan="6" class="px-6 py-4 text-center text-gray-500">Loading OMS forms...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Menu Photos Section -->
+    <div class="bg-white rounded-lg shadow">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-medium text-gray-900">Menu Photos</h3>
+          <div class="flex items-center space-x-2">
+            <button id="upload-photo-btn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+              Upload Photo
+            </button>
+            <button id="refresh-photos" class="text-gray-400 hover:text-gray-600 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Photo</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filename</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="photos-table-body" class="bg-white divide-y divide-gray-200">
+            <tr>
+              <td colspan="5" class="px-6 py-4 text-center text-gray-500">Loading photos...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden file input for photo upload -->
+  <input type="file" id="photo-upload-input" accept="image/*" class="hidden" />
+
+<script>
+  import { createClient } from '@supabase/supabase-js';
+
+  // Supabase configuration
+  const supabaseUrl = 'YOUR_SUPABASE_URL';
+  const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  // Global variables
+  let currentUser = null;
+
+  // Initialize dashboard
+  document.addEventListener('DOMContentLoaded', async () => {
+    await loadUserProfile();
+      await loadDashboardData();
+    setupEventListeners();
+  });
+
+  // Load user profile
+  async function loadUserProfile() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = '/login';
+        return;
+      }
+
+      currentUser = user;
+      
+        // Get user profile from profiles table
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+        .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (profileError) {
+          console.error('Error loading profile:', profileError);
+          return;
+        }
+
+        console.log('🔍 Profile loaded:', profile);
+        console.log('🔍 Role value from database:', JSON.stringify(profile.role));
+
+        // Check if user has Menu Operator role (case-insensitive)
+        if (!profile.role || profile.role.toLowerCase().trim() !== 'menu_operator') {
+          console.log('User does not have menu_operator role. Role:', profile.role);
+          // Redirect based on role
+          if (profile.role === 'admin') {
+            window.location.href = '/admin';
+          } else {
+            window.location.href = '/dashboard';
+          }
+          return;
+        }
+
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+    }
+  }
+
+    // Load dashboard data
+    async function loadDashboardData() {
+      await Promise.all([
+        loadOMSCustomizationForms(),
+        loadMenuPhotos(),
+        updateStats()
+      ]);
+    }
+
+    // Load OMS customization forms
+    async function loadOMSCustomizationForms() {
+      try {
+        const { data: forms, error } = await supabase
+          .from('oms_customizations')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        if (error) {
+          console.error('Error loading OMS forms:', error);
+          return;
+        }
+
+        displayOMSCustomizationForms(forms);
+        document.getElementById('total-oms-forms').textContent = forms.length;
+      } catch (error) {
+        console.error('Error loading OMS forms:', error);
+      }
+    }
+
+    // Display OMS customization forms
+    function displayOMSCustomizationForms(forms) {
+      const tbody = document.getElementById('oms-forms-table-body');
+      
+      if (!forms || forms.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No OMS forms submitted yet</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = forms.map(form => `
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm font-medium text-gray-900">${form.project_name || 'Unnamed Project'}</div>
+            <div class="text-sm text-gray-500">${form.owner_name || 'No owner'}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">${form.restaurant_name || 'Not specified'}</div>
+            <div class="text-sm text-gray-500">${form.restaurant_address || 'No address'}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">${form.user_email || 'No email'}</div>
+            <div class="text-sm text-gray-500">${form.phone_number || 'No phone'}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            ${form.logo_url ? 
+              `<img src="${form.logo_url}" alt="Logo" class="w-8 h-8 rounded object-cover">` : 
+              '<span class="text-gray-400">No logo</span>'
+            }
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            ${new Date(form.created_at).toLocaleDateString()}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewOMSForm('${form.id}')">View</button>
+            <button class="text-green-600 hover:text-green-900" onclick="processOMSForm('${form.id}')">Process</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Load menu photos
+    async function loadMenuPhotos() {
+      try {
+        const { data: photos, error } = await supabase
+          .from('menu_photos')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        if (error) {
+          console.error('Error loading photos:', error);
+          return;
+        }
+
+        displayMenuPhotos(photos);
+        document.getElementById('total-menu-photos').textContent = photos.length;
+        
+        // Update processed and pending counts
+        const processed = photos.filter(p => p.conversion_status === 'completed').length;
+        const pending = photos.filter(p => p.conversion_status === 'processing' || p.conversion_status === 'pending').length;
+        
+        document.getElementById('total-processed').textContent = processed;
+        document.getElementById('total-pending').textContent = pending;
+      } catch (error) {
+        console.error('Error loading photos:', error);
+      }
+    }
+
+    // Display menu photos
+    function displayMenuPhotos(photos) {
+      const tbody = document.getElementById('photos-table-body');
+      
+      if (!photos || photos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No photos uploaded yet</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = photos.map(photo => `
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4 whitespace-nowrap">
+            ${photo.photo_url ? 
+              `<img src="${photo.photo_url}" alt="Menu photo" class="w-12 h-12 rounded object-cover">` : 
+              '<div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center"><svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>'
+            }
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">${photo.original_filename || 'Unknown'}</div>
+            <div class="text-sm text-gray-500">${photo.file_size ? (photo.file_size / 1024).toFixed(1) + ' KB' : 'Unknown size'}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+              photo.conversion_status === 'completed' ? 'bg-green-100 text-green-800' :
+              photo.conversion_status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
+              photo.conversion_status === 'failed' ? 'bg-red-100 text-red-800' :
+              'bg-gray-100 text-gray-800'
+            }">
+              ${photo.conversion_status || 'pending'}
+          </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            ${new Date(photo.created_at).toLocaleDateString()}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewPhoto('${photo.id}')">View</button>
+            ${photo.conversion_status === 'completed' ? 
+              '<button class="text-green-600 hover:text-green-900" onclick="downloadText(\'' + photo.id + '\')">Download</button>' :
+              '<button class="text-gray-400 cursor-not-allowed" disabled>Download</button>'
+            }
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Update stats
+    async function updateStats() {
+      document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+  }
+
+  // Setup event listeners
+  function setupEventListeners() {
+      // Refresh buttons
+      document.getElementById('refresh-oms').addEventListener('click', loadOMSCustomizationForms);
+      document.getElementById('refresh-photos').addEventListener('click', loadMenuPhotos);
+
+      // Upload photo button
+      document.getElementById('upload-photo-btn').addEventListener('click', () => {
+        document.getElementById('photo-upload-input').click();
+    });
+
+      // File upload
+      document.getElementById('photo-upload-input').addEventListener('change', handlePhotoUpload);
+  }
+
+    // Handle photo upload
+    async function handlePhotoUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      alert('File size must be less than 10MB');
+      return;
+    }
+
+    try {
+      // Upload to Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${currentUser.id}/${Date.now()}.${fileExt}`;
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('menu-photos')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('menu-photos')
+        .getPublicUrl(fileName);
+
+      // Save to database
+      const { data: photoData, error: dbError } = await supabase
+          .from('menu_photos')
+          .insert({
+            user_id: currentUser.id,
+            photo_url: publicUrl,
+            original_filename: file.name,
+            file_size: file.size,
+            mime_type: file.type,
+            conversion_status: 'pending'
+        });
+
+      if (dbError) {
+        throw dbError;
+      }
+
+        // Reload photos
+        await loadMenuPhotos();
+        await updateStats();
+
+      // Reset file input
+      event.target.value = '';
+
+        alert('Photo uploaded successfully!');
+
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Error uploading file: ' + error.message);
+      }
+    }
+
+    // Global functions for table actions
+    window.viewOMSForm = function(formId) {
+      console.log('View OMS form:', formId);
+      // Implement view functionality
+    };
+
+    window.processOMSForm = function(formId) {
+      console.log('Process OMS form:', formId);
+      // Implement process functionality
+    };
+
+    window.viewPhoto = function(photoId) {
+      console.log('View photo:', photoId);
+      // Implement view functionality
+    };
+
+    window.downloadText = function(photoId) {
+      console.log('Download text for photo:', photoId);
+      // Implement download functionality
+    };
+</script>
+</MenuOperatorLayout>

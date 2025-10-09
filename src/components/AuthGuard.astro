@@ -25,8 +25,8 @@ const { redirectTo = '/login' } = Astro.props;
       let authManager = window.globalAuthManager || window.simpleAuthManager;
       
       if (!authManager) {
-        // Wait a bit and retry
-        setTimeout(checkAuth, 100);
+        // Wait a bit and retry - more aggressive
+        setTimeout(checkAuth, 50);
         return;
       }
       
@@ -62,15 +62,17 @@ const { redirectTo = '/login' } = Astro.props;
     }
   }
 
-  // Check authentication when DOM is ready
+  // Check authentication when DOM is ready - IMMEDIATE CHECK
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-      // Wait a bit longer for the global auth manager to be ready
-      setTimeout(checkAuth, 500);
+      // Check immediately, then retry if needed
+      checkAuth();
+      setTimeout(checkAuth, 100);
     });
   } else {
-    // DOM already loaded, wait a bit longer for auth manager
-    setTimeout(checkAuth, 500);
+    // DOM already loaded, check immediately
+    checkAuth();
+    setTimeout(checkAuth, 100);
   }
 
   // Listen for auth state changes

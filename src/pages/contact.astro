@@ -112,8 +112,8 @@ import Layout from '../layouts/Layout.astro';
                 required
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
               >
-                <option value="" disabled>Select a project type</option>
-                <option value="order-menu-system" selected>Order Menu System</option>
+                <option value="" disabled selected>Select a project type</option>
+                <option value="order-menu-system">Order Menu System</option>
                 <option value="restaurant-menu" disabled>Restaurant Menu System</option>
                 <option value="android-tv" disabled>Android TV App</option>
                 <option value="streaming-app" disabled>Streaming Mobile App</option>
@@ -331,8 +331,27 @@ import Layout from '../layouts/Layout.astro';
       el.disabled = false;
       restoreName(el);
     });
+    
+    // Also enable project type and message fields
+    const projectTypeSelect = document.getElementById('project_type') as HTMLSelectElement;
+    const messageTextarea = document.getElementById('message') as HTMLTextAreaElement;
+    
+    if (projectTypeSelect) {
+      projectTypeSelect.disabled = false;
+    }
+    if (messageTextarea) {
+      messageTextarea.disabled = false;
+      messageTextarea.placeholder = 'Tell us about your project requirements...';
+    }
+    
     const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement;
     if (submitBtn) submitBtn.disabled = false;
+    
+    // Hide auth message when user logs in
+    const authMessage = document.getElementById('auth-message');
+    if (authMessage) {
+      authMessage.remove();
+    }
   }
 
   // Immediately clear/disable until auth confirms login
@@ -345,6 +364,18 @@ import Layout from '../layouts/Layout.astro';
   // Ensure cleared on logout
   window.addEventListener('user-logged-out', () => {
     clearAndDisablePersonalFields();
+  });
+
+  // Force clear form on page load for non-authenticated users
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      if (!authManager || !authManager.isUserLoggedIn()) {
+        console.log('🚫 User not authenticated - forcing form clear');
+        clearAndDisablePersonalFields();
+        window.clearForm();
+      }
+    }, 100);
   });
 
   // Get Supabase client from global window object
@@ -480,305 +511,71 @@ import Layout from '../layouts/Layout.astro';
     return null;
   }
 
-  // Pre-fill form with project details and user info
+  // Simple form management - NO pre-filling without login
   window.prefillForm = async function prefillForm() {
-    try {
-      console.log('🔄 Starting form pre-fill process...');
-      console.log('🔍 Available global objects:', {
-        globalAuthManager: !!window.globalAuthManager,
-        simpleAuthManager: !!window.simpleAuthManager,
-        supabase: !!window.supabase
-      });
-      
-      // Wait for auth manager if not available
-      let authManager = window.globalAuthManager || window.simpleAuthManager;
-      if (!authManager) {
-        console.log('⏳ Auth manager not available, waiting...');
-        let attempts = 0;
-        while (!authManager && attempts < 50) { // Wait up to 5 seconds
-          await new Promise(resolve => setTimeout(resolve, 100));
-          authManager = window.globalAuthManager || window.simpleAuthManager;
-          attempts++;
-        }
-      }
-      
-      // First, always clear the form to ensure no previous data is shown
-      console.log('🧹 Clearing form first to ensure clean state...');
-      window.clearForm();
-      
-      const urlParams = getUrlParams();
-      
-      // Only pre-fill project details if user is logged in and has selected products
+    console.log('🔄 Checking authentication status...');
+    
+    // Check if user is logged in
+    const authManager = window.globalAuthManager || window.simpleAuthManager;
       const isLoggedIn = authManager && authManager.isUserLoggedIn();
 
-      // Toggle field/button enabled state according to auth
       if (isLoggedIn) {
+      console.log('✅ User is logged in - enabling form');
         enablePersonalFields();
-      } else {
-        clearAndDisablePersonalFields();
-      }
-       
-      if (isLoggedIn && urlParams.projectType) {
-        const projectTypeSelect = document.getElementById('project_type') as HTMLSelectElement;
-        if (projectTypeSelect) {
-          projectTypeSelect.value = urlParams.projectType;
-          // Trigger validation events
-          projectTypeSelect.dispatchEvent(new Event('input', { bubbles: true }));
-          projectTypeSelect.dispatchEvent(new Event('change', { bubbles: true }));
-          console.log('✅ Pre-filled project type for logged in user:', urlParams.projectType);
-        }
-      }
-
-      if (isLoggedIn && urlParams.projectDetails) {
-        const messageTextarea = document.getElementById('message') as HTMLTextAreaElement;
-        if (messageTextarea) {
-          let projectDetails = decodeURIComponent(urlParams.projectDetails);
-          
-          // Add product information if available
-          if (urlParams.product) {
-            const productName = decodeURIComponent(urlParams.product);
-            projectDetails = `Project: ${productName}\n\n${projectDetails}`;
-          }
-          
-          // Add price information if available
-          if (urlParams.price) {
-            const price = decodeURIComponent(urlParams.price);
-            projectDetails += `\n\nBudget: ₹${price}`;
-          }
-          
-          messageTextarea.value = projectDetails;
-          // Trigger validation events
-          messageTextarea.dispatchEvent(new Event('input', { bubbles: true }));
-          messageTextarea.dispatchEvent(new Event('change', { bubbles: true }));
-          console.log('✅ Pre-filled project details for logged in user');
-        }
-      } else if (!isLoggedIn) {
-        console.log('👤 User not logged in - not pre-filling project details');
-        // Ensure project fields are empty for new users
-        const projectTypeSelect = document.getElementById('project_type') as HTMLSelectElement;
-        const messageTextarea = document.getElementById('message') as HTMLTextAreaElement;
-        
-        if (projectTypeSelect) {
-          projectTypeSelect.value = '';
-        }
-        if (messageTextarea) {
-          messageTextarea.value = '';
-          messageTextarea.placeholder = 'Tell us about your project...';
-        }
-      }
-
-      // Ensure Supabase is available for profile fetching
-      if (!supabase) {
-        console.log('🔄 Supabase not available in prefill, trying to reinitialize...');
-        initSupabase();
-      }
-
-      // Pre-fill user information using global auth manager
-      console.log('🔍 Checking for logged in user using global auth manager...');
       
-      // Try global auth manager first (more reliable)
-      if (authManager && authManager.isUserLoggedIn()) {
+      // Only pre-fill if user is logged in
         const currentUser = authManager.getCurrentUser();
-        console.log('👤 User found via global auth manager:', currentUser?.email);
-        console.log('👤 User data details:', {
-          full_name: currentUser?.full_name,
-          phone: currentUser?.phone,
-          company_name: currentUser?.company_name,
-          email: currentUser?.email
-        });
-        
-        // Only prefill if user is actually logged in and has valid data
         if (currentUser && currentUser.email) {
-        
-        // Pre-fill form fields with user data
         const firstNameInput = document.getElementById('first_name') as HTMLInputElement;
         const lastNameInput = document.getElementById('last_name') as HTMLInputElement;
         const emailInput = document.getElementById('email') as HTMLInputElement;
         const phoneInput = document.getElementById('phone') as HTMLInputElement;
         const companyInput = document.getElementById('company') as HTMLInputElement;
         
-        // Fallback: Check session storage directly if auth manager data is incomplete
-        let userData = currentUser;
-        if (!userData.phone && !userData.company_name) {
-          const refreshedData = refreshUserData();
-          if (refreshedData) {
-            userData = { ...userData, ...refreshedData };
-            console.log('🔄 Using refreshed session storage data:', {
-              phone: userData.phone,
-              company_name: userData.company_name,
-              full_name: userData.full_name
-            });
-          }
+        // Pre-fill only if user data exists
+        if (currentUser.full_name) {
+          const names = currentUser.full_name.split(' ');
+          if (firstNameInput) firstNameInput.value = names[0] || '';
+          if (lastNameInput && names.length > 1) lastNameInput.value = names.slice(1).join(' ');
         }
-
-        // Enable fields when logged in
-        [firstNameInput, lastNameInput, emailInput, phoneInput, companyInput].forEach((el) => {
-          if (el) el.disabled = false;
-        });
-
-        // Pre-fill first name and last name
-        if (userData && userData.full_name) {
-          const names = userData.full_name.split(' ');
-          if (firstNameInput) {
-            firstNameInput.value = names[0] || '';
-            // Trigger validation events to ensure browser recognizes the field as valid
-            firstNameInput.dispatchEvent(new Event('input', { bubbles: true }));
-            firstNameInput.dispatchEvent(new Event('change', { bubbles: true }));
-            console.log('✅ Pre-filled first name:', names[0]);
-          }
-          if (lastNameInput && names.length > 1) {
-            lastNameInput.value = names.slice(1).join(' ');
-            // Trigger validation events
-            lastNameInput.dispatchEvent(new Event('input', { bubbles: true }));
-            lastNameInput.dispatchEvent(new Event('change', { bubbles: true }));
-            console.log('✅ Pre-filled last name:', names.slice(1).join(' '));
-          }
-        }
-        
-        // Pre-fill email, phone and company
-        if (emailInput) {
-          emailInput.value = userData.email || '';
-          emailInput.dispatchEvent(new Event('input', { bubbles: true }));
-          emailInput.dispatchEvent(new Event('change', { bubbles: true }));
-          console.log('✅ Pre-filled email:', userData.email);
-        }
-        if (phoneInput && userData.phone) {
-          // Remove +91 prefix for display in form
-          let phoneValue = userData.phone;
-          if (phoneValue.startsWith('+91')) {
-            phoneValue = phoneValue.substring(3);
-          }
+        if (emailInput) emailInput.value = currentUser.email || '';
+        if (phoneInput && currentUser.phone) {
+          let phoneValue = currentUser.phone;
+          if (phoneValue.startsWith('+91')) phoneValue = phoneValue.substring(3);
           phoneInput.value = phoneValue;
-          phoneInput.dispatchEvent(new Event('input', { bubbles: true }));
-          phoneInput.dispatchEvent(new Event('change', { bubbles: true }));
-          console.log('✅ Pre-filled phone:', phoneValue);
         }
-        if (companyInput && userData.company_name) {
-          companyInput.value = userData.company_name;
-          companyInput.dispatchEvent(new Event('input', { bubbles: true }));
-          companyInput.dispatchEvent(new Event('change', { bubbles: true }));
-          console.log('✅ Pre-filled company:', userData.company_name);
-        }
-        
+        if (companyInput && currentUser.company_name) companyInput.value = currentUser.company_name;
         }
       } else {
-        // Not logged in: clear and disable personal fields
-        const firstNameInput = document.getElementById('first_name') as HTMLInputElement;
-        const lastNameInput = document.getElementById('last_name') as HTMLInputElement;
-        const emailInput = document.getElementById('email') as HTMLInputElement;
-        const phoneInput = document.getElementById('phone') as HTMLInputElement;
-        const companyInput = document.getElementById('company') as HTMLInputElement;
-
-        [firstNameInput, lastNameInput, emailInput, phoneInput, companyInput].forEach((el) => {
-          if (!el) return;
-          el.value = '';
-          el.disabled = true;
-        });
-        
-        // Show a gentle hint
-        const messageTextarea = document.getElementById('message') as HTMLTextAreaElement;
-        if (messageTextarea) {
-          messageTextarea.placeholder = 'Please sign in to send us a message.';
-        }
-        console.log('🚫 User not logged in - cleared and disabled personal fields');
-      }
+      console.log('❌ User not logged in - clearing and disabling form');
+      clearAndDisablePersonalFields();
       
-      if (supabase) {
-        // Fallback to Supabase auth if global auth manager not available
-        try {
-          console.log('🔍 Fallback: Checking Supabase auth...');
-          const { data: { user } } = await supabase.auth.getUser();
-          
-          if (user) {
-            console.log('👤 User found via Supabase auth:', user.email);
-            
-            // Pre-fill form fields with user data
-            const firstNameInput = document.getElementById('first_name') as HTMLInputElement;
-            const lastNameInput = document.getElementById('last_name') as HTMLInputElement;
-            const emailInput = document.getElementById('email') as HTMLInputElement;
-            const phoneInput = document.getElementById('phone') as HTMLInputElement;
-            const companyInput = document.getElementById('company') as HTMLInputElement;
-
-            // Pre-fill email
-            if (emailInput && user.email) {
-              emailInput.value = user.email;
-              // Trigger validation events
-              emailInput.dispatchEvent(new Event('input', { bubbles: true }));
-              emailInput.dispatchEvent(new Event('change', { bubbles: true }));
-              console.log('✅ Pre-filled email:', user.email);
-            }
-
-            // Try to get additional user data from profiles table
-            try {
-              const { data: profile } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', user.id)
-                .single();
-
-              if (profile) {
-                // Pre-fill first name and last name
-                if (profile.full_name) {
-                  const names = profile.full_name.split(' ');
-                  if (firstNameInput) {
-                    firstNameInput.value = names[0] || '';
-                    // Trigger validation events
-                    firstNameInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    firstNameInput.dispatchEvent(new Event('change', { bubbles: true }));
-                    console.log('✅ Pre-filled first name:', names[0]);
-                  }
-                  if (lastNameInput && names.length > 1) {
-                    lastNameInput.value = names.slice(1).join(' ');
-                    // Trigger validation events
-                    lastNameInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    lastNameInput.dispatchEvent(new Event('change', { bubbles: true }));
-                    console.log('✅ Pre-filled last name:', names.slice(1).join(' '));
-                  }
-                }
-
-                // Pre-fill phone
-                if (phoneInput && profile.phone) {
-                  // Remove +91 prefix for display in form
-                  let phoneValue = profile.phone;
-                  if (phoneValue.startsWith('+91')) {
-                    phoneValue = phoneValue.substring(3);
-                  }
-                  phoneInput.value = phoneValue;
-                  // Trigger validation events
-                  phoneInput.dispatchEvent(new Event('input', { bubbles: true }));
-                  phoneInput.dispatchEvent(new Event('change', { bubbles: true }));
-                  console.log('✅ Pre-filled phone:', phoneValue);
-                }
-
-                // Pre-fill company
-                if (companyInput && profile.company_name) {
-                  companyInput.value = profile.company_name;
-                  // Trigger validation events
-                  companyInput.dispatchEvent(new Event('input', { bubbles: true }));
-                  companyInput.dispatchEvent(new Event('change', { bubbles: true }));
-                  console.log('✅ Pre-filled company:', profile.company_name);
-                }
-              }
-            } catch (profileError) {
-              console.log('⚠️ Could not fetch profile data:', profileError);
-            }
-
-            console.log('✅ Form pre-filled successfully with Supabase auth data');
-            // Force validation to recognize pre-filled fields
-            setTimeout(() => forceFormValidation(), 100);
-          } else {
-            console.log('ℹ️ No user logged in via Supabase auth - clearing form');
-            window.clearForm();
-          }
-        } catch (authError) {
-          console.log('ℹ️ Supabase auth check failed:', authError);
+      // Show auth message
+      const form = document.getElementById('contact-form');
+      if (form) {
+        let messageDiv = document.getElementById('auth-message');
+        if (!messageDiv) {
+          messageDiv = document.createElement('div');
+          messageDiv.id = 'auth-message';
+          messageDiv.className = 'mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg';
+          form.insertBefore(messageDiv, form.firstChild);
         }
-      } else {
-        console.log('ℹ️ Neither global auth manager nor Supabase available - clearing form');
-        window.clearForm();
+        messageDiv.innerHTML = `
+          <div class="flex items-center">
+            <svg class="w-5 h-5 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+              <p class="text-blue-800 font-medium">Authentication Required</p>
+              <p class="text-blue-700 text-sm">Please sign in to send us a message or view our products.</p>
+              <div class="mt-2">
+                <a href="/login" class="text-blue-600 hover:text-blue-800 font-medium text-sm mr-4">Sign In</a>
+                <a href="/signup" class="text-blue-600 hover:text-blue-800 font-medium text-sm">Create Account</a>
+              </div>
+            </div>
+          </div>
+        `;
       }
-    } catch (error) {
-      console.error('❌ Error pre-filling form:', error);
     }
   }
 
@@ -1166,51 +963,104 @@ import Layout from '../layouts/Layout.astro';
     });
   });
 
-  // Only clear form if user is not logged in when page loads
-  if (!isUserLoggedIn()) {
-    window.clearForm();
-  }
-  
-  // Only clear form if user is not logged in
-  setTimeout(() => {
-    if (!isUserLoggedIn()) {
-      window.clearForm();
-    }
-  }, 100);
-
-  // Pre-fill form when page loads with a small delay to ensure auth manager is ready
-  document.addEventListener('DOMContentLoaded', () => {
-    // Check user status first
-    setTimeout(() => {
-      window.checkUserStatus();
-    }, 100);
+  // IMMEDIATELY clear form on page load - NO DELAYS
+  function forceClearForm() {
+    console.log('🚫 FORCE CLEARING FORM - NO USER DETAILS ALLOWED WITHOUT LOGIN');
     
-    // Wait for auth manager to be fully initialized
-    const waitForAuthManager = () => {
+    // Clear all form fields immediately
+    const firstNameInput = document.getElementById('first_name') as HTMLInputElement;
+    const lastNameInput = document.getElementById('last_name') as HTMLInputElement;
+    const emailInput = document.getElementById('email') as HTMLInputElement;
+    const phoneInput = document.getElementById('phone') as HTMLInputElement;
+    const companyInput = document.getElementById('company') as HTMLInputElement;
+    const projectTypeSelect = document.getElementById('project_type') as HTMLSelectElement;
+    const messageTextarea = document.getElementById('message') as HTMLTextAreaElement;
+    
+    // Clear all fields
+    if (firstNameInput) {
+      firstNameInput.value = '';
+      firstNameInput.disabled = true;
+    }
+    if (lastNameInput) {
+      lastNameInput.value = '';
+      lastNameInput.disabled = true;
+    }
+    if (emailInput) {
+      emailInput.value = '';
+      emailInput.disabled = true;
+    }
+    if (phoneInput) {
+      phoneInput.value = '';
+      phoneInput.disabled = true;
+    }
+    if (companyInput) {
+      companyInput.value = '';
+      companyInput.disabled = true;
+    }
+    if (projectTypeSelect) {
+      projectTypeSelect.value = '';
+      projectTypeSelect.disabled = true;
+    }
+    if (messageTextarea) {
+      messageTextarea.value = '';
+      messageTextarea.disabled = true;
+      messageTextarea.placeholder = 'Please sign in to send us a message.';
+    }
+    
+    // Disable submit button
+    const submitBtn = document.querySelector('button[type="submit"]') as HTMLButtonElement;
+    if (submitBtn) {
+      submitBtn.disabled = true;
+    }
+    
+    // Show auth message
+    const form = document.getElementById('contact-form');
+    if (form) {
+      let messageDiv = document.getElementById('auth-message');
+      if (!messageDiv) {
+        messageDiv = document.createElement('div');
+        messageDiv.id = 'auth-message';
+        messageDiv.className = 'mb-6 p-4 bg-red-50 border border-red-200 rounded-lg';
+        form.insertBefore(messageDiv, form.firstChild);
+      }
+      messageDiv.innerHTML = `
+        <div class="flex items-center">
+          <svg class="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+          <div>
+            <p class="text-red-800 font-medium">Authentication Required</p>
+            <p class="text-red-700 text-sm">You must be logged in to access this form and view our products.</p>
+            <div class="mt-2">
+              <a href="/login" class="text-red-600 hover:text-red-800 font-medium text-sm mr-4">Sign In</a>
+              <a href="/signup" class="text-red-600 hover:text-red-800 font-medium text-sm">Create Account</a>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // Check authentication when page loads
+  document.addEventListener('DOMContentLoaded', () => {
+    // Check auth status immediately
+    setTimeout(() => {
       const authManager = window.globalAuthManager || window.simpleAuthManager;
-      if (authManager) {
-        console.log('✅ Auth manager found, checking user status...');
-        if (authManager.isUserLoggedIn()) {
-          console.log('👤 User is logged in - pre-filling form');
+      if (authManager && authManager.isUserLoggedIn()) {
+        console.log('✅ User is logged in - enabling form');
+        enablePersonalFields();
           prefillForm();
         } else {
-          console.log('👤 User is not logged in - clearing form');
-          window.clearForm();
-        }
-      } else {
-        console.log('⏳ Auth manager not ready yet, retrying in 100ms...');
-        setTimeout(waitForAuthManager, 100);
+        console.log('❌ User not logged in - clearing form');
+        forceClearForm();
       }
-    };
-    
-    // Start checking for auth manager after a short delay
-    setTimeout(waitForAuthManager, 200);
+    }, 100);
   });
 
   // Listen for logout events to clear the form
   window.addEventListener('user-logged-out', () => {
-    console.log('👤 User logged out - clearing contact form');
-    window.clearForm();
+    console.log('👤 User logged out - FORCE CLEARING contact form');
+    forceClearForm();
   });
 
   // Listen for login events to pre-fill the form
@@ -1231,11 +1081,12 @@ import Layout from '../layouts/Layout.astro';
       if (authManager) {
         console.log('✅ Auth manager found on window load, checking user status...');
         if (authManager.isUserLoggedIn()) {
-          console.log('👤 User is logged in on window load - pre-filling form');
+          console.log('👤 User is logged in on window load - enabling form');
+          enablePersonalFields();
           prefillForm();
         } else {
           console.log('👤 User not logged in on window load - clearing form');
-          window.clearForm();
+          forceClearForm();
         }
       } else {
         console.log('⏳ Auth manager not ready on window load, retrying in 100ms...');
@@ -1251,9 +1102,10 @@ import Layout from '../layouts/Layout.astro';
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
       console.log('🔄 Page became visible - checking authentication');
-      if (!isUserLoggedIn()) {
-        console.log('👤 User not logged in - clearing form');
-        window.clearForm();
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      if (!authManager || !authManager.isUserLoggedIn()) {
+        console.log('👤 User not logged in - FORCE CLEARING form');
+        forceClearForm();
       } else {
         console.log('👤 User is logged in - keeping form data');
       }
