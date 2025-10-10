@@ -209,6 +209,24 @@ const { title, description = "DevExpress - 24 Hour Delivery" } = Astro.props;
         animation: none !important;
       }
       
+      /* Hide navbar for menu operator panel - Ultra aggressive */
+      body.menu-operator-panel-active header:not(.menu-operator-header) {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        position: absolute !important;
+        top: -9999px !important;
+        left: -9999px !important;
+        z-index: -9999 !important;
+        pointer-events: none !important;
+        transform: translateY(-100vh) !important;
+        transition: none !important;
+        animation: none !important;
+      }
+      
       /* Additional protection for any navbar elements */
       body.admin-panel-active header * {
         display: none !important;
@@ -477,19 +495,21 @@ const { title, description = "DevExpress - 24 Hour Delivery" } = Astro.props;
       }
     </script>
     
-    <!-- Immediate admin panel detection and navbar hiding -->
+    <!-- Immediate admin panel and menu operator detection and navbar hiding -->
     <script>
-      // Check if we're in admin panel immediately
+      // Check if we're in admin panel or menu operator panel immediately
       (function() {
-        // Only apply admin logic if we're actually in admin panel
-        if (window.location.pathname.startsWith('/admin')) {
+        const pathname = window.location.pathname;
+        
+        // Check for admin panel
+        if (pathname.startsWith('/admin')) {
           // Add admin panel classes immediately
           document.documentElement.classList.add('admin-panel-active');
           document.body.classList.add('admin-panel-active');
           
           // Hide navbar immediately
           function hideNavbarImmediately() {
-            const header = document.querySelector('header');
+            const header = document.querySelector('header:not(.menu-operator-header)');
             if (header) {
               header.style.display = 'none';
               header.style.visibility = 'hidden';
@@ -520,10 +540,52 @@ const { title, description = "DevExpress - 24 Hour Delivery" } = Astro.props;
           setTimeout(hideNavbarImmediately, 0);
           setTimeout(hideNavbarImmediately, 10);
           setTimeout(hideNavbarImmediately, 50);
+        } 
+        // Check for menu operator panel
+        else if (pathname.startsWith('/menu-operator')) {
+          // Add menu operator panel classes immediately
+          document.documentElement.classList.add('menu-operator-panel-active');
+          document.body.classList.add('menu-operator-panel-active');
+          
+          // Hide main navbar immediately (but not menu operator header)
+          function hideMainNavbarImmediately() {
+            const mainHeader = document.querySelector('header:not(.menu-operator-header)');
+            if (mainHeader) {
+              mainHeader.style.display = 'none';
+              mainHeader.style.visibility = 'hidden';
+              mainHeader.style.opacity = '0';
+              mainHeader.style.height = '0';
+              mainHeader.style.maxHeight = '0';
+              mainHeader.style.overflow = 'hidden';
+              mainHeader.style.position = 'absolute';
+              mainHeader.style.top = '-9999px';
+              mainHeader.style.left = '-9999px';
+              mainHeader.style.zIndex = '-9999';
+              mainHeader.style.pointerEvents = 'none';
+              mainHeader.style.transform = 'translateY(-100vh)';
+              mainHeader.style.transition = 'none';
+              mainHeader.style.animation = 'none';
+            }
+          }
+          
+          // Try to hide immediately
+          hideMainNavbarImmediately();
+          
+          // Also try when DOM is ready
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', hideMainNavbarImmediately);
+          }
+          
+          // And try after short delays
+          setTimeout(hideMainNavbarImmediately, 0);
+          setTimeout(hideMainNavbarImmediately, 10);
+          setTimeout(hideMainNavbarImmediately, 50);
         } else {
-          // Ensure we're NOT in admin mode for normal pages
+          // Ensure we're NOT in admin or menu operator mode for normal pages
           document.documentElement.classList.remove('admin-panel-active');
+          document.documentElement.classList.remove('menu-operator-panel-active');
           document.body.classList.remove('admin-panel-active');
+          document.body.classList.remove('menu-operator-panel-active');
           
           // Ensure navbar is visible for normal pages (no style manipulation needed)
           // The navbar should be visible by default in the HTML
@@ -851,6 +913,22 @@ const { title, description = "DevExpress - 24 Hour Delivery" } = Astro.props;
       
       /* Only hide navbar in admin panel */
       .admin-panel-active header {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        position: absolute !important;
+        top: -9999px !important;
+        left: -9999px !important;
+        z-index: -9999 !important;
+        pointer-events: none !important;
+      }
+      
+      /* Hide navbar and footer in menu operator panel */
+      .menu-operator-panel-active header:not(.menu-operator-header),
+      .menu-operator-panel-active footer {
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
@@ -1351,20 +1429,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Global navbar visibility functions - simplified to prevent fluctuation
       window.hideUserNavbar = function() {
-        // Only hide if in admin panel
-        if (window.location.pathname.startsWith('/admin')) {
-          const header = document.querySelector('header');
+        // Only hide if in admin panel or menu operator panel
+        if (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/menu-operator')) {
+          const header = document.querySelector('header:not(.menu-operator-header)');
           if (header) {
             header.classList.add('admin-hidden');
-            console.log('✅ User navbar hidden for admin panel');
+            console.log('✅ User navbar hidden for admin/menu operator panel');
           }
         }
       };
       
       window.showUserNavbar = function() {
-        // Only show if not in admin panel
-        if (!window.location.pathname.startsWith('/admin')) {
-          const header = document.querySelector('header');
+        // Only show if not in admin panel or menu operator panel
+        if (!window.location.pathname.startsWith('/admin') && !window.location.pathname.startsWith('/menu-operator')) {
+          const header = document.querySelector('header:not(.menu-operator-header)');
           if (header) {
             header.classList.remove('admin-hidden');
             // Remove any inline styles that might be hiding the navbar
@@ -1374,25 +1452,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       };
       
-      // Check if we're in admin panel and hide navbar accordingly
+      // Check if we're in admin panel or menu operator panel and hide navbar accordingly
       function checkAdminPanelNavbar() {
-        if (window.location.pathname.startsWith('/admin')) {
+        const pathname = window.location.pathname;
+        
+        if (pathname.startsWith('/admin')) {
           document.body.classList.add('admin-panel-active');
           window.hideUserNavbar();
+        } else if (pathname.startsWith('/menu-operator')) {
+          document.body.classList.add('menu-operator-panel-active');
+          document.documentElement.classList.add('menu-operator-panel-active');
+          window.hideUserNavbar();
         } else {
-          // Only remove admin class and show navbar if we're NOT in admin panel
+          // Only remove admin/menu operator classes and show navbar if we're NOT in admin/menu operator panel
           document.body.classList.remove('admin-panel-active');
+          document.body.classList.remove('menu-operator-panel-active');
           document.documentElement.classList.remove('admin-panel-active');
+          document.documentElement.classList.remove('menu-operator-panel-active');
           window.showUserNavbar();
         }
       }
 
       // Handle navigation events to prevent flicker
       function handleNavigation() {
-        // Remove any admin classes when navigating away from admin
-        if (!window.location.pathname.startsWith('/admin')) {
+        const pathname = window.location.pathname;
+        
+        // Remove any admin/menu operator classes when navigating away from admin/menu operator
+        if (!pathname.startsWith('/admin') && !pathname.startsWith('/menu-operator')) {
           document.documentElement.classList.remove('admin-panel-active');
+          document.documentElement.classList.remove('menu-operator-panel-active');
           document.body.classList.remove('admin-panel-active');
+          document.body.classList.remove('menu-operator-panel-active');
           
           // No need to manipulate header styles - it should be visible by default
         }
@@ -1432,11 +1522,13 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Handle page transitions for smoother navigation
       function handlePageTransition() {
-        // Ensure navbar is always visible on non-admin pages
-        if (!window.location.pathname.startsWith('/admin')) {
-          const header = document.querySelector('header');
+        const pathname = window.location.pathname;
+        
+        // Ensure navbar is always visible on non-admin and non-menu-operator pages
+        if (!pathname.startsWith('/admin') && !pathname.startsWith('/menu-operator')) {
+          const header = document.querySelector('header:not(.menu-operator-header)');
           if (header) {
-            // Reset any admin hiding styles immediately without delay
+            // Reset any admin/menu operator hiding styles immediately without delay
             header.style.display = 'block';
             header.style.visibility = 'visible';
             header.style.opacity = '1';
