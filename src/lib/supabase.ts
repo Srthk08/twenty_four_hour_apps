@@ -112,7 +112,7 @@ export interface Profile {
   full_name?: string;
   phone?: string;
   company_name?: string;
-  role: 'customer' | 'admin' | 'developer' | 'support';
+  role: 'customer' | 'admin' | 'developer' | 'support' | 'menu_operator';
   status: 'active' | 'inactive' | 'suspended' | 'pending_verification';
   username?: string;
   avatar_url?: string;

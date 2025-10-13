@@ -136,6 +136,33 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
 <script>
   // Initialize profile page
   document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 Menu Operator Profile Page Loading...');
+    
+    // Check session storage first (primary auth method)
+    const sessionData = sessionStorage.getItem('simple-auth-session');
+    if (!sessionData) {
+      console.log('❌ No session data found - redirecting to login');
+      window.location.href = '/login';
+      return;
+    }
+
+    let session;
+    try {
+      session = JSON.parse(sessionData);
+    } catch (e) {
+      console.log('❌ Invalid session data - redirecting to login');
+      window.location.href = '/login';
+      return;
+    }
+
+    if (!session.user || !session.user.email) {
+      console.log('❌ No user data in session - redirecting to login');
+      window.location.href = '/login';
+      return;
+    }
+
+    console.log('✅ Session found for user:', session.user.email);
+    
     // Debug: Check what's in storage
     debugStorage();
     await loadUserProfile();
@@ -181,26 +208,34 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
     try {
       console.log('🚀 Starting profile load...');
       
+      // Get user from session storage (primary method)
+      const sessionData = sessionStorage.getItem('simple-auth-session');
+      if (!sessionData) {
+        console.log('❌ No session data - redirecting to login');
+        window.location.href = '/login';
+        return;
+      }
+
+      const session = JSON.parse(sessionData);
+      const user = session.user;
+      
+      if (!user || !user.email) {
+        console.log('❌ No user data in session - redirecting to login');
+        window.location.href = '/login';
+        return;
+      }
+
+      console.log('✅ User found in session:', user.email);
+      
       // Check if Supabase is available
       if (typeof window.supabase === 'undefined') {
         console.error('❌ Supabase client not available, using fallback data');
-        showFallbackProfile();
+        showFallbackProfile(user);
         return;
       }
 
       const supabase = window.supabase;
       console.log('✅ Supabase client found');
-
-      // Get current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError || !user) {
-        console.error('❌ Error getting user:', userError);
-        console.log('🔄 Redirecting to login...');
-        window.location.href = '/login';
-        return;
-      }
-
-      console.log('✅ User found:', user.email);
 
       // Try to get user profile
       let profile = null;
@@ -243,12 +278,19 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
           profile = fallbackProfile;
           console.log('✅ Fallback profile loaded:', profile);
 
-          // Check role
-          if (profile.role && profile.role.toLowerCase().trim() !== 'menu_operator') {
-            console.log('❌ User does not have menu_operator role. Role:', profile.role);
-            window.location.href = '/dashboard';
-            return;
-          }
+      // Check role - but be more lenient for menu operator pages
+      if (profile.role && profile.role.toLowerCase().trim() !== 'menu_operator') {
+        console.log('⚠️ User does not have menu_operator role in database. Role:', profile.role);
+        // Don't redirect immediately, try to use session role first
+        if (user.role === 'menu_operator' || user.role === 'menu operator') {
+          console.log('✅ Using session role instead of database role');
+          profile.role = 'menu_operator';
+        } else {
+          console.log('❌ No valid role found - redirecting to dashboard');
+          window.location.href = '/dashboard';
+          return;
+        }
+      }
         } catch (fallbackErr) {
           console.error('❌ Fallback query failed:', fallbackErr);
           showFallbackProfile(user);
@@ -257,11 +299,18 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
       }
 
       if (profile) {
-        // Check if user has menu_operator role
+        // Check if user has menu_operator role - but be more lenient
         if (profile.role && profile.role.toLowerCase().trim() !== 'menu_operator') {
-          console.log('❌ User does not have menu_operator role. Role:', profile.role);
-          window.location.href = '/dashboard';
-          return;
+          console.log('⚠️ User does not have menu_operator role in database. Role:', profile.role);
+          // Don't redirect immediately, try to use session role first
+          if (user.role === 'menu_operator' || user.role === 'menu operator') {
+            console.log('✅ Using session role instead of database role');
+            profile.role = 'menu_operator';
+          } else {
+            console.log('❌ No valid role found - redirecting to dashboard');
+            window.location.href = '/dashboard';
+            return;
+          }
         }
 
         console.log('✅ Profile loaded successfully:', profile);
@@ -314,13 +363,11 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
       }
     }
     
-    // If still no user, create demo user
+    // If still no user, redirect to login (don't create demo data)
     if (!fallbackUser) {
-      fallbackUser = {
-        email: 'user@example.com',
-        created_at: new Date().toISOString()
-      };
-      console.log('⚠️ No user found, using demo data');
+      console.log('❌ No authenticated user found - redirecting to login');
+      window.location.href = '/login';
+      return;
     }
     
     // Create profile from user data

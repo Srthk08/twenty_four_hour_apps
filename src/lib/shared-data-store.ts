@@ -78,7 +78,7 @@ export interface UserAccount {
   fullName: string;
   phone?: string;
   companyName?: string;
-  role: 'customer' | 'admin' | 'developer' | 'support';
+  role: 'customer' | 'admin' | 'developer' | 'support' | 'menu_operator';
   status: 'active' | 'inactive' | 'suspended' | 'pending_verification';
   avatarUrl?: string;
   lastLoginAt?: string;

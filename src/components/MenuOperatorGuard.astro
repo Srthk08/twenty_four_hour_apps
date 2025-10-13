@@ -6,31 +6,85 @@
 <script>
   import { createClient } from '@supabase/supabase-js';
 
-  // Supabase configuration
-  const supabaseUrl = 'YOUR_SUPABASE_URL';
-  const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+  // Supabase configuration - using the same config as the main app
+  const SUPABASE_CONFIG = {
+    url: 'https://lmrrdcaavwwletcjcpqv.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ'
+  };
+
+  // Get environment variables with fallbacks
+  const getEnvVar = (key: string): string => {
+    // Try to get from import.meta.env (Astro) - this is the primary method
+    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) {
+      return import.meta.env[key];
+    }
+    
+    // Try to get from process.env (Node.js) - for server-side
+    if (typeof process !== 'undefined' && process.env && process.env[key]) {
+      return process.env[key];
+    }
+    
+    // Try to get from window (browser) - for client-side fallback
+    if (typeof window !== 'undefined' && window.__ENV__ && window.__ENV__[key]) {
+      return window.__ENV__[key];
+    }
+    
+    // Return empty string if not found
+    return '';
+  };
+
+  // Use environment variables if available, otherwise use hardcoded config
+  const supabaseUrl = getEnvVar('VITE_SUPABASE_URL') || SUPABASE_CONFIG.url;
+  const supabaseKey = getEnvVar('VITE_SUPABASE_ANON_KEY') || SUPABASE_CONFIG.anonKey;
   const supabase = createClient(supabaseUrl, supabaseKey);
 
   // Check if user has menu operator access
   async function checkMenuOperatorAccess() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      console.log('🔍 MenuOperatorGuard - Checking access...');
       
-      if (!user) {
-        // User not logged in, redirect to login
+      // First check simple auth session
+      const sessionData = sessionStorage.getItem('simple-auth-session');
+      if (!sessionData) {
+        console.log('❌ No session data found - redirecting to login');
         window.location.href = '/login';
         return false;
       }
 
-      // Check if user has menu operator role in profiles table
+      let session;
+      try {
+        session = JSON.parse(sessionData);
+      } catch (e) {
+        console.log('❌ Invalid session data - redirecting to login');
+        window.location.href = '/login';
+        return false;
+      }
+
+      if (!session.user || !session.user.email) {
+        console.log('❌ No user data in session - redirecting to login');
+        window.location.href = '/login';
+        return false;
+      }
+
+      console.log('✅ Session found for user:', session.user.email);
+
+      // Check if user has menu operator role in session first
+      if (session.user.role === 'menu_operator' || session.user.role === 'menu operator') {
+        console.log('✅ Menu operator role found in session');
+        return true;
+      }
+
+      // If no role in session, try to fetch from Supabase
+      console.log('⚠️ No role in session, checking Supabase...');
+      
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('role, status')
-        .eq('id', user.id)
+        .eq('id', session.user.id)
         .single();
 
       if (error || !profile) {
-        // User doesn't have a profile
+        console.log('❌ No profile found in Supabase');
         showAccessDenied('You need menu operator role to access this page. Please contact support to assign the role.');
         return false;
       }
@@ -50,6 +104,11 @@
         showAccessDenied('You need menu operator role to access this page. Current role: ' + profile.role);
         return false;
       }
+
+      // Update session with role information
+      session.user.role = profile.role;
+      sessionStorage.setItem('simple-auth-session', JSON.stringify(session));
+      console.log('✅ Updated session with role information');
 
       return true;
     } catch (error) {

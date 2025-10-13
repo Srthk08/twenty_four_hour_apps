@@ -161,40 +161,107 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
   import { createClient } from '@supabase/supabase-js';
 
   // Supabase configuration
-  const supabaseUrl = 'YOUR_SUPABASE_URL';
-  const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
   const supabase = createClient(supabaseUrl, supabaseKey);
+  
+  console.log('🔧 Supabase configuration:');
+  console.log('- URL:', supabaseUrl);
+  console.log('- Key:', supabaseKey ? 'Present' : 'Missing');
 
   // Global variables
   let currentUser = null;
+
+  // Test Supabase connection and data saving
+  async function testSupabaseConnection() {
+    console.log('🧪 Testing Supabase connection...');
+    
+    try {
+      // Test 1: Check if Supabase client is working
+      console.log('✅ Supabase client created successfully');
+      
+      // Test 2: Try to insert a test OMS customization
+      const testData = {
+        user_email: 'test@example.com',
+        project_name: 'Test Project',
+        owner_name: 'Test Owner',
+        restaurant_name: 'Test Restaurant',
+        restaurant_address: '123 Test St',
+        phone_number: '+1-555-TEST',
+        logo_url: 'https://via.placeholder.com/100x100/FF0000/FFFFFF?text=TEST',
+        status: 'pending'
+      };
+      
+      console.log('📝 Attempting to insert test data...', testData);
+      
+      const { data, error } = await supabase
+        .from('oms_customizations')
+        .insert(testData)
+        .select();
+      
+      if (error) {
+        console.error('❌ Error inserting test data:', error);
+        console.error('❌ Error details:', error.message);
+        console.error('❌ Error code:', error.code);
+        console.error('❌ Error hint:', error.hint);
+        return false;
+      } else {
+        console.log('✅ Test data inserted successfully:', data);
+        
+        // Clean up test data
+        await supabase
+          .from('oms_customizations')
+          .delete()
+          .eq('user_email', 'test@example.com');
+        
+        console.log('✅ Test data cleaned up');
+        return true;
+      }
+      
+    } catch (error) {
+      console.error('❌ Exception during Supabase test:', error);
+      return false;
+    }
+  }
 
   // Initialize dashboard
   document.addEventListener('DOMContentLoaded', async () => {
     console.log('📄 DOM Content Loaded - Starting dashboard initialization');
     
-    // Force load demo data immediately
-    setTimeout(() => {
-      console.log('⏰ Timeout 1 - Force loading demo data');
-      loadDemoData();
-    }, 100);
+    // Test Supabase connection first
+    const supabaseWorking = await testSupabaseConnection();
     
-    setTimeout(() => {
-      console.log('⏰ Timeout 2 - Force loading demo data again');
-      loadDemoData();
-    }, 500);
-    
-    setTimeout(() => {
-      console.log('⏰ Timeout 3 - Final attempt to load demo data');
-      loadDemoData();
-    }, 1000);
-    
-    try {
-      await loadUserProfile();
-      await loadDashboardData();
-      setupEventListeners();
-    } catch (error) {
-      console.error('❌ Error in dashboard initialization:', error);
-      // Still try to load demo data
+    if (supabaseWorking) {
+      console.log('✅ Supabase is working! Proceeding with data loading...');
+      
+      // Force load demo data immediately
+      setTimeout(() => {
+        console.log('⏰ Timeout 1 - Force loading demo data');
+        loadDemoData();
+      }, 100);
+      
+      setTimeout(() => {
+        console.log('⏰ Timeout 2 - Force loading demo data again');
+        loadDemoData();
+      }, 500);
+      
+      setTimeout(() => {
+        console.log('⏰ Timeout 3 - Final attempt to load demo data');
+        loadDemoData();
+      }, 1000);
+      
+      try {
+        await loadUserProfile();
+        await loadDashboardData();
+        setupEventListeners();
+      } catch (error) {
+        console.error('❌ Error in dashboard initialization:', error);
+        // Still try to load demo data
+        loadDemoData();
+      }
+    } else {
+      console.error('❌ Supabase is not working! Check your configuration.');
+      // Still try to load demo data as fallback
       loadDemoData();
     }
   });

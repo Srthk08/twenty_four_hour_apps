@@ -43,6 +43,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
               <option value="admin">Admin</option>
               <option value="developer">Developer</option>
               <option value="support">Support</option>
+              <option value="menu_operator">Menu Operator</option>
             </select>
           </div>
 
@@ -92,8 +93,39 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         </div>
         
         <!-- Pagination -->
-        <div class="bg-white px-6 py-3 border-t border-gray-200">
-          <div class="flex items-center justify-between">
+        <div class="bg-white px-4 sm:px-6 py-3 border-t border-gray-200">
+          <!-- Mobile Layout -->
+          <div class="block sm:hidden">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-700">Show</span>
+                <select id="items-per-page-mobile" class="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+                <span class="text-sm text-gray-700">entries</span>
+              </div>
+              <button id="refresh-users-mobile" class="px-3 py-1 text-sm text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                Refresh
+              </button>
+            </div>
+            <div class="flex items-center justify-between">
+              <button id="prev-page-mobile" class="px-3 py-1 text-sm text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                Previous
+              </button>
+              <div id="page-numbers-mobile" class="flex items-center space-x-1 overflow-x-auto max-w-[200px]">
+                <!-- Page numbers will be generated dynamically -->
+              </div>
+              <button id="next-page-mobile" class="px-3 py-1 text-sm text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                Next
+              </button>
+            </div>
+          </div>
+          
+          <!-- Desktop Layout -->
+          <div class="hidden sm:flex items-center justify-between">
             <div class="flex items-center space-x-2">
               <span class="text-sm text-gray-700">Show</span>
               <select id="items-per-page" class="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500">
@@ -201,6 +233,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
                         <option value="admin">Admin</option>
                         <option value="developer">Developer</option>
                         <option value="support">Support</option>
+                        <option value="menu_operator">Menu Operator</option>
                       </select>
                     </div>
                     
@@ -496,12 +529,29 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
   // Update pagination controls
   function updatePagination() {
+    // Desktop elements
     const pageNumbers = document.getElementById('page-numbers');
     const prevButton = document.getElementById('prev-page');
     const nextButton = document.getElementById('next-page');
     
-    if (!pageNumbers || !prevButton || !nextButton) return;
+    // Mobile elements
+    const pageNumbersMobile = document.getElementById('page-numbers-mobile');
+    const prevButtonMobile = document.getElementById('prev-page-mobile');
+    const nextButtonMobile = document.getElementById('next-page-mobile');
     
+    // Update desktop pagination
+    if (pageNumbers && prevButton && nextButton) {
+      updatePaginationControls(pageNumbers, prevButton, nextButton);
+    }
+    
+    // Update mobile pagination
+    if (pageNumbersMobile && prevButtonMobile && nextButtonMobile) {
+      updatePaginationControls(pageNumbersMobile, prevButtonMobile, nextButtonMobile);
+    }
+  }
+  
+  // Helper function to update pagination controls
+  function updatePaginationControls(pageNumbers, prevButton, nextButton) {
     // Update previous button
     prevButton.disabled = currentPage === 1;
     prevButton.classList.toggle('opacity-50', currentPage === 1);
@@ -566,12 +616,30 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
   // Change items per page
   function changeItemsPerPage() {
+    // Check both desktop and mobile selects
     const select = document.getElementById('items-per-page');
+    const selectMobile = document.getElementById('items-per-page-mobile');
+    
+    let selectedValue = itemsPerPage; // Default to current value
+    
     if (select) {
-      itemsPerPage = parseInt(select.value);
-      currentPage = 1; // Reset to first page
-      renderUsers();
+      selectedValue = parseInt(select.value);
     }
+    if (selectMobile) {
+      selectedValue = parseInt(selectMobile.value);
+    }
+    
+    // Update both selects to stay in sync
+    if (select) {
+      select.value = selectedValue;
+    }
+    if (selectMobile) {
+      selectMobile.value = selectedValue;
+    }
+    
+    itemsPerPage = selectedValue;
+    currentPage = 1; // Reset to first page
+    renderUsers();
   }
 
   // Get role color
@@ -580,7 +648,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       'customer': 'bg-blue-100 text-blue-800',
       'admin': 'bg-red-100 text-red-800',
       'developer': 'bg-purple-100 text-purple-800',
-      'support': 'bg-green-100 text-green-800'
+      'support': 'bg-green-100 text-green-800',
+      'menu_operator': 'bg-orange-100 text-orange-800'
     };
     return colors[role as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   }
@@ -852,11 +921,15 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     document.getElementById('role-filter')?.addEventListener('change', filterUsers);
     document.getElementById('status-filter')?.addEventListener('change', filterUsers);
 
-    // Pagination controls
-    document.getElementById('items-per-page')?.addEventListener('change', changeItemsPerPage);
+    // Pagination controls - Desktop
     document.getElementById('prev-page')?.addEventListener('click', prevPage);
     document.getElementById('next-page')?.addEventListener('click', nextPage);
     document.getElementById('refresh-users')?.addEventListener('click', loadUsers);
+    
+    // Pagination controls - Mobile
+    document.getElementById('prev-page-mobile')?.addEventListener('click', prevPage);
+    document.getElementById('next-page-mobile')?.addEventListener('click', nextPage);
+    document.getElementById('refresh-users-mobile')?.addEventListener('click', loadUsers);
 
     // User form
     document.getElementById('user-form')?.addEventListener('submit', handleUserFormSubmit);
@@ -888,12 +961,39 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   window.prevPage = prevPage;
   window.changeItemsPerPage = changeItemsPerPage;
 
+  // Sync dropdown values between mobile and desktop
+  function syncDropdowns() {
+    const select = document.getElementById('items-per-page');
+    const selectMobile = document.getElementById('items-per-page-mobile');
+    
+    if (select && selectMobile) {
+      // Sync mobile to desktop
+      selectMobile.addEventListener('change', (e) => {
+        e.preventDefault();
+        select.value = selectMobile.value;
+        itemsPerPage = parseInt(selectMobile.value);
+        currentPage = 1;
+        renderUsers();
+      });
+      
+      // Sync desktop to mobile
+      select.addEventListener('change', (e) => {
+        e.preventDefault();
+        selectMobile.value = select.value;
+        itemsPerPage = parseInt(select.value);
+        currentPage = 1;
+        renderUsers();
+      });
+    }
+  }
+
   // Initialize page when DOM loads
   document.addEventListener('DOMContentLoaded', async () => {
     console.log('📄 Users page DOM loaded, initializing...');
     console.log('🔍 Supabase available:', !!window.supabase);
     console.log('🔍 Current users before load:', currentUsers.length);
     await initializeUsersPage();
+    syncDropdowns();
   });
 
   // Also try to initialize after a short delay in case of timing issues

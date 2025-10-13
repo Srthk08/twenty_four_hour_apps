@@ -489,6 +489,26 @@ import Layout from '../layouts/Layout.astro';
               userData.company_name = profileData.company_name || userData.company_name;
               userData.role = profileData.role || userData.role;
               
+              console.log('🔍 Profile data from Supabase:', {
+                role: profileData.role,
+                full_name: profileData.full_name,
+                status: profileData.status
+              });
+              console.log('🔍 User data before update:', {
+                role: userData.role,
+                email: userData.email
+              });
+              
+              // Update session storage with the role information
+              const updatedSessionData = {
+                user: userData,
+                access_token: data.session?.access_token,
+                timestamp: Date.now()
+              };
+              sessionStorage.setItem('simple-auth-session', JSON.stringify(updatedSessionData));
+              console.log('✅ Updated session storage with role:', userData.role);
+              console.log('🔍 Full user data being stored:', JSON.stringify(userData, null, 2));
+              
               // Trigger updated login event
               window.dispatchEvent(new CustomEvent('user-logged-in', {
                 detail: userData

@@ -1341,7 +1341,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         updateHeaderUserInfo() {
-          if (!this.currentUser) return;
+          // CRITICAL: Only update if user is properly authenticated
+          if (!this.isAuthenticated || !this.currentUser || !this.currentUser.email) {
+            console.log('❌ User not authenticated - clearing header info');
+            this.clearHeaderUserInfo();
+            return;
+          }
 
           const userEmail = document.getElementById('user-email');
           const userName = document.getElementById('user-name');
@@ -1354,6 +1359,18 @@ document.addEventListener('DOMContentLoaded', () => {
           if (mobileUserEmail) mobileUserEmail.textContent = this.currentUser.email || '';
         }
 
+        clearHeaderUserInfo() {
+          const userEmail = document.getElementById('user-email');
+          const userName = document.getElementById('user-name');
+          const userAvatar = document.getElementById('user-avatar');
+          const mobileUserEmail = document.getElementById('mobile-user-email');
+
+          if (userEmail) userEmail.textContent = '';
+          if (userName) userName.textContent = 'Guest';
+          if (userAvatar) userAvatar.textContent = 'G';
+          if (mobileUserEmail) mobileUserEmail.textContent = '';
+        }
+
         updateDashboard() {
           const userWelcome = document.getElementById('user-welcome');
           const userFullName = document.getElementById('user-full-name');
@@ -1361,7 +1378,8 @@ document.addEventListener('DOMContentLoaded', () => {
           const userPhone = document.getElementById('user-phone');
           const userCompany = document.getElementById('user-company');
 
-          if (this.isAuthenticated && this.currentUser) {
+          // CRITICAL: Only show user data if properly authenticated
+          if (this.isAuthenticated && this.currentUser && this.currentUser.email) {
             // User is logged in, show real data
             if (userWelcome) userWelcome.textContent = this.currentUser.full_name || this.currentUser.email?.split('@')[0] || 'User';
             if (userFullName) userFullName.textContent = this.currentUser.full_name || 'Not set';
@@ -1371,10 +1389,10 @@ document.addEventListener('DOMContentLoaded', () => {
           } else {
             // User is not logged in, show guest data
             if (userWelcome) userWelcome.textContent = 'Guest';
-            if (userFullName) userFullName.textContent = 'Guest User';
+            if (userFullName) userFullName.textContent = 'Not logged in';
             if (userEmailDashboard) userEmailDashboard.textContent = 'Not logged in';
-            if (userPhone) userPhone.textContent = 'Not available';
-            if (userCompany) userCompany.textContent = 'Guest Company';
+            if (userPhone) userPhone.textContent = 'Not logged in';
+            if (userCompany) userCompany.textContent = 'Not logged in';
           }
         }
 

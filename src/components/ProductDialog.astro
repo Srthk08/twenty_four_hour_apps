@@ -48,10 +48,7 @@
       </div>
 
       <!-- Actions -->
-      <div class="flex space-x-3">
-        <button id="view-order-menu" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
-          View Order Menu System
-        </button>
+      <div class="flex justify-end">
         <button id="close-dialog-btn" class="px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-medium transition-colors">
           Close
         </button>
@@ -67,7 +64,6 @@
     const dialogContent = document.getElementById('dialog-content');
     const closeDialog = document.getElementById('close-dialog');
     const closeDialogBtn = document.getElementById('close-dialog-btn');
-    const viewOrderMenu = document.getElementById('view-order-menu');
 
     // Show dialog function
     function showDialog() {
@@ -108,11 +104,6 @@
       }
     });
 
-    // View Order Menu System
-    viewOrderMenu.addEventListener('click', function() {
-      hideDialog();
-      window.location.href = '/products/order-menu-system';
-    });
 
     // Close on Escape key
     document.addEventListener('keydown', function(e) {

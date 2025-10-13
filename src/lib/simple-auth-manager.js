@@ -118,7 +118,12 @@ class SimpleAuthManager {
   }
 
   updateUserInfo() {
-    if (!this.currentUser) return;
+    // CRITICAL: Only update UI if user is properly authenticated
+    if (!this.isAuthenticated || !this.currentUser) {
+      console.log('❌ User not authenticated - clearing UI elements');
+      this.clearUserInfo();
+      return;
+    }
 
     // Update header user info
     const userEmail = document.getElementById('user-email');
@@ -143,6 +148,29 @@ class SimpleAuthManager {
     if (userEmailDashboard) userEmailDashboard.textContent = this.currentUser.email || 'Not set';
     if (userPhone) userPhone.textContent = this.currentUser.phone || 'Not set';
     if (userCompany) userCompany.textContent = this.currentUser.company_name || 'Not set';
+  }
+
+  clearUserInfo() {
+    // Clear all user info elements when not authenticated
+    const userEmail = document.getElementById('user-email');
+    const userName = document.getElementById('user-name');
+    const userAvatar = document.getElementById('user-avatar');
+    const mobileUserEmail = document.getElementById('mobile-user-email');
+    const userWelcome = document.getElementById('user-welcome');
+    const userFullName = document.getElementById('user-full-name');
+    const userEmailDashboard = document.getElementById('user-email');
+    const userPhone = document.getElementById('user-phone');
+    const userCompany = document.getElementById('user-company');
+
+    if (userEmail) userEmail.textContent = '';
+    if (userName) userName.textContent = 'Guest';
+    if (userAvatar) userAvatar.textContent = 'G';
+    if (mobileUserEmail) mobileUserEmail.textContent = '';
+    if (userWelcome) userWelcome.textContent = 'Guest';
+    if (userFullName) userFullName.textContent = 'Not logged in';
+    if (userEmailDashboard) userEmailDashboard.textContent = 'Not logged in';
+    if (userPhone) userPhone.textContent = 'Not logged in';
+    if (userCompany) userCompany.textContent = 'Not logged in';
   }
 
   getCurrentUser() {

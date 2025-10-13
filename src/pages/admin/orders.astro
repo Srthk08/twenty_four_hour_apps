@@ -92,8 +92,39 @@ import { supabase } from '../../lib/supabase';
         </div>
         
         <!-- Pagination -->
-        <div class="bg-white px-6 py-3 border-t border-gray-200">
-          <div class="flex items-center justify-between">
+        <div class="bg-white px-4 sm:px-6 py-3 border-t border-gray-200">
+          <!-- Mobile Layout -->
+          <div class="block sm:hidden">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-700">Show</span>
+                <select id="items-per-page-mobile" class="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+                <span class="text-sm text-gray-700">entries</span>
+              </div>
+              <button id="refresh-orders-mobile" class="px-3 py-1 text-sm text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                Refresh
+              </button>
+            </div>
+            <div class="flex items-center justify-between">
+              <button id="prev-page-mobile" class="px-3 py-1 text-sm text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                Previous
+              </button>
+              <div id="page-numbers-mobile" class="flex items-center space-x-1 overflow-x-auto max-w-[200px]">
+                <!-- Page numbers will be generated dynamically -->
+              </div>
+              <button id="next-page-mobile" class="px-3 py-1 text-sm text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                Next
+              </button>
+            </div>
+          </div>
+          
+          <!-- Desktop Layout -->
+          <div class="hidden sm:flex items-center justify-between">
             <div class="flex items-center space-x-2">
               <span class="text-sm text-gray-700">Show</span>
               <select id="items-per-page" class="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500">
@@ -315,12 +346,29 @@ import { supabase } from '../../lib/supabase';
 
   // Update pagination controls
   function updatePagination() {
+    // Desktop elements
     const pageNumbers = document.getElementById('page-numbers');
     const prevButton = document.getElementById('prev-page');
     const nextButton = document.getElementById('next-page');
     
-    if (!pageNumbers || !prevButton || !nextButton) return;
+    // Mobile elements
+    const pageNumbersMobile = document.getElementById('page-numbers-mobile');
+    const prevButtonMobile = document.getElementById('prev-page-mobile');
+    const nextButtonMobile = document.getElementById('next-page-mobile');
     
+    // Update desktop pagination
+    if (pageNumbers && prevButton && nextButton) {
+      updatePaginationControls(pageNumbers, prevButton, nextButton);
+    }
+    
+    // Update mobile pagination
+    if (pageNumbersMobile && prevButtonMobile && nextButtonMobile) {
+      updatePaginationControls(pageNumbersMobile, prevButtonMobile, nextButtonMobile);
+    }
+  }
+  
+  // Helper function to update pagination controls
+  function updatePaginationControls(pageNumbers, prevButton, nextButton) {
     // Update previous button
     prevButton.disabled = currentPage === 1;
     prevButton.classList.toggle('opacity-50', currentPage === 1);
@@ -385,12 +433,30 @@ import { supabase } from '../../lib/supabase';
 
   // Change items per page
   function changeItemsPerPage() {
+    // Check both desktop and mobile selects
     const select = document.getElementById('items-per-page');
+    const selectMobile = document.getElementById('items-per-page-mobile');
+    
+    let selectedValue = itemsPerPage; // Default to current value
+    
     if (select) {
-      itemsPerPage = parseInt(select.value);
-      currentPage = 1; // Reset to first page
-      renderOrders();
+      selectedValue = parseInt(select.value);
     }
+    if (selectMobile) {
+      selectedValue = parseInt(selectMobile.value);
+    }
+    
+    // Update both selects to stay in sync
+    if (select) {
+      select.value = selectedValue;
+    }
+    if (selectMobile) {
+      selectMobile.value = selectedValue;
+    }
+    
+    itemsPerPage = selectedValue;
+    currentPage = 1; // Reset to first page
+    renderOrders();
   }
 
   // Get status color
@@ -586,11 +652,15 @@ import { supabase } from '../../lib/supabase';
     document.getElementById('status-filter')?.addEventListener('change', filterOrders);
     document.getElementById('date-filter')?.addEventListener('change', filterOrders);
 
-    // Pagination controls
-    document.getElementById('items-per-page')?.addEventListener('change', changeItemsPerPage);
+    // Pagination controls - Desktop
     document.getElementById('prev-page')?.addEventListener('click', prevPage);
     document.getElementById('next-page')?.addEventListener('click', nextPage);
     document.getElementById('refresh-orders')?.addEventListener('click', loadOrders);
+    
+    // Pagination controls - Mobile
+    document.getElementById('prev-page-mobile')?.addEventListener('click', prevPage);
+    document.getElementById('next-page-mobile')?.addEventListener('click', nextPage);
+    document.getElementById('refresh-orders-mobile')?.addEventListener('click', loadOrders);
 
     // Modal close button
     document.getElementById('close-modal')?.addEventListener('click', () => {
@@ -605,8 +675,37 @@ import { supabase } from '../../lib/supabase';
     });
   }
 
+  // Sync dropdown values between mobile and desktop
+  function syncDropdowns() {
+    const select = document.getElementById('items-per-page');
+    const selectMobile = document.getElementById('items-per-page-mobile');
+    
+    if (select && selectMobile) {
+      // Sync mobile to desktop
+      selectMobile.addEventListener('change', (e) => {
+        e.preventDefault();
+        select.value = selectMobile.value;
+        itemsPerPage = parseInt(selectMobile.value);
+        currentPage = 1;
+        renderOrders();
+      });
+      
+      // Sync desktop to mobile
+      select.addEventListener('change', (e) => {
+        e.preventDefault();
+        selectMobile.value = select.value;
+        itemsPerPage = parseInt(select.value);
+        currentPage = 1;
+        renderOrders();
+      });
+    }
+  }
+
   // Initialize page when DOM loads
-  document.addEventListener('DOMContentLoaded', initializeOrdersPage);
+  document.addEventListener('DOMContentLoaded', () => {
+    initializeOrdersPage();
+    syncDropdowns();
+  });
 
   // Make functions globally available for onclick handlers
   (window as any).viewOrder = viewOrder;

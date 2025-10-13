@@ -660,49 +660,74 @@ import AuthGuard from '../components/AuthGuard.astro';
   async function updateUserInfo() {
     console.log('🔄 Updating user info...');
     
-    // Get all possible user data sources
+    // CRITICAL: Check if user is actually logged in first
+    const authManager = window.globalAuthManager || window.simpleAuthManager;
+    if (!authManager || !authManager.isUserLoggedIn()) {
+      console.log('❌ User not logged in - showing generic welcome message');
+      
+      // Update welcome message to generic text
+      const userWelcome = document.getElementById('user-welcome');
+      if (userWelcome) {
+        userWelcome.textContent = 'Guest';
+        console.log('👋 Welcome message updated to: Guest');
+      }
+      
+      console.log('✅ Dashboard updated for guest user');
+      return;
+    }
+    
+    // Get authenticated user data
     let userData = null;
     let source = '';
     
-    // Check all possible storage locations
-    const sources = [
-      { key: 'simple-auth-session', storage: sessionStorage, path: 'user' },
-      { key: 'simple-auth-user', storage: localStorage, path: null },
-      { key: 'simple-auth-session', storage: localStorage, path: 'user' }
-    ];
+    // Get current user from auth manager
+    const currentUser = authManager.getCurrentUser();
+    if (currentUser && currentUser.email) {
+      userData = currentUser;
+      source = 'auth-manager';
+      console.log(`✅ Found authenticated user data:`, userData.email);
+    }
     
-    for (const sourceInfo of sources) {
-      try {
-        const data = sourceInfo.storage.getItem(sourceInfo.key);
-        if (data) {
-          const parsed = JSON.parse(data);
-          userData = sourceInfo.path ? parsed[sourceInfo.path] : parsed;
-          if (userData && userData.email) {
-            source = sourceInfo.key;
-            console.log(`✅ Found user data in ${sourceInfo.key}:`, userData.email);
-            break;
+    // If still no data, try to get from storage (but only if user is logged in)
+    if (!userData) {
+      console.log('No auth manager data, checking storage...');
+      const sources = [
+        { key: 'simple-auth-session', storage: sessionStorage, path: 'user' },
+        { key: 'simple-auth-user', storage: localStorage, path: null },
+        { key: 'simple-auth-session', storage: localStorage, path: 'user' }
+      ];
+      
+      for (const sourceInfo of sources) {
+        try {
+          const data = sourceInfo.storage.getItem(sourceInfo.key);
+          if (data) {
+            const parsed = JSON.parse(data);
+            userData = sourceInfo.path ? parsed[sourceInfo.path] : parsed;
+            if (userData && userData.email) {
+              source = sourceInfo.key;
+              console.log(`✅ Found user data in ${sourceInfo.key}:`, userData.email);
+              break;
+            }
           }
+        } catch (error) {
+          console.log(`Error reading ${sourceInfo.key}:`, error);
         }
-      } catch (error) {
-        console.log(`Error reading ${sourceInfo.key}:`, error);
       }
     }
     
-    // If still no data, try to get from URL parameters or create mock data
+    // If still no data, show generic message (don't create mock data)
     if (!userData) {
-      console.log('No stored user data found, checking URL...');
-      const urlParams = new URLSearchParams(window.location.search);
-      const email = urlParams.get('email') || 'user@example.com';
-      const name = urlParams.get('name') || 'User';
+      console.log('❌ No authenticated user data found');
       
-      userData = {
-        email: email,
-        full_name: name,
-        phone: 'Not set',
-        company_name: 'Not set'
-      };
-      source = 'URL parameters';
-      console.log('Using fallback data:', userData);
+      // Update welcome message to generic text
+      const userWelcome = document.getElementById('user-welcome');
+      if (userWelcome) {
+        userWelcome.textContent = 'Guest';
+        console.log('👋 Welcome message updated to: Guest');
+      }
+      
+      console.log('✅ Dashboard updated for guest user');
+      return;
     }
     
     // Normalize user data structure for Supabase
@@ -733,11 +758,15 @@ import AuthGuard from '../components/AuthGuard.astro';
         }
       }
       
-      // Ensure we have the required fields
+      // Ensure we have the required fields (but don't create fake data)
       userData.full_name = userData.full_name || userData.fullName || 'User';
       userData.phone = userData.phone || 'Not set';
       userData.company_name = userData.company_name || userData.companyName || 'Not set';
-      userData.email = userData.email || 'user@example.com';
+      // Don't create fake email - only use real authenticated email
+      if (!userData.email) {
+        console.log('❌ No email found in authenticated user data');
+        return;
+      }
       
       console.log('📋 Final normalized user data:', userData);
     }
@@ -1593,6 +1622,13 @@ import AuthGuard from '../components/AuthGuard.astro';
       form.addEventListener('submit', async (e) => {
         console.log('Form submit event triggered!');
         e.preventDefault();
+        
+        // CRITICAL: Check if user is logged in before allowing form submission
+        const authManager = window.globalAuthManager || window.simpleAuthManager;
+        if (!authManager || !authManager.isUserLoggedIn()) {
+          alert('❌ Please log in to submit this form. You must be authenticated to place an order.');
+          return;
+        }
       
       const formData = new FormData(form);
       const formDataObj = Object.fromEntries(formData);
@@ -2169,6 +2205,13 @@ import AuthGuard from '../components/AuthGuard.astro';
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
       
+      // CRITICAL: Check if user is logged in before allowing form submission
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      if (!authManager || !authManager.isUserLoggedIn()) {
+        alert('❌ Please log in to submit this form. You must be authenticated to place an order.');
+        return;
+      }
+      
       const formData = new FormData(form);
       const data = Object.fromEntries(formData);
       
@@ -2405,58 +2448,76 @@ import AuthGuard from '../components/AuthGuard.astro';
   // Make function globally accessible
   window.showBrowseProductsSection = showBrowseProductsSection;
 
-  // Auto-fill user details in forms
+  // Auto-fill user details in forms - ONLY when user is properly authenticated
   function autofillUserDetails() {
     console.log('🔄 Attempting to auto-fill user details...');
     
     // Wait for auth manager to be available
     const waitForAuthManager = () => {
       const authManager = window.globalAuthManager || window.simpleAuthManager;
-      if (authManager && authManager.isUserLoggedIn()) {
-        const currentUser = authManager.getCurrentUser();
-        console.log('👤 Current user from auth manager:', currentUser);
-        
-        if (currentUser && currentUser.email) {
-          console.log('📧 Auto-filling email:', currentUser.email);
-          const emailFields = document.querySelectorAll('input[name="email"], input[type="email"]');
-          emailFields.forEach(field => {
-            field.value = currentUser.email;
-            field.dispatchEvent(new Event('input', { bubbles: true }));
-            field.dispatchEvent(new Event('change', { bubbles: true }));
-            console.log('✅ Filled email field:', field);
-          });
-        }
-        
-        if (currentUser && currentUser.phone) {
-          console.log('📱 Auto-filling phone:', currentUser.phone);
-          const phoneFields = document.querySelectorAll('input[name="phone"], input[type="tel"]');
-          phoneFields.forEach(field => {
-            field.value = currentUser.phone;
-            field.dispatchEvent(new Event('input', { bubbles: true }));
-            field.dispatchEvent(new Event('change', { bubbles: true }));
-            console.log('✅ Filled phone field:', field);
-          });
-        }
-        
-        if (currentUser && currentUser.full_name) {
-          console.log('👤 Auto-filling contact person:', currentUser.full_name);
-          const contactPersonFields = document.querySelectorAll('input[name="contactPerson"]');
-          contactPersonFields.forEach(field => {
-            field.value = currentUser.full_name;
-            field.dispatchEvent(new Event('input', { bubbles: true }));
-            field.dispatchEvent(new Event('change', { bubbles: true }));
-            console.log('✅ Filled contact person field:', field);
-          });
-        }
-        
-        // Note: Removed auto-filling of company name, restaurant name, and owner name
-        // Only contact details (email, phone) and contact person name are auto-filled
-        // Other fields should be filled manually by the user
-        
-        console.log('✅ Auto-fill completed with auth manager data');
-        return true;
+      
+      // CRITICAL: Check if user is actually logged in before proceeding
+      if (!authManager || !authManager.isUserLoggedIn()) {
+        console.log('❌ User not logged in - skipping auto-fill');
+        return false;
       }
-      return false;
+      
+      const currentUser = authManager.getCurrentUser();
+      console.log('👤 Current user from auth manager:', currentUser);
+      
+      // Additional check: ensure we have valid user data
+      if (!currentUser || !currentUser.email) {
+        console.log('❌ No valid user data found - skipping auto-fill');
+        return false;
+      }
+      
+      // Verify user is properly authenticated (not just cached data)
+      if (!currentUser.id && !currentUser.user_id) {
+        console.log('❌ User lacks proper authentication ID - skipping auto-fill');
+        return false;
+      }
+      
+      console.log('✅ User is properly authenticated - proceeding with auto-fill');
+      
+      if (currentUser && currentUser.email) {
+        console.log('📧 Auto-filling email:', currentUser.email);
+        const emailFields = document.querySelectorAll('input[name="email"], input[type="email"]');
+        emailFields.forEach(field => {
+          field.value = currentUser.email;
+          field.dispatchEvent(new Event('input', { bubbles: true }));
+          field.dispatchEvent(new Event('change', { bubbles: true }));
+          console.log('✅ Filled email field:', field);
+        });
+      }
+      
+      if (currentUser && currentUser.phone) {
+        console.log('📱 Auto-filling phone:', currentUser.phone);
+        const phoneFields = document.querySelectorAll('input[name="phone"], input[type="tel"]');
+        phoneFields.forEach(field => {
+          field.value = currentUser.phone;
+          field.dispatchEvent(new Event('input', { bubbles: true }));
+          field.dispatchEvent(new Event('change', { bubbles: true }));
+          console.log('✅ Filled phone field:', field);
+        });
+      }
+      
+      if (currentUser && currentUser.full_name) {
+        console.log('👤 Auto-filling contact person:', currentUser.full_name);
+        const contactPersonFields = document.querySelectorAll('input[name="contactPerson"]');
+        contactPersonFields.forEach(field => {
+          field.value = currentUser.full_name;
+          field.dispatchEvent(new Event('input', { bubbles: true }));
+          field.dispatchEvent(new Event('change', { bubbles: true }));
+          console.log('✅ Filled contact person field:', field);
+        });
+      }
+      
+      // Note: Removed auto-filling of company name, restaurant name, and owner name
+      // Only contact details (email, phone) and contact person name are auto-filled
+      // Other fields should be filled manually by the user
+      
+      console.log('✅ Auto-fill completed with auth manager data');
+      return true;
     };
     
     // Try immediate fill
@@ -2468,53 +2529,11 @@ import AuthGuard from '../components/AuthGuard.astro';
         attempts++;
         if (waitForAuthManager() || attempts >= maxAttempts) {
           clearInterval(interval);
-          if (attempts >= maxAttempts) {
-            console.log('⏰ Auth manager timeout, trying fallback methods...');
-            
-            // Fallback: Try session storage
-            const sessionData = sessionStorage.getItem('simple-auth-session');
-      if (sessionData) {
-        try {
-          const sessionObj = JSON.parse(sessionData);
-          const userData = sessionObj.user;
-          
-          if (userData && userData.email) {
-                  const emailFields = document.querySelectorAll('input[name="email"], input[type="email"]');
-                  emailFields.forEach(field => {
-                field.value = userData.email;
-                    field.dispatchEvent(new Event('input', { bubbles: true }));
-                    field.dispatchEvent(new Event('change', { bubbles: true }));
-            });
-          }
-          
-          if (userData && userData.phone) {
-                  const phoneFields = document.querySelectorAll('input[name="phone"], input[type="tel"]');
-                  phoneFields.forEach(field => {
-                field.value = userData.phone;
-                    field.dispatchEvent(new Event('input', { bubbles: true }));
-                    field.dispatchEvent(new Event('change', { bubbles: true }));
-                  });
-                }
-                
-                if (userData && userData.full_name) {
-                  const contactPersonFields = document.querySelectorAll('input[name="contactPerson"]');
-                  contactPersonFields.forEach(field => {
-                    field.value = userData.full_name;
-                    field.dispatchEvent(new Event('input', { bubbles: true }));
-                    field.dispatchEvent(new Event('change', { bubbles: true }));
-                  });
-                }
-                
-                // Note: Removed auto-filling of company name, restaurant name, and owner name
-                // Only contact details (email, phone) and contact person name are auto-filled
-                // Other fields should be filled manually by the user
-                
-                console.log('✅ Auto-fill completed with session storage fallback');
-        } catch (error) {
-                console.error('❌ Error parsing session data:', error);
+        if (attempts >= maxAttempts) {
+          console.log('⏰ Auth manager timeout - user appears to be not logged in');
+          console.log('❌ No authenticated user found - forms will remain empty');
+          return;
         }
-      }
-          }
         }
       }, 100);
     }

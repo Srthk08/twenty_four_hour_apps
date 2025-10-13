@@ -165,11 +165,11 @@ const { title, description } = Astro.props;
             <!-- Logo and Brand -->
             <div class="flex items-center">
               <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span class="text-white font-bold text-sm">MO</span>
+                  <span class="text-white font-bold text-sm">MO</span>
               </div>
               <span class="ml-3 text-lg font-semibold text-gray-800">Menu Operator</span>
             </div>
-
+            
             <!-- Desktop Navigation -->
             <div class="hidden lg:flex items-center space-x-1">
               <!-- Back to Site -->
@@ -192,8 +192,8 @@ const { title, description } = Astro.props;
                 </svg>
               </button>
             </div>
-
-            <!-- Profile Dropdown -->
+              
+              <!-- Profile Dropdown -->
             <div class="flex items-center space-x-4">
               <div class="relative" x-data="{ open: false }">
                 <button 
@@ -209,35 +209,35 @@ const { title, description } = Astro.props;
                   </svg>
                 </button>
 
-                <div 
-                  x-show="open"
-                  x-transition:enter="transition ease-out duration-100"
-                  x-transition:enter-start="transform opacity-0 scale-95"
-                  x-transition:enter-end="transform opacity-100 scale-100"
-                  x-transition:leave="transition ease-in duration-75"
-                  x-transition:leave-start="transform opacity-100 scale-100"
-                  x-transition:leave-end="transform opacity-0 scale-95"
-                  @click.away="open = false"
-                  class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50 border border-gray-200"
-                >
+                 <div 
+                   x-show="open"
+                   x-transition:enter="transition ease-out duration-100"
+                   x-transition:enter-start="transform opacity-0 scale-95"
+                   x-transition:enter-end="transform opacity-100 scale-100"
+                   x-transition:leave="transition ease-in duration-75"
+                   x-transition:leave-start="transform opacity-100 scale-100"
+                   x-transition:leave-end="transform opacity-0 scale-95"
+                   @click.away="open = false"
+                   class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50 border border-gray-200"
+                 >
                   <a href="/menu-operator/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200">
-                    <div class="flex items-center">
+                     <div class="flex items-center">
                       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                      </svg>
-                      Profile
-                    </div>
-                  </a>
-                  <hr class="my-2 border-gray-200">
+                         </svg>
+                       Profile
+                     </div>
+                   </a>
+                   <hr class="my-2 border-gray-200">
                   <button id="logout-btn" onclick="handleMenuOperatorLogout()" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200">
-                    <div class="flex items-center">
+                     <div class="flex items-center">
                       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                      </svg>
-                      Sign out
-                    </div>
-                  </button>
-                </div>
+                         </svg>
+                       Sign out
+                     </div>
+                   </button>
+                 </div>
               </div>
             </div>
           </div>
@@ -482,9 +482,13 @@ const { title, description } = Astro.props;
       })();
 
       // Supabase configuration
-      const supabaseUrl = 'YOUR_SUPABASE_URL';
-      const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
       const supabase = createClient(supabaseUrl, supabaseKey);
+      
+      console.log('🔧 MenuOperatorLayout Supabase configuration:');
+      console.log('- URL:', supabaseUrl);
+      console.log('- Key:', supabaseKey ? 'Present' : 'Missing');
 
       // Initialize menu operator panel
       document.addEventListener('DOMContentLoaded', async () => {
@@ -667,10 +671,10 @@ const { title, description } = Astro.props;
             try {
               // Try without role filter
               const { data: fallbackProfile, error: fallbackError } = await supabase
-                .from('profiles')
-                .select('full_name, email, role')
-                .eq('id', user.id)
-                .single();
+            .from('profiles')
+            .select('full_name, email, role')
+            .eq('id', user.id)
+            .single();
 
               if (fallbackError) {
                 console.error('❌ Fallback profile query failed:', fallbackError);
@@ -715,39 +719,37 @@ const { title, description } = Astro.props;
         }
       }
 
-      // Update user display
+      // Update user display - ONLY for authenticated users
       function updateUserDisplay(user, profile) {
         try {
           console.log('🔄 Updating user display...', { user: user?.email, profile: profile?.full_name });
           
-          // Handle fallback when no user data
+          // Handle fallback when no user data - but only if properly authenticated
           if (!user) {
-            // Try to get user from simple auth manager
+            // Try to get user from simple auth manager with proper validation
             let fallbackUser = null;
             
             try {
               const sessionData = sessionStorage.getItem('simple-auth-session');
               if (sessionData) {
                 const session = JSON.parse(sessionData);
-                if (session.user && session.access_token) {
+                // CRITICAL: Only use session data if it has valid user AND access token
+                if (session.user && session.access_token && session.user.email) {
                   fallbackUser = session.user;
-                  console.log('✅ Found user in sessionStorage for header:', fallbackUser.email);
+                  console.log('✅ Found authenticated user in sessionStorage:', fallbackUser.email);
+                } else {
+                  console.log('❌ Invalid session data - missing user, token, or email');
                 }
               }
             } catch (e) {
               console.log('⚠️ Error reading sessionStorage:', e);
             }
             
+            // Don't fallback to localStorage without proper authentication
             if (!fallbackUser) {
-              try {
-                const storedUser = localStorage.getItem('simple-auth-user');
-                if (storedUser) {
-                  fallbackUser = JSON.parse(storedUser);
-                  console.log('✅ Found user in localStorage for header:', fallbackUser.email);
-                }
-              } catch (e) {
-                console.log('⚠️ Error reading localStorage:', e);
-              }
+              console.log('❌ No authenticated user found - redirecting to login');
+              window.location.href = '/login';
+              return;
             }
             
             if (fallbackUser) {
@@ -757,7 +759,7 @@ const { title, description } = Astro.props;
                 nameElement.textContent = displayName;
               }
               
-              const avatar = document.getElementById('menu-operator-avatar');
+            const avatar = document.getElementById('menu-operator-avatar');
               if (avatar) {
                 if (fallbackUser.full_name || fallbackUser.name) {
                   const name = fallbackUser.full_name || fallbackUser.name;
@@ -918,7 +920,7 @@ const { title, description } = Astro.props;
             } catch (error) {
               console.error('❌ Error during logout:', error);
               // Still redirect even if there's an error
-              window.location.href = '/login';
+            window.location.href = '/login';
             }
           }
         }

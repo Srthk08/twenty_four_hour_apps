@@ -80,7 +80,7 @@
               </svg>
               Dashboard
             </a>
-            <a href="/profile" class="flex items-center px-6 py-4 text-base text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200">
+            <a href="/profile" id="profile-link" class="flex items-center px-6 py-4 text-base text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200">
               <svg class="w-6 h-6 mr-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
               </svg>
@@ -201,7 +201,7 @@
               <span class="flex-1">Dashboard</span>
             </a>
             
-            <a href="/profile" class="flex items-center px-6 py-4 text-2xl font-light text-white hover:text-white hover:bg-white hover:bg-opacity-20 transition-all duration-300">
+            <a href="/profile" id="mobile-profile-link" class="flex items-center px-6 py-4 text-2xl font-light text-white hover:text-white hover:bg-white hover:bg-opacity-20 transition-all duration-300">
               <svg class="w-5 h-5 mr-4 text-white text-opacity-70 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
               </svg>
@@ -400,17 +400,32 @@
 <script>
   // Immediate script to prevent flashing - runs before DOM is ready
   (function() {
-    // Check auth state immediately and set correct initial state
+    // CRITICAL: Check auth state with proper validation
     try {
       const sessionData = sessionStorage.getItem('simple-auth-session');
-      const isAuthenticated = sessionData && JSON.parse(sessionData).user;
+      let isAuthenticated = false;
+      let user = null;
+      
+      // Validate session data properly
+      if (sessionData) {
+        try {
+          const session = JSON.parse(sessionData);
+          // Check if session has valid user data AND access token
+          if (session.user && session.access_token && session.user.email) {
+            isAuthenticated = true;
+            user = session.user;
+            console.log('✅ Valid authenticated session found');
+          } else {
+            console.log('❌ Invalid session data - missing user or token');
+          }
+        } catch (e) {
+          console.log('❌ Invalid session data format');
+        }
+      }
       
       const style = document.createElement('style');
-      if (isAuthenticated) {
-        // User is logged in - show user menu immediately and pre-populate user info
-        const session = JSON.parse(sessionData);
-        const user = session.user;
-        
+      if (isAuthenticated && user) {
+        // User is properly authenticated - show user menu
         style.textContent = `
           #auth-buttons, #mobile-auth-buttons { display: none !important; }
           #user-menu, #mobile-user-menu { display: flex !important; }
@@ -418,7 +433,7 @@
           #user-email, #user-name, #user-avatar, #mobile-user-email { opacity: 1 !important; }
         `;
         
-        // Pre-populate user info immediately to prevent blinking
+        // Pre-populate user info only for authenticated users
         setTimeout(() => {
           const userEmail = document.getElementById('user-email');
           const userName = document.getElementById('user-name');
@@ -431,9 +446,9 @@
           if (mobileUserEmail) mobileUserEmail.textContent = user.email || '';
         }, 0);
         
-        console.log('✅ User authenticated - showing user menu immediately with pre-populated info');
+        console.log('✅ User authenticated - showing user menu with valid data');
       } else {
-        // User is not logged in - show auth buttons
+        // User is not authenticated - show auth buttons and clear any cached data
         style.textContent = `
           #auth-buttons, #mobile-auth-buttons { display: flex !important; }
           #user-menu, #mobile-user-menu { display: none !important; }
@@ -576,9 +591,14 @@
     }
   }
 
-  // Fallback function to update user info
+  // Fallback function to update user info - ONLY for authenticated users
   function updateUserInfoFallback(user) {
-    if (!user) return;
+    // CRITICAL: Only update if user is properly authenticated
+    if (!user || !user.email) {
+      console.log('❌ No valid user data - clearing UI');
+      clearUserInfoFallback();
+      return;
+    }
 
     const userEmail = document.getElementById('user-email');
     const userName = document.getElementById('user-name');
@@ -589,14 +609,56 @@
     if (userName) userName.textContent = user.full_name || user.email?.split('@')[0] || 'User';
     if (userAvatar) userAvatar.textContent = (user.full_name || user.email || 'U').charAt(0).toUpperCase();
     if (mobileUserEmail) mobileUserEmail.textContent = user.email || '';
+    
+    // Update role-based links
+    updateRoleBasedLinks(user);
+  }
+
+  // Function to clear user info when not authenticated
+  function clearUserInfoFallback() {
+    const userEmail = document.getElementById('user-email');
+    const userName = document.getElementById('user-name');
+    const userAvatar = document.getElementById('user-avatar');
+    const mobileUserEmail = document.getElementById('mobile-user-email');
+
+    if (userEmail) userEmail.textContent = '';
+    if (userName) userName.textContent = 'Guest';
+    if (userAvatar) userAvatar.textContent = 'G';
+    if (mobileUserEmail) mobileUserEmail.textContent = '';
+  }
+
+  // Function to update role-based links - ONLY for authenticated users
+  function updateRoleBasedLinks(user) {
+    // CRITICAL: Only update if user is properly authenticated
+    if (!user || !user.email) {
+      console.log('❌ No valid user data - hiding role-based links');
+      hideAllRoleBasedLinks();
+      return;
+    }
+
+    // If role is not available, try to fetch it from Supabase
+    if (!user.role || user.role === 'user') {
+      console.log('⚠️ Role not available in session, attempting to fetch from Supabase...');
+      fetchUserRoleFromSupabase(user);
+      return;
+    }
+
+    // Store the current role in a global variable to prevent overrides
+    window.currentUserRole = user.role;
+    console.log('🔒 Stored user role globally:', window.currentUserRole);
 
     // Show/hide role-based links
     const menuOperatorLink = document.getElementById('menu-operator-link');
     const mobileMenuOperatorLink = document.getElementById('mobile-menu-operator-link');
     const adminPanelLink = document.getElementById('admin-panel-link');
     const mobileAdminPanelLink = document.getElementById('mobile-admin-panel-link');
+    
+    // Get profile links
+    const profileLink = document.getElementById('profile-link');
+    const mobileProfileLink = document.getElementById('mobile-profile-link');
 
     // Check if user has menu operator role
+    console.log('🔍 Checking user role:', user.role, 'for user:', user.email);
     if (user.role === 'menu_operator' || user.role === 'menu operator') {
       if (menuOperatorLink) {
         menuOperatorLink.classList.remove('hidden');
@@ -606,6 +668,14 @@
         mobileMenuOperatorLink.classList.remove('hidden');
         mobileMenuOperatorLink.style.display = 'block';
       }
+      
+      // Update profile links to point to menu operator profile
+      if (profileLink) {
+        profileLink.href = '/menu-operator/profile';
+      }
+      if (mobileProfileLink) {
+        mobileProfileLink.href = '/menu-operator/profile';
+      }
     } else {
       if (menuOperatorLink) {
         menuOperatorLink.classList.add('hidden');
@@ -614,6 +684,14 @@
       if (mobileMenuOperatorLink) {
         mobileMenuOperatorLink.classList.add('hidden');
         mobileMenuOperatorLink.style.display = 'none';
+      }
+      
+      // Update profile links to point to regular profile
+      if (profileLink) {
+        profileLink.href = '/profile';
+      }
+      if (mobileProfileLink) {
+        mobileProfileLink.href = '/profile';
       }
     }
 
@@ -636,6 +714,141 @@
         mobileAdminPanelLink.classList.add('hidden');
         mobileAdminPanelLink.style.display = 'none';
       }
+    }
+  }
+
+  // Function to fetch user role from Supabase
+  async function fetchUserRoleFromSupabase(user) {
+    try {
+      // Check if Supabase is available
+      if (typeof window.supabase === 'undefined') {
+        console.log('❌ Supabase not available, using fallback role');
+        updateRoleBasedLinksWithFallback(user);
+        return;
+      }
+
+      const supabase = window.supabase;
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.log('❌ Error fetching role from Supabase:', error);
+        updateRoleBasedLinksWithFallback(user);
+        return;
+      }
+
+      if (profile && profile.role) {
+        console.log('✅ Role fetched from Supabase:', profile.role);
+        // Update user object with role
+        user.role = profile.role;
+        
+        // Update session storage with the role
+        const sessionData = sessionStorage.getItem('simple-auth-session');
+        if (sessionData) {
+          const session = JSON.parse(sessionData);
+          session.user.role = profile.role;
+          sessionStorage.setItem('simple-auth-session', JSON.stringify(session));
+        }
+        
+        // Now update the role-based links
+        updateRoleBasedLinks(user);
+      } else {
+        console.log('⚠️ No role found in profile, using fallback');
+        updateRoleBasedLinksWithFallback(user);
+      }
+    } catch (error) {
+      console.error('❌ Error fetching role from Supabase:', error);
+      updateRoleBasedLinksWithFallback(user);
+    }
+  }
+
+  // Function to update role-based links with fallback
+  function updateRoleBasedLinksWithFallback(user) {
+    console.log('🔄 Using fallback role-based link update');
+    // For now, assume regular user if no role is available
+    user.role = user.role || 'customer';
+    updateRoleBasedLinks(user);
+  }
+
+  // Function to persistently maintain correct profile links
+  function maintainProfileLinks() {
+    const profileLink = document.getElementById('profile-link');
+    const mobileProfileLink = document.getElementById('mobile-profile-link');
+    
+    if (!profileLink || !mobileProfileLink) {
+      return; // Links not found yet
+    }
+
+    // Check if we have a stored role
+    if (window.currentUserRole) {
+      console.log('🔒 Maintaining profile links with stored role:', window.currentUserRole);
+      
+      if (window.currentUserRole === 'menu_operator' || window.currentUserRole === 'menu operator') {
+        if (profileLink.href !== '/menu-operator/profile') {
+          profileLink.href = '/menu-operator/profile';
+          profileLink.setAttribute('href', '/menu-operator/profile');
+          console.log('🔧 Fixed desktop profile link to menu operator profile');
+        }
+        if (mobileProfileLink.href !== '/menu-operator/profile') {
+          mobileProfileLink.href = '/menu-operator/profile';
+          mobileProfileLink.setAttribute('href', '/menu-operator/profile');
+          console.log('🔧 Fixed mobile profile link to menu operator profile');
+        }
+      } else {
+        if (profileLink.href !== '/profile') {
+          profileLink.href = '/profile';
+          profileLink.setAttribute('href', '/profile');
+          console.log('🔧 Fixed desktop profile link to regular profile');
+        }
+        if (mobileProfileLink.href !== '/profile') {
+          mobileProfileLink.href = '/profile';
+          mobileProfileLink.setAttribute('href', '/profile');
+          console.log('🔧 Fixed mobile profile link to regular profile');
+        }
+      }
+    } else {
+      // Check if user is on menu operator pages
+      const isOnMenuOperatorPage = window.location.pathname.includes('/menu-operator');
+      if (isOnMenuOperatorPage) {
+        if (profileLink.href !== '/menu-operator/profile') {
+          profileLink.href = '/menu-operator/profile';
+          profileLink.setAttribute('href', '/menu-operator/profile');
+          console.log('🔧 Fixed profile link based on current page context');
+        }
+        if (mobileProfileLink.href !== '/menu-operator/profile') {
+          mobileProfileLink.href = '/menu-operator/profile';
+          mobileProfileLink.setAttribute('href', '/menu-operator/profile');
+          console.log('🔧 Fixed mobile profile link based on current page context');
+        }
+      }
+    }
+  }
+
+  // Function to hide all role-based links when not authenticated
+  function hideAllRoleBasedLinks() {
+    const menuOperatorLink = document.getElementById('menu-operator-link');
+    const mobileMenuOperatorLink = document.getElementById('mobile-menu-operator-link');
+    const adminPanelLink = document.getElementById('admin-panel-link');
+    const mobileAdminPanelLink = document.getElementById('mobile-admin-panel-link');
+
+    if (menuOperatorLink) {
+      menuOperatorLink.classList.add('hidden');
+      menuOperatorLink.style.display = 'none';
+    }
+    if (mobileMenuOperatorLink) {
+      mobileMenuOperatorLink.classList.add('hidden');
+      mobileMenuOperatorLink.style.display = 'none';
+    }
+    if (adminPanelLink) {
+      adminPanelLink.classList.add('hidden');
+      adminPanelLink.style.display = 'none';
+    }
+    if (mobileAdminPanelLink) {
+      mobileAdminPanelLink.classList.add('hidden');
+      mobileAdminPanelLink.style.display = 'none';
     }
   }
 
@@ -766,7 +979,7 @@
           console.log('✅ Auth buttons shown, user menu hidden');
         }
   
-  // Function to update user info from session
+  // Function to update user info from session - ONLY for authenticated users
   function updateUserInfoFromSession() {
     try {
       const sessionData = sessionStorage.getItem('simple-auth-session');
@@ -774,7 +987,8 @@
         const session = JSON.parse(sessionData);
         const user = session.user;
         
-        if (user) {
+        // CRITICAL: Only update if user is properly authenticated with valid session
+        if (user && session.access_token && user.email) {
           const userEmail = document.getElementById('user-email');
           const userName = document.getElementById('user-name');
           const userAvatar = document.getElementById('user-avatar');
@@ -796,10 +1010,29 @@
             mobileUserEmail.textContent = user.email || '';
             mobileUserEmail.style.opacity = '1';
           }
+          
+          // Debug: Log user data
+          console.log('🔍 User data in updateUserInfoFromSession:', {
+            email: user.email,
+            role: user.role,
+            full_name: user.full_name,
+            id: user.id
+          });
+          console.log('🔍 Full session data:', JSON.stringify(session, null, 2));
+          
+          // Update role-based links
+          updateRoleBasedLinks(user);
+        } else {
+          console.log('❌ Invalid session - clearing user info');
+          clearUserInfoFallback();
         }
+      } else {
+        console.log('❌ No session data - clearing user info');
+        clearUserInfoFallback();
       }
     } catch (error) {
       console.error('Error updating user info:', error);
+      clearUserInfoFallback();
     }
   }
   
@@ -1048,6 +1281,81 @@
     initMobileMenu();
     initDashboardLinks();
     
+    // Force refresh role-based links after a short delay to ensure all data is loaded
+    setTimeout(() => {
+      console.log('🔄 Force refreshing role-based links...');
+      const sessionData = sessionStorage.getItem('simple-auth-session');
+      if (sessionData) {
+        try {
+          const session = JSON.parse(sessionData);
+          if (session.user && session.user.email) {
+            console.log('🔄 Refreshing links for user:', session.user.email, 'with role:', session.user.role);
+            updateRoleBasedLinks(session.user);
+          }
+        } catch (e) {
+          console.log('⚠️ Error refreshing role-based links:', e);
+        }
+      }
+    }, 1000);
+
+    // Also try immediately to fix profile links
+    setTimeout(() => {
+      console.log('🚨 IMMEDIATE PROFILE LINK FIX...');
+      const sessionData = sessionStorage.getItem('simple-auth-session');
+      if (sessionData) {
+        try {
+          const session = JSON.parse(sessionData);
+          if (session.user && session.user.email) {
+            console.log('🚨 Immediate fix for user:', session.user.email, 'role:', session.user.role);
+            
+            // Force update profile links based on role
+            const profileLink = document.getElementById('profile-link');
+            const mobileProfileLink = document.getElementById('mobile-profile-link');
+            
+            // Check if user is on menu operator pages
+            const isOnMenuOperatorPage = window.location.pathname.includes('/menu-operator');
+            const hasMenuOperatorRole = session.user.role === 'menu_operator' || session.user.role === 'menu operator';
+            
+            console.log('🔍 Context check:', {
+              isOnMenuOperatorPage,
+              hasMenuOperatorRole,
+              currentPath: window.location.pathname,
+              userRole: session.user.role
+            });
+            
+            if (hasMenuOperatorRole || isOnMenuOperatorPage) {
+              if (profileLink) {
+                profileLink.href = '/menu-operator/profile';
+                profileLink.setAttribute('href', '/menu-operator/profile');
+                console.log('✅ Updated desktop profile link to menu operator profile');
+              }
+              if (mobileProfileLink) {
+                mobileProfileLink.href = '/menu-operator/profile';
+                mobileProfileLink.setAttribute('href', '/menu-operator/profile');
+                console.log('✅ Updated mobile profile link to menu operator profile');
+              }
+            } else {
+              if (profileLink) {
+                profileLink.href = '/profile';
+                profileLink.setAttribute('href', '/profile');
+                console.log('✅ Updated desktop profile link to regular profile');
+              }
+              if (mobileProfileLink) {
+                mobileProfileLink.href = '/profile';
+                mobileProfileLink.setAttribute('href', '/profile');
+                console.log('✅ Updated mobile profile link to regular profile');
+              }
+            }
+            
+            // Also call the maintain function to ensure persistence
+            maintainProfileLinks();
+          }
+        } catch (e) {
+          console.log('⚠️ Error in immediate profile link fix:', e);
+        }
+      }
+    }, 100);
+
     // Also try to update when global auth manager becomes available
     const checkForAuthManager = () => {
       const authManager = window.globalAuthManager || window.simpleAuthManager;
@@ -1068,6 +1376,7 @@
       console.log('Navigation detected - updating header state');
       setInitialUIState();
       initDashboardLinks();
+      maintainProfileLinks();
     });
     
     // Also update links when the page becomes visible (in case of back/forward navigation)
@@ -1076,6 +1385,7 @@
         console.log('Page visible - updating header state');
         setInitialUIState();
         initDashboardLinks();
+        maintainProfileLinks();
       }
     });
     
@@ -1083,8 +1393,14 @@
     window.addEventListener('focus', () => {
       console.log('Window focused - updating header state');
       setInitialUIState();
+      maintainProfileLinks();
     });
     
+    // Start continuous monitoring of profile links
+    setInterval(() => {
+      maintainProfileLinks();
+    }, 2000); // Check every 2 seconds
+
     console.log('✅ Header initialized with fallback support');
   });
 
