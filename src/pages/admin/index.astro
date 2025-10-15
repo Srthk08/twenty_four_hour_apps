@@ -536,16 +536,16 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         return;
       }
 
-      // Fetch both customization_forms and oms_customizations data
+      // Fetch both customization_forms and order_customizations data
       console.log('🔍 Fetching customization_forms data...');
       const { data: regularCustomizations, error: regularError } = await supabase
         .from('customization_forms')
         .select('*')
         .order('created_at', { ascending: false });
 
-      console.log('🔍 Fetching oms_customizations data...');
+      console.log('🔍 Fetching order_customizations data...');
       const { data: omsCustomizations, error: omsError } = await supabase
-        .from('oms_customizations')
+        .from('order_customizations')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -561,30 +561,31 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
       if (omsCustomizations && !omsError) {
         console.log('✅ OMS customizations loaded:', omsCustomizations.length);
+        console.log('🔍 Raw OMS data from database:', omsCustomizations);
         // Transform OMS data to match the expected format
         const transformedOmsData = omsCustomizations.map(oms => ({
           id: oms.id,
-          contact_email: oms.user_email,
-          product_type: oms.product_type || 'order-menu-system',
-          product_name: oms.product_name || 'Order Menu System',
-          project_name: oms.project_name,
-          restaurant_name: oms.restaurant_name,
-          owner_name: oms.owner_name,
-          restaurant_address: oms.restaurant_address,
-          contact_person: oms.contact_person,
-          phone: oms.phone_number,
-          additional_requirements: oms.additional_requirements,
-          primary_color: oms.primary_color,
-          secondary_color: oms.secondary_color,
-          accent_color: oms.accent_color,
-          text_color: oms.text_color,
-          product_price: oms.product_price,
+          contact_email: oms.email || 'Not provided',
+          product_type: 'order-menu-system',
+          product_name: 'Order Menu System',
+          project_name: oms.project_name || 'Not provided',
+          restaurant_name: oms.restaurant_name || 'Not provided',
+          owner_name: oms.owner_name || 'Not provided',
+          restaurant_address: oms.address_line_1,
+          contact_person: oms.contact_person || 'Not provided',
+          phone: oms.phone_number || 'Not provided',
+          additional_requirements: oms.additional_requirements || 'Not provided',
+          primary_color: null,
+          secondary_color: null,
+          accent_color: null,
+          text_color: null,
+          product_price: oms.total_amount,
           created_at: oms.created_at,
             updated_at: oms.updated_at,
             // OMS specific fields
             menu_categories: typeof oms.menu_categories === 'string' ? JSON.parse(oms.menu_categories) : (oms.menu_categories || []),
             menu_items: typeof oms.menu_items === 'string' ? JSON.parse(oms.menu_items) : (oms.menu_items || []),
-            logo_url: oms.logo_url,
+            logo_url: oms.restaurant_logo_url,
           logo_filename: oms.logo_filename,
           logo_size: oms.logo_size
         }));
@@ -859,14 +860,14 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     console.log('Loading all customizations...');
     
     try {
-      // Fetch both customization_forms and oms_customizations data
+      // Fetch both customization_forms and order_customizations data
       const { data: regularCustomizations, error: regularError } = await supabase
         .from('customization_forms')
         .select('*')
         .order('created_at', { ascending: false });
 
       const { data: omsCustomizations, error: omsError } = await supabase
-        .from('oms_customizations')
+        .from('order_customizations')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -883,27 +884,27 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         // Transform OMS data to match the expected format
         const transformedOmsData = omsCustomizations.map(oms => ({
           id: oms.id,
-          contact_email: oms.user_email,
-          product_type: oms.product_type || 'order-menu-system',
-          product_name: oms.product_name || 'Order Menu System',
-          project_name: oms.project_name,
-          restaurant_name: oms.restaurant_name,
-          owner_name: oms.owner_name,
-          restaurant_address: oms.restaurant_address,
-          contact_person: oms.contact_person,
-          phone: oms.phone_number,
-          additional_requirements: oms.additional_requirements,
-          primary_color: oms.primary_color,
-          secondary_color: oms.secondary_color,
-          accent_color: oms.accent_color,
-          text_color: oms.text_color,
-          product_price: oms.product_price,
+          contact_email: oms.email || 'Not provided',
+          product_type: 'order-menu-system',
+          product_name: 'Order Menu System',
+          project_name: oms.project_name || 'Not provided',
+          restaurant_name: oms.restaurant_name || 'Not provided',
+          owner_name: oms.owner_name || 'Not provided',
+          restaurant_address: oms.address_line_1,
+          contact_person: oms.contact_person || 'Not provided',
+          phone: oms.phone_number || 'Not provided',
+          additional_requirements: oms.additional_requirements || 'Not provided',
+          primary_color: null,
+          secondary_color: null,
+          accent_color: null,
+          text_color: null,
+          product_price: oms.total_amount,
           created_at: oms.created_at,
             updated_at: oms.updated_at,
             // OMS specific fields
             menu_categories: typeof oms.menu_categories === 'string' ? JSON.parse(oms.menu_categories) : (oms.menu_categories || []),
             menu_items: typeof oms.menu_items === 'string' ? JSON.parse(oms.menu_items) : (oms.menu_items || []),
-            logo_url: oms.logo_url,
+            logo_url: oms.restaurant_logo_url,
           logo_filename: oms.logo_filename,
           logo_size: oms.logo_size
         }));
@@ -957,99 +958,176 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   function renderCustomizations(customizations) {
     if (customizations && customizations.length > 0) {
       return customizations.map((customization, index) => `
-        <div class="bg-gray-50 p-4 rounded-lg border customization-item" data-email="${(customization.contact_email || '').toLowerCase()}">
-            <div class="flex justify-between items-start mb-3">
-            <h4 class="text-lg font-semibold text-gray-900">#${index + 1} - ${customization.product_name || 'Unknown Product'}</h4>
+        <div class="bg-white p-6 rounded-lg border shadow-sm customization-item" data-email="${(customization.contact_email || '').toLowerCase()}">
+          <div class="flex justify-between items-start mb-6">
+            <h4 class="text-xl font-bold text-gray-900">#${index + 1} - ${customization.product_name || 'Order Menu System'}</h4>
             <span class="text-sm text-gray-500">${new Date(customization.created_at).toLocaleDateString()}</span>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-              <p class="text-sm text-gray-600"><strong>Contact Email:</strong> <span class="font-mono text-indigo-600">${customization.contact_email || 'Not provided'}</span></p>
-              <p class="text-sm text-gray-600"><strong>Product Type:</strong> ${customization.product_type || 'Not specified'}</p>
-              <p class="text-sm text-gray-600"><strong>Product Name:</strong> ${customization.product_name || 'Not provided'}</p>
-              <p class="text-sm text-gray-600"><strong>Project Name:</strong> ${customization.project_name || 'Not provided'}</p>
-              ${customization.restaurant_name ? `<p class="text-sm text-gray-600"><strong>Restaurant Name:</strong> ${customization.restaurant_name}</p>` : ''}
-              ${customization.owner_name ? `<p class="text-sm text-gray-600"><strong>Owner Name:</strong> ${customization.owner_name}</p>` : ''}
+          </div>
+          
+          <!-- Product Information Section -->
+          <div class="bg-gray-50 p-4 rounded-lg mb-4">
+            <h5 class="text-lg font-semibold text-gray-900 mb-3">Product Information</h5>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-sm font-medium text-gray-600">Product Type:</span>
+                  <span class="text-sm text-gray-900">${customization.product_type || 'order-menu-system'}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm font-medium text-gray-600">Product Name:</span>
+                  <span class="text-sm text-gray-900">${customization.product_name || 'Order Menu System'}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm font-medium text-gray-600">Price:</span>
+                  <span class="text-sm text-gray-900">₹${(customization.product_price || customization.total_amount || 0).toLocaleString('en-IN')}</span>
+                </div>
               </div>
-              <div>
-              <p class="text-sm text-gray-600"><strong>Price:</strong> ${(customization.product_price || 0).toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</p>
-              <p class="text-sm text-gray-600"><strong>Contact Person:</strong> ${customization.contact_person || 'N/A'}</p>
-              <p class="text-sm text-gray-600"><strong>Phone:</strong> ${customization.phone || 'N/A'}</p>
-              <p class="text-sm text-gray-600"><strong>Cuisine Type:</strong> ${customization.cuisine_type || 'N/A'}</p>
-              <p class="text-sm text-gray-600"><strong>Created:</strong> ${new Date(customization.created_at).toLocaleString()}</p>
-              </div>
-            </div>
-            
-            ${customization.restaurant_address ? `
-            <div class="bg-white p-3 rounded border mb-3">
-              <h5 class="font-medium text-gray-900 mb-2">Restaurant Address:</h5>
-              <p class="text-sm text-gray-600">${customization.restaurant_address}</p>
-            </div>
-            ` : ''}
-            
-            ${customization.menu_items && customization.menu_items.length > 0 ? `
-            <div class="bg-white p-3 rounded border mb-3">
-              <h5 class="font-medium text-gray-900 mb-2">Menu Items (${customization.menu_items.length} items):</h5>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                ${customization.menu_items.slice(0, 6).map(item => `
-                  <div class="text-sm text-gray-600">
-                    <strong>${item.item_name || 'Unnamed Item'}</strong> - ₹${item.price || '0'} 
-                    <span class="text-gray-500">(${item.item_category || 'Uncategorized'})</span>
-                  </div>
-                `).join('')}
-                ${customization.menu_items.length > 6 ? `<div class="text-sm text-gray-500">... and ${customization.menu_items.length - 6} more items</div>` : ''}
+              <div class="space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-sm font-medium text-gray-600">Project Name:</span>
+                  <span class="text-sm text-gray-900">${customization.project_name || 'Not provided'}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm font-medium text-gray-600">Restaurant Name:</span>
+                  <span class="text-sm text-gray-900">${customization.restaurant_name || 'Not provided'}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm font-medium text-gray-600">Owner Name:</span>
+                  <span class="text-sm text-gray-900">${customization.owner_name || 'Not provided'}</span>
+                </div>
               </div>
             </div>
-            ` : ''}
-            
-            ${customization.primary_color || customization.secondary_color || customization.accent_color || customization.text_color ? `
-            <div class="bg-white p-3 rounded border mb-3">
-              <h5 class="font-medium text-gray-900 mb-2">Color Customization:</h5>
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                ${customization.primary_color ? `
-                <div class="flex items-center space-x-2">
-                  <div class="w-6 h-6 rounded border" style="background-color: ${customization.primary_color}"></div>
-                  <span class="text-sm text-gray-600"><strong>Primary:</strong> ${customization.primary_color}</span>
+          </div>
+          
+          <!-- Contact Information Section -->
+          <div class="bg-gray-50 p-4 rounded-lg mb-4">
+            <h5 class="text-lg font-semibold text-gray-900 mb-3">Contact Information</h5>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-sm font-medium text-gray-600">Email:</span>
+                  <span class="text-sm text-gray-900">${customization.contact_email || customization.email || 'Not provided'}</span>
                 </div>
-                ` : ''}
-                ${customization.secondary_color ? `
-                <div class="flex items-center space-x-2">
-                  <div class="w-6 h-6 rounded border" style="background-color: ${customization.secondary_color}"></div>
-                  <span class="text-sm text-gray-600"><strong>Secondary:</strong> ${customization.secondary_color}</span>
+                <div class="flex justify-between">
+                  <span class="text-sm font-medium text-gray-600">Phone:</span>
+                  <span class="text-sm text-gray-900">${customization.phone || customization.contact_phone || 'Not provided'}</span>
                 </div>
-                ` : ''}
-                ${customization.accent_color ? `
-                <div class="flex items-center space-x-2">
-                  <div class="w-6 h-6 rounded border" style="background-color: ${customization.accent_color}"></div>
-                  <span class="text-sm text-gray-600"><strong>Accent:</strong> ${customization.accent_color}</span>
+              </div>
+              <div class="space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-sm font-medium text-gray-600">Created:</span>
+                  <span class="text-sm text-gray-900">${new Date(customization.created_at).toLocaleString()}</span>
                 </div>
-                ` : ''}
-                ${customization.text_color ? `
-                <div class="flex items-center space-x-2">
-                  <div class="w-6 h-6 rounded border" style="background-color: ${customization.text_color}"></div>
-                  <span class="text-sm text-gray-600"><strong>Text:</strong> ${customization.text_color}</span>
+                <div class="flex justify-between">
+                  <span class="text-sm font-medium text-gray-600">Updated:</span>
+                  <span class="text-sm text-gray-900">${new Date(customization.updated_at || customization.created_at).toLocaleString()}</span>
                 </div>
-                ` : ''}
               </div>
             </div>
-            ` : ''}
-            
-          ${customization.logo_url ? `
-            <div class="bg-white p-3 rounded border mb-3">
-            <h5 class="font-medium text-gray-900 mb-2">Logo:</h5>
-            <img src="${customization.logo_url}" alt="Logo" class="h-16 w-16 object-contain border rounded">
-            <p class="text-xs text-gray-500 mt-1">${customization.logo_filename || 'Logo file'}</p>
+          </div>
+          
+          <!-- Restaurant Information Section -->
+          ${customization.restaurant_name || customization.contact_person || customization.phone ? `
+          <div class="bg-gray-50 p-4 rounded-lg mb-4">
+            <h5 class="text-lg font-semibold text-gray-900 mb-3">Restaurant Information</h5>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-sm font-medium text-gray-600">Restaurant Name:</span>
+                  <span class="text-sm text-gray-900">${customization.restaurant_name || 'Not provided'}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm font-medium text-gray-600">Contact Person:</span>
+                  <span class="text-sm text-gray-900">${customization.contact_person || 'Not provided'}</span>
+                </div>
+              </div>
+              <div class="space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-sm font-medium text-gray-600">Phone:</span>
+                  <span class="text-sm text-gray-900">${customization.phone || customization.contact_phone || 'Not provided'}</span>
+                </div>
+              </div>
             </div>
-            ` : ''}
-            
+          </div>
+          ` : ''}
+          
+          <!-- Address Information Section -->
+          ${customization.restaurant_address || customization.city || customization.state ? `
+          <div class="bg-gray-50 p-4 rounded-lg mb-4">
+            <h5 class="text-lg font-semibold text-gray-900 mb-3">Address Information</h5>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-sm font-medium text-gray-600">Address:</span>
+                  <span class="text-sm text-gray-900">${customization.restaurant_address || customization.address_line_1 || 'Not provided'}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm font-medium text-gray-600">City:</span>
+                  <span class="text-sm text-gray-900">${customization.city || 'Not provided'}</span>
+                </div>
+              </div>
+              <div class="space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-sm font-medium text-gray-600">State:</span>
+                  <span class="text-sm text-gray-900">${customization.state || 'Not provided'}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm font-medium text-gray-600">Pincode:</span>
+                  <span class="text-sm text-gray-900">${customization.pincode || 'Not provided'}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm font-medium text-gray-600">Country:</span>
+                  <span class="text-sm text-gray-900">${customization.country || 'Not provided'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          ` : ''}
+          
+          <!-- Additional Requirements Section -->
           ${customization.additional_requirements ? `
-            <div class="bg-white p-3 rounded border">
-            <h5 class="font-medium text-gray-900 mb-2">Additional Requirements:</h5>
-            <p class="text-sm text-gray-600">${customization.additional_requirements}</p>
+          <div class="bg-gray-50 p-4 rounded-lg mb-4">
+            <h5 class="text-lg font-semibold text-gray-900 mb-3">Additional Requirements</h5>
+            <div class="space-y-2">
+              <div class="flex justify-between">
+                <span class="text-sm font-medium text-gray-600">Requirements:</span>
+                <span class="text-sm text-gray-900">${customization.additional_requirements}</span>
+              </div>
             </div>
+          </div>
+          ` : ''}
+          
+          <!-- Logo Section -->
+          ${customization.logo_url ? `
+          <div class="bg-gray-50 p-4 rounded-lg mb-4">
+            <h5 class="text-lg font-semibold text-gray-900 mb-3">Restaurant Logo</h5>
+            <div class="flex items-center space-x-4">
+              <img src="${customization.logo_url}" alt="Restaurant Logo" class="h-16 w-16 object-contain border rounded">
+              <div>
+                <p class="text-sm text-gray-600">${customization.logo_filename || 'Restaurant Logo'}</p>
+                <p class="text-xs text-gray-500">Logo uploaded successfully</p>
+              </div>
+            </div>
+          </div>
+          ` : ''}
+          
+          <!-- Menu Photos Section -->
+          ${customization.menu_photos_urls && customization.menu_photos_urls.length > 0 ? `
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h5 class="text-lg font-semibold text-gray-900 mb-3">Menu Photos (${customization.menu_photos_urls.length} photos)</h5>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              ${customization.menu_photos_urls.slice(0, 8).map(photoUrl => `
+                <img src="${photoUrl}" alt="Menu Photo" class="h-20 w-20 object-cover border rounded">
+              `).join('')}
+              ${customization.menu_photos_urls.length > 8 ? `
+                <div class="h-20 w-20 border rounded flex items-center justify-center bg-gray-100">
+                  <span class="text-xs text-gray-500">+${customization.menu_photos_urls.length - 8} more</span>
+                </div>
               ` : ''}
             </div>
+          </div>
+          ` : ''}
+        </div>
       `).join('');
     } else {
       return `
@@ -1086,11 +1164,22 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
   // Make loadCustomizationsData globally accessible
   window.loadCustomizationsData = loadCustomizationsData;
+  
+  // Add refresh function to clear cache and reload data
+  window.refreshOMSCustomizations = async function() {
+    console.log('🔄 Refreshing OMS customizations and clearing cache...');
+    // Clear any cached data
+    window.allCustomizations = [];
+    // Reload data
+    await loadCustomizationsData();
+    console.log('✅ OMS customizations refreshed');
+  };
 
   // Function to view customization details
   window.viewCustomizationDetails = async function(customizationId) {
     console.log('🔍 Viewing customization details for ID:', customizationId);
     console.log('🔍 Supabase client available:', !!supabase);
+    console.log('🔄 Force refreshing data from order_customizations table...');
     
     try {
       if (!supabase) {
@@ -1099,60 +1188,80 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         return;
       }
 
-      console.log('🔍 Fetching customization data from database...');
-      // First try to get from customization_forms table
-      let { data: customization, error } = await supabase
-        .from('customization_forms')
+      console.log('🔍 Fetching fresh data directly from order_customizations table...');
+      
+      // First try to get from order_customizations table (since that's where OMS data is stored)
+      let { data: omsCustomization, error: omsError } = await supabase
+        .from('order_customizations')
         .select('*')
         .eq('id', customizationId)
         .single();
 
-      // If not found in customization_forms, try oms_customizations table
-      if (error && error.code === 'PGRST116') {
-        console.log('Not found in customization_forms, trying oms_customizations...');
-        const { data: omsCustomization, error: omsError } = await supabase
-          .from('oms_customizations')
+      let customization = null;
+      let error = null;
+
+      if (omsError) {
+        console.log('Not found in order_customizations, trying customization_forms...');
+        // If not found in order_customizations, try customization_forms table
+        const { data: regularCustomization, error: regularError } = await supabase
+          .from('customization_forms')
           .select('*')
           .eq('id', customizationId)
           .single();
 
-        if (omsError) {
-          console.error('Error loading OMS customization details:', omsError);
-          alert('Error loading customization details: ' + omsError.message);
+        if (regularError) {
+          console.error('Error loading customization details:', regularError);
+          alert('Error loading customization details: ' + regularError.message);
           return;
         }
 
+        customization = regularCustomization;
+        error = null;
+      } else {
+        console.log('✅ Found OMS customization in order_customizations table:', omsCustomization);
+        
         // Transform OMS data to match expected format
         customization = {
           id: omsCustomization.id,
-          contact_email: omsCustomization.user_email,
-          product_type: omsCustomization.product_type || 'order-menu-system',
-          product_name: omsCustomization.product_name || 'Order Menu System',
-          project_name: omsCustomization.project_name,
-          restaurant_name: omsCustomization.restaurant_name,
-          owner_name: omsCustomization.owner_name,
-          restaurant_address: omsCustomization.restaurant_address,
-          contact_person: omsCustomization.contact_person,
-          phone: omsCustomization.phone_number,
-          additional_requirements: omsCustomization.additional_requirements,
-          primary_color: omsCustomization.primary_color,
-          secondary_color: omsCustomization.secondary_color,
-          accent_color: omsCustomization.accent_color,
-          text_color: omsCustomization.text_color,
-          product_price: omsCustomization.product_price,
+          contact_email: omsCustomization.email || 'Not provided',
+          email: omsCustomization.email || 'Not provided',
+          product_type: 'order-menu-system',
+          product_name: 'Order Menu System',
+          project_name: omsCustomization.project_name || 'Not provided',
+          restaurant_name: omsCustomization.restaurant_name || 'Not provided',
+          owner_name: omsCustomization.owner_name || 'Not provided',
+          restaurant_address: omsCustomization.address_line_1 || 'Not provided',
+          contact_person: omsCustomization.contact_person || 'Not provided',
+          phone: omsCustomization.phone_number || 'Not provided',
+          contact_phone: omsCustomization.phone_number || 'Not provided',
+          additional_requirements: omsCustomization.additional_requirements || 'Not provided',
+          primary_color: null,
+          secondary_color: null,
+          accent_color: null,
+          text_color: null,
+          product_price: omsCustomization.total_amount || 0,
+          total_amount: omsCustomization.total_amount || 0,
           created_at: omsCustomization.created_at,
-          updated_at: omsCustomization.updated_at,
+          updated_at: omsCustomization.updated_at || omsCustomization.created_at,
           // OMS specific fields
-          menu_categories: omsCustomization.menu_categories,
-          menu_items: omsCustomization.menu_items,
-          logo_url: omsCustomization.logo_url,
+          menu_categories: omsCustomization.menu_categories || [],
+          menu_items: omsCustomization.menu_items || [],
+          logo_url: omsCustomization.restaurant_logo_url,
           logo_filename: omsCustomization.logo_filename,
-          logo_size: omsCustomization.logo_size
+          logo_size: omsCustomization.logo_size,
+          // Additional fields from order_customizations
+          city: omsCustomization.city || 'Not provided',
+          state: omsCustomization.state || 'Not provided',
+          pincode: omsCustomization.pincode || 'Not provided',
+          country: omsCustomization.country || 'Not provided',
+          house_flat_number: omsCustomization.house_flat_number || 'Not provided',
+          menu_photos_urls: omsCustomization.menu_photos_urls || []
         };
-        error = null; // Clear error since we found the data
+        error = null;
       }
 
       console.log('🔍 Database response:', { data: customization, error });
+      console.log('🔍 Raw customization data from database:', customization);
 
       if (error) {
         console.error('❌ Error loading customization details:', error);
@@ -1201,7 +1310,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
               </div>
               <div class="flex justify-between">
                 <span class="text-sm font-medium text-gray-600">Price:</span>
-                <span class="text-sm text-gray-900">${(customization.product_price || 0).toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</span>
+                <span class="text-sm text-gray-900">₹${(customization.product_price || customization.total_amount || 0).toLocaleString('en-IN')}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-sm font-medium text-gray-600">Project Name:</span>
@@ -1210,10 +1319,6 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
               <div class="flex justify-between">
                 <span class="text-sm font-medium text-gray-600">Restaurant Name:</span>
                 <span class="text-sm text-gray-900">${customization.restaurant_name || 'N/A'}</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-sm font-medium text-gray-600">Cuisine Type:</span>
-                <span class="text-sm text-gray-900">${customization.cuisine_type || 'N/A'}</span>
               </div>
             </div>
           </div>
@@ -1224,11 +1329,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             <div class="space-y-2">
               <div class="flex justify-between">
                 <span class="text-sm font-medium text-gray-600">Email:</span>
-                <span class="text-sm text-gray-900">${customization.contact_email || 'Not provided'}</span>
+                <span class="text-sm text-gray-900">${customization.contact_email || customization.email || 'Not provided'}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-sm font-medium text-gray-600">Phone:</span>
-                <span class="text-sm text-gray-900">${customization.contact_phone || 'Not provided'}</span>
+                <span class="text-sm text-gray-900">${customization.phone || customization.contact_phone || 'Not provided'}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-sm font-medium text-gray-600">Created:</span>
@@ -1254,45 +1359,67 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           </div>
           ` : ''}
           
-          ${customization.primary_color || customization.secondary_color || customization.accent_color || customization.text_color ? `
-          <!-- Color Customization Section -->
+          
+          <!-- Restaurant Information Section (for Order Menu System) -->
+          ${customization.restaurant_name || customization.contact_person || customization.phone ? `
           <div class="bg-gray-50 p-4 rounded-lg">
-            <h4 class="text-lg font-semibold text-gray-900 mb-3">Color Customization</h4>
+            <h4 class="text-lg font-semibold text-gray-900 mb-3">Restaurant Information</h4>
             <div class="space-y-2">
-              ${customization.primary_color ? `
-              <div class="flex justify-between items-center">
-                <span class="text-sm font-medium text-gray-600">Primary:</span>
-                <div class="flex items-center space-x-2">
-                  <span class="inline-block w-4 h-4 rounded border" style="background-color: ${customization.primary_color}"></span>
-                  <span class="text-sm text-gray-900">${customization.primary_color}</span>
-                </div>
+              ${customization.restaurant_name ? `
+              <div class="flex justify-between">
+                <span class="text-sm font-medium text-gray-600">Restaurant Name:</span>
+                <span class="text-sm text-gray-900">${customization.restaurant_name}</span>
               </div>
               ` : ''}
-              ${customization.secondary_color ? `
-              <div class="flex justify-between items-center">
-                <span class="text-sm font-medium text-gray-600">Secondary:</span>
-                <div class="flex items-center space-x-2">
-                  <span class="inline-block w-4 h-4 rounded border" style="background-color: ${customization.secondary_color}"></span>
-                  <span class="text-sm text-gray-900">${customization.secondary_color}</span>
-                </div>
+              ${customization.contact_person ? `
+              <div class="flex justify-between">
+                <span class="text-sm font-medium text-gray-600">Contact Person:</span>
+                <span class="text-sm text-gray-900">${customization.contact_person}</span>
               </div>
               ` : ''}
-              ${customization.accent_color ? `
-              <div class="flex justify-between items-center">
-                <span class="text-sm font-medium text-gray-600">Accent:</span>
-                <div class="flex items-center space-x-2">
-                  <span class="inline-block w-4 h-4 rounded border" style="background-color: ${customization.accent_color}"></span>
-                  <span class="text-sm text-gray-900">${customization.accent_color}</span>
-                </div>
+              ${customization.phone ? `
+              <div class="flex justify-between">
+                <span class="text-sm font-medium text-gray-600">Phone:</span>
+                <span class="text-sm text-gray-900">${customization.phone}</span>
               </div>
               ` : ''}
-              ${customization.text_color ? `
-              <div class="flex justify-between items-center">
-                <span class="text-sm font-medium text-gray-600">Text:</span>
-                <div class="flex items-center space-x-2">
-                  <span class="inline-block w-4 h-4 rounded border" style="background-color: ${customization.text_color}"></span>
-                  <span class="text-sm text-gray-900">${customization.text_color}</span>
-                </div>
+            </div>
+          </div>
+          ` : ''}
+          
+          <!-- Address Information Section (for Order Menu System) -->
+          ${customization.restaurant_address || customization.city || customization.state ? `
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h4 class="text-lg font-semibold text-gray-900 mb-3">Address Information</h4>
+            <div class="space-y-2">
+              ${customization.restaurant_address ? `
+              <div class="flex justify-between">
+                <span class="text-sm font-medium text-gray-600">Address:</span>
+                <span class="text-sm text-gray-900">${customization.restaurant_address}</span>
+              </div>
+              ` : ''}
+              ${customization.city ? `
+              <div class="flex justify-between">
+                <span class="text-sm font-medium text-gray-600">City:</span>
+                <span class="text-sm text-gray-900">${customization.city}</span>
+              </div>
+              ` : ''}
+              ${customization.state ? `
+              <div class="flex justify-between">
+                <span class="text-sm font-medium text-gray-600">State:</span>
+                <span class="text-sm text-gray-900">${customization.state}</span>
+              </div>
+              ` : ''}
+              ${customization.pincode ? `
+              <div class="flex justify-between">
+                <span class="text-sm font-medium text-gray-600">Pincode:</span>
+                <span class="text-sm text-gray-900">${customization.pincode}</span>
+              </div>
+              ` : ''}
+              ${customization.country ? `
+              <div class="flex justify-between">
+                <span class="text-sm font-medium text-gray-600">Country:</span>
+                <span class="text-sm text-gray-900">${customization.country}</span>
               </div>
               ` : ''}
             </div>

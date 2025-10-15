@@ -180,22 +180,45 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
       // Test 1: Check if Supabase client is working
       console.log('✅ Supabase client created successfully');
       
-      // Test 2: Try to insert a test OMS customization
+      // Test 2: Check if there's existing data in order_customizations table
+      console.log('🔍 Checking existing data in order_customizations table...');
+      const { data: existingData, error: fetchError } = await supabase
+        .from('order_customizations')
+        .select('*')
+        .limit(5);
+      
+      if (fetchError) {
+        console.error('❌ Error fetching existing data:', fetchError);
+        console.error('❌ Error details:', fetchError.message);
+        console.error('❌ Error code:', fetchError.code);
+        console.error('❌ Error hint:', fetchError.hint);
+      } else {
+        console.log('📊 Existing data in order_customizations:', existingData?.length || 0, 'records');
+        if (existingData && existingData.length > 0) {
+          console.log('📋 Sample data:', existingData[0]);
+        }
+      }
+      
+      // Test 3: Try to insert a test OMS customization
       const testData = {
-        user_email: 'test@example.com',
+        email: 'test@example.com',
         project_name: 'Test Project',
         owner_name: 'Test Owner',
         restaurant_name: 'Test Restaurant',
-        restaurant_address: '123 Test St',
+        address_line_1: '123 Test St',
         phone_number: '+1-555-TEST',
-        logo_url: 'https://via.placeholder.com/100x100/FF0000/FFFFFF?text=TEST',
-        status: 'pending'
+        restaurant_logo_url: 'https://via.placeholder.com/100x100/FF0000/FFFFFF?text=TEST',
+        status: 'pending',
+        base_package_cost: 999.00,
+        gst_amount: 180.00,
+        total_amount: 1179.00,
+        payment_status: 'pending'
       };
       
       console.log('📝 Attempting to insert test data...', testData);
       
       const { data, error } = await supabase
-        .from('oms_customizations')
+        .from('order_customizations')
         .insert(testData)
         .select();
       
@@ -210,9 +233,9 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
         
         // Clean up test data
         await supabase
-          .from('oms_customizations')
+          .from('order_customizations')
           .delete()
-          .eq('user_email', 'test@example.com');
+          .eq('email', 'test@example.com');
         
         console.log('✅ Test data cleaned up');
         return true;
@@ -227,6 +250,10 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
   // Initialize dashboard
   document.addEventListener('DOMContentLoaded', async () => {
     console.log('📄 DOM Content Loaded - Starting dashboard initialization');
+    
+    // Load demo data immediately to clear loading state
+    console.log('⏰ Immediate demo data load...');
+    loadDemoData();
     
     // Test Supabase connection first
     const supabaseWorking = await testSupabaseConnection();
@@ -254,6 +281,13 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
         await loadUserProfile();
         await loadDashboardData();
         setupEventListeners();
+        
+        // Force load real data after a short delay
+        setTimeout(async () => {
+          console.log('⏰ Delayed real data load...');
+          await loadOMSCustomizationForms();
+        }, 2000);
+        
       } catch (error) {
         console.error('❌ Error in dashboard initialization:', error);
         // Still try to load demo data
@@ -264,6 +298,12 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
       // Still try to load demo data as fallback
       loadDemoData();
     }
+    
+    // Final fallback - ensure demo data is loaded
+    setTimeout(() => {
+      console.log('⏰ Final fallback - ensuring demo data is loaded');
+      loadDemoData();
+    }, 3000);
   });
 
   // Also try immediately when script loads
@@ -273,17 +313,23 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
     loadDemoData();
   }, 50);
 
-  // Test DOM elements exist
+  // Test DOM elements exist and force load demo data
   setTimeout(() => {
     console.log('🧪 Testing DOM elements...');
     const testElement = document.getElementById('total-oms-forms');
     if (testElement) {
-      console.log('✅ Found total-oms-forms element, setting test value');
-      testElement.textContent = 'TEST';
+      console.log('✅ Found total-oms-forms element, forcing demo data load');
+      loadDemoData();
     } else {
       console.log('❌ total-oms-forms element not found');
     }
   }, 200);
+
+  // Final fallback on window load
+  window.addEventListener('load', () => {
+    console.log('🌐 Window loaded - final demo data load attempt');
+    loadDemoData();
+  });
 
   // Load user profile from Supabase
   async function loadUserProfile() {
@@ -472,14 +518,20 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
     // Load OMS customization forms
     async function loadOMSCustomizationForms() {
       try {
+        console.log('🔄 Loading OMS customization forms from order_customizations table...');
+        console.log('🔍 Supabase client:', supabase);
+        
         const { data: forms, error } = await supabase
-          .from('oms_customizations')
+          .from('order_customizations')
           .select('*')
           .order('created_at', { ascending: false })
           .limit(50);
 
+        console.log('📊 Query result:', { forms, error });
+
         if (error) {
-          console.error('Error loading OMS forms:', error);
+          console.error('❌ Error loading OMS forms:', error);
+          console.error('❌ Error details:', error.message, error.code, error.hint);
           // Use demo data when Supabase fails
           const demoForms = getDemoOMSForms();
           displayOMSCustomizationForms(demoForms);
@@ -487,17 +539,21 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
           return;
         }
 
+        console.log('✅ Successfully fetched forms:', forms?.length || 0);
+
         // If no real data, use demo data
         if (!forms || forms.length === 0) {
+          console.log('⚠️ No real data found, using demo data');
           const demoForms = getDemoOMSForms();
           displayOMSCustomizationForms(demoForms);
           document.getElementById('total-oms-forms').textContent = demoForms.length;
         } else {
+          console.log('✅ Displaying real data:', forms.length, 'forms');
           displayOMSCustomizationForms(forms);
           document.getElementById('total-oms-forms').textContent = forms.length;
         }
       } catch (error) {
-        console.error('Error loading OMS forms:', error);
+        console.error('❌ Exception loading OMS forms:', error);
         // Use demo data when there's an error
         const demoForms = getDemoOMSForms();
         displayOMSCustomizationForms(demoForms);
@@ -513,10 +569,10 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
           project_name: 'Bella Vista Restaurant',
           owner_name: 'Maria Rodriguez',
           restaurant_name: 'Bella Vista',
-          restaurant_address: '123 Main Street, New York, NY',
-          user_email: 'maria@bellavista.com',
+          address_line_1: '123 Main Street, New York, NY',
+          email: 'maria@bellavista.com',
           phone_number: '+1 (555) 123-4567',
-          logo_url: 'https://via.placeholder.com/32x32/4F46E5/FFFFFF?text=BV',
+          restaurant_logo_url: 'https://via.placeholder.com/32x32/4F46E5/FFFFFF?text=BV',
           created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'pending'
         },
@@ -525,10 +581,10 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
           project_name: 'Golden Dragon Chinese',
           owner_name: 'David Chen',
           restaurant_name: 'Golden Dragon',
-          restaurant_address: '456 Oak Avenue, Los Angeles, CA',
-          user_email: 'david@goldendragon.com',
+          address_line_1: '456 Oak Avenue, Los Angeles, CA',
+          email: 'david@goldendragon.com',
           phone_number: '+1 (555) 987-6543',
-          logo_url: 'https://via.placeholder.com/32x32/DC2626/FFFFFF?text=GD',
+          restaurant_logo_url: 'https://via.placeholder.com/32x32/DC2626/FFFFFF?text=GD',
           created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'processed'
         },
@@ -537,10 +593,10 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
           project_name: 'Café Del Sol',
           owner_name: 'Sophie Martin',
           restaurant_name: 'Café Del Sol',
-          restaurant_address: '789 Pine Street, Miami, FL',
-          user_email: 'sophie@cafedelsol.com',
+          address_line_1: '789 Pine Street, Miami, FL',
+          email: 'sophie@cafedelsol.com',
           phone_number: '+1 (555) 456-7890',
-          logo_url: 'https://via.placeholder.com/32x32/059669/FFFFFF?text=CD',
+          restaurant_logo_url: 'https://via.placeholder.com/32x32/059669/FFFFFF?text=CD',
           created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'pending'
         },
@@ -549,10 +605,10 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
           project_name: 'Pizza Palace',
           owner_name: 'Tony Romano',
           restaurant_name: 'Pizza Palace',
-          restaurant_address: '321 Elm Street, Chicago, IL',
-          user_email: 'tony@pizzapalace.com',
+          address_line_1: '321 Elm Street, Chicago, IL',
+          email: 'tony@pizzapalace.com',
           phone_number: '+1 (555) 321-9876',
-          logo_url: 'https://via.placeholder.com/32x32/7C3AED/FFFFFF?text=PP',
+          restaurant_logo_url: 'https://via.placeholder.com/32x32/7C3AED/FFFFFF?text=PP',
           created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'processed'
         },
@@ -561,10 +617,10 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
           project_name: 'Sushi Master',
           owner_name: 'Yuki Tanaka',
           restaurant_name: 'Sushi Master',
-          restaurant_address: '654 Maple Drive, Seattle, WA',
-          user_email: 'yuki@sushimaster.com',
+          address_line_1: '654 Maple Drive, Seattle, WA',
+          email: 'yuki@sushimaster.com',
           phone_number: '+1 (555) 654-3210',
-          logo_url: 'https://via.placeholder.com/32x32/EA580C/FFFFFF?text=SM',
+          restaurant_logo_url: 'https://via.placeholder.com/32x32/EA580C/FFFFFF?text=SM',
           created_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'pending'
         }
@@ -573,13 +629,21 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
 
     // Display OMS customization forms
     function displayOMSCustomizationForms(forms) {
+      console.log('🎨 Displaying OMS forms:', forms);
       const tbody = document.getElementById('oms-forms-table-body');
       
+      if (!tbody) {
+        console.error('❌ OMS table body not found!');
+        return;
+      }
+      
       if (!forms || forms.length === 0) {
+        console.log('📭 No forms to display, showing empty message');
         tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No OMS forms submitted yet</td></tr>';
         return;
       }
 
+      console.log('📋 Rendering', forms.length, 'forms');
       tbody.innerHTML = forms.map(form => `
         <tr class="hover:bg-gray-50">
           <td class="px-6 py-4 whitespace-nowrap">
@@ -588,15 +652,15 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="text-sm text-gray-900">${form.restaurant_name || 'Not specified'}</div>
-            <div class="text-sm text-gray-500">${form.restaurant_address || 'No address'}</div>
+            <div class="text-sm text-gray-500">${form.address_line_1 || 'No address'}</div>
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
-            <div class="text-sm text-gray-900">${form.user_email || 'No email'}</div>
+            <div class="text-sm text-gray-900">${form.email || 'No email'}</div>
             <div class="text-sm text-gray-500">${form.phone_number || 'No phone'}</div>
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
-            ${form.logo_url ? 
-              `<img src="${form.logo_url}" alt="Logo" class="w-8 h-8 rounded object-cover">` : 
+            ${form.restaurant_logo_url ? 
+              `<img src="${form.restaurant_logo_url}" alt="Logo" class="w-8 h-8 rounded object-cover">` : 
               '<span class="text-gray-400">No logo</span>'
             }
           </td>
@@ -609,6 +673,8 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
           </td>
         </tr>
       `).join('');
+      
+      console.log('✅ OMS forms rendered successfully');
     }
 
     // Load menu photos
@@ -780,11 +846,29 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
   // Setup event listeners
   function setupEventListeners() {
       // Refresh buttons
-      document.getElementById('refresh-oms').addEventListener('click', loadOMSCustomizationForms);
+      document.getElementById('refresh-oms').addEventListener('click', async () => {
+        console.log('🔄 Manual refresh of OMS forms triggered');
+        await loadOMSCustomizationForms();
+      });
       document.getElementById('refresh-photos').addEventListener('click', loadMenuPhotos);
 
       // File upload
       document.getElementById('photo-upload-input').addEventListener('change', handlePhotoUpload);
+      
+      // Add a test button to force load real data
+      const testButton = document.createElement('button');
+      testButton.textContent = 'Test Real Data';
+      testButton.className = 'px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700';
+      testButton.onclick = async () => {
+        console.log('🧪 Testing real data load...');
+        await loadOMSCustomizationForms();
+      };
+      
+      // Add test button to the page
+      const header = document.querySelector('.bg-white.rounded-lg.shadow.p-6');
+      if (header) {
+        header.appendChild(testButton);
+      }
   }
 
     // Handle photo upload
@@ -853,9 +937,66 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
     }
 
     // Global functions for table actions
-    window.viewOMSForm = function(formId) {
-      console.log('View OMS form:', formId);
-      // Implement view functionality
+    window.viewOMSForm = async function(formId) {
+      console.log('🔄 Loading OMS form details for:', formId);
+      
+      try {
+        const { data: form, error } = await supabase
+          .from('order_customizations')
+          .select('*')
+          .eq('id', formId)
+          .single();
+
+        if (error) {
+          console.error('Error loading OMS form details:', error);
+          alert('Error loading form details: ' + error.message);
+          return;
+        }
+
+        // Create a detailed modal with the same format as Admin Panel
+        const details = `
+Customization Form Details:
+==========================
+
+Product Information:
+-------------------
+Product Type: Order Menu System
+Product Name: Order Menu System
+Price: ₹${(form.total_amount || 0).toLocaleString('en-IN')}
+Project Name: ${form.project_name || 'Not provided'}
+Restaurant Name: ${form.restaurant_name || 'Not provided'}
+Owner Name: ${form.owner_name || 'Not provided'}
+
+Contact Information:
+-------------------
+Email: ${form.email || 'Not provided'}
+Phone: ${form.phone_number || 'Not provided'}
+Contact Person: ${form.contact_person || 'Not provided'}
+Created: ${new Date(form.created_at).toLocaleString()}
+Updated: ${new Date(form.updated_at || form.created_at).toLocaleString()}
+
+Address Information:
+------------------
+House/Flat Number: ${form.house_flat_number || 'Not provided'}
+Address: ${form.address_line_1 || 'Not provided'}
+City: ${form.city || 'Not provided'}
+State: ${form.state || 'Not provided'}
+Pincode: ${form.pincode || 'Not provided'}
+Country: ${form.country || 'Not provided'}
+
+Additional Requirements:
+-----------------------
+${form.additional_requirements || 'No additional requirements provided'}
+
+${form.restaurant_logo_url ? `Restaurant Logo: ${form.restaurant_logo_url}` : ''}
+${form.menu_photos_urls && form.menu_photos_urls.length > 0 ? `Menu Photos: ${form.menu_photos_urls.length} photos uploaded` : ''}
+        `;
+        
+        alert(details);
+      } catch (error) {
+        console.error('Error viewing OMS form details:', error);
+        alert('Error viewing form details: ' + error.message);
+      }
     };
 
     window.processOMSForm = function(formId) {

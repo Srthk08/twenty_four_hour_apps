@@ -218,6 +218,15 @@ import AuthGuard from '../components/AuthGuard.astro';
               <button type="button" id="cancel-customization" class="px-8 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium">
                 Cancel
               </button>
+              <button type="button" id="test-save" class="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 font-medium">
+                Test Save to Database
+              </button>
+              <button type="button" id="simple-test" class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+                Simple Test
+              </button>
+              <button type="button" id="direct-save" class="px-8 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 font-medium">
+                Direct Save
+              </button>
               <button type="submit" class="px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium">
                 Save and Make Payment
               </button>
@@ -2204,6 +2213,9 @@ import AuthGuard from '../components/AuthGuard.astro';
     // Form submission - Save requirements only
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
+      console.log('🚀 FORM SUBMIT EVENT TRIGGERED!');
+      console.log('🚀 Form element:', form);
+      console.log('🚀 Event target:', e.target);
       
       // CRITICAL: Check if user is logged in before allowing form submission
       const authManager = window.globalAuthManager || window.simpleAuthManager;
@@ -2216,10 +2228,65 @@ import AuthGuard from '../components/AuthGuard.astro';
       const data = Object.fromEntries(formData);
       
       console.log('📝 Project requirements saved:', data);
+      console.log('📝 Form data keys:', Object.keys(data));
+      console.log('📝 Form data values:', Object.values(data));
       
-      // Get product details
+      // Get product details first
       const productName = document.getElementById('selected-product-name').textContent;
       const productPrice = document.getElementById('selected-product-price').textContent;
+      
+      // Check if it's Order Menu System and save to database
+      if (productName && productName.toLowerCase().includes('order menu')) {
+        console.log('🧪 Order Menu System detected, saving to database...');
+        
+        // Prepare data for database
+        const insertData = {
+          project_name: data.projectName || 'Form Submit Project',
+          restaurant_name: data.restaurantName || 'Form Submit Restaurant',
+          owner_name: data.ownerName || 'Form Submit Owner',
+          contact_person: data.contactPerson || 'Form Submit Contact',
+          email: data.email || 'form@submit.com',
+          phone_number: data.phone || '1234567890',
+          house_flat_number: data.houseNumber || '123',
+          address_line_1: data.addressLine1 || 'Form Submit Address',
+          city: data.city || 'Form Submit City',
+          state: data.state || 'Form Submit State',
+          pincode: data.pincode || '123456',
+          country: data.country || 'India',
+          restaurant_logo_url: null,
+          menu_photos_urls: [],
+          additional_requirements: data.additionalRequirements || 'Form submit requirements',
+          base_package_cost: 999.00,
+          gst_amount: 180.00,
+          total_amount: 1179.00,
+          status: 'pending',
+          payment_status: 'pending'
+        };
+        
+        console.log('🧪 Insert data prepared:', insertData);
+        
+        try {
+          console.log('🧪 Saving to Supabase...');
+          const { data: result, error } = await window.supabase
+            .from('order_customizations')
+            .insert(insertData)
+            .select();
+            
+          if (error) {
+            console.error('❌ Form submit save failed:', error);
+            alert('❌ Form submit save failed: ' + error.message);
+          } else {
+            console.log('✅ Form submit save successful!', result);
+            alert('✅ Data saved successfully to Supabase!');
+          }
+        } catch (err) {
+          console.error('❌ Form submit save error:', err);
+          alert('❌ Form submit save error: ' + err.message);
+        }
+      } else {
+        console.log('🧪 Not Order Menu System, skipping database save');
+        console.log('🧪 Product name was:', productName);
+      }
       
       // Create project requirements object
       const projectRequirements = {
@@ -3009,6 +3076,473 @@ import AuthGuard from '../components/AuthGuard.astro';
   // Make it globally available for form visibility changes
   window.reinitializePincodeAutocomplete = reinitializePincodeAutocomplete;
 
+  // Add test save button functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const testSaveBtn = document.getElementById('test-save');
+    if (testSaveBtn) {
+      testSaveBtn.addEventListener('click', async function() {
+        console.log('🧪 Test save button clicked!');
+        
+        const form = document.getElementById('requirements-form');
+        if (form) {
+          const formData = new FormData(form);
+          const data = Object.fromEntries(formData);
+          console.log('🧪 Test save - Form data:', data);
+          
+          await testDirectOrderCustomizationSave(data);
+        } else {
+          console.error('❌ Form not found for test save');
+        }
+      });
+    }
+    
+    // Simple test button
+    const simpleTestBtn = document.getElementById('simple-test');
+    if (simpleTestBtn) {
+      simpleTestBtn.addEventListener('click', async function() {
+        console.log('🔵 Simple test button clicked!');
+        alert('🔵 Simple test button works!');
+        
+        // Test basic data insertion
+        const testData = {
+          project_name: 'Simple Test Project',
+          restaurant_name: 'Simple Test Restaurant',
+          owner_name: 'Simple Test Owner',
+          contact_person: 'Simple Test Contact',
+          email: 'test@example.com',
+          phone_number: '1234567890',
+          house_flat_number: '123',
+          address_line_1: 'Test Address',
+          city: 'Test City',
+          state: 'Test State',
+          pincode: '123456',
+          country: 'India',
+          restaurant_logo_url: null,
+          menu_photos_urls: [],
+          additional_requirements: 'Simple test requirements',
+          base_package_cost: 999.00,
+          gst_amount: 180.00,
+          total_amount: 1179.00,
+          status: 'pending',
+          payment_status: 'pending'
+        };
+        
+        console.log('🔵 Simple test data:', testData);
+        
+        try {
+          const { data: result, error } = await window.supabase
+            .from('order_customizations')
+            .insert(testData)
+            .select();
+            
+          if (error) {
+            console.error('❌ Simple test failed:', error);
+            alert('❌ Simple test failed: ' + error.message);
+          } else {
+            console.log('✅ Simple test successful!', result);
+            alert('✅ Simple test successful! Data saved to database.');
+          }
+        } catch (err) {
+          console.error('❌ Simple test error:', err);
+          alert('❌ Simple test error: ' + err.message);
+        }
+      });
+    }
+    
+    // Function to find and setup form
+    function setupForm() {
+      const form = document.getElementById('requirements-form');
+      console.log('🔍 Form found:', !!form);
+      console.log('🔍 Form element:', form);
+      
+      if (form) {
+        console.log('✅ Form found, adding event listener...');
+        
+        // Override the form submission completely
+        form.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          console.log('🚀 FORCE FORM SUBMISSION TRIGGERED!');
+          alert('🚀 Form submission detected!');
+          
+          // Get form data
+          const formData = new FormData(form);
+          const data = Object.fromEntries(formData);
+          console.log('🚀 Form data collected:', data);
+          
+          // Always try to save to order_customizations
+          try {
+            const insertData = {
+              project_name: data.projectName || 'Manual Test Project',
+              restaurant_name: data.restaurantName || 'Manual Test Restaurant',
+              owner_name: data.ownerName || 'Manual Test Owner',
+              contact_person: data.contactPerson || 'Manual Test Contact',
+              email: data.email || 'manual@test.com',
+              phone_number: data.phone || '1234567890',
+              house_flat_number: data.houseNumber || '123',
+              address_line_1: data.addressLine1 || 'Manual Test Address',
+              city: data.city || 'Manual Test City',
+              state: data.state || 'Manual Test State',
+              pincode: data.pincode || '123456',
+              country: data.country || 'India',
+              restaurant_logo_url: null,
+              menu_photos_urls: [],
+              additional_requirements: data.additionalRequirements || 'Manual test requirements',
+              base_package_cost: 999.00,
+              gst_amount: 180.00,
+              total_amount: 1179.00,
+              status: 'pending',
+              payment_status: 'pending'
+            };
+            
+            console.log('🚀 Insert data prepared:', insertData);
+            
+            const { data: result, error } = await window.supabase
+              .from('order_customizations')
+              .insert(insertData)
+              .select();
+              
+            if (error) {
+              console.error('❌ Force save failed:', error);
+              alert('❌ Save failed: ' + error.message);
+            } else {
+              console.log('✅ Force save successful!', result);
+              alert('✅ Data saved successfully to order_customizations table!');
+            }
+          } catch (err) {
+            console.error('❌ Force save error:', err);
+            alert('❌ Save error: ' + err.message);
+          }
+        });
+        
+        return true;
+      } else {
+        console.log('⏳ Form not found yet, will retry...');
+        return false;
+      }
+    }
+    
+    // Try to setup form immediately
+    if (!setupForm()) {
+      // If form not found, try again after delays
+      setTimeout(() => {
+        console.log('🔄 Retrying form setup after 1 second...');
+        if (!setupForm()) {
+          setTimeout(() => {
+            console.log('🔄 Retrying form setup after 3 seconds...');
+            if (!setupForm()) {
+              setTimeout(() => {
+                console.log('🔄 Retrying form setup after 5 seconds...');
+                setupForm();
+              }, 5000);
+            }
+          }, 3000);
+        }
+      }, 1000);
+    }
+    
+    // Also add a global form submission handler
+    document.addEventListener('submit', function(e) {
+      console.log('🌍 Global form submission detected!');
+      console.log('🌍 Form element:', e.target);
+      console.log('🌍 Form ID:', e.target.id);
+      
+      if (e.target.id === 'requirements-form') {
+        console.log('🌍 Requirements form submitted globally!');
+        alert('🌍 Global form submission detected!');
+      }
+    });
+    
+    // Add direct click listener to Save and Make Payment button
+    console.log('🔍 Looking for save button...');
+    
+    // First try to find the button inside the order-menu-form
+    const orderMenuForm = document.getElementById('order-menu-form');
+    let targetButton = null;
+    
+    if (orderMenuForm) {
+      console.log('🔍 Order menu form found:', orderMenuForm);
+      targetButton = orderMenuForm.querySelector('button[type="submit"]');
+      console.log('🔍 Save button in order menu form:', targetButton);
+    }
+    
+    // If not found, try to find by text content
+    if (!targetButton) {
+      const allButtons = document.querySelectorAll('button');
+      console.log('🔍 All buttons found:', allButtons.length);
+      
+      for (let button of allButtons) {
+        if (button.textContent.includes('Save and Make Payment')) {
+          // Check if this button is inside the order-menu-form
+          if (orderMenuForm && orderMenuForm.contains(button)) {
+            targetButton = button;
+            console.log('🔍 Found save button by text in order menu form:', targetButton);
+            break;
+          }
+        }
+      }
+    }
+    
+    if (targetButton) {
+      console.log('🔴 Save button found:', targetButton);
+      let isSaving = false; // Flag to prevent duplicate saves
+      targetButton.addEventListener('click', async function(e) {
+        console.log('🔴 Save button clicked directly!');
+        e.preventDefault();
+        
+        // Prevent duplicate saves
+        if (isSaving) {
+          console.log('⚠️ Save already in progress, ignoring duplicate click');
+          return;
+        }
+        isSaving = true;
+        
+        // Get the form
+        const form = document.getElementById('order-menu-form');
+        if (!form) {
+          console.error('❌ Order menu form not found for save button');
+          alert('❌ Form not found!');
+          return;
+        }
+        
+        // Get form data
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData);
+        console.log('🔴 Save button - Form data:', data);
+        
+        // Check if form has data
+        if (Object.keys(data).length === 0) {
+          console.error('❌ No form data found for save button');
+          alert('❌ No form data found! Please fill out the form first.');
+          return;
+        }
+        
+        // Prepare data for database
+        const insertData = {
+          project_name: data.projectName || 'Save Button Project',
+          restaurant_name: data.restaurantName || 'Save Button Restaurant',
+          owner_name: data.ownerName || 'Save Button Owner',
+          contact_person: data.contactPerson || 'Save Button Contact',
+          email: data.email || 'save@button.com',
+          phone_number: data.phone || '1234567890',
+          house_flat_number: data.houseNumber || '123',
+          address_line_1: data.addressLine1 || 'Save Button Address',
+          city: data.city || 'Save Button City',
+          state: data.state || 'Save Button State',
+          pincode: data.pincode || '123456',
+          country: data.country || 'India',
+          restaurant_logo_url: null,
+          menu_photos_urls: [],
+          additional_requirements: data.additionalRequirements || 'Save button requirements',
+          base_package_cost: 999.00,
+          gst_amount: 180.00,
+          total_amount: 1179.00,
+          status: 'pending',
+          payment_status: 'pending'
+        };
+        
+        console.log('🔴 Save button - Insert data:', insertData);
+        
+        try {
+          console.log('🔴 Save button - Saving to Supabase...');
+          
+          // Import Supabase client
+          const { supabase } = await import('../lib/supabase');
+          
+          if (!supabase) {
+            console.error('❌ Supabase client not available');
+            alert('❌ Form submission error: Supabase client not loaded. Please refresh the page and try again.');
+            return;
+          }
+          
+          const { data: result, error } = await supabase
+            .from('order_customizations')
+            .insert(insertData)
+            .select();
+            
+          if (error) {
+            console.error('❌ Save button save failed:', error);
+            alert('❌ Form submission failed: ' + error.message);
+          } else {
+            console.log('✅ Save button save successful!', result);
+            
+            // Clear the form after successful save
+            form.reset();
+            
+            // Clear file inputs specifically
+            const logoInput = form.querySelector('input[name="restaurantLogo"]');
+            const menuPhotosInput = form.querySelector('input[name="menuPhotos"]');
+            
+            if (logoInput) {
+              logoInput.value = '';
+              console.log('✅ Logo input cleared');
+            }
+            
+            if (menuPhotosInput) {
+              menuPhotosInput.value = '';
+              console.log('✅ Menu photos input cleared');
+            }
+            
+            // Clear Order Menu System specific preview elements
+            const orderMenuLogoPreview = document.getElementById('order-menu-logo-preview');
+            const orderMenuLogoPreviewImg = document.getElementById('order-menu-logo-preview-img');
+            const orderMenuLogoFilename = document.getElementById('order-menu-logo-filename');
+            const menuPhotosPreview = document.getElementById('menu-photos-preview');
+            const menuPhotosGrid = document.getElementById('menu-photos-grid');
+            
+            if (orderMenuLogoPreview) {
+              orderMenuLogoPreview.classList.add('hidden');
+              console.log('✅ Order menu logo preview hidden');
+            }
+            
+            if (orderMenuLogoPreviewImg) {
+              orderMenuLogoPreviewImg.src = '';
+              console.log('✅ Order menu logo preview image cleared');
+            }
+            
+            if (orderMenuLogoFilename) {
+              orderMenuLogoFilename.textContent = '';
+              console.log('✅ Order menu logo filename cleared');
+            }
+            
+            if (menuPhotosPreview) {
+              menuPhotosPreview.classList.add('hidden');
+              console.log('✅ Menu photos preview hidden');
+            }
+            
+            if (menuPhotosGrid) {
+              menuPhotosGrid.innerHTML = '';
+              console.log('✅ Menu photos grid cleared');
+            }
+            
+            // Reset upload areas to original state
+            const logoUploadArea = document.getElementById('order-menu-logo-upload-area');
+            const menuPhotosUploadArea = document.getElementById('menu-photos-upload-area');
+            
+            if (logoUploadArea) {
+              logoUploadArea.innerHTML = `
+                <div class="flex flex-col items-center">
+                  <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                  </svg>
+                  <p class="text-gray-600 mb-2">Click to upload logo</p>
+                  <p class="text-sm text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                </div>
+              `;
+              console.log('✅ Logo upload area reset to original state');
+            }
+            
+            if (menuPhotosUploadArea) {
+              menuPhotosUploadArea.innerHTML = `
+                <div class="flex flex-col items-center">
+                  <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  <p class="text-gray-600 mb-2">Click to upload photos</p>
+                  <p class="text-sm text-gray-500">PNG, JPG, GIF up to 5MB each</p>
+                </div>
+              `;
+              console.log('✅ Menu photos upload area reset to original state');
+            }
+            
+            // Reset global variables
+            if (typeof menuPhotos !== 'undefined') {
+              menuPhotos = [];
+              console.log('✅ Menu photos array cleared');
+            }
+            
+            // Show success message
+            alert('✅ Form submitted successfully!');
+          }
+        } catch (err) {
+          console.error('❌ Save button save error:', err);
+          alert('❌ Form submission error: ' + err.message);
+        } finally {
+          // Reset the flag after save operation completes
+          isSaving = false;
+        }
+      });
+    } else {
+      console.error('❌ Save button not found!');
+    }
+    
+    // Global click handler removed to prevent duplicate saves
+    
+    // Direct save button - this will definitely work
+    const directSaveBtn = document.getElementById('direct-save');
+    if (directSaveBtn) {
+      directSaveBtn.addEventListener('click', async function() {
+        console.log('🔴 Direct save button clicked!');
+        alert('🔴 Direct save button clicked!');
+        
+        // Get form data directly
+        const form = document.getElementById('requirements-form');
+        console.log('🔴 Direct save - Form found:', !!form);
+        
+        if (!form) {
+          console.error('❌ Form not found for direct save');
+          alert('❌ Form not found! Please make sure the form is visible.');
+          
+          // Try to find all forms on the page
+          const allForms = document.querySelectorAll('form');
+          console.log('🔴 All forms on page:', allForms);
+          console.log('🔴 Form IDs:', Array.from(allForms).map(f => f.id));
+          
+          return;
+        }
+        
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData);
+        console.log('🔴 Direct save - Form data:', data);
+        
+        // Prepare data for database
+        const insertData = {
+          project_name: data.projectName || 'Direct Save Project',
+          restaurant_name: data.restaurantName || 'Direct Save Restaurant',
+          owner_name: data.ownerName || 'Direct Save Owner',
+          contact_person: data.contactPerson || 'Direct Save Contact',
+          email: data.email || 'direct@save.com',
+          phone_number: data.phone || '1234567890',
+          house_flat_number: data.houseNumber || '123',
+          address_line_1: data.addressLine1 || 'Direct Save Address',
+          city: data.city || 'Direct Save City',
+          state: data.state || 'Direct Save State',
+          pincode: data.pincode || '123456',
+          country: data.country || 'India',
+          restaurant_logo_url: null,
+          menu_photos_urls: [],
+          additional_requirements: data.additionalRequirements || 'Direct save requirements',
+          base_package_cost: 999.00,
+          gst_amount: 180.00,
+          total_amount: 1179.00,
+          status: 'pending',
+          payment_status: 'pending'
+        };
+        
+        console.log('🔴 Direct save - Insert data:', insertData);
+        
+        try {
+          const { data: result, error } = await window.supabase
+            .from('order_customizations')
+            .insert(insertData)
+            .select();
+            
+          if (error) {
+            console.error('❌ Direct save failed:', error);
+            alert('❌ Direct save failed: ' + error.message);
+          } else {
+            console.log('✅ Direct save successful!', result);
+            alert('✅ Direct save successful! Data saved to database.');
+          }
+        } catch (err) {
+          console.error('❌ Direct save error:', err);
+          alert('❌ Direct save error: ' + err.message);
+        }
+      });
+    }
+    
+    // Order Menu System test buttons removed
+  });
+
   function showSuggestions(container, suggestions, input) {
     if (suggestions.length === 0) {
       hideSuggestions(container);
@@ -3037,5 +3571,96 @@ import AuthGuard from '../components/AuthGuard.astro';
 
   function hideSuggestions(container) {
     container.classList.add('hidden');
+  }
+
+  // Test function to directly save to order_customizations table
+  async function testDirectOrderCustomizationSave(formData) {
+    try {
+      console.log('🧪 Starting direct save test...');
+      console.log('🧪 Form data received:', formData);
+      console.log('🧪 Form data keys:', Object.keys(formData));
+      console.log('🧪 Form data values:', Object.values(formData));
+      
+      // Get current user
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      const currentUser = authManager?.getCurrentUser();
+      console.log('🧪 Current user:', currentUser);
+      
+      if (!currentUser) {
+        console.error('❌ No user found for direct save test');
+        return;
+      }
+      
+      // Check if Supabase is available
+      if (!window.supabase) {
+        console.error('❌ Supabase not available for direct save test');
+        alert('❌ Supabase not available! Check console for details.');
+        return;
+      }
+      
+      // Test Supabase connection
+      console.log('🧪 Testing Supabase connection...');
+      try {
+        const { data: testData, error: testError } = await window.supabase
+          .from('order_customizations')
+          .select('count')
+          .limit(1);
+        
+        if (testError) {
+          console.error('❌ Supabase connection test failed:', testError);
+          alert('❌ Supabase connection failed: ' + testError.message);
+          return;
+        } else {
+          console.log('✅ Supabase connection test successful');
+        }
+      } catch (connError) {
+        console.error('❌ Supabase connection error:', connError);
+        alert('❌ Supabase connection error: ' + connError.message);
+        return;
+      }
+      
+      // Prepare data for order_customizations table using correct field names
+      const insertData = {
+        project_name: formData.projectName || 'Test Project',
+        restaurant_name: formData.restaurantName || 'Test Restaurant',
+        owner_name: formData.ownerName || 'Test Owner',
+        contact_person: formData.contactPerson || 'Test Contact',
+        email: formData.email || currentUser.email,
+        phone_number: formData.phone || '1234567890',
+        house_flat_number: formData.houseNumber || '123',
+        address_line_1: formData.addressLine1 || 'Test Address',
+        city: formData.city || 'Test City',
+        state: formData.state || 'Test State',
+        pincode: formData.pincode || '123456',
+        country: formData.country || 'India',
+        restaurant_logo_url: null, // Will be handled separately
+        menu_photos_urls: [], // Will be handled separately
+        additional_requirements: formData.additionalRequirements || 'Test requirements',
+        base_package_cost: 999.00,
+        gst_amount: 180.00,
+        total_amount: 1179.00,
+        status: 'pending',
+        payment_status: 'pending'
+      };
+      
+      console.log('🧪 Insert data prepared:', insertData);
+      
+      // Insert into order_customizations table
+      const { data: result, error } = await window.supabase
+        .from('order_customizations')
+        .insert(insertData)
+        .select();
+        
+      if (error) {
+        console.error('❌ Direct save test failed:', error);
+        console.error('❌ Error details:', JSON.stringify(error, null, 2));
+      } else {
+        console.log('✅ Direct save test successful!', result);
+        alert('✅ Data saved successfully to order_customizations table!');
+      }
+      
+    } catch (err) {
+      console.error('❌ Direct save test error:', err);
+    }
   }
 </script>

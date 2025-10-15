@@ -2585,6 +2585,7 @@ import { sharedDataStore } from '../lib/shared-data-store';
             console.error('❌ Error saving Order Menu System customization:', customizationError);
             console.error('❌ Error details:', JSON.stringify(customizationError, null, 2));
             console.error('❌ Cart data that failed:', JSON.stringify(cartData, null, 2));
+            console.error('❌ Insert data that failed:', JSON.stringify(insertData, null, 2));
             return null;
           }
           
