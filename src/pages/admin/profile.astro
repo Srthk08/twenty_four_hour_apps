@@ -172,6 +172,26 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   // Supabase configuration
   const SUPABASE_URL = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+
+  // Format date function to fix month display issue
+  function formatDate(dateString) {
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+      }
+      
+      // Format as MM/DD/YYYY to ensure consistent display
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const year = date.getFullYear();
+      
+      return `${month}/${day}/${year}`;
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid Date';
+    }
+  }
   
   let supabase = null;
   
@@ -244,10 +264,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           
           // Update dates
           if (profile.created_at) {
-            document.getElementById('admin-created-at').textContent = new Date(profile.created_at).toLocaleDateString();
+            document.getElementById('admin-created-at').textContent = formatDate(profile.created_at);
           }
           if (user.last_sign_in_at) {
-            document.getElementById('admin-last-login').textContent = new Date(user.last_sign_in_at).toLocaleDateString();
+            document.getElementById('admin-last-login').textContent = formatDate(user.last_sign_in_at);
           }
         }
       } else {
@@ -325,7 +345,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             color: 'green',
             title: 'New Contact Submission',
             description: `${contact.first_name} ${contact.last_name} - ${contact.project_type || 'General Inquiry'}`,
-            time: new Date(contact.created_at).toLocaleDateString()
+            time: formatDate(contact.created_at)
           });
         });
       }
@@ -339,7 +359,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             color: 'yellow',
             title: `Support Ticket ${ticket.status || 'New'}`,
             description: `${ticket.subject || 'No subject'} - ${ticket.category || 'General'}`,
-            time: new Date(ticket.created_at).toLocaleDateString()
+            time: formatDate(ticket.created_at)
           });
         });
       }
@@ -353,7 +373,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             color: 'blue',
             title: 'New Cart Customization',
             description: `${cart.project_name || 'Custom Project'} - ₹${cart.total_amount || '0'}`,
-            time: new Date(cart.created_at).toLocaleDateString()
+            time: formatDate(cart.created_at)
           });
         });
       }

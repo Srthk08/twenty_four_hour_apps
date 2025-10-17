@@ -216,6 +216,26 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   // Supabase configuration
   const SUPABASE_URL = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+
+  // Format date function to fix month display issue
+  function formatDate(dateString) {
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+      }
+      
+      // Format as MM/DD/YYYY to ensure consistent display
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const year = date.getFullYear();
+      
+      return `${month}/${day}/${year}`;
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid Date';
+    }
+  }
   
   let supabase = null;
   
@@ -408,8 +428,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
                 ${user.role || 'customer'}
               </span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(user.created_at).toLocaleDateString()}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.last_login ? new Date(user.last_login).toLocaleDateString() : '-'}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatDate(user.created_at)}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.last_login ? formatDate(user.last_login) : '-'}</td>
           </tr>
         `).join('');
       } else {
@@ -464,7 +484,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${contact.phone || '-'}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${contact.company_name || '-'}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${contact.project_type || '-'}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(contact.created_at).toLocaleDateString()}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatDate(contact.created_at)}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <button onclick="viewContactDetails('${contact.id}')" class="text-blue-600 hover:text-blue-900">View Details</button>
             </td>
@@ -510,7 +530,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
                 ${ticket.status}
               </span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(ticket.created_at).toLocaleDateString()}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatDate(ticket.created_at)}</td>
           </tr>
         `).join('');
       } else {
@@ -713,7 +733,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
               <div>
                 <p class="text-sm text-gray-600"><strong>Company:</strong> ${contact.company_name || 'Not provided'}</p>
                 <p class="text-sm text-gray-600"><strong>Project Type:</strong> ${contact.project_type || 'Not specified'}</p>
-                <p class="text-sm text-gray-600"><strong>Submitted:</strong> ${new Date(contact.created_at).toLocaleDateString()}</p>
+                <p class="text-sm text-gray-600"><strong>Submitted:</strong> ${formatDate(contact.created_at)}</p>
               </div>
             </div>
           </div>
@@ -798,7 +818,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <div class="bg-gray-50 p-4 rounded-lg border contact-item" data-email="${(contact.email || '').toLowerCase()}">
           <div class="flex justify-between items-start mb-3">
             <h4 class="text-lg font-semibold text-gray-900">#${index + 1} - ${contact.first_name} ${contact.last_name}</h4>
-            <span class="text-sm text-gray-500">${new Date(contact.created_at).toLocaleDateString()}</span>
+            <span class="text-sm text-gray-500">${formatDate(contact.created_at)}</span>
           </div>
           
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">

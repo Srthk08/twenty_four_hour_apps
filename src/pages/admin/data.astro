@@ -337,6 +337,26 @@ import { supabase } from '../../lib/supabase';
 <script>
   // Use the Supabase client from AdminLayout
   let supabase;
+
+  // Format date function to fix month display issue
+  function formatDate(dateString) {
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+      }
+      
+      // Format as MM/DD/YYYY to ensure consistent display
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const year = date.getFullYear();
+      
+      return `${month}/${day}/${year}`;
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid Date';
+    }
+  }
   
   // Wait for Supabase to load
   function waitForSupabase() {
@@ -419,8 +439,8 @@ import { supabase } from '../../lib/supabase';
                 ${user.role || 'customer'}
               </span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(user.created_at).toLocaleDateString()}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.last_login ? new Date(user.last_login).toLocaleDateString() : '-'}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatDate(user.created_at)}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.last_login ? formatDate(user.last_login) : '-'}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <button onclick="viewUserDetails('${user.id}')" class="text-blue-600 hover:text-blue-900">View Details</button>
             </td>
@@ -458,7 +478,7 @@ import { supabase } from '../../lib/supabase';
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${contact.phone || '-'}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${contact.company_name || '-'}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${contact.project_type || '-'}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(contact.created_at).toLocaleDateString()}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatDate(contact.created_at)}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <button onclick="viewContactDetails('${contact.id}')" class="text-blue-600 hover:text-blue-900">View Details</button>
             </td>
@@ -504,7 +524,7 @@ import { supabase } from '../../lib/supabase';
                 ${ticket.status}
               </span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(ticket.created_at).toLocaleDateString()}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatDate(ticket.created_at)}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <button onclick="viewTicketDetails('${ticket.id}')" class="text-blue-600 hover:text-blue-900">View Details</button>
             </td>
@@ -610,7 +630,7 @@ import { supabase } from '../../lib/supabase';
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${customization.product_name || '-'}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${customization.project_name || '-'}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${(customization.product_price || 0).toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(customization.created_at).toLocaleDateString()}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatDate(customization.created_at)}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <button onclick="viewCustomizationDetails('${customization.id}')" class="text-blue-600 hover:text-blue-900">View Details</button>
             </td>
@@ -768,7 +788,7 @@ import { supabase } from '../../lib/supabase';
               <div>
                 <p class="text-sm text-gray-600"><strong>Company:</strong> ${contact.company_name || 'Not provided'}</p>
                 <p class="text-sm text-gray-600"><strong>Project Type:</strong> ${contact.project_type || 'Not specified'}</p>
-                <p class="text-sm text-gray-600"><strong>Submitted:</strong> ${new Date(contact.created_at).toLocaleDateString()}</p>
+                <p class="text-sm text-gray-600"><strong>Submitted:</strong> ${formatDate(contact.created_at)}</p>
               </div>
             </div>
           </div>
@@ -819,7 +839,7 @@ import { supabase } from '../../lib/supabase';
               <div>
                 <p class="text-sm text-gray-600"><strong>Status:</strong> <span class="px-2 py-1 text-xs rounded-full ${ticket.status === 'open' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}">${ticket.status}</span></p>
                 <p class="text-sm text-gray-600"><strong>Email:</strong> ${ticket.user_email || ticket.email || 'No Email'}</p>
-                <p class="text-sm text-gray-600"><strong>Created:</strong> ${new Date(ticket.created_at).toLocaleDateString()}</p>
+                <p class="text-sm text-gray-600"><strong>Created:</strong> ${formatDate(ticket.created_at)}</p>
               </div>
             </div>
           </div>
@@ -870,7 +890,7 @@ import { supabase } from '../../lib/supabase';
               </div>
               <div>
                 <p class="text-sm text-gray-600"><strong>Total Amount:</strong> ${cart.total_amount ? cart.total_amount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) : '₹0'}</p>
-                <p class="text-sm text-gray-600"><strong>Created:</strong> ${new Date(cart.created_at).toLocaleDateString()}</p>
+                <p class="text-sm text-gray-600"><strong>Created:</strong> ${formatDate(cart.created_at)}</p>
                 <p class="text-sm text-gray-600"><strong>Restaurant Name:</strong> ${cart.restaurant_name || 'N/A'}</p>
                 <p class="text-sm text-gray-600"><strong>Cuisine Type:</strong> ${cart.cuisine_type || 'N/A'}</p>
               </div>
@@ -960,7 +980,7 @@ import { supabase } from '../../lib/supabase';
                 Contact Form
               </span>
             </div>
-            <span class="text-sm text-gray-500">${new Date(contact.created_at).toLocaleDateString()}</span>
+            <span class="text-sm text-gray-500">${formatDate(contact.created_at)}</span>
           </div>
           
           <h4 class="font-semibold text-gray-900 mb-2">${contact.first_name} ${contact.last_name || ''}</h4>
@@ -1077,7 +1097,7 @@ import { supabase } from '../../lib/supabase';
               <p class="text-sm text-gray-600 mb-2"><strong>Contact Person:</strong> ${cart.contact_person || 'Not specified'}</p>
               <p class="text-sm text-gray-600 mb-2"><strong>User Email:</strong> ${cart.user_email || 'Not provided'}</p>
               <p class="text-sm text-gray-600 mb-2"><strong>Total Amount:</strong> ${cart.total_amount ? cart.total_amount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) : '₹0'}</p>
-              <p class="text-sm text-gray-600 mb-2"><strong>Created:</strong> ${new Date(cart.created_at).toLocaleDateString()}</p>
+              <p class="text-sm text-gray-600 mb-2"><strong>Created:</strong> ${formatDate(cart.created_at)}</p>
             </div>
             <div>
               <h5 class="font-medium text-gray-900 mb-3">Restaurant Details</h5>
@@ -1312,7 +1332,7 @@ import { supabase } from '../../lib/supabase';
                 Order Menu System
               </span>
             </div>
-            <span class="text-sm text-gray-500">${new Date(customization.created_at).toLocaleDateString()}</span>
+            <span class="text-sm text-gray-500">${formatDate(customization.created_at)}</span>
           </div>
           
           <h4 class="font-semibold text-gray-900 mb-2">${customization.project_name || 'No Project Name'}</h4>

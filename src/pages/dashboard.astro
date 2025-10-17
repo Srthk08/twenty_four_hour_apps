@@ -238,7 +238,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         <div id="order-menu-customization-form" class="bg-white rounded-lg shadow-sm p-8 hidden">
           <div class="flex items-center justify-between mb-8">
             <h2 class="text-3xl font-bold text-gray-900">Order Menu System Requirements</h2>
-            <button id="close-order-menu-form" class="text-gray-400 hover:text-gray-600" onclick="console.log('Close button clicked directly!'); document.getElementById('order-menu-customization-form').classList.add('hidden'); window.history.replaceState({}, document.title, window.location.pathname); const recentActivity = document.getElementById('recent-activity'); if(recentActivity) { recentActivity.style.display = 'block'; recentActivity.classList.remove('hidden'); recentActivity.style.opacity = '1'; recentActivity.style.transform = 'translateY(0)'; }">
+            <button id="close-order-menu-form" class="text-gray-400 hover:text-gray-600" onclick="console.log('Close button clicked via inline!'); document.getElementById('order-menu-customization-form').classList.add('hidden'); window.history.replaceState({}, document.title, window.location.pathname); userClosedForm = true; showBrowseProductsSection(); showNoActivityMessage();">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -600,7 +600,7 @@ import AuthGuard from '../components/AuthGuard.astro';
 
             <!-- Form Actions -->
             <div class="flex justify-end space-x-4 pt-6 border-t">
-              <button type="button" id="cancel-order-menu" class="px-8 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium" onclick="console.log('Cancel button clicked directly!'); document.getElementById('order-menu-customization-form').classList.add('hidden'); window.history.replaceState({}, document.title, window.location.pathname); const recentActivity = document.getElementById('recent-activity'); if(recentActivity) { recentActivity.style.display = 'block'; recentActivity.classList.remove('hidden'); recentActivity.style.opacity = '1'; recentActivity.style.transform = 'translateY(0)'; }">
+              <button type="button" id="cancel-order-menu" class="px-8 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium" onclick="console.log('Cancel button clicked via inline!'); document.getElementById('order-menu-customization-form').classList.add('hidden'); window.history.replaceState({}, document.title, window.location.pathname); userClosedForm = true; showBrowseProductsSection(); showNoActivityMessage();">
                 Cancel
               </button>
               <button type="submit" class="px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium">
@@ -612,17 +612,16 @@ import AuthGuard from '../components/AuthGuard.astro';
 
         <!-- Recent Activity -->
         <div id="recent-activity" class="bg-white rounded-lg shadow-sm p-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-          <div class="text-center py-8">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-            </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">No recent activity</h3>
-            <p class="mt-1 text-sm text-gray-500">Start by browsing our products and placing your first order.</p>
-            <div class="mt-6">
-              <a href="/products" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700">
-                Browse Products
-              </a>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Recent Activity</h3>
+          </div>
+          <div id="activity-content">
+            <div class="text-center py-8">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">Loading recent activity...</h3>
+              <p class="mt-1 text-sm text-gray-500">Please wait while we fetch your recent orders.</p>
             </div>
           </div>
         </div>
@@ -1158,6 +1157,9 @@ import AuthGuard from '../components/AuthGuard.astro';
     console.log('handleOrderMenuForm called - form found:', form);
     const closeBtn = document.getElementById('close-order-menu-form');
     const cancelBtn = document.getElementById('cancel-order-menu');
+    
+    console.log('🔍 Close button found:', closeBtn);
+    console.log('🔍 Cancel button found:', cancelBtn);
     const logoUpload = document.getElementById('order-menu-logo-upload');
     const logoUploadArea = document.getElementById('order-menu-logo-upload-area');
     const logoPreview = document.getElementById('order-menu-logo-preview');
@@ -1614,13 +1616,17 @@ import AuthGuard from '../components/AuthGuard.astro';
     
     // Close form handlers
     closeBtn?.addEventListener('click', () => {
+      userClosedForm = true;
       showBrowseProductsSection();
+      showNoActivityMessage();
       // Clear URL parameters when form is closed
       window.history.replaceState({}, document.title, window.location.pathname);
     });
     
     cancelBtn?.addEventListener('click', () => {
+      userClosedForm = true;
       showBrowseProductsSection();
+      showNoActivityMessage();
       // Clear URL parameters when form is closed
       window.history.replaceState({}, document.title, window.location.pathname);
     });
@@ -1838,6 +1844,11 @@ import AuthGuard from '../components/AuthGuard.astro';
                 successDiv.classList.remove('hidden');
                 successDiv.textContent = 'Order Menu requirements saved successfully! Opening payment page...';
               }
+              
+              // Refresh recent activity to show the new submission
+              setTimeout(() => {
+                loadRecentActivity();
+              }, 1000);
               // Open payment link in new tab to avoid console errors
               const paymentWindow = window.open('https://payments.pabbly.com/subscribe/68c084369dbcfe4b619b80ce/six-months-inr', '_blank');
               
@@ -2050,7 +2061,11 @@ import AuthGuard from '../components/AuthGuard.astro';
         e.preventDefault();
         document.getElementById('order-menu-customization-form').classList.add('hidden');
         window.history.replaceState({}, document.title, window.location.pathname);
-        setTimeout(() => showBrowseProductsSection(), 100);
+        // Set flag to prevent loadRecentActivity from overriding
+        userClosedForm = true;
+        // Immediately show browse products content without delay
+        showBrowseProductsSection();
+        showNoActivityMessage();
       }
       
       if (e.target && e.target.id === 'cancel-order-menu') {
@@ -2058,9 +2073,44 @@ import AuthGuard from '../components/AuthGuard.astro';
         e.preventDefault();
         document.getElementById('order-menu-customization-form').classList.add('hidden');
         window.history.replaceState({}, document.title, window.location.pathname);
-        setTimeout(() => showBrowseProductsSection(), 100);
+        // Set flag to prevent loadRecentActivity from overriding
+        userClosedForm = true;
+        // Immediately show browse products content without delay
+        showBrowseProductsSection();
+        showNoActivityMessage();
       }
     });
+    
+    // Add direct event listeners as backup
+    if (closeBtn) {
+      console.log('✅ Adding direct event listener to close button');
+      closeBtn.addEventListener('click', (e) => {
+        console.log('Close button clicked via direct listener!');
+        e.preventDefault();
+        document.getElementById('order-menu-customization-form').classList.add('hidden');
+        window.history.replaceState({}, document.title, window.location.pathname);
+        userClosedForm = true;
+        showBrowseProductsSection();
+        showNoActivityMessage();
+      });
+    } else {
+      console.log('❌ Close button not found for direct event listener');
+    }
+    
+    if (cancelBtn) {
+      console.log('✅ Adding direct event listener to cancel button');
+      cancelBtn.addEventListener('click', (e) => {
+        console.log('Cancel button clicked via direct listener!');
+        e.preventDefault();
+        document.getElementById('order-menu-customization-form').classList.add('hidden');
+        window.history.replaceState({}, document.title, window.location.pathname);
+        userClosedForm = true;
+        showBrowseProductsSection();
+        showNoActivityMessage();
+      });
+    } else {
+      console.log('❌ Cancel button not found for direct event listener');
+    }
     } else {
       console.error('Form not found - cannot add event listener');
     }
@@ -2199,13 +2249,17 @@ import AuthGuard from '../components/AuthGuard.astro';
     
     // Close form handlers
     closeBtn?.addEventListener('click', () => {
+      userClosedForm = true;
       showBrowseProductsSection();
+      showNoActivityMessage();
       // Clear URL parameters when form is closed
       window.history.replaceState({}, document.title, window.location.pathname);
     });
     
     cancelBtn?.addEventListener('click', () => {
+      userClosedForm = true;
       showBrowseProductsSection();
+      showNoActivityMessage();
       // Clear URL parameters when form is closed
       window.history.replaceState({}, document.title, window.location.pathname);
     });
@@ -2515,6 +2569,53 @@ import AuthGuard from '../components/AuthGuard.astro';
   // Make function globally accessible
   window.showBrowseProductsSection = showBrowseProductsSection;
 
+  // Global event listeners for order menu form buttons (backup)
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('🔧 Setting up global event listeners for order menu form buttons');
+    
+    // Add event listener for close button
+    const closeBtn = document.getElementById('close-order-menu-form');
+    if (closeBtn) {
+      console.log('✅ Global close button found, adding event listener');
+      closeBtn.addEventListener('click', (e) => {
+        console.log('🚀 Global close button clicked!');
+        e.preventDefault();
+        e.stopPropagation();
+        const form = document.getElementById('order-menu-customization-form');
+        if (form) {
+          form.classList.add('hidden');
+        }
+        window.history.replaceState({}, document.title, window.location.pathname);
+        userClosedForm = true;
+        showBrowseProductsSection();
+        showNoActivityMessage();
+      });
+    } else {
+      console.log('❌ Global close button not found');
+    }
+    
+    // Add event listener for cancel button
+    const cancelBtn = document.getElementById('cancel-order-menu');
+    if (cancelBtn) {
+      console.log('✅ Global cancel button found, adding event listener');
+      cancelBtn.addEventListener('click', (e) => {
+        console.log('🚀 Global cancel button clicked!');
+        e.preventDefault();
+        e.stopPropagation();
+        const form = document.getElementById('order-menu-customization-form');
+        if (form) {
+          form.classList.add('hidden');
+        }
+        window.history.replaceState({}, document.title, window.location.pathname);
+        userClosedForm = true;
+        showBrowseProductsSection();
+        showNoActivityMessage();
+      });
+    } else {
+      console.log('❌ Global cancel button not found');
+    }
+  });
+
   // Auto-fill user details in forms - ONLY when user is properly authenticated
   function autofillUserDetails() {
     console.log('🔄 Attempting to auto-fill user details...');
@@ -2606,6 +2707,201 @@ import AuthGuard from '../components/AuthGuard.astro';
     }
   }
 
+  // Flag to track if user manually closed a form
+  let userClosedForm = false;
+
+  // Load recent activity (submitted Order Menu System forms)
+  async function loadRecentActivity() {
+    console.log('🔄 Loading recent activity...');
+    const activityContent = document.getElementById('activity-content');
+    
+    if (!activityContent) {
+      console.error('Activity content element not found');
+      return;
+    }
+    
+    try {
+      // Get Supabase client
+      const { supabase } = await import('../lib/supabase');
+      
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        console.error('Error getting user:', userError);
+        showNoActivityMessage();
+        return;
+      }
+      
+      // Fetch Order Menu System customizations for this user
+      const { data: customizations, error } = await supabase
+        .from('order_customizations')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      
+      if (error) {
+        console.error('Error loading customizations:', error);
+        showNoActivityMessage();
+        return;
+      }
+      
+      console.log('📋 Loaded customizations:', customizations?.length || 0);
+      
+      if (!customizations || customizations.length === 0) {
+        showNoActivityMessage();
+        return;
+      }
+      
+      // Display the customizations
+      displayRecentActivity(customizations);
+      
+    } catch (error) {
+      console.error('Error loading recent activity:', error);
+      showNoActivityMessage();
+    }
+  }
+  
+  // Display recent activity
+  function displayRecentActivity(customizations) {
+    const activityContent = document.getElementById('activity-content');
+    
+    if (!activityContent) return;
+    
+    activityContent.innerHTML = `
+      <div class="space-y-4">
+        ${customizations.map(customization => `
+          <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <div class="flex items-center space-x-3">
+                  <div class="flex-shrink-0">
+                    <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                      <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h4 class="text-sm font-medium text-gray-900">${customization.project_name || 'Unnamed Project'}</h4>
+                    <p class="text-sm text-gray-500">${customization.restaurant_name || 'Restaurant Name Not Provided'}</p>
+                    <div class="mt-1 flex items-center space-x-4 text-xs text-gray-500">
+                      <span>Order Menu System</span>
+                      <span>•</span>
+                      <span>₹${(customization.total_amount || 0).toLocaleString('en-IN')}</span>
+                      <span>•</span>
+                      <span>${new Date(customization.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-3 flex items-center justify-between">
+                  <div class="flex items-center space-x-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      Submitted
+                    </span>
+                    ${customization.additional_requirements ? `
+                      <span class="text-xs text-gray-500 truncate max-w-xs">
+                        ${customization.additional_requirements.substring(0, 50)}${customization.additional_requirements.length > 50 ? '...' : ''}
+                      </span>
+                    ` : ''}
+                  </div>
+                  <button onclick="viewOrderDetails('${customization.id}')" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
+                    View Details
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+  
+  // Show no activity message
+  function showNoActivityMessage() {
+    const activityContent = document.getElementById('activity-content');
+    
+    if (!activityContent) return;
+    
+    activityContent.innerHTML = `
+      <div class="text-center py-8">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No recent activity</h3>
+        <p class="mt-1 text-sm text-gray-500">Start by browsing our products and placing your first order.</p>
+        <div class="mt-6">
+          <a href="/products" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700">
+            Browse Products
+          </a>
+        </div>
+      </div>
+    `;
+  }
+  
+  // View order details
+  window.viewOrderDetails = async function(customizationId) {
+    console.log('🔄 Loading order details for:', customizationId);
+    
+    try {
+      const { supabase } = await import('../lib/supabase');
+      
+      const { data: customization, error } = await supabase
+        .from('order_customizations')
+        .select('*')
+        .eq('id', customizationId)
+        .single();
+      
+      if (error) {
+        console.error('Error loading customization details:', error);
+        alert('Error loading order details: ' + error.message);
+        return;
+      }
+      
+      const details = `
+Order Menu System Details:
+=========================
+
+Project Information:
+-------------------
+Project Name: ${customization.project_name || 'Not provided'}
+Restaurant Name: ${customization.restaurant_name || 'Not provided'}
+Owner Name: ${customization.owner_name || 'Not provided'}
+Contact Person: ${customization.contact_person || 'Not provided'}
+
+Contact Information:
+-------------------
+Email: ${customization.email || 'Not provided'}
+Phone: ${customization.phone_number || 'Not provided'}
+
+Address Information:
+------------------
+House/Flat Number: ${customization.house_flat_number || 'Not provided'}
+Address: ${customization.address_line_1 || 'Not provided'}
+City: ${customization.city || 'Not provided'}
+State: ${customization.state || 'Not provided'}
+Pincode: ${customization.pincode || 'Not provided'}
+Country: ${customization.country || 'Not provided'}
+
+Additional Requirements:
+-----------------------
+${customization.additional_requirements || 'No additional requirements provided'}
+
+Order Details:
+-------------
+Price: ₹${(customization.total_amount || 0).toLocaleString('en-IN')}
+Submitted: ${new Date(customization.created_at).toLocaleString()}
+Status: Submitted
+      `;
+      
+      alert(details);
+    } catch (error) {
+      console.error('Error viewing order details:', error);
+      alert('Error viewing order details: ' + error.message);
+    }
+  };
+
   // Update user info when page loads
   document.addEventListener('DOMContentLoaded', () => {
     console.log('Dashboard DOM loaded - initializing with global auth manager');
@@ -2623,6 +2919,14 @@ import AuthGuard from '../components/AuthGuard.astro';
         recentActivity.style.display = 'block';
         recentActivity.classList.remove('hidden');
         console.log('✅ Showing browse products section - no product selected');
+        // Only load recent activity if user didn't manually close a form
+        if (!userClosedForm) {
+          loadRecentActivity();
+        } else {
+          // User closed a form, show browse products content directly
+          showNoActivityMessage();
+          userClosedForm = false; // Reset flag
+        }
       }
       // Ensure forms are hidden when no product is selected
       const productForm = document.getElementById('product-customization-form');
@@ -2637,6 +2941,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         console.log('✅ Hiding browse products section - product selected');
       }
     }
+    
     
     // Remove page load transition to prevent bluish screen
       document.body.style.opacity = '1';
@@ -3452,6 +3757,11 @@ import AuthGuard from '../components/AuthGuard.astro';
             
             // Show success message
             alert('✅ Form submitted successfully!');
+            
+            // Refresh recent activity to show the new submission
+            setTimeout(() => {
+              loadRecentActivity();
+            }, 1000);
           }
         } catch (err) {
           console.error('❌ Save button save error:', err);

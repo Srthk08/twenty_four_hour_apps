@@ -35,8 +35,8 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
         
         <!-- User Info -->
         <div class="flex-1">
-          <h2 id="profile-name" class="text-2xl font-bold text-gray-900 mb-2">Loading...</h2>
-          <p id="profile-email" class="text-gray-600 mb-4">Loading...</p>
+          <h2 id="profile-name" class="text-2xl font-bold text-gray-900 mb-2">Menu Operator</h2>
+          <p id="profile-email" class="text-gray-600 mb-4">Loading profile...</p>
           
           <!-- Status Badges -->
           <div class="flex space-x-3">
@@ -66,7 +66,7 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-            <p id="profile-full-name" class="text-gray-900">Loading...</p>
+            <p id="profile-full-name" class="text-gray-900">Menu Operator</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
@@ -74,7 +74,7 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Last Login</label>
-            <p id="profile-last-login" class="text-gray-900">Loading...</p>
+            <p id="profile-last-login" class="text-gray-900">Just now</p>
           </div>
         </div>
         
@@ -82,11 +82,11 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <p id="profile-email-detail" class="text-gray-900">Loading...</p>
+            <p id="profile-email-detail" class="text-gray-900">Loading profile...</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Member Since</label>
-            <p id="profile-member-since" class="text-gray-900">Loading...</p>
+            <p id="profile-member-since" class="text-gray-900">Today</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
@@ -226,6 +226,15 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
       }
 
       console.log('✅ User found in session:', user.email);
+      
+      // Immediately update display with session data
+      updateProfileDisplay(user, {
+        full_name: user.full_name || user.name || 'Menu Operator',
+        email: user.email,
+        created_at: user.created_at || new Date().toISOString(),
+        last_login: new Date().toISOString(),
+        role: 'menu_operator'
+      });
       
       // Check if Supabase is available
       if (typeof window.supabase === 'undefined') {

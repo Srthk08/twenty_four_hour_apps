@@ -329,6 +329,26 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   // Supabase configuration
   const SUPABASE_URL = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+
+  // Format date function to fix month display issue
+  function formatDate(dateString) {
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+      }
+      
+      // Format as MM/DD/YYYY to ensure consistent display
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const year = date.getFullYear();
+      
+      return `${month}/${day}/${year}`;
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid Date';
+    }
+  }
   
   let supabase = null;
   let currentUsers = [];
@@ -497,10 +517,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           </span>
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-          ${user.last_login_at ? new Date(user.last_login_at).toLocaleDateString() : 'Never'}
+          ${user.last_login_at ? formatDate(user.last_login_at) : 'Never'}
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-          ${user.created_at ? new Date(user.created_at).toLocaleDateString() : 'Invalid Date'}
+          ${user.created_at ? formatDate(user.created_at) : 'Invalid Date'}
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
           <div class="flex space-x-2">
@@ -778,7 +798,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
               </div>
               <div class="flex justify-between">
                 <span class="text-sm text-gray-500">Last Login:</span>
-                <span class="text-sm font-medium text-gray-900">${user.last_login_at || user.lastLoginAt ? new Date(user.last_login_at || user.lastLoginAt).toLocaleString() : 'Never'}</span>
+                <span class="text-sm font-medium text-gray-900">${user.last_login_at || user.lastLoginAt ? formatDate(user.last_login_at || user.lastLoginAt) : 'Never'}</span>
               </div>
             </div>
           </div>
@@ -790,7 +810,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           <div class="space-y-2">
             <div class="flex justify-between">
               <span class="text-sm text-gray-500">Created:</span>
-              <span class="text-sm font-medium text-gray-900">${user.created_at || user.createdAt ? new Date(user.created_at || user.createdAt).toLocaleString() : 'Not available'}</span>
+              <span class="text-sm font-medium text-gray-900">${user.created_at || user.createdAt ? formatDate(user.created_at || user.createdAt) : 'Not available'}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-sm text-gray-500">Last Updated:</span>
