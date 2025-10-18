@@ -1,29 +1,27 @@
 ---
-import MenuOperatorLayout from '../../layouts/MenuOperatorLayout.astro';
-import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
+import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro';
 ---
 
-<MenuOperatorGuard />
-
-<MenuOperatorLayout title="Menu Operator Dashboard - 24HourApps">
-  <div class="space-y-6">
-    <!-- Header Section -->
+<MenuOperatorAdminLayout title="Menu Operator Dashboard - Product Customizations">
+  <div class="max-w-7xl mx-auto">
     <div class="bg-white rounded-lg shadow p-6">
-      <div class="flex items-center justify-between">
+      <div class="flex items-center justify-between mb-6">
         <div>
-          <h2 class="text-2xl font-bold text-gray-900 mb-2">Menu Operator Dashboard</h2>
-          <p class="text-gray-600">Manage OMS customization forms and menu photos</p>
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">Product Customizations Dashboard</h2>
+          <p class="text-gray-600">Manage all product customizations, track progress, and handle customer requests.</p>
         </div>
-        <div class="text-right">
-          <p class="text-sm text-gray-500">Last updated</p>
-          <p class="text-sm font-medium text-gray-900" id="last-updated">Just now</p>
+        <div class="flex space-x-3">
+          <button onclick="window.location.reload()" class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Refresh Data
+          </button>
         </div>
-      </div>
       </div>
 
-    <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <!-- OMS Forms Card -->
+        <!-- Total Customizations Card -->
       <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
         <div class="flex items-center">
           <div class="p-2 bg-blue-100 rounded-lg">
@@ -32,87 +30,173 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
             </svg>
         </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-blue-600">OMS Forms</p>
-            <p class="text-2xl font-bold text-blue-900" id="total-oms-forms">0</p>
+              <p class="text-sm font-medium text-blue-600">Total Customizations</p>
+              <p class="text-2xl font-bold text-blue-900" id="total-customizations">3</p>
           </div>
         </div>
       </div>
 
-      <!-- Menu Photos Card -->
-      <div class="bg-green-50 rounded-lg p-6 border border-green-200">
+        <!-- Pending Customizations Card -->
+        <div class="bg-yellow-50 rounded-lg p-6 border border-yellow-200">
         <div class="flex items-center">
-          <div class="p-2 bg-green-100 rounded-lg">
-            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            <div class="p-2 bg-yellow-100 rounded-lg">
+              <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
               </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-green-600">Menu Photos</p>
-            <p class="text-2xl font-bold text-green-900" id="total-menu-photos">0</p>
+              <p class="text-sm font-medium text-yellow-600">Pending</p>
+              <p class="text-2xl font-bold text-yellow-900" id="pending-customizations">1</p>
               </div>
             </div>
           </div>
           
-      <!-- Processed Photos Card -->
-      <div class="bg-purple-50 rounded-lg p-6 border border-purple-200">
+        <!-- In Progress Card -->
+        <div class="bg-orange-50 rounded-lg p-6 border border-orange-200">
         <div class="flex items-center">
-          <div class="p-2 bg-purple-100 rounded-lg">
-            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-2 bg-orange-100 rounded-lg">
+              <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
             </svg>
             </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-purple-600">Processed</p>
-            <p class="text-2xl font-bold text-purple-900" id="total-processed">0</p>
+              <p class="text-sm font-medium text-orange-600">In Progress</p>
+              <p class="text-2xl font-bold text-orange-900" id="in-progress-customizations">1</p>
           </div>
         </div>
       </div>
 
-      <!-- Pending Card -->
-      <div class="bg-orange-50 rounded-lg p-6 border border-orange-200">
+        <!-- Completed Card -->
+        <div class="bg-green-50 rounded-lg p-6 border border-green-200">
         <div class="flex items-center">
-          <div class="p-2 bg-orange-100 rounded-lg">
-            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            <div class="p-2 bg-green-100 rounded-lg">
+              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
         </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-orange-600">Pending</p>
-            <p class="text-2xl font-bold text-orange-900" id="total-pending">0</p>
+              <p class="text-sm font-medium text-green-600">Completed</p>
+              <p class="text-2xl font-bold text-green-900" id="completed-customizations">1</p>
           </div>
           </div>
         </div>
       </div>
 
-    <!-- OMS Customization Forms Section -->
-    <div class="bg-white rounded-lg shadow">
-        <div class="px-6 py-4 border-b border-gray-200">
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-medium text-gray-900">OMS Customization Forms</h3>
+      <!-- Detailed Data Sections -->
+      <div class="mt-8 space-y-8">
+        
+        <!-- Product Customizations Section -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold text-gray-900">Product Customizations</h3>
           <div class="flex items-center space-x-2">
-            <button id="refresh-oms" class="text-gray-400 hover:text-gray-600 transition-colors">
+              <button id="refresh-customizations" class="text-gray-400 hover:text-gray-600 transition-colors">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
               </svg>
             </button>
-          </div>
         </div>
       </div>
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project & Contact</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Restaurant & Owner</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email & Phone</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product & Project</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Details</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Info</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody id="oms-forms-table-body" class="bg-white divide-y divide-gray-200">
-            <tr>
-              <td colspan="6" class="px-6 py-4 text-center text-gray-500">Loading OMS forms...</td>
+              <tbody id="customizations-table-body" class="bg-white divide-y divide-gray-200">
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900">Restaurant Menu System</div>
+                <div class="text-sm text-gray-500">Bella Vista Digital Menu</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">Maria Rodriguez</div>
+                <div class="text-sm text-gray-500">Bella Vista Restaurant</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">maria@bellavista.com</div>
+                <div class="text-sm text-gray-500">+1 (555) 123-4567</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  pending
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                ₹25,000
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                2024-01-15
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewCustomization('demo-1')">View</button>
+                <button class="text-green-600 hover:text-green-900" onclick="processCustomization('demo-1')">Process</button>
+              </td>
+            </tr>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900">Android TV App</div>
+                <div class="text-sm text-gray-500">Golden Dragon Streaming App</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">David Chen</div>
+                <div class="text-sm text-gray-500">Golden Dragon Media</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">david@goldendragon.com</div>
+                <div class="text-sm text-gray-500">+1 (555) 987-6543</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                  in_progress
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                ₹55,000
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                2024-01-12
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewCustomization('demo-2')">View</button>
+                <button class="text-green-600 hover:text-green-900" onclick="processCustomization('demo-2')">Process</button>
+              </td>
+            </tr>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900">Restaurant Website</div>
+                <div class="text-sm text-gray-500">Café Del Sol Website</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">Sophie Martin</div>
+                <div class="text-sm text-gray-500">Café Del Sol</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">sophie@cafedelsol.com</div>
+                <div class="text-sm text-gray-500">+1 (555) 456-7890</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  completed
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                ₹15,000
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                2024-01-10
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewCustomization('demo-3')">View</button>
+                <button class="text-green-600 hover:text-green-900" onclick="processCustomization('demo-3')">Process</button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -120,17 +204,15 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
     </div>
 
     <!-- Menu Photos Section -->
-    <div class="bg-white rounded-lg shadow">
-      <div class="px-6 py-4 border-b border-gray-200">
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-medium text-gray-900">Menu Photos</h3>
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold text-gray-900">Menu Photos</h3>
           <div class="flex items-center space-x-2">
             <button id="refresh-photos" class="text-gray-400 hover:text-gray-600 transition-colors">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
               </svg>
             </button>
-          </div>
         </div>
       </div>
       <div class="overflow-x-auto">
@@ -140,16 +222,85 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Photo</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filename</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody id="photos-table-body" class="bg-white divide-y divide-gray-200">
-            <tr>
-              <td colspan="5" class="px-6 py-4 text-center text-gray-500">Loading photos...</td>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <img src="https://via.placeholder.com/100x100/4F46E5/FFFFFF?text=BV" alt="Menu photo" class="w-12 h-12 rounded object-cover">
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">bella-vista-menu.jpg</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  completed
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                2.4 MB
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                2024-01-15
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewPhoto('photo-1')">View</button>
+                <button class="text-green-600 hover:text-green-900" onclick="downloadText('photo-1')">Download</button>
+              </td>
+            </tr>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <img src="https://via.placeholder.com/100x100/DC2626/FFFFFF?text=GD" alt="Menu photo" class="w-12 h-12 rounded object-cover">
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">golden-dragon-menu.jpg</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                  processing
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                1.8 MB
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                2024-01-12
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewPhoto('photo-2')">View</button>
+                <button class="text-gray-400 cursor-not-allowed" disabled>Download</button>
+              </td>
+            </tr>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <img src="https://via.placeholder.com/100x100/059669/FFFFFF?text=CD" alt="Menu photo" class="w-12 h-12 rounded object-cover">
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">cafe-del-sol-menu.jpg</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  completed
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                3.1 MB
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                2024-01-10
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewPhoto('photo-3')">View</button>
+                <button class="text-green-600 hover:text-green-900" onclick="downloadText('photo-3')">Download</button>
+              </td>
             </tr>
           </tbody>
         </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -169,299 +320,89 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
   console.log('- URL:', supabaseUrl);
   console.log('- Key:', supabaseKey ? 'Present' : 'Missing');
 
-  // IMMEDIATE DATA LOAD - Run as soon as script loads
-  (function() {
-    console.log('🚨 IMMEDIATE DATA LOAD STARTING...');
-    
-    // Function to force load data immediately
-    function forceLoadDataImmediately() {
-      console.log('🚨 FORCE LOADING DATA IMMEDIATELY...');
-      
-      // Get demo data - OMS Form Structure
-      const demoForms = [
-        {
-          id: 'demo-1',
-          project_name: 'Bella Vista Restaurant App',
-          contact_person: 'Maria Rodriguez',
-          owner_name: 'Maria Rodriguez',
-          restaurant_name: 'Bella Vista',
-          user_email: 'maria@bellavista.com',
-          phone_number: '+1 (555) 123-4567',
-          house_flat_number: '123',
-          address_line_1: 'Main Street',
-          city: 'New York',
-          state: 'NY',
-          pincode: '10001',
-          country: 'USA',
-          additional_requirements: 'Need QR code ordering system',
-          created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          status: 'pending'
-        },
-        {
-          id: 'demo-2',
-          project_name: 'Golden Dragon Order System',
-          contact_person: 'David Chen',
-          owner_name: 'David Chen',
-          restaurant_name: 'Golden Dragon',
-          user_email: 'david@goldendragon.com',
-          phone_number: '+1 (555) 987-6543',
-          house_flat_number: '456',
-          address_line_1: 'Oak Avenue',
-          city: 'Los Angeles',
-          state: 'CA',
-          pincode: '90210',
-          country: 'USA',
-          additional_requirements: 'Multi-language support needed',
-          created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-          status: 'processed'
-        },
-        {
-          id: 'demo-3',
-          project_name: 'Café Del Sol Menu App',
-          contact_person: 'Sophie Martin',
-          owner_name: 'Sophie Martin',
-          restaurant_name: 'Café Del Sol',
-          user_email: 'sophie@cafedelsol.com',
-          phone_number: '+1 (555) 456-7890',
-          house_flat_number: '789',
-          address_line_1: 'Pine Street',
-          city: 'Miami',
-          state: 'FL',
-          pincode: '33101',
-          country: 'USA',
-          additional_requirements: 'Integration with delivery partners',
-          created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          status: 'pending'
-        }
-      ];
-      
-      const demoPhotos = [
-        {
-          id: 'photo-1',
-          original_filename: 'bella-vista-menu.jpg',
-          photo_url: 'https://via.placeholder.com/100x100/4F46E5/FFFFFF?text=BV',
-          conversion_status: 'completed',
-          created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-          file_size: 2400000
-        },
-        {
-          id: 'photo-2',
-          original_filename: 'golden-dragon-menu.jpg',
-          photo_url: 'https://via.placeholder.com/100x100/DC2626/FFFFFF?text=GD',
-          conversion_status: 'processing',
-          created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-          file_size: 1800000
-        },
-        {
-          id: 'photo-3',
-          original_filename: 'cafe-del-sol-menu.jpg',
-          photo_url: 'https://via.placeholder.com/100x100/059669/FFFFFF?text=CD',
-          conversion_status: 'completed',
-          created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-          file_size: 3100000
-        }
-      ];
-      
-      // Try to update elements immediately
-      try {
-        const omsTableBody = document.getElementById('oms-forms-table-body');
-        if (omsTableBody) {
-          console.log('🔄 Updating OMS table immediately...');
-          omsTableBody.innerHTML = demoForms.map(form => `
-            <tr class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">${form.project_name}</div>
-                <div class="text-sm text-gray-500">${form.contact_person}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">${form.restaurant_name}</div>
-                <div class="text-sm text-gray-500">${form.owner_name}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">${form.user_email}</div>
-                <div class="text-sm text-gray-500">${form.phone_number}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">${form.city}, ${form.state}</div>
-                <div class="text-sm text-gray-500">${form.pincode}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                ${new Date(form.created_at).toLocaleDateString()}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <button class="text-blue-600 hover:text-blue-900 mr-3">View</button>
-                <button class="text-green-600 hover:text-green-900">Process</button>
-              </td>
-            </tr>
-          `).join('');
-          console.log('✅ OMS table updated immediately');
-        }
-        
-        const photosTableBody = document.getElementById('photos-table-body');
-        if (photosTableBody) {
-          console.log('🔄 Updating photos table immediately...');
-          photosTableBody.innerHTML = demoPhotos.map(photo => `
-            <tr class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <img src="${photo.photo_url}" alt="Menu photo" class="w-12 h-12 rounded object-cover">
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">${photo.original_filename}</div>
-                <div class="text-sm text-gray-500">${(photo.file_size / 1024).toFixed(1)} KB</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  photo.conversion_status === 'completed' ? 'bg-green-100 text-green-800' :
-                  photo.conversion_status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-gray-100 text-gray-800'
-                }">
-                  ${photo.conversion_status}
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                ${new Date(photo.created_at).toLocaleDateString()}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <button class="text-blue-600 hover:text-blue-900 mr-3">View</button>
-                <button class="text-green-600 hover:text-green-900">Download</button>
-              </td>
-            </tr>
-          `).join('');
-          console.log('✅ Photos table updated immediately');
-        }
-        
-        // Update counts
-        const omsCount = document.getElementById('total-oms-forms');
-        const photosCount = document.getElementById('total-menu-photos');
-        const processedCount = document.getElementById('total-processed');
-        const pendingCount = document.getElementById('total-pending');
-        
-        if (omsCount) omsCount.textContent = demoForms.length;
-        if (photosCount) photosCount.textContent = demoPhotos.length;
-        if (processedCount) processedCount.textContent = demoPhotos.filter(p => p.conversion_status === 'completed').length;
-        if (pendingCount) pendingCount.textContent = demoPhotos.filter(p => p.conversion_status === 'processing').length;
-        
-        // Update last updated time
-        const lastUpdated = document.getElementById('last-updated');
-        if (lastUpdated) {
-          lastUpdated.textContent = 'Just now';
-        }
-        
-        console.log('🎉 IMMEDIATE DATA LOAD SUCCESSFUL!');
-        
-      } catch (error) {
-        console.error('❌ Error in immediate data load:', error);
-      }
-    }
-    
-    // Try immediately
-    forceLoadDataImmediately();
-    
-    // Try when DOM is ready
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', forceLoadDataImmediately);
-    } else {
-      forceLoadDataImmediately();
-    }
-    
-    // Try multiple times
-    setTimeout(forceLoadDataImmediately, 100);
-    setTimeout(forceLoadDataImmediately, 500);
-    setTimeout(forceLoadDataImmediately, 1000);
-    setTimeout(forceLoadDataImmediately, 2000);
-  })();
-
   // Global variables
   let currentUser = null;
+  
 
-  // Test Supabase connection and data saving
-  async function testSupabaseConnection() {
-    console.log('🧪 Testing Supabase connection...');
-    
-    try {
-      // Test 1: Check if Supabase client is working
-      console.log('✅ Supabase client created successfully');
-      
-      // Test 2: Check if there's existing data in order_customizations table
-      console.log('🔍 Checking existing data in order_customizations table...');
-      const { data: existingData, error: fetchError } = await supabase
-        .from('order_customizations')
-        .select('*')
-        .limit(5);
-      
-      if (fetchError) {
-        console.error('❌ Error fetching existing data:', fetchError);
-        console.error('❌ Error details:', fetchError.message);
-        console.error('❌ Error code:', fetchError.code);
-        console.error('❌ Error hint:', fetchError.hint);
-      } else {
-        console.log('📊 Existing data in order_customizations:', existingData?.length || 0, 'records');
-        if (existingData && existingData.length > 0) {
-          console.log('📋 Sample data:', existingData[0]);
-        }
+  // Wait for Supabase to load
+  function waitForSupabase() {
+    return new Promise((resolve) => {
+      if (window.supabase) {
+        supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        resolve(supabase);
+    } else {
+        setTimeout(() => waitForSupabase().then(resolve), 100);
       }
-      
-      // Test 3: Try to insert a test OMS customization
-      const testData = {
-        email: 'test@example.com',
-        project_name: 'Test Project',
-        owner_name: 'Test Owner',
-        restaurant_name: 'Test Restaurant',
-        address_line_1: '123 Test St',
-        phone_number: '+1-555-TEST',
-        restaurant_logo_url: 'https://via.placeholder.com/100x100/FF0000/FFFFFF?text=TEST',
-        status: 'pending',
-        base_package_cost: 999.00,
-        gst_amount: 180.00,
-        total_amount: 1179.00,
-        payment_status: 'pending'
-      };
-      
-      console.log('📝 Attempting to insert test data...', testData);
-      
-      const { data, error } = await supabase
-        .from('order_customizations')
-        .insert(testData)
-        .select();
-      
-      if (error) {
-        console.error('❌ Error inserting test data:', error);
-        console.error('❌ Error details:', error.message);
-        console.error('❌ Error code:', error.code);
-        console.error('❌ Error hint:', error.hint);
-        return false;
-      } else {
-        console.log('✅ Test data inserted successfully:', data);
-        
-        // Clean up test data
-        await supabase
-          .from('order_customizations')
-          .delete()
-          .eq('email', 'test@example.com');
-        
-        console.log('✅ Test data cleaned up');
-        return true;
-      }
-      
-    } catch (error) {
-      console.error('❌ Exception during Supabase test:', error);
-      return false;
-    }
+    });
   }
 
-  // Initialize dashboard - FINAL VERSION
+  // Initialize dashboard
   document.addEventListener('DOMContentLoaded', async () => {
-    console.log('📄 DOM Content Loaded - Starting FINAL dashboard initialization');
+    console.log('📄 DOM Content Loaded - Starting Menu Operator Dashboard initialization');
+    console.log('🔄 UPDATED: Product Customizations Dashboard Loading...');
     
-    // IMMEDIATELY show data - no loading states
-    console.log('🚨 LOADING DATA IMMEDIATELY...');
-    await loadDataAndDisplay();
-    
-    // Setup event listeners
+    // Setup event listeners first
     setupEventListeners();
     
-    console.log('✅ FINAL Dashboard initialization completed');
+    // Load demo data immediately
+    loadDemoDataImmediately();
+    
+    // Try to load real data immediately
+    setTimeout(async () => {
+      try {
+        console.log('🔄 Attempting to load real data from Supabase...');
+        await loadRealData();
+      } catch (error) {
+        console.error('❌ Error loading real data:', error);
+        console.log('🔄 Keeping static data as fallback');
+      }
+    }, 500);
+    
+    console.log('✅ Menu Operator Dashboard initialization completed!');
   });
+  
+  // Load demo data immediately
+  function loadDemoDataImmediately() {
+    console.log('🔄 Loading demo data immediately...');
+    const demoCustomizations = getDemoProductCustomizations();
+    const demoPhotos = getDemoMenuPhotos();
+    
+    displayProductCustomizations(demoCustomizations);
+    displayMenuPhotos(demoPhotos);
+    updateStatistics(demoCustomizations, demoPhotos);
+    
+    console.log('✅ Demo data loaded - Customizations:', demoCustomizations.length, 'Photos:', demoPhotos.length);
+  }
+  
+  // Load real data from Supabase
+  async function loadRealData() {
+    try {
+      console.log('🔄 Loading real data from Supabase...');
+      
+      // Wait for Supabase
+      await waitForSupabase();
+      
+      // Load user profile
+      await loadUserProfile();
+      
+      // Load customizations from product_customizations table
+      const customizations = await loadRealProductCustomizations();
+      const photos = await loadRealMenuPhotos();
+      
+      console.log('🔄 Real data fetched - Customizations:', customizations?.length || 0, 'Photos:', photos?.length || 0);
+      
+      // Always display real data, even if empty
+      displayProductCustomizations(customizations);
+      displayMenuPhotos(photos);
+      updateStatistics(customizations, photos);
+      
+      console.log('✅ Real data loaded and displayed - Customizations:', customizations?.length || 0, 'Photos:', photos?.length || 0);
+      
+    } catch (error) {
+      console.error('❌ Error loading real data:', error);
+      console.log('🔄 Keeping static data as fallback');
+    }
+  }
   
   // Load data and display immediately
   async function loadDataAndDisplay() {
@@ -469,51 +410,75 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
       console.log('🔄 Loading data from Supabase...');
       
       // Try to load real data first
-      const forms = await loadRealOMSForms();
+      const customizations = await loadRealProductCustomizations();
       const photos = await loadRealMenuPhotos();
       
-      // Display the data
-      displayOMSForms(forms);
-      displayMenuPhotos(photos);
-      updateStatistics(forms, photos);
+      // If no real data, use demo data
+      if (!customizations || customizations.length === 0) {
+        console.log('⚠️ No real customizations found, using demo data');
+        const demoCustomizations = getDemoProductCustomizations();
+        displayProductCustomizations(demoCustomizations);
+        updateStatistics(demoCustomizations, photos || []);
+      } else {
+        displayProductCustomizations(customizations);
+        updateStatistics(customizations, photos || []);
+      }
       
-      console.log('✅ Real data loaded and displayed');
+      if (!photos || photos.length === 0) {
+        console.log('⚠️ No real photos found, using demo data');
+        const demoPhotos = getDemoMenuPhotos();
+        displayMenuPhotos(demoPhotos);
+      } else {
+      displayMenuPhotos(photos);
+      }
+      
+      console.log('✅ Data loaded and displayed');
       
     } catch (error) {
       console.error('❌ Error loading real data, using demo data:', error);
       
       // Fallback to demo data
-      const demoForms = getDemoOMSForms();
+      const demoCustomizations = getDemoProductCustomizations();
       const demoPhotos = getDemoMenuPhotos();
       
-      displayOMSForms(demoForms);
+      displayProductCustomizations(demoCustomizations);
       displayMenuPhotos(demoPhotos);
-      updateStatistics(demoForms, demoPhotos);
+      updateStatistics(demoCustomizations, demoPhotos);
       
       console.log('✅ Demo data loaded and displayed');
     }
   }
   
-  // Load real OMS forms from Supabase
-  async function loadRealOMSForms() {
+  // Load real product customizations from Supabase (from product_customizations table)
+  async function loadRealProductCustomizations() {
     try {
+      console.log('🔄 Attempting to load from product_customizations table...');
+      console.log('🔄 Supabase client status:', supabase ? 'Available' : 'Not available');
+      
       if (!supabase) {
+        console.error('❌ Supabase client not available');
         throw new Error('Supabase not available');
       }
       
+      console.log('🔄 Executing Supabase query...');
       const { data, error } = await supabase
-        .from('order_customizations')
+        .from('product_customizations')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(50);
       
+      console.log('🔄 Supabase query completed. Data:', data, 'Error:', error);
+      
       if (error) {
+        console.error('❌ Supabase error:', error);
         throw error;
       }
       
+      console.log('✅ Loaded customizations from product_customizations:', data?.length || 0);
+      console.log('🔄 Sample data:', data?.[0] || 'No data');
       return data || [];
     } catch (error) {
-      console.error('Error loading real OMS forms:', error);
+      console.error('❌ Error loading real product customizations from product_customizations:', error);
       throw error;
     }
   }
@@ -521,7 +486,10 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
   // Load real menu photos from Supabase
   async function loadRealMenuPhotos() {
     try {
+      console.log('🔄 Attempting to load from menu_photos table...');
+      
       if (!supabase) {
+        console.error('❌ Supabase client not available');
         throw new Error('Supabase not available');
       }
       
@@ -532,53 +500,72 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
         .limit(50);
       
       if (error) {
+        console.error('❌ Supabase error:', error);
         throw error;
       }
       
+      console.log('✅ Loaded photos from menu_photos:', data?.length || 0);
       return data || [];
     } catch (error) {
-      console.error('Error loading real menu photos:', error);
+      console.error('❌ Error loading real menu photos:', error);
       throw error;
     }
   }
   
-  // Display OMS forms in table
-  function displayOMSForms(forms) {
-    const tbody = document.getElementById('oms-forms-table-body');
-    if (!tbody) return;
-    
-    if (!forms || forms.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No OMS forms submitted yet</td></tr>';
+  // Display product customizations in table (mapped from order_customizations)
+  function displayProductCustomizations(customizations) {
+    console.log('🔄 Displaying customizations:', customizations?.length || 0);
+    const tbody = document.getElementById('customizations-table-body');
+    if (!tbody) {
+      console.error('❌ Table body not found! Looking for: customizations-table-body');
+      console.log('Available elements:', document.querySelectorAll('[id*="table"]'));
       return;
     }
     
-    tbody.innerHTML = forms.map(form => `
+    if (!customizations || customizations.length === 0) {
+      console.log('⚠️ No customizations to display - showing empty state');
+      tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">No product customizations found in database. <button onclick="loadRealData()" class="text-blue-600 hover:text-blue-800 underline">Refresh to try again</button></td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = customizations.map(customization => `
       <tr class="hover:bg-gray-50">
         <td class="px-6 py-4 whitespace-nowrap">
-          <div class="text-sm font-medium text-gray-900">${form.project_name || 'Unnamed Project'}</div>
-          <div class="text-sm text-gray-500">${form.contact_person || 'No contact person'}</div>
+          <div class="text-sm font-medium text-gray-900">${customization.product_name || 'Product Customization'}</div>
+          <div class="text-sm text-gray-500">${customization.project_name || 'No project name'}</div>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-          <div class="text-sm text-gray-900">${form.restaurant_name || 'Not specified'}</div>
-          <div class="text-sm text-gray-500">${form.owner_name || 'No owner'}</div>
+          <div class="text-sm text-gray-900">${customization.customer_name || 'Not specified'}</div>
+          <div class="text-sm text-gray-500">${customization.company_name || 'No company'}</div>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-          <div class="text-sm text-gray-900">${form.user_email || form.email || 'No email'}</div>
-          <div class="text-sm text-gray-500">${form.phone_number || 'No phone'}</div>
+          <div class="text-sm text-gray-900">${customization.email || 'No email'}</div>
+          <div class="text-sm text-gray-500">${customization.phone || 'No phone'}</div>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-          <div class="text-sm text-gray-900">${form.city || 'No city'}, ${form.state || 'No state'}</div>
-          <div class="text-sm text-gray-500">${form.pincode || 'No pincode'}</div>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            customization.status === 'completed' ? 'bg-green-100 text-green-800' :
+            customization.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
+            customization.status === 'pending' ? 'bg-blue-100 text-blue-800' :
+            'bg-gray-100 text-gray-800'
+          }">
+            ${customization.status || 'pending'}
+          </span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+          ₹${(customization.price || 0).toLocaleString('en-IN')}
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-          ${form.created_at ? new Date(form.created_at).toLocaleDateString() : 'Unknown'}
+          ${customization.created_at ? new Date(customization.created_at).toLocaleDateString() : 'Unknown'}
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-          <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewOMSForm('${form.id}')">View</button>
-          <button class="text-green-600 hover:text-green-900" onclick="processOMSForm('${form.id}')">Process</button>
+          <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewCustomization('${customization.id}')">View</button>
+          <button class="text-green-600 hover:text-green-900" onclick="processCustomization('${customization.id}')">Process</button>
         </td>
       </tr>
     `).join('');
+    
+    console.log('✅ Customizations table updated with', customizations.length, 'items');
   }
   
   // Display menu photos in table
@@ -587,7 +574,8 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
     if (!tbody) return;
     
     if (!photos || photos.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No photos uploaded yet</td></tr>';
+      console.log('⚠️ No photos to display - showing empty state');
+      tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No photos found in database. <button onclick="loadRealData()" class="text-blue-600 hover:text-blue-800 underline">Refresh to try again</button></td></tr>';
       return;
     }
     
@@ -601,7 +589,6 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
           <div class="text-sm text-gray-900">${photo.original_filename || 'Unknown'}</div>
-          <div class="text-sm text-gray-500">${photo.file_size ? (photo.file_size / 1024).toFixed(1) + ' KB' : 'Unknown size'}</div>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
           <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -614,125 +601,10 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
           </span>
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          ${photo.file_size ? (photo.file_size / 1024).toFixed(1) + ' KB' : 'Unknown size'}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
           ${photo.created_at ? new Date(photo.created_at).toLocaleDateString() : 'Unknown'}
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-          <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewPhoto('${photo.id}')">View</button>
-          ${photo.conversion_status === 'completed' ? 
-            '<button class="text-green-600 hover:text-green-900" onclick="downloadText(\'' + photo.id + '\')">Download</button>' :
-            '<button class="text-gray-400 cursor-not-allowed" disabled>Download</button>'
-          }
-        </td>
-      </tr>
-    `).join('');
-  }
-  
-  // Update statistics
-  function updateStatistics(forms, photos) {
-    const omsCount = document.getElementById('total-oms-forms');
-    const photosCount = document.getElementById('total-menu-photos');
-    const processedCount = document.getElementById('total-processed');
-    const pendingCount = document.getElementById('total-pending');
-    
-    if (omsCount) omsCount.textContent = forms.length;
-    if (photosCount) photosCount.textContent = photos.length;
-    
-    if (processedCount) {
-      const processed = photos.filter(p => p.conversion_status === 'completed').length;
-      processedCount.textContent = processed;
-    }
-    
-    if (pendingCount) {
-      const pending = photos.filter(p => p.conversion_status === 'processing' || p.conversion_status === 'pending').length;
-      pendingCount.textContent = pending;
-    }
-    
-    // Update last updated time
-    const lastUpdated = document.getElementById('last-updated');
-    if (lastUpdated) {
-      lastUpdated.textContent = 'Just now';
-    }
-  }
-  
-  // FORCE LOAD DEMO DATA - IMMEDIATE, NO DELAYS
-  function forceLoadDemoDataNow() {
-    console.log('🚨 FORCE LOADING DEMO DATA NOW...');
-    
-    // Get demo data
-    const demoForms = getDemoOMSForms();
-    const demoPhotos = getDemoMenuPhotos();
-    
-    console.log('📋 Demo forms:', demoForms.length);
-    console.log('📸 Demo photos:', demoPhotos.length);
-    
-    // FORCE UPDATE ALL ELEMENTS IMMEDIATELY
-    try {
-      // Update OMS forms table
-      const omsTableBody = document.getElementById('oms-forms-table-body');
-      if (omsTableBody) {
-        console.log('🔄 Updating OMS table...');
-        omsTableBody.innerHTML = demoForms.map(form => `
-          <tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm font-medium text-gray-900">${form.project_name || 'Unnamed Project'}</div>
-              <div class="text-sm text-gray-500">${form.owner_name || 'No owner'}</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">${form.restaurant_name || 'Not specified'}</div>
-              <div class="text-sm text-gray-500">${form.address_line_1 || 'No address'}</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">${form.email || 'No email'}</div>
-              <div class="text-sm text-gray-500">${form.phone_number || 'No phone'}</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              ${form.restaurant_logo_url ? 
-                `<img src="${form.restaurant_logo_url}" alt="Logo" class="w-8 h-8 rounded object-cover">` : 
-                '<span class="text-gray-400">No logo</span>'
-              }
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              ${new Date(form.created_at).toLocaleDateString()}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-              <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewOMSForm('${form.id}')">View</button>
-              <button class="text-green-600 hover:text-green-900" onclick="processOMSForm('${form.id}')">Process</button>
-            </td>
-          </tr>
-        `).join('');
-        console.log('✅ OMS table updated');
-      } else {
-        console.error('❌ OMS table body not found');
-      }
-      
-      // Update menu photos table
-      const photosTableBody = document.getElementById('photos-table-body');
-      if (photosTableBody) {
-        console.log('🔄 Updating photos table...');
-        photosTableBody.innerHTML = demoPhotos.map(photo => `
-          <tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap">
-              ${photo.photo_url ? 
-                `<img src="${photo.photo_url}" alt="Menu photo" class="w-12 h-12 rounded object-cover">` : 
-                '<div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center"><svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>'
-              }
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">${photo.original_filename || 'Unknown'}</div>
-              <div class="text-sm text-gray-500">${photo.file_size ? (photo.file_size / 1024).toFixed(1) + ' KB' : 'Unknown size'}</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                photo.conversion_status === 'completed' ? 'bg-green-100 text-green-800' :
-                photo.conversion_status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
-                photo.conversion_status === 'failed' ? 'bg-red-100 text-red-800' :
-                'bg-gray-100 text-gray-800'
-              }">
-                ${photo.conversion_status || 'pending'}
-              </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              ${new Date(photo.created_at).toLocaleDateString()}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewPhoto('${photo.id}')">View</button>
@@ -743,93 +615,133 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
             </td>
           </tr>
         `).join('');
-        console.log('✅ Photos table updated');
-      } else {
-        console.error('❌ Photos table body not found');
       }
       
       // Update statistics
-      const omsCount = document.getElementById('total-oms-forms');
-      const photosCount = document.getElementById('total-menu-photos');
-      const processedCount = document.getElementById('total-processed');
-      const pendingCount = document.getElementById('total-pending');
-      
-      if (omsCount) {
-        omsCount.textContent = demoForms.length;
-        console.log('✅ OMS count updated:', demoForms.length);
-      }
-      
-      if (photosCount) {
-        photosCount.textContent = demoPhotos.length;
-        console.log('✅ Photos count updated:', demoPhotos.length);
-      }
-      
-      if (processedCount) {
-        const processed = demoPhotos.filter(p => p.conversion_status === 'completed').length;
-        processedCount.textContent = processed;
-        console.log('✅ Processed count updated:', processed);
-      }
-      
-      if (pendingCount) {
-        const pending = demoPhotos.filter(p => p.conversion_status === 'processing' || p.conversion_status === 'pending').length;
-        pendingCount.textContent = pending;
-        console.log('✅ Pending count updated:', pending);
-      }
-      
-      // Update last updated time
-      const lastUpdated = document.getElementById('last-updated');
-      if (lastUpdated) {
-        lastUpdated.textContent = 'Just now';
-        console.log('✅ Last updated time updated');
-      }
-      
-      console.log('🎉 DEMO DATA FORCE LOADED SUCCESSFULLY!');
-      
-    } catch (error) {
-      console.error('❌ Error force loading demo data:', error);
+  function updateStatistics(customizations, photos) {
+    const totalCustomizations = document.getElementById('total-customizations');
+    const pendingCustomizations = document.getElementById('pending-customizations');
+    const inProgressCustomizations = document.getElementById('in-progress-customizations');
+    const completedCustomizations = document.getElementById('completed-customizations');
+    
+    if (totalCustomizations) totalCustomizations.textContent = customizations.length;
+    
+    if (pendingCustomizations) {
+      const pending = customizations.filter(c => c.status === 'pending' || c.status === 'new').length;
+      pendingCustomizations.textContent = pending;
+    }
+    
+    if (inProgressCustomizations) {
+      const inProgress = customizations.filter(c => c.status === 'in_progress' || c.status === 'processing').length;
+      inProgressCustomizations.textContent = inProgress;
+    }
+    
+    if (completedCustomizations) {
+      const completed = customizations.filter(c => c.status === 'completed' || c.status === 'processed').length;
+      completedCustomizations.textContent = completed;
     }
   }
 
-  // Additional initialization on window load as fallback
-  window.addEventListener('load', () => {
-    console.log('🌐 Window loaded - checking if data is loaded');
-    
-    // Check if data is already loaded
-    const omsCount = document.getElementById('total-oms-forms')?.textContent;
-    const photosCount = document.getElementById('total-menu-photos')?.textContent;
-    
-    if (omsCount === '0' && photosCount === '0') {
-      console.log('⚠️ Data appears to be empty, attempting to reload...');
-      loadDashboardData().catch(() => {
-        console.log('🔄 Final fallback to demo data');
-        loadDemoData();
-      });
-    }
-  });
-  
-  // Aggressive fallback - force load demo data after 3 seconds if still loading
-  setTimeout(() => {
-    console.log('⏰ 3-second timeout - checking if still loading...');
-    
-    const omsTableBody = document.getElementById('oms-forms-table-body');
-    const photosTableBody = document.getElementById('photos-table-body');
-    
-    if (omsTableBody && omsTableBody.innerHTML.includes('Loading OMS forms...')) {
-      console.log('🔄 OMS forms still loading, forcing demo data...');
-      loadDemoData();
-    }
-    
-    if (photosTableBody && photosTableBody.innerHTML.includes('Loading photos...')) {
-      console.log('🔄 Photos still loading, forcing demo data...');
-      loadDemoData();
-    }
-  }, 3000);
-  
-  // Another fallback after 5 seconds
-  setTimeout(() => {
-    console.log('⏰ 5-second timeout - final fallback...');
-    loadDemoData();
-  }, 5000);
+  // Demo product customizations data
+  function getDemoProductCustomizations() {
+    return [
+      {
+        id: 'demo-1',
+        product_name: 'Restaurant Menu System',
+        project_name: 'Bella Vista Digital Menu',
+        customer_name: 'Maria Rodriguez',
+        company_name: 'Bella Vista Restaurant',
+        email: 'maria@bellavista.com',
+        phone: '+1 (555) 123-4567',
+        requirements: 'QR code ordering system with real-time updates',
+        status: 'pending',
+        price: 25000,
+        created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'demo-2',
+        product_name: 'Android TV App',
+        project_name: 'Golden Dragon Streaming App',
+        customer_name: 'David Chen',
+        company_name: 'Golden Dragon Media',
+        email: 'david@goldendragon.com',
+        phone: '+1 (555) 987-6543',
+        requirements: 'Multi-language support and content management',
+        status: 'in_progress',
+        price: 55000,
+        created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'demo-3',
+        product_name: 'Restaurant Website',
+        project_name: 'Café Del Sol Website',
+        customer_name: 'Sophie Martin',
+        company_name: 'Café Del Sol',
+        email: 'sophie@cafedelsol.com',
+        phone: '+1 (555) 456-7890',
+        requirements: 'Online ordering integration with delivery partners',
+        status: 'completed',
+        price: 15000,
+        created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'demo-4',
+        product_name: 'Streaming Mobile App',
+        project_name: 'Pizza Palace Mobile App',
+        customer_name: 'Tony Romano',
+        company_name: 'Pizza Palace',
+        email: 'tony@pizzapalace.com',
+        phone: '+1 (555) 321-9876',
+        requirements: 'Real-time order tracking and push notifications',
+        status: 'pending',
+        price: 45000,
+        created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'demo-5',
+        product_name: 'Restaurant Menu System',
+        project_name: 'Sushi Master Digital Menu',
+        customer_name: 'Yuki Tanaka',
+        company_name: 'Sushi Master',
+        email: 'yuki@sushimaster.com',
+        phone: '+1 (555) 654-3210',
+        requirements: 'Customizable menu categories and seasonal updates',
+        status: 'in_progress',
+        price: 25000,
+        created_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString()
+      }
+    ];
+  }
+
+  // Demo menu photos data
+  function getDemoMenuPhotos() {
+    return [
+      {
+        id: 'photo-1',
+        original_filename: 'bella-vista-menu.jpg',
+        photo_url: 'https://via.placeholder.com/100x100/4F46E5/FFFFFF?text=BV',
+        conversion_status: 'completed',
+        created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        file_size: 2400000
+      },
+      {
+        id: 'photo-2',
+        original_filename: 'golden-dragon-menu.jpg',
+        photo_url: 'https://via.placeholder.com/100x100/DC2626/FFFFFF?text=GD',
+        conversion_status: 'processing',
+        created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        file_size: 1800000
+      },
+      {
+        id: 'photo-3',
+        original_filename: 'cafe-del-sol-menu.jpg',
+        photo_url: 'https://via.placeholder.com/100x100/059669/FFFFFF?text=CD',
+        conversion_status: 'completed',
+        created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        file_size: 3100000
+      }
+    ];
+  }
 
   // Load user profile from Supabase
   async function loadUserProfile() {
@@ -918,412 +830,33 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
     }
   }
 
-    // Load dashboard data
-    async function loadDashboardData() {
-      console.log('🚀 Loading dashboard data...');
-      
-      try {
-        // Load real data from Supabase
-        await Promise.all([
-          loadOMSCustomizationForms(),
-          loadMenuPhotos(),
-          updateStats()
-        ]);
-        
-        console.log('✅ Dashboard data loaded successfully');
-      } catch (error) {
-        console.error('❌ Error loading dashboard data:', error);
-        
-        // Fallback to demo data
-        console.log('🔄 Falling back to demo data...');
-        loadDemoData();
-      }
-    }
-
-    // Force load demo data immediately
-    function loadDemoData() {
-      console.log('🎭 Loading demo data immediately...');
-      
-      try {
-        // Check if DOM elements exist
-        const omsFormsElement = document.getElementById('total-oms-forms');
-        const menuPhotosElement = document.getElementById('total-menu-photos');
-        const processedElement = document.getElementById('total-processed');
-        const pendingElement = document.getElementById('total-pending');
-        const omsTableBody = document.getElementById('oms-forms-table-body');
-        const photosTableBody = document.getElementById('photos-table-body');
-        
-        console.log('🔍 DOM Elements check:');
-        console.log('- total-oms-forms:', omsFormsElement);
-        console.log('- total-menu-photos:', menuPhotosElement);
-        console.log('- total-processed:', processedElement);
-        console.log('- total-pending:', pendingElement);
-        console.log('- oms-forms-table-body:', omsTableBody);
-        console.log('- photos-table-body:', photosTableBody);
-        
-        if (!omsFormsElement || !menuPhotosElement || !processedElement || !pendingElement) {
-          console.error('❌ Required DOM elements not found!');
-          return;
-        }
-        
-        // Load demo OMS forms
-        console.log('📋 Loading demo OMS forms...');
-        const demoForms = getDemoOMSForms();
-        console.log('📋 Demo forms:', demoForms);
-        
-        if (omsTableBody) {
-          displayOMSForms(demoForms);
-          console.log('✅ OMS forms displayed');
-        } else {
-          console.error('❌ OMS table body not found');
-        }
-        
-        omsFormsElement.textContent = demoForms.length;
-        console.log('✅ OMS forms count updated:', demoForms.length);
-        
-        // Load demo menu photos
-        console.log('📸 Loading demo menu photos...');
-        const demoPhotos = getDemoMenuPhotos();
-        console.log('📸 Demo photos:', demoPhotos);
-        
-        if (photosTableBody) {
-          displayMenuPhotos(demoPhotos);
-          console.log('✅ Menu photos displayed');
-        } else {
-          console.error('❌ Photos table body not found');
-        }
-        
-        menuPhotosElement.textContent = demoPhotos.length;
-        console.log('✅ Menu photos count updated:', demoPhotos.length);
-        
-        // Update processed and pending counts
-        const processed = demoPhotos.filter(p => p.conversion_status === 'completed').length;
-        const pending = demoPhotos.filter(p => p.conversion_status === 'processing' || p.conversion_status === 'pending').length;
-        
-        processedElement.textContent = processed;
-        pendingElement.textContent = pending;
-        
-        console.log('✅ Demo data loaded successfully!');
-        console.log(`📊 Stats: ${demoForms.length} OMS forms, ${demoPhotos.length} photos, ${processed} processed, ${pending} pending`);
-        
-        // Force update the "Last updated" text
-        const lastUpdatedElement = document.getElementById('last-updated');
-        if (lastUpdatedElement) {
-          lastUpdatedElement.textContent = 'Just now';
-          console.log('✅ Last updated text updated');
-        }
-        
-        // Verify the loading states are cleared
-        setTimeout(() => {
-          const omsTableContent = omsTableBody?.innerHTML || '';
-          const photosTableContent = photosTableBody?.innerHTML || '';
-          
-          if (omsTableContent.includes('Loading OMS forms...')) {
-            console.log('⚠️ OMS forms still showing loading state, retrying...');
-            displayOMSForms(demoForms);
-          }
-          
-          if (photosTableContent.includes('Loading photos...')) {
-            console.log('⚠️ Photos still showing loading state, retrying...');
-            displayMenuPhotos(demoPhotos);
-          }
-        }, 100);
-        
-      } catch (error) {
-        console.error('❌ Error loading demo data:', error);
-      }
-    }
-
-    // Load OMS customization forms
-    async function loadOMSCustomizationForms() {
-      try {
-        console.log('🔄 Loading OMS customization forms from order_customizations table...');
-        
-        // Check if Supabase client is available
-        if (!supabase) {
-          console.error('❌ Supabase client not available');
-          throw new Error('Supabase client not available');
-        }
-        
-        console.log('🔍 Supabase client:', supabase);
-        
-        const { data: forms, error } = await supabase
-          .from('order_customizations')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(50);
-
-        console.log('📊 Query result:', { forms, error });
-
-        if (error) {
-          console.error('❌ Error loading OMS forms:', error);
-          console.error('❌ Error details:', error.message, error.code, error.hint);
-          throw error; // Let the calling function handle the fallback
-        }
-
-        console.log('✅ Successfully fetched forms:', forms?.length || 0);
-
-        // Display the data (even if empty)
-        if (forms && forms.length > 0) {
-          console.log('✅ Displaying real data:', forms.length, 'forms');
-          displayOMSForms(forms);
-          document.getElementById('total-oms-forms').textContent = forms.length;
-        } else {
-          console.log('⚠️ No real data found, showing empty state');
-          displayOMSForms([]);
-          document.getElementById('total-oms-forms').textContent = '0';
-        }
-      } catch (error) {
-        console.error('❌ Exception loading OMS forms:', error);
-        throw error; // Let the calling function handle the fallback
-      }
-    }
-
-    // Demo OMS forms data
-    function getDemoOMSForms() {
-      return [
-        {
-          id: 'demo-1',
-          project_name: 'Bella Vista Restaurant App',
-          contact_person: 'Maria Rodriguez',
-          owner_name: 'Maria Rodriguez',
-          restaurant_name: 'Bella Vista',
-          user_email: 'maria@bellavista.com',
-          phone_number: '+1 (555) 123-4567',
-          house_flat_number: '123',
-          address_line_1: 'Main Street',
-          city: 'New York',
-          state: 'NY',
-          pincode: '10001',
-          country: 'USA',
-          additional_requirements: 'Need QR code ordering system',
-          created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          status: 'pending'
-        },
-        {
-          id: 'demo-2',
-          project_name: 'Golden Dragon Order System',
-          contact_person: 'David Chen',
-          owner_name: 'David Chen',
-          restaurant_name: 'Golden Dragon',
-          user_email: 'david@goldendragon.com',
-          phone_number: '+1 (555) 987-6543',
-          house_flat_number: '456',
-          address_line_1: 'Oak Avenue',
-          city: 'Los Angeles',
-          state: 'CA',
-          pincode: '90210',
-          country: 'USA',
-          additional_requirements: 'Multi-language support needed',
-          created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-          status: 'processed'
-        },
-        {
-          id: 'demo-3',
-          project_name: 'Café Del Sol Menu App',
-          contact_person: 'Sophie Martin',
-          owner_name: 'Sophie Martin',
-          restaurant_name: 'Café Del Sol',
-          user_email: 'sophie@cafedelsol.com',
-          phone_number: '+1 (555) 456-7890',
-          house_flat_number: '789',
-          address_line_1: 'Pine Street',
-          city: 'Miami',
-          state: 'FL',
-          pincode: '33101',
-          country: 'USA',
-          additional_requirements: 'Integration with delivery partners',
-          created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          status: 'pending'
-        },
-        {
-          id: 'demo-4',
-          project_name: 'Pizza Palace Order App',
-          contact_person: 'Tony Romano',
-          owner_name: 'Tony Romano',
-          restaurant_name: 'Pizza Palace',
-          user_email: 'tony@pizzapalace.com',
-          phone_number: '+1 (555) 321-9876',
-          house_flat_number: '321',
-          address_line_1: 'Elm Street',
-          city: 'Chicago',
-          state: 'IL',
-          pincode: '60601',
-          country: 'USA',
-          additional_requirements: 'Real-time order tracking',
-          created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-          status: 'processed'
-        },
-        {
-          id: 'demo-5',
-          project_name: 'Sushi Master Mobile Menu',
-          contact_person: 'Yuki Tanaka',
-          owner_name: 'Yuki Tanaka',
-          restaurant_name: 'Sushi Master',
-          user_email: 'yuki@sushimaster.com',
-          phone_number: '+1 (555) 654-3210',
-          house_flat_number: '654',
-          address_line_1: 'Maple Drive',
-          city: 'Seattle',
-          state: 'WA',
-          pincode: '98101',
-          country: 'USA',
-          additional_requirements: 'Customizable menu categories',
-          created_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
-          status: 'pending'
-        }
-      ];
-    }
-
-
-    // Load menu photos
-    async function loadMenuPhotos() {
-      try {
-        console.log('🔄 Loading menu photos...');
-        
-        // Check if Supabase client is available
-        if (!supabase) {
-          console.error('❌ Supabase client not available');
-          throw new Error('Supabase client not available');
-        }
-        
-        // Check if currentUser is available
-        if (!currentUser) {
-          console.log('⚠️ No current user, using demo data');
-          const demoPhotos = getDemoMenuPhotos();
-          displayMenuPhotos(demoPhotos);
-          updatePhotoStats(demoPhotos);
-          return;
-        }
-        
-        const { data: photos, error } = await supabase
-          .from('menu_photos')
-          .select('*')
-          .eq('user_id', currentUser.id)
-          .order('created_at', { ascending: false })
-          .limit(50);
-
-        if (error) {
-          console.error('❌ Error loading photos:', error);
-          throw error; // Let the calling function handle the fallback
-        }
-
-        console.log('✅ Successfully fetched photos:', photos?.length || 0);
-
-        // Display the data (even if empty)
-        if (photos && photos.length > 0) {
-          console.log('✅ Displaying real photo data:', photos.length, 'photos');
-          displayMenuPhotos(photos);
-          updatePhotoStats(photos);
-        } else {
-          console.log('⚠️ No real photo data found, showing empty state');
-          displayMenuPhotos([]);
-          updatePhotoStats([]);
-        }
-      } catch (error) {
-        console.error('❌ Exception loading photos:', error);
-        throw error; // Let the calling function handle the fallback
-      }
-    }
-    
-    // Update photo statistics
-    function updatePhotoStats(photos) {
-      const totalPhotos = photos.length;
-      const processed = photos.filter(p => p.conversion_status === 'completed').length;
-      const pending = photos.filter(p => p.conversion_status === 'processing' || p.conversion_status === 'pending').length;
-      
-      document.getElementById('total-menu-photos').textContent = totalPhotos;
-      document.getElementById('total-processed').textContent = processed;
-      document.getElementById('total-pending').textContent = pending;
-      
-      console.log(`📊 Photo stats: ${totalPhotos} total, ${processed} processed, ${pending} pending`);
-    }
-
-    // Demo menu photos data
-    function getDemoMenuPhotos() {
-      return [
-        {
-          id: 'photo-1',
-          original_filename: 'bella-vista-menu.jpg',
-          photo_url: 'https://via.placeholder.com/100x100/4F46E5/FFFFFF?text=BV',
-          conversion_status: 'completed',
-          created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-          file_size: 2400000 // 2.4 MB in bytes
-        },
-        {
-          id: 'photo-2',
-          original_filename: 'golden-dragon-menu.jpg',
-          photo_url: 'https://via.placeholder.com/100x100/DC2626/FFFFFF?text=GD',
-          conversion_status: 'processing',
-          created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-          file_size: 1800000 // 1.8 MB in bytes
-        },
-        {
-          id: 'photo-3',
-          original_filename: 'cafe-del-sol-menu.jpg',
-          photo_url: 'https://via.placeholder.com/100x100/059669/FFFFFF?text=CD',
-          conversion_status: 'completed',
-          created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-          file_size: 3100000 // 3.1 MB in bytes
-        },
-        {
-          id: 'photo-4',
-          original_filename: 'pizza-palace-menu.jpg',
-          photo_url: 'https://via.placeholder.com/100x100/7C3AED/FFFFFF?text=PP',
-          conversion_status: 'pending',
-          created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          file_size: 2700000 // 2.7 MB in bytes
-        },
-        {
-          id: 'photo-5',
-          original_filename: 'sushi-master-menu.jpg',
-          photo_url: 'https://via.placeholder.com/100x100/EA580C/FFFFFF?text=SM',
-          conversion_status: 'completed',
-          created_at: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString(),
-          file_size: 2200000 // 2.2 MB in bytes
-        },
-        {
-          id: 'photo-6',
-          original_filename: 'thai-garden-menu.jpg',
-          photo_url: 'https://via.placeholder.com/100x100/0891B2/FFFFFF?text=TG',
-          conversion_status: 'pending',
-          created_at: new Date(Date.now() - 11 * 24 * 60 * 60 * 1000).toISOString(),
-          file_size: 1900000 // 1.9 MB in bytes
-        }
-      ];
-    }
-
-
-    // Update stats
-    async function updateStats() {
-      document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
-  }
-
   // Setup event listeners
   function setupEventListeners() {
       // Refresh buttons
-      document.getElementById('refresh-oms').addEventListener('click', async () => {
-        console.log('🔄 Manual refresh of OMS forms triggered');
-        await loadOMSCustomizationForms();
-      });
-      document.getElementById('refresh-photos').addEventListener('click', loadMenuPhotos);
+      const refreshCustomizations = document.getElementById('refresh-customizations');
+      if (refreshCustomizations) {
+        refreshCustomizations.addEventListener('click', async () => {
+          console.log('🔄 Manual refresh of product customizations triggered');
+          await loadRealData();
+        });
+      }
+      
+      const refreshPhotos = document.getElementById('refresh-photos');
+      if (refreshPhotos) {
+        refreshPhotos.addEventListener('click', async () => {
+          console.log('🔄 Manual refresh of photos triggered');
+          await loadRealData();
+        });
+      }
+      
+      // Refresh button now uses onclick handler directly
+
+      // Buttons now use onclick handlers directly
 
       // File upload
-      document.getElementById('photo-upload-input').addEventListener('change', handlePhotoUpload);
-      
-      // Add a test button to force load real data
-      const testButton = document.createElement('button');
-      testButton.textContent = 'Test Real Data';
-      testButton.className = 'px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700';
-      testButton.onclick = async () => {
-        console.log('🧪 Testing real data load...');
-        await loadOMSCustomizationForms();
-      };
-      
-      // Add test button to the page
-      const header = document.querySelector('.bg-white.rounded-lg.shadow.p-6');
-      if (header) {
-        header.appendChild(testButton);
+      const photoUploadInput = document.getElementById('photo-upload-input');
+      if (photoUploadInput) {
+        photoUploadInput.addEventListener('change', handlePhotoUpload);
       }
   }
 
@@ -1378,8 +911,7 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
       }
 
         // Reload photos
-        await loadMenuPhotos();
-        await updateStats();
+        await loadRealMenuPhotos();
 
       // Reset file input
       event.target.value = '';
@@ -1393,71 +925,61 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
     }
 
     // Global functions for table actions
-    window.viewOMSForm = async function(formId) {
-      console.log('🔄 Loading OMS form details for:', formId);
+    window.viewCustomization = async function(customizationId) {
+      console.log('🔄 Loading product customization details for:', customizationId);
       
       try {
-        const { data: form, error } = await supabase
-          .from('order_customizations')
+        const { data: customization, error } = await supabase
+          .from('product_customizations')
           .select('*')
-          .eq('id', formId)
+          .eq('id', customizationId)
           .single();
 
         if (error) {
-          console.error('Error loading OMS form details:', error);
-          alert('Error loading form details: ' + error.message);
+          console.error('Error loading product customization details:', error);
+          alert('Error loading customization details: ' + error.message);
           return;
         }
 
-        // Create a detailed modal with the same format as Admin Panel
+        // Create a detailed modal with admin panel styling
         const details = `
-Customization Form Details:
-==========================
+Product Customization Details:
+=============================
 
 Product Information:
 -------------------
-Product Type: Order Menu System
-Product Name: Order Menu System
-Price: ₹${(form.total_amount || 0).toLocaleString('en-IN')}
-Project Name: ${form.project_name || 'Not provided'}
-Restaurant Name: ${form.restaurant_name || 'Not provided'}
-Owner Name: ${form.owner_name || 'Not provided'}
+Product Name: ${customization.product_name || 'Not provided'}
+Project Name: ${customization.project_name || 'Not provided'}
+Status: ${customization.status || 'Not provided'}
+Price: ₹${(customization.price || 0).toLocaleString('en-IN')}
 
-Contact Information:
+Customer Information:
 -------------------
-Email: ${form.email || 'Not provided'}
-Phone: ${form.phone_number || 'Not provided'}
-Contact Person: ${form.contact_person || 'Not provided'}
-Created: ${new Date(form.created_at).toLocaleString()}
-Updated: ${new Date(form.updated_at || form.created_at).toLocaleString()}
+Customer Name: ${customization.customer_name || 'Not provided'}
+Company Name: ${customization.company_name || 'Not provided'}
+Email: ${customization.email || 'Not provided'}
+Phone: ${customization.phone || 'Not provided'}
 
-Address Information:
-------------------
-House/Flat Number: ${form.house_flat_number || 'Not provided'}
-Address: ${form.address_line_1 || 'Not provided'}
-City: ${form.city || 'Not provided'}
-State: ${form.state || 'Not provided'}
-Pincode: ${form.pincode || 'Not provided'}
-Country: ${form.country || 'Not provided'}
+Project Details:
+---------------
+Requirements: ${customization.requirements || 'No requirements provided'}
+Created: ${new Date(customization.created_at).toLocaleString()}
+Updated: ${new Date(customization.updated_at || customization.created_at).toLocaleString()}
 
-Additional Requirements:
------------------------
-${form.additional_requirements || 'No additional requirements provided'}
-
-${form.restaurant_logo_url ? `Restaurant Logo: ${form.restaurant_logo_url}` : ''}
-${form.menu_photos_urls && form.menu_photos_urls.length > 0 ? `Menu Photos: ${form.menu_photos_urls.length} photos uploaded` : ''}
+${customization.notes ? `Notes: ${customization.notes}` : ''}
         `;
         
         alert(details);
       } catch (error) {
-        console.error('Error viewing OMS form details:', error);
-        alert('Error viewing form details: ' + error.message);
+        console.error('Error viewing product customization details:', error);
+        alert('Error viewing customization details: ' + error.message);
       }
     };
 
-    window.processOMSForm = function(formId) {
-      console.log('Process OMS form:', formId);
+    window.processCustomization = function(customizationId) {
+      console.log('Process product customization:', customizationId);
       // Implement process functionality
+      alert('Processing customization: ' + customizationId);
     };
 
     window.viewPhoto = function(photoId) {
@@ -1469,5 +991,12 @@ ${form.menu_photos_urls && form.menu_photos_urls.length > 0 ? `Menu Photos: ${fo
       console.log('Download text for photo:', photoId);
       // Implement download functionality
     };
+    
+    // Force load data immediately when script loads
+    console.log('🔄 Script loaded - Force loading data...');
+    setTimeout(() => {
+      loadDemoDataImmediately();
+    }, 100);
+    
 </script>
-</MenuOperatorLayout>
+</MenuOperatorAdminLayout>
