@@ -324,15 +324,32 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
   let currentUser = null;
   
 
-  // Wait for Supabase to load
+  // Wait for Supabase to load with timeout
   function waitForSupabase() {
     return new Promise((resolve) => {
-      if (window.supabase) {
-        supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-        resolve(supabase);
-    } else {
-        setTimeout(() => waitForSupabase().then(resolve), 100);
-      }
+      let attempts = 0;
+      const maxAttempts = 50; // 5 seconds max wait
+      
+      const checkSupabase = () => {
+        attempts++;
+        if (window.supabase) {
+          try {
+            supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+            console.log('✅ Supabase client initialized successfully');
+            resolve(supabase);
+          } catch (error) {
+            console.error('❌ Error initializing Supabase:', error);
+            resolve(null);
+          }
+        } else if (attempts < maxAttempts) {
+          setTimeout(checkSupabase, 100);
+        } else {
+          console.warn('⚠️ Supabase not available after timeout, continuing with demo data');
+          resolve(null);
+        }
+      };
+      
+      checkSupabase();
     });
   }
 
@@ -341,24 +358,35 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
     console.log('📄 DOM Content Loaded - Starting Menu Operator Dashboard initialization');
     console.log('🔄 UPDATED: Product Customizations Dashboard Loading...');
     
-    // Setup event listeners first
-    setupEventListeners();
-    
-    // Load demo data immediately
+    // Load demo data immediately - this ensures the page is never blank
+    console.log('🔄 Loading demo data immediately...');
     loadDemoDataImmediately();
     
-    // Try to load real data immediately
+    // Setup event listeners immediately
+    setupEventListeners();
+    
+    console.log('✅ Dashboard initialized with demo data - Page is ready!');
+    
+    // Try to load real data in background (non-blocking)
     setTimeout(async () => {
       try {
-        console.log('🔄 Attempting to load real data from Supabase...');
+        console.log('🔄 Attempting to load real data in background...');
         await loadRealData();
+        console.log('✅ Real data loaded successfully');
       } catch (error) {
-        console.error('❌ Error loading real data:', error);
-        console.log('🔄 Keeping static data as fallback');
+        console.warn('⚠️ Could not load real data, continuing with demo data:', error.message);
       }
-    }, 500);
-    
-    console.log('✅ Menu Operator Dashboard initialization completed!');
+    }, 1000); // Wait 1 second before trying real data
+  });
+  
+  // Additional fallback for window load
+  window.addEventListener('load', () => {
+    console.log('🔄 Window loaded - Ensuring dashboard is ready');
+    // Force demo data if page is still loading
+    if (document.getElementById('customizations-table-body').innerHTML.includes('Loading')) {
+      console.log('🔄 Page still loading, forcing demo data');
+      loadDemoDataImmediately();
+    }
   });
   
   // Load demo data immediately
@@ -379,8 +407,13 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
     try {
       console.log('🔄 Loading real data from Supabase...');
       
-      // Wait for Supabase
-      await waitForSupabase();
+      // Wait for Supabase with timeout
+      const supabaseClient = await waitForSupabase();
+      
+      if (!supabaseClient) {
+        console.warn('⚠️ Supabase not available, keeping demo data');
+        return;
+      }
       
       // Load user profile
       await loadUserProfile();
@@ -391,16 +424,26 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
       
       console.log('🔄 Real data fetched - Customizations:', customizations?.length || 0, 'Photos:', photos?.length || 0);
       
-      // Always display real data, even if empty
-      displayProductCustomizations(customizations);
-      displayMenuPhotos(photos);
-      updateStatistics(customizations, photos);
+      // Only update if we have real data
+      if (customizations && customizations.length > 0) {
+        displayProductCustomizations(customizations);
+        console.log('✅ Updated with real customizations data');
+      }
       
-      console.log('✅ Real data loaded and displayed - Customizations:', customizations?.length || 0, 'Photos:', photos?.length || 0);
+      if (photos && photos.length > 0) {
+        displayMenuPhotos(photos);
+        console.log('✅ Updated with real photos data');
+      }
+      
+      if (customizations || photos) {
+        updateStatistics(customizations || [], photos || []);
+        console.log('✅ Real data loaded and displayed successfully!');
+      } else {
+        console.log('ℹ️ No real data found, keeping demo data');
+      }
       
     } catch (error) {
-      console.error('❌ Error loading real data:', error);
-      console.log('🔄 Keeping static data as fallback');
+      console.warn('⚠️ Error loading real data, keeping demo data:', error.message);
     }
   }
   

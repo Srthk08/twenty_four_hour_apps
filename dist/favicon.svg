@@ -1,0 +1,18 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="16" cy="16" r="15" fill="#14b8a6"/>
+  
+  <!-- Simple square with rounded corners -->
+  <rect x="8" y="8" width="16" height="16" 
+        rx="2" ry="2" 
+        fill="white" 
+        stroke="none"/>
+  
+  <!-- Number 24 in the center -->
+  <text x="16" y="20" 
+        font-family="Arial, sans-serif" 
+        font-size="12" 
+        font-weight="bold" 
+        text-anchor="middle" 
+        fill="#14b8a6">24</text>
+</svg>
