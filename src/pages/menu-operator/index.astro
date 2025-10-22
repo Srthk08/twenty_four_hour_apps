@@ -11,12 +11,6 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
           <p class="text-gray-600">Manage all product customizations, track progress, and handle customer requests.</p>
         </div>
         <div class="flex space-x-3">
-          <button onclick="showProductBrowser()" class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-            Browse Products
-          </button>
           <button onclick="window.location.reload()" class="inline-flex items-center px-6 py-3 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
@@ -95,15 +89,15 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
         <div class="bg-white rounded-lg shadow p-6">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-xl font-bold text-gray-900">Product Customizations</h3>
-            <div class="flex items-center space-x-2">
+          <div class="flex items-center space-x-2">
               <input id="search-email" type="text" placeholder="Search by email..." class="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
               <button id="refresh-customizations" class="text-gray-400 hover:text-gray-600 transition-colors" title="Refresh">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                </svg>
-              </button>
-            </div>
-          </div>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+            </button>
+        </div>
+      </div>
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
@@ -117,7 +111,7 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody id="customizations-table-body" class="bg-white divide-y divide-gray-200">
+              <tbody id="customizations-table-body" class="bg-white divide-y divide-gray-200">
             <tr>
               <td colspan="7" class="px-6 py-4 text-center text-gray-500">Loading customizations...</td>
             </tr>
@@ -226,7 +220,7 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
     setupEventListeners();
     
     // Load real data immediately
-    await loadRealData();
+        await loadRealData();
   });
   
   // Additional fallback for window load
@@ -529,7 +523,7 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
       window.__all_customizations = customizations || [];
       displayProductCustomizations(window.__all_customizations);
       displayMenuPhotos(photos || []);
-      updateStatistics(customizations || [], photos || []);
+        updateStatistics(customizations || [], photos || []);
       
     } catch (error) {
       console.warn('⚠️ Error loading real data:', error.message);
@@ -641,7 +635,7 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
         .select('id, created_at, menu_photos_urls')
         .order('created_at', { ascending: false })
         .limit(50);
-
+      
       if (error) {
         console.warn('⚠️ order_customizations select for photos failed:', error.message);
         return [];
@@ -725,6 +719,14 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
       console.warn('REST by id exception:', e);
       return null;
     }
+  }
+
+  // Utility: timeout wrapper
+  function withTimeout(promise, ms) {
+    return Promise.race([
+      promise,
+      new Promise(resolve => setTimeout(() => resolve(null), ms))
+    ]);
   }
   
   // Display product customizations in table (mapped from order_customizations)
@@ -1165,21 +1167,26 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
       try {
         let customization = null;
         let error = null;
-        try {
-          const res = await supabase
-            .from('order_customizations')
-            .select('*')
-            .eq('id', customizationId)
-            .single();
-          customization = res.data;
-          error = res.error;
-        } catch (e) {
-          error = e;
-        }
-
-        // If blocked by RLS or error, fall back to REST by id
-        if (error || !customization) {
-          console.warn('Supabase single() failed, trying REST by id:', error?.message || error);
+        // Run client query and REST fallback concurrently with short timeout for faster UX
+        const clientPromise = (async () => {
+          try {
+            const res = await supabase
+              .from('order_customizations')
+          .select('*')
+          .eq('id', customizationId)
+          .single();
+            return res.data || null;
+          } catch {
+            return null;
+          }
+        })();
+        const restPromise = restSelectById('order_customizations', customizationId);
+        customization = await withTimeout(Promise.any([
+          clientPromise,
+          restPromise
+        ]), 2500);
+        if (!customization) {
+          // If Promise.any returned nulls or timed out, try REST directly once more
           customization = await restSelectById('order_customizations', customizationId);
         }
 
@@ -1202,6 +1209,16 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
           const state = customization.state || '';
           const pincode = customization.pincode || '';
           const country = customization.country || '';
+
+          // Robust restaurant name resolution
+          const restaurantName = (
+            customization.restaurant_name ||
+            customization.restaurantName ||
+            customization.restaurant ||
+            customization.restaurant_title ||
+            customization.project_name ||
+            ''
+          );
 
           // Photos
           let photos = customization.menu_photos_urls || [];
@@ -1238,8 +1255,12 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
                   }">${customization.status || 'pending'}</div>
                 </div>
                 <div>
-                  <h4 class="text-sm font-medium text-gray-500 mb-1">Project / Restaurant</h4>
-                  <p class="text-gray-900">${customization.project_name || customization.restaurant_name || 'Not provided'}</p>
+                  <h4 class="text-sm font-medium text-gray-500 mb-1">Project Name</h4>
+                  <p class="text-gray-900">${customization.project_name || 'Not provided'}</p>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-500 mb-1">Restaurant Name</h4>
+                  <p class="text-gray-900">${restaurantName || 'Not provided'}</p>
                 </div>
                 <div>
                   <h4 class="text-sm font-medium text-gray-500 mb-1">Amounts</h4>
@@ -1310,7 +1331,10 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
                 <div id="ai-conversion-result" class="mt-4 hidden">
                   <div class="flex items-center justify-between mb-2">
                     <h5 class="text-sm font-semibold text-gray-900">Extracted Menu Text</h5>
-                    <button type="button" onclick="copyAIText()" class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200">Copy</button>
+                    <div id="ai-action-buttons" class="space-x-2 hidden">
+                      <button type="button" onclick="copyAIText()" class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200">Copy</button>
+                      <button type="button" onclick="clearAIText()" class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200" title="Clear">Clear</button>
+                    </div>
                   </div>
                   <pre id="ai-conversion-text" class="w-full p-3 border border-gray-300 rounded-md text-sm whitespace-pre-wrap bg-gray-50"></pre>
                   <div id="ai-conversion-status" class="mt-2 text-xs text-gray-500"></div>
@@ -1348,6 +1372,8 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
         if (resultWrap) resultWrap.classList.remove('hidden');
         if (status) status.textContent = 'Converting images to text, please wait...';
         if (resultArea) resultArea.textContent = '';
+        const actionBtns = document.getElementById('ai-action-buttons');
+        if (actionBtns) actionBtns.classList.add('hidden');
 
         // Collect visible image URLs from the modal photos grid
         const photosGrid = document.getElementById('photos-grid');
@@ -1371,9 +1397,10 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
           });
         }
 
-        let combined = '';
+        const sections = [];
         let processed = 0;
-        for (const url of urls) {
+        for (let idx = 0; idx < urls.length; idx++) {
+          const url = urls[idx];
           try {
             // Bypass CORS by drawing to canvas
             const img = new Image();
@@ -1411,7 +1438,14 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
 
             const { data: { text } } = await window.Tesseract.recognize(dataUrl, 'eng');
             if (text && text.trim()) {
-              combined += (combined ? '\n\n' : '') + text.trim();
+              // Normalize: split into lines, trim, remove empties, convert to bullet points
+              const lines = text
+                .replace(/\r\n/g, '\n')
+                .split('\n')
+                .map(l => l.trim())
+                .filter(l => l.length > 0);
+              const bullets = lines.map(l => `• ${l}`).join('\n');
+              sections.push(`Image ${idx + 1}\n${bullets}`);
             }
           } catch (imgErr) {
             console.warn('OCR failed for image:', url, imgErr);
@@ -1420,11 +1454,13 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
           if (status) status.textContent = `Processed ${processed}/${urls.length} image(s)`;
         }
 
-        if (!combined) {
-          combined = 'No text detected. Try clearer photos or higher contrast images.';
-        }
+        const combined = sections.length
+          ? sections.join('\n\n')
+          : 'No text detected. Try clearer photos or higher contrast images.';
 
         if (resultArea) resultArea.textContent = combined;
+        const actionBtns2 = document.getElementById('ai-action-buttons');
+        if (actionBtns2 && combined && combined.trim()) actionBtns2.classList.remove('hidden');
         if (status) status.textContent = 'Done';
       } catch (e) {
         console.error('AI conversion error:', e);
@@ -1445,6 +1481,15 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
       sel.addRange(range);
       try { document.execCommand('copy'); } catch {}
       sel.removeAllRanges();
+    };
+
+    window.clearAIText = function() {
+      const el = document.getElementById('ai-conversion-text');
+      const status = document.getElementById('ai-conversion-status');
+      if (el) el.textContent = '';
+      if (status) status.textContent = '';
+      const actionBtns = document.getElementById('ai-action-buttons');
+      if (actionBtns) actionBtns.classList.add('hidden');
     };
 
     window.processCustomization = function(customizationId) {

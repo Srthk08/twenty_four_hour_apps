@@ -1415,6 +1415,30 @@ import { supabase } from '../../lib/supabase';
 
       // Populate the details content
       const detailsContent = document.getElementById('customization-details-content');
+      // Build images HTML (logo + menu photos)
+      let photos = customization.menu_photos_urls || [];
+      try { if (typeof photos === 'string') photos = JSON.parse(photos); } catch {}
+      // If photos empty but logo exists, treat logo as a photo (fallback)
+      const logoUrlSource = customization.restaurant_logo_url || customization.logo_url || '';
+      let movedLogoIntoPhotos = false;
+      if ((!Array.isArray(photos) || photos.length === 0) && logoUrlSource) {
+        photos = [{ url: logoUrlSource, filename: 'restaurant-logo' }];
+        movedLogoIntoPhotos = true;
+      }
+      const photosHtml = Array.isArray(photos) && photos.length
+        ? `<div class="grid grid-cols-3 sm:grid-cols-4 gap-3">${photos.map(p => `
+            <a href="${p.url || p.publicUrl}" target="_blank" class="block">
+              <img src="${p.url || p.publicUrl}" crossorigin="anonymous" alt="${p.filename || 'menu photo'}" class="w-20 h-20 object-cover rounded border"/>
+              <p class="mt-1 text-xs text-gray-500 truncate">${p.filename || ''}</p>
+            </a>
+          `).join('')}</div>`
+        : '<p class="text-gray-500">No menu photos uploaded</p>';
+      const hasPhotos = Array.isArray(photos) && photos.length > 0;
+      const logoOnly = (!!customization.restaurant_logo_url || !!customization.logo_url) && !hasPhotos && !movedLogoIntoPhotos;
+      const logoHtml = logoOnly
+        ? `<img src="${customization.restaurant_logo_url || customization.logo_url}" alt="Restaurant Logo" class="w-20 h-20 object-cover rounded border"/>`
+        : '';
+
       detailsContent.innerHTML = `
         <div class="bg-white rounded-lg shadow p-6">
           <h4 class="text-xl font-bold text-gray-900 mb-6">Customization Form Details</h4>
@@ -1454,6 +1478,23 @@ import { supabase } from '../../lib/supabase';
             </div>
           </div>
           
+          <!-- Images Section -->
+          <div class="bg-gray-50 p-4 rounded-lg mb-4">
+            <h5 class="text-lg font-semibold text-gray-900 mb-3">Images</h5>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              ${logoOnly ? `
+              <div>
+                <p class="text-sm font-bold text-gray-600 mb-2">Restaurant Logo</p>
+                ${logoHtml || '<span class="text-gray-500">Not uploaded</span>'}
+              </div>
+              ` : ''}
+              <div>
+                <p class="text-sm font-bold text-gray-600 mb-2">Menu Photos</p>
+                ${photosHtml}
+              </div>
+            </div>
+          </div>
+
           <!-- Contact Information Section -->
           <div class="bg-gray-50 p-4 rounded-lg mb-4">
             <h5 class="text-lg font-semibold text-gray-900 mb-3">Contact Information</h5>
@@ -1547,22 +1588,7 @@ import { supabase } from '../../lib/supabase';
           </div>
           ` : ''}
           
-          <!-- Menu Photos Section -->
-          ${customization.menu_photos_urls && customization.menu_photos_urls.length > 0 ? `
-          <div class="bg-gray-50 p-4 rounded-lg">
-            <h5 class="text-lg font-semibold text-gray-900 mb-3">Menu Photos (${customization.menu_photos_urls.length} photos)</h5>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-              ${customization.menu_photos_urls.slice(0, 8).map(photoUrl => `
-                <img src="${photoUrl}" alt="Menu Photo" class="h-20 w-20 object-cover border rounded">
-              `).join('')}
-              ${customization.menu_photos_urls.length > 8 ? `
-                <div class="h-20 w-20 border rounded flex items-center justify-center bg-gray-100">
-                  <span class="text-xs text-gray-500">+${customization.menu_photos_urls.length - 8} more</span>
-                </div>
-              ` : ''}
-            </div>
-          </div>
-          ` : ''}
+          
         </div>
       `;
     } catch (error) {

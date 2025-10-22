@@ -1313,6 +1313,33 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         return;
       }
 
+      // Prepare images (logo + menu photos)
+      let photos = customization.menu_photos_urls || [];
+      try {
+        if (typeof photos === 'string') photos = JSON.parse(photos);
+      } catch {}
+      // If photos are missing but logo exists (common mis-save), treat logo as a photo
+      const logoUrlSource = customization.logo_url || customization.restaurant_logo_url || '';
+      let movedLogoIntoPhotos = false;
+      if ((!Array.isArray(photos) || photos.length === 0) && logoUrlSource) {
+        photos = [{ url: logoUrlSource, filename: 'restaurant-logo' }];
+        movedLogoIntoPhotos = true;
+      }
+      const photosHtml = Array.isArray(photos) && photos.length
+        ? `<div class="grid grid-cols-3 sm:grid-cols-4 gap-3">${photos.map(p => `
+            <a href="${p.url || p.publicUrl}" target="_blank" class="block">
+              <img src="${p.url || p.publicUrl}" crossorigin="anonymous" alt="${p.filename || 'menu photo'}" class="w-20 h-20 object-cover rounded border"/>
+              <p class="mt-1 text-xs text-gray-500 truncate">${p.filename || ''}</p>
+            </a>
+          `).join('')}</div>`
+        : '<p class="text-gray-500">No menu photos uploaded</p>';
+
+      const hasPhotos = Array.isArray(photos) && photos.length > 0;
+      const logoOnly = (!!customization.logo_url || !!customization.restaurant_logo_url) && !hasPhotos && !movedLogoIntoPhotos;
+      const logoHtml = logoOnly
+        ? `<img src="${customization.logo_url || customization.restaurant_logo_url}" alt="Restaurant Logo" class="w-20 h-20 object-cover rounded border"/>`
+        : '';
+
       modalTitle.textContent = 'Customization Details';
       modalContent.innerHTML = `
         <div class="space-y-4">
@@ -1343,6 +1370,25 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             </div>
           </div>
           
+          <!-- Images Section -->
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h4 class="text-lg font-semibold text-gray-900 mb-3">Images</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              ${logoOnly ? `
+              <div>
+                <p class="text-sm font-medium text-gray-600 mb-2">Restaurant Logo</p>
+                ${logoHtml || '<span class="text-gray-500">Not uploaded</span>'}
+              </div>
+              ` : ''}
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <p class="text-sm font-medium text-gray-600">Menu Photos</p>
+                </div>
+                ${photosHtml}
+              </div>
+            </div>
+          </div>
+
           <!-- Contact Information Section -->
           <div class="bg-gray-50 p-4 rounded-lg">
             <h4 class="text-lg font-semibold text-gray-900 mb-3">Contact Information</h4>
