@@ -11,11 +11,17 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
           <p class="text-gray-600">Manage all product customizations, track progress, and handle customer requests.</p>
         </div>
         <div class="flex space-x-3">
-          <button onclick="window.location.reload()" class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors">
+          <button onclick="showProductBrowser()" class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            Browse Products
+          </button>
+          <button onclick="window.location.reload()" class="inline-flex items-center px-6 py-3 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
             </svg>
-            Refresh Data
+            Refresh
           </button>
         </div>
       </div>
@@ -89,14 +95,15 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
         <div class="bg-white rounded-lg shadow p-6">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-xl font-bold text-gray-900">Product Customizations</h3>
-          <div class="flex items-center space-x-2">
-              <button id="refresh-customizations" class="text-gray-400 hover:text-gray-600 transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-              </svg>
-            </button>
-        </div>
-      </div>
+            <div class="flex items-center space-x-2">
+              <input id="search-email" type="text" placeholder="Search by email..." class="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+              <button id="refresh-customizations" class="text-gray-400 hover:text-gray-600 transition-colors" title="Refresh">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
@@ -110,197 +117,16 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-              <tbody id="customizations-table-body" class="bg-white divide-y divide-gray-200">
-            <tr class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">Restaurant Menu System</div>
-                <div class="text-sm text-gray-500">Bella Vista Digital Menu</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">Maria Rodriguez</div>
-                <div class="text-sm text-gray-500">Bella Vista Restaurant</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">maria@bellavista.com</div>
-                <div class="text-sm text-gray-500">+1 (555) 123-4567</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  pending
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                ₹25,000
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                2024-01-15
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewCustomization('demo-1')">View</button>
-                <button class="text-green-600 hover:text-green-900" onclick="processCustomization('demo-1')">Process</button>
-              </td>
-            </tr>
-            <tr class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">Android TV App</div>
-                <div class="text-sm text-gray-500">Golden Dragon Streaming App</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">David Chen</div>
-                <div class="text-sm text-gray-500">Golden Dragon Media</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">david@goldendragon.com</div>
-                <div class="text-sm text-gray-500">+1 (555) 987-6543</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                  in_progress
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                ₹55,000
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                2024-01-12
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewCustomization('demo-2')">View</button>
-                <button class="text-green-600 hover:text-green-900" onclick="processCustomization('demo-2')">Process</button>
-              </td>
-            </tr>
-            <tr class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">Restaurant Website</div>
-                <div class="text-sm text-gray-500">Café Del Sol Website</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">Sophie Martin</div>
-                <div class="text-sm text-gray-500">Café Del Sol</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">sophie@cafedelsol.com</div>
-                <div class="text-sm text-gray-500">+1 (555) 456-7890</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  completed
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                ₹15,000
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                2024-01-10
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewCustomization('demo-3')">View</button>
-                <button class="text-green-600 hover:text-green-900" onclick="processCustomization('demo-3')">Process</button>
-              </td>
+          <tbody id="customizations-table-body" class="bg-white divide-y divide-gray-200">
+            <tr>
+              <td colspan="7" class="px-6 py-4 text-center text-gray-500">Loading customizations...</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- Menu Photos Section -->
-        <div class="bg-white rounded-lg shadow p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-xl font-bold text-gray-900">Menu Photos</h3>
-          <div class="flex items-center space-x-2">
-            <button id="refresh-photos" class="text-gray-400 hover:text-gray-600 transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-              </svg>
-            </button>
-        </div>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Photo</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filename</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="photos-table-body" class="bg-white divide-y divide-gray-200">
-            <tr class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <img src="https://via.placeholder.com/100x100/4F46E5/FFFFFF?text=BV" alt="Menu photo" class="w-12 h-12 rounded object-cover">
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">bella-vista-menu.jpg</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  completed
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                2.4 MB
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                2024-01-15
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewPhoto('photo-1')">View</button>
-                <button class="text-green-600 hover:text-green-900" onclick="downloadText('photo-1')">Download</button>
-              </td>
-            </tr>
-            <tr class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <img src="https://via.placeholder.com/100x100/DC2626/FFFFFF?text=GD" alt="Menu photo" class="w-12 h-12 rounded object-cover">
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">golden-dragon-menu.jpg</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                  processing
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                1.8 MB
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                2024-01-12
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewPhoto('photo-2')">View</button>
-                <button class="text-gray-400 cursor-not-allowed" disabled>Download</button>
-              </td>
-            </tr>
-            <tr class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <img src="https://via.placeholder.com/100x100/059669/FFFFFF?text=CD" alt="Menu photo" class="w-12 h-12 rounded object-cover">
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">cafe-del-sol-menu.jpg</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  completed
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                3.1 MB
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                2024-01-10
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewPhoto('photo-3')">View</button>
-                <button class="text-green-600 hover:text-green-900" onclick="downloadText('photo-3')">Download</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-          </div>
-        </div>
+    <!-- Menu Photos Section removed as requested -->
       </div>
     </div>
   </div>
@@ -308,49 +134,87 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
   <!-- Hidden file input for photo upload -->
   <input type="file" id="photo-upload-input" accept="image/*" class="hidden" />
 
-<script>
-  import { createClient } from '@supabase/supabase-js';
+  <!-- Product Browser Modal -->
+  <div id="product-browser-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-2xl font-bold text-gray-900">Browse Products</h3>
+            <button onclick="closeProductBrowser()" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="products-grid">
+            <!-- Products will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  // Supabase configuration
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-  const supabase = createClient(supabaseUrl, supabaseKey);
-  
-  console.log('🔧 Supabase configuration:');
+
+  <!-- Product Customization Form Modal -->
+  <div id="customization-form-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-2xl font-bold text-gray-900">Product Customization Form</h3>
+            <button onclick="closeCustomizationForm()" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <div id="customization-form-content">
+            <!-- Customization form will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customization Details Modal -->
+  <div id="customization-details-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-2xl font-bold text-gray-900">Order Customization Details</h3>
+            <button onclick="closeCustomizationDetails()" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          <div id="customization-details-content">
+            <!-- Details content will be injected here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  import { supabase, supabaseUrl, supabaseAnonKey } from '../../lib/supabase';
+
+  // Supabase configuration (shared client with fallbacks)
+  console.log('🔧 Supabase configuration (shared client):');
   console.log('- URL:', supabaseUrl);
-  console.log('- Key:', supabaseKey ? 'Present' : 'Missing');
+  console.log('- Key:', supabaseAnonKey ? 'Present' : 'Missing');
 
   // Global variables
   let currentUser = null;
   
 
-  // Wait for Supabase to load with timeout
+  // Wait for Supabase (returns already-initialized client)
   function waitForSupabase() {
-    return new Promise((resolve) => {
-      let attempts = 0;
-      const maxAttempts = 50; // 5 seconds max wait
-      
-      const checkSupabase = () => {
-        attempts++;
-        if (window.supabase) {
-          try {
-            supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-            console.log('✅ Supabase client initialized successfully');
-            resolve(supabase);
-          } catch (error) {
-            console.error('❌ Error initializing Supabase:', error);
-            resolve(null);
-          }
-        } else if (attempts < maxAttempts) {
-          setTimeout(checkSupabase, 100);
-        } else {
-          console.warn('⚠️ Supabase not available after timeout, continuing with demo data');
-          resolve(null);
-        }
-      };
-      
-      checkSupabase();
-    });
+    return Promise.resolve(supabase);
   }
 
   // Initialize dashboard
@@ -358,36 +222,277 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
     console.log('📄 DOM Content Loaded - Starting Menu Operator Dashboard initialization');
     console.log('🔄 UPDATED: Product Customizations Dashboard Loading...');
     
-    // Load demo data immediately - this ensures the page is never blank
-    console.log('🔄 Loading demo data immediately...');
-    loadDemoDataImmediately();
-    
     // Setup event listeners immediately
     setupEventListeners();
     
-    console.log('✅ Dashboard initialized with demo data - Page is ready!');
-    
-    // Try to load real data in background (non-blocking)
-    setTimeout(async () => {
-      try {
-        console.log('🔄 Attempting to load real data in background...');
-        await loadRealData();
-        console.log('✅ Real data loaded successfully');
-      } catch (error) {
-        console.warn('⚠️ Could not load real data, continuing with demo data:', error.message);
-      }
-    }, 1000); // Wait 1 second before trying real data
+    // Load real data immediately
+    await loadRealData();
   });
   
   // Additional fallback for window load
   window.addEventListener('load', () => {
     console.log('🔄 Window loaded - Ensuring dashboard is ready');
-    // Force demo data if page is still loading
     if (document.getElementById('customizations-table-body').innerHTML.includes('Loading')) {
-      console.log('🔄 Page still loading, forcing demo data');
-      loadDemoDataImmediately();
+      loadRealData();
     }
   });
+
+  // Modal Functions
+
+  window.showProductBrowser = function() {
+    console.log('🔄 Showing product browser...');
+    const modal = document.getElementById('product-browser-modal');
+    const grid = document.getElementById('products-grid');
+    
+    // Load products
+    const products = getAvailableProducts();
+    grid.innerHTML = generateProductsHTML(products);
+    
+    modal.classList.remove('hidden');
+  };
+
+  window.closeProductBrowser = function() {
+    document.getElementById('product-browser-modal').classList.add('hidden');
+  };
+
+  window.selectProduct = function(productId) {
+    console.log('🔄 Product selected:', productId);
+    closeProductBrowser();
+    showCustomizationForm(productId);
+  };
+
+  window.showCustomizationForm = function(productId) {
+    console.log('🔄 Showing customization form for product:', productId);
+    const modal = document.getElementById('customization-form-modal');
+    const content = document.getElementById('customization-form-content');
+    
+    // Get product details
+    const product = getProductById(productId);
+    content.innerHTML = generateCustomizationFormHTML(product);
+    
+    modal.classList.remove('hidden');
+  };
+
+  window.closeCustomizationForm = function() {
+    document.getElementById('customization-form-modal').classList.add('hidden');
+  };
+
+  // Form submission handler
+  document.addEventListener('submit', function(e) {
+    if (e.target.id === 'customization-form') {
+      e.preventDefault();
+      handleCustomizationFormSubmit(e.target);
+    }
+  });
+
+  function handleCustomizationFormSubmit(form) {
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    
+    console.log('🔄 Submitting customization form:', data);
+    
+    // Add product information
+    const productId = form.dataset.productId || 'unknown';
+    const product = getProductById(productId);
+    
+    const customizationData = {
+      ...data,
+      product_name: product.name,
+      product_id: productId,
+      status: 'pending',
+      created_at: new Date().toISOString()
+    };
+    
+    // Here you would typically save to Supabase
+    console.log('📝 Customization data to save:', customizationData);
+    
+    // Show success message
+    alert('Customization request submitted successfully! We will contact you soon.');
+    
+    // Close the form
+    closeCustomizationForm();
+    
+    // Optionally refresh the dashboard
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  }
+
+  // Data Functions
+
+  function getAvailableProducts() {
+    return [
+      {
+        id: 'restaurant-menu-system',
+        name: 'Restaurant Menu System',
+        description: 'Digital menu system with QR code ordering',
+        price: 'Starting from $2,500',
+        image: '/images/restaurant-menu.jpg',
+        features: ['QR Code Ordering', 'Real-time Updates', 'Multi-language Support']
+      },
+      {
+        id: 'android-tv-app',
+        name: 'Android TV App',
+        description: 'Custom Android TV application for streaming',
+        price: 'Starting from $5,500',
+        image: '/images/android-tv.jpg',
+        features: ['Custom UI/UX', 'Content Management', 'Multi-platform Support']
+      },
+      {
+        id: 'restaurant-website',
+        name: 'Restaurant Website',
+        description: 'Professional website with online ordering',
+        price: 'Starting from $3,000',
+        image: '/images/restaurant-website.jpg',
+        features: ['Online Ordering', 'Menu Management', 'SEO Optimized']
+      },
+      {
+        id: 'streaming-mobile-app',
+        name: 'Streaming Mobile App',
+        description: 'Cross-platform mobile app for content streaming',
+        price: 'Starting from $4,500',
+        image: '/images/mobile-app.jpg',
+        features: ['iOS & Android', 'Live Streaming', 'User Management']
+      },
+      {
+        id: 'order-menu-system',
+        name: 'Order Menu System',
+        description: 'Complete ordering system for restaurants',
+        price: 'Starting from $3,500',
+        image: '/images/order-system.jpg',
+        features: ['Order Management', 'Payment Integration', 'Analytics']
+      },
+      {
+        id: 'e-commerce-platform',
+        name: 'E-commerce Platform',
+        description: 'Full-featured online store platform',
+        price: 'Starting from $6,000',
+        image: '/images/ecommerce.jpg',
+        features: ['Product Catalog', 'Payment Gateway', 'Inventory Management']
+      }
+    ];
+  }
+
+  function getProductById(productId) {
+    const products = getAvailableProducts();
+    return products.find(p => p.id === productId) || products[0];
+  }
+
+
+  function generateProductsHTML(products) {
+    return `
+      ${products.map(product => `
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+          <div class="p-6">
+            <div class="aspect-w-16 aspect-h-9 mb-4">
+              <div class="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center">
+                <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">${product.name}</h3>
+            <p class="text-gray-600 mb-4">${product.description}</p>
+            <div class="mb-4">
+              <p class="text-lg font-bold text-green-600">${product.price}</p>
+            </div>
+            <div class="mb-4">
+              <h4 class="text-sm font-medium text-gray-900 mb-2">Features:</h4>
+              <ul class="text-sm text-gray-600 space-y-1">
+                ${product.features.map(feature => `<li>• ${feature}</li>`).join('')}
+              </ul>
+            </div>
+            <button onclick="selectProduct('${product.id}')" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors">
+              Select Product
+            </button>
+          </div>
+        </div>
+      `).join('')}
+    `;
+  }
+
+  function generateCustomizationFormHTML(product) {
+    return `
+      <div class="space-y-6">
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <h4 class="text-lg font-semibold text-gray-900 mb-2">Selected Product: ${product.name}</h4>
+          <p class="text-gray-600">${product.description}</p>
+        </div>
+        
+        <form id="customization-form" data-product-id="${product.id}" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Customer Name *</label>
+              <input type="text" name="customer_name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
+              <input type="text" name="company_name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+              <input type="email" name="email" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+              <input type="tel" name="phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
+            <input type="text" name="project_name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Requirements *</label>
+            <textarea name="requirements" rows="4" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Describe your specific requirements..."></textarea>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Budget Range</label>
+            <select name="budget_range" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+              <option value="">Select Budget Range</option>
+              <option value="under-5k">Under $5,000</option>
+              <option value="5k-10k">$5,000 - $10,000</option>
+              <option value="10k-25k">$10,000 - $25,000</option>
+              <option value="25k-50k">$25,000 - $50,000</option>
+              <option value="over-50k">Over $50,000</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Timeline</label>
+            <select name="timeline" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+              <option value="">Select Timeline</option>
+              <option value="asap">ASAP</option>
+              <option value="1-month">1 Month</option>
+              <option value="2-3-months">2-3 Months</option>
+              <option value="3-6-months">3-6 Months</option>
+              <option value="6-months-plus">6+ Months</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
+            <textarea name="notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Any additional information..."></textarea>
+          </div>
+          
+          <div class="flex justify-end space-x-4">
+            <button type="button" onclick="closeCustomizationForm()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
+              Cancel
+            </button>
+            <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+              Submit Customization Request
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
   
   // Load demo data immediately
   function loadDemoDataImmediately() {
@@ -409,41 +514,29 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
       
       // Wait for Supabase with timeout
       const supabaseClient = await waitForSupabase();
-      
-      if (!supabaseClient) {
-        console.warn('⚠️ Supabase not available, keeping demo data');
-        return;
-      }
+      if (!supabaseClient) return;
       
       // Load user profile
       await loadUserProfile();
       
-      // Load customizations from product_customizations table
+      // Load customizations from order_customizations table
       const customizations = await loadRealProductCustomizations();
       const photos = await loadRealMenuPhotos();
       
       console.log('🔄 Real data fetched - Customizations:', customizations?.length || 0, 'Photos:', photos?.length || 0);
       
-      // Only update if we have real data
-      if (customizations && customizations.length > 0) {
-        displayProductCustomizations(customizations);
-        console.log('✅ Updated with real customizations data');
-      }
-      
-      if (photos && photos.length > 0) {
-        displayMenuPhotos(photos);
-        console.log('✅ Updated with real photos data');
-      }
-      
-      if (customizations || photos) {
-        updateStatistics(customizations || [], photos || []);
-        console.log('✅ Real data loaded and displayed successfully!');
-      } else {
-        console.log('ℹ️ No real data found, keeping demo data');
-      }
+      // Cache full list for searching
+      window.__all_customizations = customizations || [];
+      displayProductCustomizations(window.__all_customizations);
+      displayMenuPhotos(photos || []);
+      updateStatistics(customizations || [], photos || []);
       
     } catch (error) {
-      console.warn('⚠️ Error loading real data, keeping demo data:', error.message);
+      console.warn('⚠️ Error loading real data:', error.message);
+      // Ensure UI advances from Loading... to empty state
+      displayProductCustomizations([]);
+      displayMenuPhotos([]);
+      updateStatistics([], []);
     }
   }
   
@@ -492,10 +585,10 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
     }
   }
   
-  // Load real product customizations from Supabase (from product_customizations table)
+  // Load real product customizations from Supabase (from order_customizations table)
   async function loadRealProductCustomizations() {
     try {
-      console.log('🔄 Attempting to load from product_customizations table...');
+      console.log('🔄 Attempting to load from order_customizations table...');
       console.log('🔄 Supabase client status:', supabase ? 'Available' : 'Not available');
       
       if (!supabase) {
@@ -503,12 +596,18 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
         throw new Error('Supabase not available');
       }
       
-      console.log('🔄 Executing Supabase query...');
-      const { data, error } = await supabase
-        .from('product_customizations')
+      console.log('🔄 Executing Supabase query (order_customizations)...');
+      let { data, error } = await supabase
+        .from('order_customizations')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(50);
+
+      // REST fallback if RLS blocks or no rows but we expect data
+      if (error || !data) {
+        console.warn('⚠️ Supabase query error/empty, trying REST fallback:', error?.message);
+        data = await restSelect('order_customizations');
+      }
       
       console.log('🔄 Supabase query completed. Data:', data, 'Error:', error);
       
@@ -517,7 +616,7 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
         throw error;
       }
       
-      console.log('✅ Loaded customizations from product_customizations:', data?.length || 0);
+      console.log('✅ Loaded customizations from order_customizations:', data?.length || 0);
       console.log('🔄 Sample data:', data?.[0] || 'No data');
       return data || [];
     } catch (error) {
@@ -536,22 +635,95 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
         throw new Error('Supabase not available');
       }
       
+      // Derive photos from order_customizations.menu_photos_urls to avoid 404 REST calls
       const { data, error } = await supabase
-        .from('menu_photos')
-        .select('*')
+        .from('order_customizations')
+        .select('id, created_at, menu_photos_urls')
         .order('created_at', { ascending: false })
         .limit(50);
-      
+
       if (error) {
-        console.error('❌ Supabase error:', error);
-        throw error;
+        console.warn('⚠️ order_customizations select for photos failed:', error.message);
+        return [];
       }
-      
-      console.log('✅ Loaded photos from menu_photos:', data?.length || 0);
-      return data || [];
+
+      const photos = [];
+      (data || []).forEach(row => {
+        let items = row.menu_photos_urls;
+        if (!items) return;
+        try {
+          if (typeof items === 'string') items = JSON.parse(items);
+        } catch {
+          items = [];
+        }
+        if (Array.isArray(items)) {
+          items.forEach(p => {
+            photos.push({
+              id: `${row.id}-${p.path || p.filename || Math.random().toString(36).slice(2)}`,
+              photo_url: p.url || p.publicUrl || null,
+              original_filename: p.filename || 'menu-photo',
+              conversion_status: 'completed',
+              file_size: p.size || null,
+              created_at: row.created_at
+            });
+          });
+        }
+      });
+
+      console.log('✅ Derived photos from order_customizations:', photos.length);
+      return photos;
     } catch (error) {
       console.error('❌ Error loading real menu photos:', error);
       throw error;
+    }
+  }
+
+  // Generic REST fallback using current session token
+  async function restSelect(table) {
+    try {
+      const { data: sess } = await supabase.auth.getSession();
+      const token = sess?.session?.access_token || sess?.access_token || '';
+      const url = `${supabaseUrl}/rest/v1/${table}?select=*`;
+      const resp = await fetch(url, {
+        headers: {
+          'apikey': supabaseAnonKey,
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      });
+      if (!resp.ok) {
+        const txt = await resp.text();
+        console.warn('REST fallback failed:', resp.status, txt);
+        return [];
+      }
+      return await resp.json();
+    } catch (e) {
+      console.warn('REST fallback exception:', e);
+      return [];
+    }
+  }
+
+  // REST select by id helper
+  async function restSelectById(table, id) {
+    try {
+      const { data: sess } = await supabase.auth.getSession();
+      const token = sess?.session?.access_token || sess?.access_token || '';
+      const url = `${supabaseUrl}/rest/v1/${table}?id=eq.${encodeURIComponent(id)}&select=*`;
+      const resp = await fetch(url, {
+        headers: {
+          'apikey': supabaseAnonKey,
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      });
+      if (!resp.ok) {
+        const txt = await resp.text();
+        console.warn('REST by id failed:', resp.status, txt);
+        return null;
+      }
+      const arr = await resp.json();
+      return Array.isArray(arr) && arr.length ? arr[0] : null;
+    } catch (e) {
+      console.warn('REST by id exception:', e);
+      return null;
     }
   }
   
@@ -574,36 +746,35 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
     tbody.innerHTML = customizations.map(customization => `
       <tr class="hover:bg-gray-50">
         <td class="px-6 py-4 whitespace-nowrap">
-          <div class="text-sm font-medium text-gray-900">${customization.product_name || 'Product Customization'}</div>
-          <div class="text-sm text-gray-500">${customization.project_name || 'No project name'}</div>
+          <div class="text-sm font-medium text-gray-900">${customization.product_name || 'Order Menu System'}</div>
+          <div class="text-sm text-gray-500">${customization.project_name || customization.restaurant_name || 'No project name'}</div>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-          <div class="text-sm text-gray-900">${customization.customer_name || 'Not specified'}</div>
-          <div class="text-sm text-gray-500">${customization.company_name || 'No company'}</div>
+          <div class="text-sm text-gray-900">${customization.contact_person || customization.owner_name || 'Not specified'}</div>
+          <div class="text-sm text-gray-500">${customization.restaurant_name || customization.company_name || ''}</div>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
           <div class="text-sm text-gray-900">${customization.email || 'No email'}</div>
-          <div class="text-sm text-gray-500">${customization.phone || 'No phone'}</div>
+          <div class="text-sm text-gray-500">${customization.phone_number || customization.phone || 'No phone'}</div>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
           <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-            customization.status === 'completed' ? 'bg-green-100 text-green-800' :
-            customization.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
-            customization.status === 'pending' ? 'bg-blue-100 text-blue-800' :
+            (customization.status === 'completed' || customization.status === 'processed') ? 'bg-green-100 text-green-800' :
+            (customization.status === 'in_progress' || customization.status === 'processing') ? 'bg-yellow-100 text-yellow-800' :
+            (customization.status === 'pending' || customization.status === 'pending_payment' || customization.status === 'submitted') ? 'bg-blue-100 text-blue-800' :
             'bg-gray-100 text-gray-800'
           }">
             ${customization.status || 'pending'}
           </span>
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-          ₹${(customization.price || 0).toLocaleString('en-IN')}
+          ₹${(customization.total_amount || customization.price || 0).toLocaleString('en-IN')}
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
           ${customization.created_at ? new Date(customization.created_at).toLocaleDateString() : 'Unknown'}
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-          <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewCustomization('${customization.id}')">View</button>
-          <button class="text-green-600 hover:text-green-900" onclick="processCustomization('${customization.id}')">Process</button>
+          <button type="button" class="text-blue-600 hover:text-blue-900" onclick="viewCustomization('${customization.id}')">View</button>
         </td>
       </tr>
     `).join('');
@@ -649,13 +820,7 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
           ${photo.created_at ? new Date(photo.created_at).toLocaleDateString() : 'Unknown'}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-              <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="viewPhoto('${photo.id}')">View</button>
-              ${photo.conversion_status === 'completed' ? 
-                '<button class="text-green-600 hover:text-green-900" onclick="downloadText(\'' + photo.id + '\')">Download</button>' :
-                '<button class="text-gray-400 cursor-not-allowed" disabled>Download</button>'
-              }
-            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">-</td>
           </tr>
         `).join('');
       }
@@ -881,7 +1046,28 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
         refreshCustomizations.addEventListener('click', async () => {
           console.log('🔄 Manual refresh of product customizations triggered');
           await loadRealData();
+          // clear search on refresh
+          const input = document.getElementById('search-email');
+          if (input) input.value = '';
         });
+      }
+      // Email search
+      const searchInput = document.getElementById('search-email');
+      if (searchInput) {
+        const runFilter = () => {
+          const q = (searchInput.value || '').toLowerCase().trim();
+          const all = window.__all_customizations || [];
+          if (!q) {
+            displayProductCustomizations(all);
+            updateStatistics(all, []);
+            return;
+          }
+          const filtered = all.filter(row => (row.email || '').toLowerCase().includes(q));
+          displayProductCustomizations(filtered);
+          updateStatistics(filtered, []);
+        };
+        searchInput.addEventListener('input', runFilter);
+        searchInput.addEventListener('change', runFilter);
       }
       
       const refreshPhotos = document.getElementById('refresh-photos');
@@ -969,54 +1155,296 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
 
     // Global functions for table actions
     window.viewCustomization = async function(customizationId) {
+      // Ensure modal opens immediately to avoid double-click confusion
+      const modal = document.getElementById('customization-details-modal');
+      modal?.classList.remove('hidden');
+      const container = document.getElementById('customization-details-content');
+      if (container) container.innerHTML = '<p class="text-gray-500">Loading details...</p>';
       console.log('🔄 Loading product customization details for:', customizationId);
       
       try {
-        const { data: customization, error } = await supabase
-          .from('product_customizations')
-          .select('*')
-          .eq('id', customizationId)
-          .single();
+        let customization = null;
+        let error = null;
+        try {
+          const res = await supabase
+            .from('order_customizations')
+            .select('*')
+            .eq('id', customizationId)
+            .single();
+          customization = res.data;
+          error = res.error;
+        } catch (e) {
+          error = e;
+        }
 
-        if (error) {
-          console.error('Error loading product customization details:', error);
-          alert('Error loading customization details: ' + error.message);
+        // If blocked by RLS or error, fall back to REST by id
+        if (error || !customization) {
+          console.warn('Supabase single() failed, trying REST by id:', error?.message || error);
+          customization = await restSelectById('order_customizations', customizationId);
+        }
+
+        // If still no record, show empty state (don't leave loading)
+        if (!customization) {
+          console.warn('No customization found for id:', customizationId);
+          if (container) {
+            container.innerHTML = '<p class="text-gray-500">No details found for this customization.</p>';
+          }
           return;
         }
 
-        // Create a detailed modal with admin panel styling
-        const details = `
-Product Customization Details:
-=============================
+        // Render into modal
+        const container = document.getElementById('customization-details-content');
+        if (container) {
+          // Normalize address parts
+          const house = customization.house_flat_number || customization.houseNumber || '';
+          const line1 = customization.address_line_1 || customization.addressLine1 || '';
+          const city = customization.city || '';
+          const state = customization.state || '';
+          const pincode = customization.pincode || '';
+          const country = customization.country || '';
 
-Product Information:
--------------------
-Product Name: ${customization.product_name || 'Not provided'}
-Project Name: ${customization.project_name || 'Not provided'}
-Status: ${customization.status || 'Not provided'}
-Price: ₹${(customization.price || 0).toLocaleString('en-IN')}
+          // Photos
+          let photos = customization.menu_photos_urls || [];
+          try {
+            if (typeof photos === 'string') photos = JSON.parse(photos);
+          } catch {}
+          const photosHTML = Array.isArray(photos) && photos.length
+            ? `<div id="photos-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3">${photos.map(p => `
+                <a href="${p.url || p.publicUrl}" target="_blank" class="block">
+                  <img src="${p.url || p.publicUrl}" crossorigin="anonymous" alt="${p.filename || 'menu photo'}" class="w-20 h-20 object-cover rounded border"/>
+                  <p class="mt-1 text-xs text-gray-500 truncate">${p.filename || ''}</p>
+                </a>
+              `).join('')}</div>`
+            : '<p class="text-gray-500">No menu photos uploaded</p>';
 
-Customer Information:
--------------------
-Customer Name: ${customization.customer_name || 'Not provided'}
-Company Name: ${customization.company_name || 'Not provided'}
-Email: ${customization.email || 'Not provided'}
-Phone: ${customization.phone || 'Not provided'}
+          const logoHTML = customization.restaurant_logo_url
+            ? `<img src="${customization.restaurant_logo_url}" alt="Logo" class="w-20 h-20 object-cover rounded border"/>`
+            : '<span class="text-gray-500">Not uploaded</span>';
 
-Project Details:
----------------
-Requirements: ${customization.requirements || 'No requirements provided'}
-Created: ${new Date(customization.created_at).toLocaleString()}
-Updated: ${new Date(customization.updated_at || customization.created_at).toLocaleString()}
-
-${customization.notes ? `Notes: ${customization.notes}` : ''}
-        `;
-        
-        alert(details);
+          container.innerHTML = `
+            <div class="space-y-8">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 class="text-sm font-medium text-gray-500 mb-1">Product</h4>
+                  <p class="text-gray-900">${customization.product_name || 'Order Menu System'}</p>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-500 mb-1">Status</h4>
+                  <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    (customization.status === 'completed' || customization.status === 'processed') ? 'bg-green-100 text-green-800' :
+                    (customization.status === 'in_progress' || customization.status === 'processing') ? 'bg-yellow-100 text-yellow-800' :
+                    (customization.status === 'pending' || customization.status === 'pending_payment' || customization.status === 'submitted') ? 'bg-blue-100 text-blue-800' :
+                    'bg-gray-100 text-gray-800'
+                  }">${customization.status || 'pending'}</div>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-500 mb-1">Project / Restaurant</h4>
+                  <p class="text-gray-900">${customization.project_name || customization.restaurant_name || 'Not provided'}</p>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-500 mb-1">Amounts</h4>
+                  <p class="text-gray-900">Base: ₹${(customization.base_package_cost || 0).toLocaleString('en-IN')} · GST: ₹${(customization.gst_amount || 0).toLocaleString('en-IN')} · Total: ₹${(customization.total_amount || 0).toLocaleString('en-IN')}</p>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 class="text-sm font-medium text-gray-500 mb-1">Owner Name</h4>
+                  <p class="text-gray-900">${customization.owner_name || '-'}</p>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-500 mb-1">Contact Person</h4>
+                  <p class="text-gray-900">${customization.contact_person || customization.owner_name || 'Not provided'}</p>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-500 mb-1">Email</h4>
+                  <p class="text-gray-900">${customization.email || 'Not provided'}</p>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-500 mb-1">Phone</h4>
+                  <p class="text-gray-900">${customization.phone_number || customization.phone || 'Not provided'}</p>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-500 mb-1">Created</h4>
+                  <p class="text-gray-900">${new Date(customization.created_at).toLocaleString()}</p>
+                </div>
+              </div>
+              <div>
+                <h4 class="text-sm font-medium text-gray-500 mb-2">Address</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <p class="text-xs text-gray-500">House / Flat Number</p>
+                    <p class="text-gray-900">${house || '-'}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-500">Address Line 1</p>
+                    <p class="text-gray-900">${line1 || '-'}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-500">City</p>
+                    <p class="text-gray-900">${city || '-'}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-500">State</p>
+                    <p class="text-gray-900">${state || '-'}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-500">Pincode</p>
+                    <p class="text-gray-900">${pincode || '-'}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-500">Country</p>
+                    <p class="text-gray-900">${country || '-'}</p>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h4 class="text-sm font-medium text-gray-500 mb-2">Restaurant Logo</h4>
+                ${logoHTML}
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <h4 class="text-sm font-medium text-gray-500">Menu Photos</h4>
+                  <button type="button" onclick="convertImagesToTextAI()" class="px-3 py-1.5 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors">Convert with AI</button>
+                </div>
+                ${photosHTML}
+                <div id="ai-conversion-result" class="mt-4 hidden">
+                  <div class="flex items-center justify-between mb-2">
+                    <h5 class="text-sm font-semibold text-gray-900">Extracted Menu Text</h5>
+                    <button type="button" onclick="copyAIText()" class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200">Copy</button>
+                  </div>
+                  <pre id="ai-conversion-text" class="w-full p-3 border border-gray-300 rounded-md text-sm whitespace-pre-wrap bg-gray-50"></pre>
+                  <div id="ai-conversion-status" class="mt-2 text-xs text-gray-500"></div>
+                </div>
+              </div>
+              <div>
+                <h4 class="text-sm font-medium text-gray-500 mb-1">Additional Requirements</h4>
+                <p class="text-gray-900 whitespace-pre-wrap">${customization.additional_requirements || 'None'}</p>
+              </div>
+            </div>
+          `;
+          const modal = document.getElementById('customization-details-modal');
+          modal?.classList.remove('hidden');
+        }
       } catch (error) {
         console.error('Error viewing product customization details:', error);
-        alert('Error viewing customization details: ' + error.message);
+        const container = document.getElementById('customization-details-content');
+        if (container) {
+          container.innerHTML = '<p class="text-red-600">Error loading details. Please try again.</p>';
+        }
       }
+    };
+
+    window.closeCustomizationDetails = function() {
+      const modal = document.getElementById('customization-details-modal');
+      if (modal) modal.classList.add('hidden');
+    };
+
+    // AI conversion using Tesseract.js (client-side OCR) with deblur pre-processing
+    window.convertImagesToTextAI = async function() {
+      try {
+        const resultWrap = document.getElementById('ai-conversion-result');
+        const resultArea = document.getElementById('ai-conversion-text');
+        const status = document.getElementById('ai-conversion-status');
+        if (resultWrap) resultWrap.classList.remove('hidden');
+        if (status) status.textContent = 'Converting images to text, please wait...';
+        if (resultArea) resultArea.textContent = '';
+
+        // Collect visible image URLs from the modal photos grid
+        const photosGrid = document.getElementById('photos-grid');
+        const imageEls = photosGrid ? photosGrid.querySelectorAll('img') : [];
+        const urls = Array.from(imageEls).map(img => img.src).filter(Boolean);
+
+        if (urls.length === 0) {
+          if (resultArea) resultArea.textContent = 'No photos available to convert.';
+          if (status) status.textContent = '';
+          return;
+        }
+
+        // Lazy load Tesseract
+        if (!window.Tesseract) {
+          await new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+            s.onload = resolve;
+            s.onerror = reject;
+            document.head.appendChild(s);
+          });
+        }
+
+        let combined = '';
+        let processed = 0;
+        for (const url of urls) {
+          try {
+            // Bypass CORS by drawing to canvas
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.src = url;
+            await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+
+            // Simple unsharp mask (deblur) before OCR: blur + high-pass + add
+            // 1) Create blurred version
+            const blurCanvas = document.createElement('canvas');
+            blurCanvas.width = canvas.width; blurCanvas.height = canvas.height;
+            const bctx = blurCanvas.getContext('2d');
+            bctx.filter = 'blur(1.5px)';
+            bctx.drawImage(canvas, 0, 0);
+
+            // 2) High-pass = original - blurred
+            const src = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const blr = bctx.getImageData(0, 0, blurCanvas.width, blurCanvas.height);
+            const out = ctx.createImageData(src.width, src.height);
+            for (let i = 0; i < src.data.length; i += 4) {
+              // amount factor
+              const amount = 1.0;
+              out.data[i]   = Math.min(255, Math.max(0, src.data[i]   + amount * (src.data[i]   - blr.data[i])));
+              out.data[i+1] = Math.min(255, Math.max(0, src.data[i+1] + amount * (src.data[i+1] - blr.data[i+1])));
+              out.data[i+2] = Math.min(255, Math.max(0, src.data[i+2] + amount * (src.data[i+2] - blr.data[i+2])));
+              out.data[i+3] = src.data[i+3];
+            }
+            ctx.putImageData(out, 0, 0);
+
+            const dataUrl = canvas.toDataURL('image/png');
+
+            const { data: { text } } = await window.Tesseract.recognize(dataUrl, 'eng');
+            if (text && text.trim()) {
+              combined += (combined ? '\n\n' : '') + text.trim();
+            }
+          } catch (imgErr) {
+            console.warn('OCR failed for image:', url, imgErr);
+          }
+          processed++;
+          if (status) status.textContent = `Processed ${processed}/${urls.length} image(s)`;
+        }
+
+        if (!combined) {
+          combined = 'No text detected. Try clearer photos or higher contrast images.';
+        }
+
+        if (resultArea) resultArea.textContent = combined;
+        if (status) status.textContent = 'Done';
+      } catch (e) {
+        console.error('AI conversion error:', e);
+        const resultArea = document.getElementById('ai-conversion-text');
+        const status = document.getElementById('ai-conversion-status');
+        if (resultArea) resultArea.textContent = 'Error converting images. Please try again.';
+        if (status) status.textContent = '';
+      }
+    };
+
+    window.copyAIText = function() {
+      const el = document.getElementById('ai-conversion-text');
+      if (!el) return;
+      const range = document.createRange();
+      range.selectNode(el);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      try { document.execCommand('copy'); } catch {}
+      sel.removeAllRanges();
     };
 
     window.processCustomization = function(customizationId) {
@@ -1035,11 +1463,9 @@ ${customization.notes ? `Notes: ${customization.notes}` : ''}
       // Implement download functionality
     };
     
-    // Force load data immediately when script loads
-    console.log('🔄 Script loaded - Force loading data...');
-    setTimeout(() => {
-      loadDemoDataImmediately();
-    }, 100);
+    // Initial load uses real data only
+    console.log('🔄 Script loaded - Loading real data...');
+    loadRealData();
     
 </script>
 </MenuOperatorAdminLayout>

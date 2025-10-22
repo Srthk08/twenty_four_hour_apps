@@ -305,23 +305,7 @@ const { title, description } = Astro.props;
 
             <!-- Desktop Navigation -->
             <div class="hidden lg:flex items-center space-x-1">
-              <!-- Dashboard -->
-              <a href="/menu-operator" class="nav-item" :class="currentPage === 'dashboard' ? 'nav-active' : ''">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-                </svg>
-                <span>Dashboard</span>
-              </a>
-
-              <!-- Profile -->
-              <a href="/menu-operator/profile" class="nav-item" :class="currentPage === 'profile' ? 'nav-active' : ''">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>
-                <span>Profile</span>
-              </a>
-
-              <!-- Back to Site -->
+              <!-- Back to Site only -->
               <a href="/" class="nav-item">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -405,19 +389,6 @@ const { title, description } = Astro.props;
            class="lg:hidden bg-white border-t border-gray-200 relative z-40"
          >
           <div class="px-2 pt-2 pb-3 space-y-1">
-            <a href="/menu-operator" class="mobile-nav-item" :class="currentPage === 'dashboard' ? 'mobile-nav-active' : ''">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-              </svg>
-              <span>Dashboard</span>
-            </a>
-            <a href="/menu-operator/profile" class="mobile-nav-item" :class="currentPage === 'profile' ? 'mobile-nav-active' : ''">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-              </svg>
-              <span>Profile</span>
-            </a>
-            
             <a href="/" class="mobile-nav-item">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>

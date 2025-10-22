@@ -28,8 +28,8 @@ const getEnvVar = (key: string): string => {
 };
 
 // Use environment variables if available, otherwise use hardcoded config
-const supabaseUrl = getEnvVar('VITE_SUPABASE_URL') || SUPABASE_CONFIG.url;
-const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY') || SUPABASE_CONFIG.anonKey;
+export const supabaseUrl = getEnvVar('VITE_SUPABASE_URL') || SUPABASE_CONFIG.url;
+export const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY') || SUPABASE_CONFIG.anonKey;
 
 // Enhanced logging for debugging
 console.log('Environment Detection:', {

@@ -15,6 +15,22 @@ import AuthGuard from '../components/AuthGuard.astro';
           <p class="text-gray-600">Manage your projects and orders from your dashboard.</p>
         </div>
 
+        <!-- Recent Activity (moved up under welcome) -->
+        <div id="recent-activity" class="bg-white rounded-lg shadow-sm p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Recent Activity</h3>
+          </div>
+          <div id="activity-content">
+            <div class="text-center py-8">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">Loading recent activity...</h3>
+              <p class="mt-1 text-sm text-gray-500">Please wait while we fetch your recent orders.</p>
+            </div>
+          </div>
+        </div>
+
 
         <!-- Product Customization Form (shown when product is selected) -->
         <div id="product-customization-form" class="bg-white rounded-lg shadow-sm p-8 hidden">
@@ -613,21 +629,7 @@ import AuthGuard from '../components/AuthGuard.astro';
           </form>
         </div>
 
-        <!-- Recent Activity -->
-        <div id="recent-activity" class="bg-white rounded-lg shadow-sm p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900">Recent Activity</h3>
-          </div>
-          <div id="activity-content">
-            <div class="text-center py-8">
-              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-              </svg>
-              <h3 class="mt-2 text-sm font-medium text-gray-900">Loading recent activity...</h3>
-              <p class="mt-1 text-sm text-gray-500">Please wait while we fetch your recent orders.</p>
-            </div>
-          </div>
-        </div>
+        
       </div>
     </section>
   </AuthGuard>
@@ -639,6 +641,10 @@ import AuthGuard from '../components/AuthGuard.astro';
 
   // Menu Photos Array
   let menuPhotos = [];
+  
+  // Global variables to store files BEFORE form submission (to prevent them from being cleared)
+  let cachedMenuPhotos = [];
+  let cachedLogoFile = null;
   
   console.log('Dashboard loaded - using global auth manager');
 
@@ -1373,6 +1379,10 @@ import AuthGuard from '../components/AuthGuard.astro';
           // Add all valid files to the array
           menuPhotos = [...menuPhotos, ...validFiles];
           
+          // CRITICAL: Cache files in global variable BEFORE input is cleared
+          cachedMenuPhotos = [...menuPhotos];
+          console.log('📸 Cached menu photos:', cachedMenuPhotos.length, 'files');
+          
           // Update preview
           updateMenuPhotosPreview();
           
@@ -1778,7 +1788,8 @@ import AuthGuard from '../components/AuthGuard.astro';
     
     // Form submission - simplified validation
     console.log('Adding form submission event listener to form:', form);
-    if (form) {
+    // Disabled legacy submit handler; unified handler below handles validation + upload + insert
+    if (false && form) {
       form.addEventListener('submit', async (e) => {
         console.log('Form submit event triggered!');
         e.preventDefault();
@@ -1806,6 +1817,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         return;
       }
       console.log('Form submission allowed - menu photos present');
+      return;
 
       // Validate phone number
       if (!formDataObj.phone || formDataObj.phone.trim() === '') {
@@ -1927,26 +1939,26 @@ import AuthGuard from '../components/AuthGuard.astro';
         } else {
           // Save to Supabase using OMS function
           const { data: customizationData, error: customizationError } = await supabase.rpc('upsert_oms_customization', {
-            p_user_email: data.email,
-            p_project_name: data.projectName,
-            p_restaurant_name: data.restaurantName,
-            p_owner_name: data.ownerName,
-            p_restaurant_address: `${data.houseNumber}, ${data.addressLine1}, ${data.city}, ${data.state} ${data.pincode}, ${data.country}`,
-            p_contact_person: data.contactPerson,
-            p_phone_number: data.phone,
-            p_house_number: data.houseNumber,
-            p_address_line1: data.addressLine1,
-            p_city: data.city,
-            p_state: data.state,
-            p_pincode: data.pincode,
-            p_country: data.country,
-            p_contact_person: data.contactPerson,
-            p_phone_number: data.phone,
+            p_user_email: formDataObj.email,
+            p_project_name: formDataObj.projectName,
+            p_restaurant_name: formDataObj.restaurantName,
+            p_owner_name: formDataObj.ownerName,
+            p_restaurant_address: `${formDataObj.houseNumber}, ${formDataObj.addressLine1}, ${formDataObj.city}, ${formDataObj.state} ${formDataObj.pincode}, ${formDataObj.country}`,
+            p_contact_person: formDataObj.contactPerson,
+            p_phone_number: formDataObj.phone,
+            p_house_number: formDataObj.houseNumber,
+            p_address_line1: formDataObj.addressLine1,
+            p_city: formDataObj.city,
+            p_state: formDataObj.state,
+            p_pincode: formDataObj.pincode,
+            p_country: formDataObj.country,
+            p_contact_person: formDataObj.contactPerson,
+            p_phone_number: formDataObj.phone,
             p_user_id: null,
             p_logo_url: null,
             p_logo_filename: null,
             p_logo_size: null,
-            p_additional_requirements: data.additionalRequirements || ''
+            p_additional_requirements: formDataObj.additionalRequirements || ''
           });
           
           if (customizationError) {
@@ -2134,6 +2146,11 @@ import AuthGuard from '../components/AuthGuard.astro';
         const file = e.target.files[0];
         if (file) {
           console.log('File selected:', file.name);
+          
+          // CRITICAL: Cache logo file in global variable
+          cachedLogoFile = file;
+          console.log('🏷️ Cached logo file:', file.name);
+          
           const reader = new FileReader();
           reader.onload = (e) => {
             console.log('File reader onload triggered');
@@ -2322,6 +2339,24 @@ import AuthGuard from '../components/AuthGuard.astro';
   async function handleOrderMenuFormSubmission() {
     console.log('🚀 Handling Order Menu Form submission...');
     
+    // IMMEDIATE CHECK: Are files cached?
+    console.log('🔍 IMMEDIATE FILE CHECK:');
+    console.log('📸 Cached menu photos count:', cachedMenuPhotos.length);
+    console.log('🏷️ Cached logo file:', cachedLogoFile ? 'Yes' : 'No');
+    
+    if (cachedMenuPhotos.length > 0) {
+      console.log('📸 Cached menu photos details:', cachedMenuPhotos.map(f => ({ name: f.name, size: f.size, type: f.type })));
+    }
+    
+    if (cachedLogoFile) {
+      console.log('🏷️ Cached logo file details:', { name: cachedLogoFile.name, size: cachedLogoFile.size, type: cachedLogoFile.type });
+    }
+    
+    // Log cached file counts (avoid blocking alerts)
+    const menuCount = cachedMenuPhotos.length;
+    const logoCount = cachedLogoFile ? 1 : 0;
+    console.log('Cached files => menuPhotos:', menuCount, 'logo:', logoCount);
+    
     const form = document.getElementById('order-menu-form');
     if (!form) {
       console.error('Order menu form not found');
@@ -2341,49 +2376,218 @@ import AuthGuard from '../components/AuthGuard.astro';
     console.log('📝 Form data collected:', formDataObj);
     
     try {
+      // Get Supabase client
+      const { supabase } = await import('../lib/supabase');
+      console.log('✅ Supabase client loaded');
+      
+      // Skip client-side bucket listing; assume buckets exist and handle upload errors gracefully.
+      
+      // Upload menu photos to Supabase Storage (Required for Order Menu System)
+      let menuPhotosUrls = [];
+      
+      // Use cached files (file input is cleared after selection)
+      console.log('📸 Using cached menu photos:', cachedMenuPhotos.length, 'files');
+      console.log('📸 Cached menu photos:', cachedMenuPhotos.map(f => ({ name: f.name, size: f.size, type: f.type })));
+      
+      if (cachedMenuPhotos && cachedMenuPhotos.length > 0) {
+        console.log(`📸 Found ${cachedMenuPhotos.length} cached files`);
+        
+        try {
+          console.log('📸 Starting menu photos upload to Supabase Storage...');
+          
+          for (let i = 0; i < cachedMenuPhotos.length; i++) {
+            const photo = cachedMenuPhotos[i];
+            console.log(`📸 Uploading photo ${i + 1}/${cachedMenuPhotos.length}: ${photo.name}`);
+            console.log(`📸 File size: ${photo.size} bytes`);
+            console.log(`📸 File type: ${photo.type}`);
+            
+            // Create unique filename
+            const timestamp = Date.now();
+            const randomId = Math.random().toString(36).substring(2, 8);
+            const safeName = photo.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+            const path = `menu_photos/${timestamp}_${randomId}_${safeName}`;
+            
+            console.log(`📸 Upload path: ${path}`);
+            
+            try {
+              // Upload the File object directly (more reliable across browsers)
+              const { error: uploadError } = await supabase.storage
+                .from('menu-photos')
+                .upload(path, photo, {
+                  upsert: true,
+                  contentType: photo.type,
+                  cacheControl: '3600'
+                });
+              
+              if (uploadError) {
+                console.error(`❌ Upload error for photo ${i + 1}:`, uploadError);
+                continue;
+              }
+              
+              // Get public URL
+              const { data: urlData } = supabase.storage
+                .from('menu-photos')
+                .getPublicUrl(path);
+              
+              if (urlData && urlData.publicUrl) {
+                menuPhotosUrls.push({
+                  url: urlData.publicUrl,
+                  filename: photo.name,
+                  mimeType: photo.type,
+                  size: photo.size,
+                  path: path
+                });
+                console.log(`✅ Photo ${i + 1} uploaded successfully: ${urlData.publicUrl}`);
+              } else {
+                console.error(`❌ Failed to get public URL for photo ${i + 1}`);
+              }
+              
+            } catch (fileErr) {
+              console.error(`❌ Exception uploading photo ${i + 1}:`, fileErr);
+            }
+          }
+          
+          console.log(`📸 Menu photos upload completed. ${menuPhotosUrls.length} photos uploaded successfully.`);
+          console.log('📸 Uploaded URLs:', menuPhotosUrls);
+          
+        } catch (e) {
+          console.error('❌ Menu photos upload failed:', e);
+        }
+      } else {
+        console.log('⚠️ No menu photos found in file input');
+        console.log('🔍 Checking menuPhotos array as fallback...');
+        console.log('📸 menuPhotos array:', menuPhotos);
+        console.log('📸 menuPhotos length:', menuPhotos ? menuPhotos.length : 'undefined');
+      }
+      
+      // Upload restaurant logo to Supabase Storage (Optional)
+      let restaurantLogoUrl = null;
+      
+      // Use cached logo file
+      console.log('🏷️ Using cached logo file:', cachedLogoFile ? cachedLogoFile.name : 'none');
+      
+      if (cachedLogoFile) {
+        const logoFile = cachedLogoFile;
+        console.log(`🏷️ Uploading logo: ${logoFile.name}`);
+        console.log(`🏷️ Logo size: ${logoFile.size} bytes`);
+        console.log(`🏷️ Logo type: ${logoFile.type}`);
+        
+        try {
+          console.log('🏷️ Starting restaurant logo upload to Supabase Storage...');
+          
+          // Create unique filename
+          const timestamp = Date.now();
+          const randomId = Math.random().toString(36).substring(2, 8);
+          const safeName = logoFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+          const path = `logos/${timestamp}_${randomId}_${safeName}`;
+          
+          console.log(`🏷️ Upload path: ${path}`);
+          
+          // Upload the File object directly (more reliable across browsers)
+          const { error: uploadError } = await supabase.storage
+            .from('logos')
+            .upload(path, logoFile, { 
+              upsert: true, 
+              contentType: logoFile.type,
+              cacheControl: '3600'
+            });
+          
+          if (uploadError) {
+            console.error('❌ Logo upload error:', uploadError);
+          } else {
+            // Get public URL
+            const { data: urlData } = supabase.storage
+              .from('logos')
+              .getPublicUrl(path);
+            
+            if (urlData && urlData.publicUrl) {
+              restaurantLogoUrl = urlData.publicUrl;
+              console.log(`✅ Logo uploaded successfully: ${urlData.publicUrl}`);
+            } else {
+              console.error('❌ Failed to get logo public URL');
+            }
+          }
+        } catch (e) {
+          console.error('❌ Logo upload failed:', e);
+        }
+      } else {
+        console.log('ℹ️ No logo uploaded (optional field)');
+      }
+      
       // Prepare data for database insertion
-      const insertData = {
-        product_name: 'Order Menu System',
-        project_name: formDataObj.projectName,
-        owner_name: formDataObj.ownerName,
-        contact_person: formDataObj.contactPerson,
-        email: formDataObj.email,
-        phone_number: formDataObj.phone,
-        house_flat_number: formDataObj.houseNumber,
-        address_line_1: formDataObj.addressLine1,
-        city: formDataObj.city,
-        state: formDataObj.state,
-        pincode: formDataObj.pincode,
-        country: formDataObj.country,
-        restaurant_name: formDataObj.restaurantName,
-        restaurant_logo_url: null, // Will be updated after file upload
-        menu_photos_urls: [], // Will be updated after file upload
-        additional_requirements: formDataObj.additionalRequirements || '',
-        total_amount: 1179, // Fixed price for Order Menu System
-        status: 'pending_payment'
-      };
+        const insertData = {
+          project_name: formDataObj.projectName,
+          owner_name: formDataObj.ownerName,
+          contact_person: formDataObj.contactPerson,
+          email: formDataObj.email,
+          phone_number: formDataObj.phone,
+          house_flat_number: formDataObj.houseNumber,
+          address_line_1: formDataObj.addressLine1,
+          city: formDataObj.city,
+          state: formDataObj.state,
+          pincode: formDataObj.pincode,
+          country: formDataObj.country,
+          restaurant_name: formDataObj.restaurantName,
+          restaurant_logo_url: restaurantLogoUrl, // Store the uploaded logo URL
+          menu_photos_urls: menuPhotosUrls, // Store the uploaded menu photo URLs (array of objects)
+          additional_requirements: formDataObj.additionalRequirements || '',
+          base_package_cost: 999,
+          gst_amount: 180,
+          total_amount: 1179, // Fixed price for Order Menu System
+          status: 'pending',
+          payment_status: 'pending'
+        };
 
       console.log('💾 Saving order customization data:', insertData);
 
-      // Save to database
-      const { data, error } = await supabase
-        .from('order_customizations')
-        .insert([insertData])
-        .select();
+      // Save to database using direct REST API call with ?select=* (no columns param)
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token || '';
+      const { supabaseUrl, supabaseAnonKey } = await import('../lib/supabase');
+      const anonKey = supabaseAnonKey;
+      const apiBase = supabaseUrl;
+      const restUrl = `${apiBase}/rest/v1/order_customizations?select=*`;
+      const resp = await fetch(restUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation',
+          'apikey': anonKey,
+          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {})
+        },
+        body: JSON.stringify(insertData)
+      });
 
-      if (error) {
-        console.error('❌ Error saving order customization:', error);
+      if (!resp.ok) {
+        const text = await resp.text();
+        console.error('❌ REST insert failed:', resp.status, text);
         alert('❌ Error saving your order. Please try again.');
         return;
       }
 
-      console.log('✅ Order customization saved successfully:', data);
+      const data = await resp.json();
+      console.log('✅ Order customization saved successfully (REST):', data);
 
-      // Show success message
+      // Show success message with upload details
       const successDiv = document.getElementById('validation-errors');
       if (successDiv) {
+        let uploadDetails = '';
+        if (menuPhotosUrls.length > 0) {
+          uploadDetails += `<p class="text-green-700 mt-2">📸 ${menuPhotosUrls.length} menu photo${menuPhotosUrls.length > 1 ? 's' : ''} uploaded successfully!</p>`;
+        }
+        if (restaurantLogoUrl) {
+          uploadDetails += `<p class="text-green-700 mt-2">🏷️ Restaurant logo uploaded successfully!</p>`;
+        }
+        
         successDiv.classList.remove('hidden');
-        successDiv.innerHTML = '<div class="bg-green-50 border border-green-200 rounded-lg p-4"><h4 class="text-green-800 font-semibold mb-2">✅ Order Submitted Successfully!</h4><p class="text-green-700">Your order has been saved. You will be redirected to the payment page.</p></div>';
+        successDiv.innerHTML = `
+          <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+            <h4 class="text-green-800 font-semibold mb-2">✅ Order Submitted Successfully!</h4>
+            <p class="text-green-700">Your order has been saved with all uploaded files.</p>
+            ${uploadDetails}
+            <p class="text-green-700 mt-2">You will be redirected to the payment page.</p>
+          </div>
+        `;
       }
 
       // Redirect to payment page after a short delay
@@ -2665,27 +2869,45 @@ import AuthGuard from '../components/AuthGuard.astro';
         let menuPhotosUrls = [];
         if (name.includes('order menu') && menuPhotos.length > 0) {
           try {
+            console.log('📸 Starting menu photos upload to Supabase Storage...');
             const { supabase } = await import('../lib/supabase');
+            
             for (let i = 0; i < menuPhotos.length; i++) {
               const photo = menuPhotos[i];
-              const safeName = photo.name.replace(/\s+/g, '_');
-              const path = `menu_photos/${Date.now()}_${i}_${safeName}`;
+              const safeName = photo.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+              const timestamp = Date.now();
+              const path = `menu_photos/${timestamp}_${i}_${safeName}`;
+              
+              console.log(`📸 Uploading photo ${i + 1}/${menuPhotos.length}: ${photo.name}`);
+              console.log(`📸 Upload path: ${path}`);
+              
               const fileBuffer = await photo.arrayBuffer();
               const { error: upErr } = await supabase.storage
-                .from('logos')
-                .upload(path, fileBuffer, { upsert: true, contentType: photo.type, cacheControl: '3600' });
+                .from('menu-photos')
+                .upload(path, fileBuffer, { 
+                  upsert: true, 
+                  contentType: photo.type, 
+                  cacheControl: '3600' 
+                });
+              
               if (!upErr) {
-                const { data: pub } = supabase.storage.from('logos').getPublicUrl(path);
+                const { data: pub } = supabase.storage.from('menu-photos').getPublicUrl(path);
                 menuPhotosUrls.push({
                   url: pub?.publicUrl || null,
                   filename: photo.name,
                   mimeType: photo.type,
-                  size: photo.size
+                  size: photo.size,
+                  path: path
                 });
+                console.log(`✅ Photo ${i + 1} uploaded successfully:`, pub?.publicUrl);
+              } else {
+                console.error(`❌ Error uploading photo ${i + 1}:`, upErr);
               }
             }
+            
+            console.log('📸 Menu photos upload completed. URLs:', menuPhotosUrls);
           } catch (e) {
-            console.warn('Menu photos upload skipped:', e);
+            console.error('❌ Menu photos upload failed:', e);
           }
         }
         
@@ -3062,22 +3284,80 @@ import AuthGuard from '../components/AuthGuard.astro';
       // Get Supabase client
       const { supabase } = await import('../lib/supabase');
       
-      // Get current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      // Determine current user email and role
+      let userEmail = null;
+      let userRole = null;
+      let userId = null;
+      try {
+        const authRes = await supabase.auth.getUser();
+        userEmail = authRes?.data?.user?.email || null;
+        userId = authRes?.data?.user?.id || null;
+      } catch (e) {
+        console.warn('Supabase auth getUser failed, will try fallback:', e);
+      }
       
-      if (userError || !user) {
-        console.error('Error getting user:', userError);
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      const currentUser = authManager?.getCurrentUser?.();
+      if (!userEmail) userEmail = currentUser?.email || null;
+      if (!userRole) userRole = currentUser?.role || null;
+      
+      // If role still unknown but we have a supabase user, look up profile role
+      if (!userRole && userId) {
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', userId)
+            .single();
+          userRole = profile?.role || null;
+        } catch {}
+      }
+      // Fallback: if still no role but we have email, lookup profile by email
+      if (!userRole && userEmail) {
+        try {
+          const { data: profileByEmail } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('email', userEmail)
+            .single();
+          userRole = profileByEmail?.role || null;
+        } catch {}
+      }
+      
+      // If no identity at all, show empty state
+      if (!userEmail && !userRole) {
+        console.log('No authenticated user found for recent activity');
         showNoActivityMessage();
         return;
       }
       
-      // Fetch Order Menu System customizations for this user
-      const { data: customizations, error } = await supabase
+      // Menu operator sees all recent orders; others see their own
+      let query = supabase
         .from('order_customizations')
         .select('*')
-        .eq('email', user.email)
         .order('created_at', { ascending: false })
         .limit(10);
+
+      if (userRole === 'menu_operator') {
+        // Privacy: menu operators see only their own activity (or empty state)
+        if (userEmail) {
+          console.log('Role menu_operator → filtering by email:', userEmail);
+          query = query.eq('email', userEmail);
+        } else {
+          console.log('Role menu_operator but no email → showing empty state');
+          showNoActivityMessage();
+          return;
+        }
+      } else if (userEmail) {
+        console.log('Filtering recent activity by email:', userEmail);
+        query = query.eq('email', userEmail);
+      } else {
+        console.log('No email available → showing empty state');
+        showNoActivityMessage();
+        return;
+      }
+
+      const { data: customizations, error } = await query;
       
       if (error) {
         console.error('Error loading customizations:', error);
@@ -3101,65 +3381,120 @@ import AuthGuard from '../components/AuthGuard.astro';
     }
   }
   
-  // Display recent activity
-  function displayRecentActivity(customizations) {
-    const activityContent = document.getElementById('activity-content');
-    
-    if (!activityContent) return;
-    
-    activityContent.innerHTML = `
-      <div class="space-y-4">
-        ${customizations.map(customization => `
-          <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="flex items-center space-x-3">
-                  <div class="flex-shrink-0">
-                    <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                      <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                      </svg>
-                    </div>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <h4 class="text-sm font-medium text-gray-900">${customization.project_name || 'Unnamed Project'}</h4>
-                    <p class="text-sm text-gray-500">${customization.restaurant_name || 'Restaurant Name Not Provided'}</p>
-                    <div class="mt-1 flex items-center space-x-4 text-xs text-gray-500">
-                      <span>Order Menu System</span>
-                      <span>•</span>
-                      <span>₹${(customization.total_amount || 0).toLocaleString('en-IN')}</span>
-                      <span>•</span>
-                      <span>${new Date(customization.created_at).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="mt-3 flex items-center justify-between">
-                  <div class="flex items-center space-x-2">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Submitted
-                    </span>
-                    ${customization.additional_requirements ? `
-                      <span class="text-xs text-gray-500 truncate max-w-xs">
-                        ${customization.additional_requirements.substring(0, 50)}${customization.additional_requirements.length > 50 ? '...' : ''}
-                      </span>
-                    ` : ''}
-                  </div>
-                  <button onclick="viewOrderDetails('${customization.id}')" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
-                    View Details
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    `;
-  }
+   // Display recent activity
+   function displayRecentActivity(customizations) {
+     const activityContent = document.getElementById('activity-content');
+     
+     if (!activityContent) return;
+     
+     activityContent.innerHTML = `
+       <div class="space-y-4">
+         ${customizations.map(customization => {
+           // Parse menu photos URLs if they exist
+           let menuPhotos = [];
+           try {
+             if (customization.menu_photos_urls && typeof customization.menu_photos_urls === 'string') {
+               menuPhotos = JSON.parse(customization.menu_photos_urls);
+             } else if (Array.isArray(customization.menu_photos_urls)) {
+               menuPhotos = customization.menu_photos_urls;
+             }
+           } catch (e) {
+             console.warn('Error parsing menu photos:', e);
+           }
+           
+           return `
+           <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+             <div class="flex items-start justify-between">
+               <div class="flex-1">
+                 <div class="flex items-center space-x-3">
+                   <div class="flex-shrink-0">
+                     <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                       <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                       </svg>
+                     </div>
+                   </div>
+                   <div class="flex-1 min-w-0">
+                     <h4 class="text-sm font-medium text-gray-900">${customization.project_name || 'Unnamed Project'}</h4>
+                     <p class="text-sm text-gray-500">${customization.restaurant_name || 'Restaurant Name Not Provided'}</p>
+                     <div class="mt-1 flex items-center space-x-4 text-xs text-gray-500">
+                       <span>Order Menu System</span>
+                       <span>•</span>
+                       <span>₹${(customization.total_amount || 0).toLocaleString('en-IN')}</span>
+                       <span>•</span>
+                       <span>${new Date(customization.created_at).toLocaleDateString()}</span>
+                       ${menuPhotos.length > 0 ? `<span>•</span><span>${menuPhotos.length} photo${menuPhotos.length > 1 ? 's' : ''}</span>` : ''}
+                     </div>
+                   </div>
+                 </div>
+                 
+                 ${menuPhotos.length > 0 ? `
+                   <div class="mt-3">
+                     <div class="flex items-center space-x-2 mb-2">
+                       <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                       </svg>
+                       <span class="text-xs text-gray-500">Menu Photos</span>
+                     </div>
+                     <div class="grid grid-cols-3 gap-2">
+                       ${menuPhotos.slice(0, 6).map(photo => `
+                         <div class="relative group">
+                           <img 
+                             src="${photo.url}" 
+                             alt="${photo.filename || 'Menu photo'}"
+                             class="w-full h-16 object-cover rounded-lg border border-gray-200 hover:border-primary-300 transition-colors cursor-pointer"
+                             onclick="openImageModal('${photo.url}', '${photo.filename || 'Menu photo'}')"
+                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0zMiAyNEw0MCAzMkgzMkwzMiAyNFoiIGZpbGw9IiM5Q0EzQUYiLz4KPGNpcmNsZSBjeD0iMzIiIGN5PSI0MCIgcj0iNCIgZmlsbD0iIzlDQTNBRiIvPgo8dGV4dCB4PSIzMiIgeT0iNTIiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI4IiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzZCNzI4MCI+SW1hZ2U8L3RleHQ+Cjwvc3ZnPgo='"
+                           />
+                           <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded-lg flex items-center justify-center">
+                             <svg class="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                             </svg>
+                           </div>
+                         </div>
+                       `).join('')}
+                       ${menuPhotos.length > 6 ? `
+                         <div class="w-full h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                           <span class="text-xs text-gray-500">+${menuPhotos.length - 6} more</span>
+                         </div>
+                       ` : ''}
+                     </div>
+                   </div>
+                 ` : ''}
+                 
+                 <div class="mt-3 flex items-center justify-between">
+                   <div class="flex items-center space-x-2">
+                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                       Submitted
+                     </span>
+                     ${customization.additional_requirements ? `
+                       <span class="text-xs text-gray-500 truncate max-w-xs">
+                         ${customization.additional_requirements.substring(0, 50)}${customization.additional_requirements.length > 50 ? '...' : ''}
+                       </span>
+                     ` : ''}
+                   </div>
+                   <button onclick="viewOrderDetails('${customization.id}')" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
+                     View Details
+                   </button>
+                 </div>
+               </div>
+             </div>
+           </div>
+         `;
+         }).join('')}
+       </div>
+     `;
+   }
   
   // Show no activity message
   function showNoActivityMessage() {
     const activityContent = document.getElementById('activity-content');
+    const recentActivity = document.getElementById('recent-activity');
     
+    if (recentActivity) {
+      recentActivity.classList.remove('hidden');
+      recentActivity.style.display = 'block';
+    }
     if (!activityContent) return;
     
     activityContent.innerHTML = `
@@ -3239,32 +3574,136 @@ Status: Submitted
       alert('Error viewing order details: ' + error.message);
     }
   };
+  
+  // Open image modal for full-size viewing
+  window.openImageModal = function(imageUrl, filename) {
+    console.log('Opening image modal for:', filename);
+    
+    // Create modal overlay
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+    modal.innerHTML = `
+      <div class="relative max-w-4xl max-h-full p-4">
+        <button onclick="closeImageModal()" class="absolute top-2 right-2 z-10 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 transition-all">
+          <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+        <img 
+          src="${imageUrl}" 
+          alt="${filename}"
+          class="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+          onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMDAgMTIwTDI0MCAxNjBIMTYwTDIwMCAxMjBaIiBmaWxsPSIjOUNBM0FGIi8+CjxjaXJjbGUgY3g9IjIwMCIgY3k9IjIwMCIgcj0iMjAiIGZpbGw9IiM5Q0EzQUYiLz4KPHRleHQgeD0iMjAwIiB5PSIyNDAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2QjcyODAiPkltYWdlIFVuYXZhaWxhYmxlPC90ZXh0Pgo8L3N2Zz4K'"
+        />
+        <div class="absolute bottom-4 left-4 right-4 bg-black bg-opacity-50 text-white p-3 rounded-lg">
+          <p class="text-sm font-medium">${filename}</p>
+        </div>
+      </div>
+    `;
+    
+    // Add click outside to close
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closeImageModal();
+      }
+    });
+    
+    // Add escape key to close
+    const escapeHandler = function(e) {
+      if (e.key === 'Escape') {
+        closeImageModal();
+        document.removeEventListener('keydown', escapeHandler);
+      }
+    };
+    document.addEventListener('keydown', escapeHandler);
+    
+    document.body.appendChild(modal);
+    
+    // Store modal reference for closing
+    window.currentImageModal = modal;
+  };
+  
+  // Close image modal
+  window.closeImageModal = function() {
+    if (window.currentImageModal) {
+      document.body.removeChild(window.currentImageModal);
+      window.currentImageModal = null;
+    }
+  };
+  
+  // Test function to debug file upload
+  window.testFileUpload = async function() {
+    console.log('🧪 Testing file upload...');
+    
+    const menuPhotosInput = document.getElementById('menu-photos-upload');
+    console.log('📸 File input element:', menuPhotosInput);
+    console.log('📸 Files in input:', menuPhotosInput ? menuPhotosInput.files : 'no input');
+    
+    if (menuPhotosInput && menuPhotosInput.files && menuPhotosInput.files.length > 0) {
+      const file = menuPhotosInput.files[0];
+      console.log('📸 Testing with file:', file.name, file.size, file.type);
+      
+      try {
+        const { supabase } = await import('../lib/supabase');
+        console.log('📸 Supabase client loaded');
+        
+        // Convert to binary
+        const fileBuffer = await file.arrayBuffer();
+        console.log('📸 File converted to buffer:', fileBuffer.byteLength, 'bytes');
+        
+        // Test upload
+        const timestamp = Date.now();
+        const path = `menu_photos/test_${timestamp}_${file.name}`;
+        console.log('📸 Upload path:', path);
+        
+        const { error } = await supabase.storage
+          .from('menu-photos')
+          .upload(path, fileBuffer, { 
+            upsert: true, 
+            contentType: file.type
+          });
+        
+        if (error) {
+          console.error('❌ Upload failed:', error);
+        } else {
+          const { data } = supabase.storage.from('menu-photos').getPublicUrl(path);
+          console.log('✅ Upload successful:', data.publicUrl);
+          console.log('🎯 Check your Supabase Storage menu-photos bucket!');
+        }
+      } catch (e) {
+        console.error('❌ Test failed:', e);
+      }
+    } else {
+      console.log('❌ No files selected');
+    }
+  };
 
   // Update user info when page loads
   document.addEventListener('DOMContentLoaded', () => {
     console.log('Dashboard DOM loaded - initializing with global auth manager');
     
-    // Check URL parameters immediately to prevent blinking
+    // Force clean dashboard view only when NOT arriving with a product selection
+    // Keep ?product=&price= so the customization form can show
+    const initialParams = new URLSearchParams(window.location.search);
+    const hasProductSelection = initialParams.has('product') && initialParams.has('price');
+    if (window.location.search && !hasProductSelection) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    // Check URL parameters after optional cleaning
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('product');
     const price = urlParams.get('price');
     
     const recentActivity = document.getElementById('recent-activity');
     
-    // Show recent activity only if there are NO URL parameters (no product selected)
+    // Show recent activity for normal dashboard load (menu operator or any user) when no product selected
     if (!productId || !price) {
       if (recentActivity) {
         recentActivity.style.display = 'block';
         recentActivity.classList.remove('hidden');
         console.log('✅ Showing browse products section - no product selected');
-        // Only load recent activity if user didn't manually close a form
-        if (!userClosedForm) {
-          loadRecentActivity();
-        } else {
-          // User closed a form, show browse products content directly
-          showNoActivityMessage();
-          userClosedForm = false; // Reset flag
-        }
+        // Always load recent activity on dashboard
+        loadRecentActivity();
       }
       // Ensure forms are hidden when no product is selected
       const productForm = document.getElementById('product-customization-form');
@@ -3372,7 +3811,7 @@ Status: Submitted
       }
     }
     
-    // Handle product selection
+    // Handle product selection (will no-op since we cleared params for dashboard entry)
     handleProductSelection();
     
     // Handle form functionality
@@ -3463,11 +3902,14 @@ Status: Submitted
   window.addEventListener('user-logged-in', () => {
     console.log('User logged in event received in dashboard');
     updateUserInfo();
+    // Refresh recent activity when auth changes (menu operator dashboards)
+    setTimeout(() => loadRecentActivity(), 100);
   });
   
   window.addEventListener('user-logged-out', () => {
     console.log('User logged out event received in dashboard');
     updateUserInfo();
+    setTimeout(() => loadRecentActivity(), 100);
   });
   
   // Logout functionality removed (was in Quick Actions section)
@@ -3929,183 +4371,15 @@ Status: Submitted
       console.log('🔴 Save button found:', targetButton);
       let isSaving = false; // Flag to prevent duplicate saves
       targetButton.addEventListener('click', async function(e) {
-        console.log('🔴 Save button clicked directly!');
+        console.log('🔴 Save button clicked (unified flow)!');
         e.preventDefault();
-        
-        // Prevent duplicate saves
-        if (isSaving) {
-          console.log('⚠️ Save already in progress, ignoring duplicate click');
-          return;
-        }
+        if (isSaving) return;
         isSaving = true;
-        
-        // Get the form
-        const form = document.getElementById('order-menu-form');
-        if (!form) {
-          console.error('❌ Order menu form not found for save button');
-          alert('❌ Form not found!');
-          return;
-        }
-        
-        // Get form data
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData);
-        console.log('🔴 Save button - Form data:', data);
-        
-        // Check if form has data
-        if (Object.keys(data).length === 0) {
-          console.error('❌ No form data found for save button');
-          alert('❌ No form data found! Please fill out the form first.');
-          return;
-        }
-        
-        // Prepare data for database
-        const insertData = {
-          project_name: data.projectName || 'Save Button Project',
-          restaurant_name: data.restaurantName || 'Save Button Restaurant',
-          owner_name: data.ownerName || 'Save Button Owner',
-          contact_person: data.contactPerson || 'Save Button Contact',
-          email: data.email || 'save@button.com',
-          phone_number: data.phone || '1234567890',
-          house_flat_number: data.houseNumber || '123',
-          address_line_1: data.addressLine1 || 'Save Button Address',
-          city: data.city || 'Save Button City',
-          state: data.state || 'Save Button State',
-          pincode: data.pincode || '123456',
-          country: data.country || 'India',
-          restaurant_logo_url: null,
-          menu_photos_urls: [],
-          additional_requirements: data.additionalRequirements || 'Save button requirements',
-          base_package_cost: 999.00,
-          gst_amount: 180.00,
-          total_amount: 1179.00,
-          status: 'pending',
-          payment_status: 'pending'
-        };
-        
-        console.log('🔴 Save button - Insert data:', insertData);
-        
         try {
-          console.log('🔴 Save button - Saving to Supabase...');
-          
-          // Import Supabase client
-          const { supabase } = await import('../lib/supabase');
-          
-          if (!supabase) {
-            console.error('❌ Supabase client not available');
-            alert('❌ Form submission error: Supabase client not loaded. Please refresh the page and try again.');
-            return;
-          }
-          
-          const { data: result, error } = await supabase
-            .from('order_customizations')
-            .insert(insertData)
-            .select();
-            
-          if (error) {
-            console.error('❌ Save button save failed:', error);
-            alert('❌ Form submission failed: ' + error.message);
-          } else {
-            console.log('✅ Save button save successful!', result);
-            
-            // Clear the form after successful save
-            form.reset();
-            
-            // Clear file inputs specifically
-            const logoInput = form.querySelector('input[name="restaurantLogo"]');
-            const menuPhotosInput = form.querySelector('input[name="menuPhotos"]');
-            
-            if (logoInput) {
-              logoInput.value = '';
-              console.log('✅ Logo input cleared');
-            }
-            
-            if (menuPhotosInput) {
-              menuPhotosInput.value = '';
-              console.log('✅ Menu photos input cleared');
-            }
-            
-            // Clear Order Menu System specific preview elements
-            const orderMenuLogoPreview = document.getElementById('order-menu-logo-preview');
-            const orderMenuLogoPreviewImg = document.getElementById('order-menu-logo-preview-img');
-            const orderMenuLogoFilename = document.getElementById('order-menu-logo-filename');
-            const menuPhotosPreview = document.getElementById('menu-photos-preview');
-            const menuPhotosGrid = document.getElementById('menu-photos-grid');
-            
-            if (orderMenuLogoPreview) {
-              orderMenuLogoPreview.classList.add('hidden');
-              console.log('✅ Order menu logo preview hidden');
-            }
-            
-            if (orderMenuLogoPreviewImg) {
-              orderMenuLogoPreviewImg.src = '';
-              console.log('✅ Order menu logo preview image cleared');
-            }
-            
-            if (orderMenuLogoFilename) {
-              orderMenuLogoFilename.textContent = '';
-              console.log('✅ Order menu logo filename cleared');
-            }
-            
-            if (menuPhotosPreview) {
-              menuPhotosPreview.classList.add('hidden');
-              console.log('✅ Menu photos preview hidden');
-            }
-            
-            if (menuPhotosGrid) {
-              menuPhotosGrid.innerHTML = '';
-              console.log('✅ Menu photos grid cleared');
-            }
-            
-            // Reset upload areas to original state
-            const logoUploadArea = document.getElementById('order-menu-logo-upload-area');
-            const menuPhotosUploadArea = document.getElementById('menu-photos-upload-area');
-            
-            if (logoUploadArea) {
-              logoUploadArea.innerHTML = `
-                <div class="flex flex-col items-center">
-                  <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                  </svg>
-                  <p class="text-gray-600 mb-2">Click to upload logo</p>
-                  <p class="text-sm text-gray-500">PNG, JPG, GIF up to 10MB</p>
-                </div>
-              `;
-              console.log('✅ Logo upload area reset to original state');
-            }
-            
-            if (menuPhotosUploadArea) {
-              menuPhotosUploadArea.innerHTML = `
-                <div class="flex flex-col items-center">
-                  <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                  </svg>
-                  <p class="text-gray-600 mb-2">Click to upload photos</p>
-                  <p class="text-sm text-gray-500">PNG, JPG, GIF up to 5MB each</p>
-                </div>
-              `;
-              console.log('✅ Menu photos upload area reset to original state');
-            }
-            
-            // Reset global variables
-            if (typeof menuPhotos !== 'undefined') {
-              menuPhotos = [];
-              console.log('✅ Menu photos array cleared');
-            }
-            
-            // Show success message
-            alert('✅ Form submitted successfully!');
-            
-            // Refresh recent activity to show the new submission
-            setTimeout(() => {
-              loadRecentActivity();
-            }, 1000);
-          }
+          await handleOrderMenuFormSubmission();
         } catch (err) {
-          console.error('❌ Save button save error:', err);
-          alert('❌ Form submission error: ' + err.message);
+          console.error('❌ Save button unified flow error:', err);
         } finally {
-          // Reset the flag after save operation completes
           isSaving = false;
         }
       });
@@ -4120,70 +4394,13 @@ Status: Submitted
     if (directSaveBtn) {
       directSaveBtn.addEventListener('click', async function() {
         console.log('🔴 Direct save button clicked!');
-        alert('🔴 Direct save button clicked!');
         
-        // Get form data directly
-        const form = document.getElementById('requirements-form');
-        console.log('🔴 Direct save - Form found:', !!form);
-        
-        if (!form) {
-          console.error('❌ Form not found for direct save');
-          alert('❌ Form not found! Please make sure the form is visible.');
-          
-          // Try to find all forms on the page
-          const allForms = document.querySelectorAll('form');
-          console.log('🔴 All forms on page:', allForms);
-          console.log('🔴 Form IDs:', Array.from(allForms).map(f => f.id));
-          
-          return;
-        }
-        
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData);
-        console.log('🔴 Direct save - Form data:', data);
-        
-        // Prepare data for database
-        const insertData = {
-          project_name: data.projectName || 'Direct Save Project',
-          restaurant_name: data.restaurantName || 'Direct Save Restaurant',
-          owner_name: data.ownerName || 'Direct Save Owner',
-          contact_person: data.contactPerson || 'Direct Save Contact',
-          email: data.email || 'direct@save.com',
-          phone_number: data.phone || '1234567890',
-          house_flat_number: data.houseNumber || '123',
-          address_line_1: data.addressLine1 || 'Direct Save Address',
-          city: data.city || 'Direct Save City',
-          state: data.state || 'Direct Save State',
-          pincode: data.pincode || '123456',
-          country: data.country || 'India',
-          restaurant_logo_url: null,
-          menu_photos_urls: [],
-          additional_requirements: data.additionalRequirements || 'Direct save requirements',
-          base_package_cost: 999.00,
-          gst_amount: 180.00,
-          total_amount: 1179.00,
-          status: 'pending',
-          payment_status: 'pending'
-        };
-        
-        console.log('🔴 Direct save - Insert data:', insertData);
-        
+        // Route through the same validated submission path (uploads + DB insert)
         try {
-          const { data: result, error } = await window.supabase
-            .from('order_customizations')
-            .insert(insertData)
-            .select();
-            
-          if (error) {
-            console.error('❌ Direct save failed:', error);
-            alert('❌ Direct save failed: ' + error.message);
-          } else {
-            console.log('✅ Direct save successful!', result);
-            alert('✅ Direct save successful! Data saved to database.');
-          }
+          await handleOrderMenuFormSubmission();
         } catch (err) {
-          console.error('❌ Direct save error:', err);
-          alert('❌ Direct save error: ' + err.message);
+          console.error('❌ Direct save flow failed:', err);
+          alert('❌ Direct save failed. See console.');
         }
       });
     }
