@@ -1736,41 +1736,10 @@ import { sharedDataStore } from '../lib/shared-data-store';
               paymentContent.style.display = 'block';
             }
             
-            // Check if this is Order Menu System - open payment link in new tab
+            // For OMS, payment link removed; just show payment section
             if (isOrderMenuSystem) {
-              console.log('🍽️ Order Menu System detected - opening payment in new tab...');
-              // Open payment link in new tab to avoid console errors
-              const paymentWindow = window.open('https://payments.pabbly.com/subscribe/68c084369dbcfe4b619b80ce/six-months-inr', '_blank');
-              
-              // Check if popup was blocked
-              if (!paymentWindow) {
-                alert('Please allow popups for this site to proceed with payment, or click the payment link manually.');
-                // Fallback: show payment link
-                const paymentLink = document.createElement('div');
-                paymentLink.innerHTML = `
-                  <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                              background: white; padding: 20px; border: 2px solid #4CAF50; 
-                              border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 9999;">
-                    <h3 style="color: #4CAF50; margin-bottom: 15px;">Payment Required</h3>
-                    <p style="margin-bottom: 15px;">Please complete your payment to proceed:</p>
-                    <a href="https://payments.pabbly.com/subscribe/68c084369dbcfe4b619b80ce/six-months-inr" 
-                       target="_blank" style="display: inline-block; padding: 10px 20px; 
-                       background: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">
-                      Open Payment Page
-                    </a>
-                    <button onclick="this.parentElement.remove()" style="margin-left: 10px; padding: 10px 15px; 
-                            background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                      Close
-                    </button>
-                  </div>
-                `;
-                document.body.appendChild(paymentLink);
-              } else {
-                // Show success message and redirect to congratulations page
-                setTimeout(() => {
-                  window.location.href = '/orders?order=success&product=order-menu-system';
-                }, 2000);
-              }
+              console.log('🍽️ Order Menu System detected - payment link removed, showing payment section only.');
+              paymentSection.scrollIntoView({ behavior: 'smooth' });
             } else {
               // Scroll to payment section for other products
               paymentSection.scrollIntoView({ behavior: 'smooth' });

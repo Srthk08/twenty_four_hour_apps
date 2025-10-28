@@ -13,6 +13,27 @@ import AuthGuard from '../components/AuthGuard.astro';
           <p class="text-gray-600 mt-2">View your order history and track your projects</p>
         </div>
 
+        <!-- Recent Order Summary (replaces activity) -->
+        <div id="recent-order-summary" class="hidden bg-white rounded-xl shadow-sm p-6 mb-8">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-500">Most recent order</p>
+              <h3 class="text-lg font-semibold text-gray-900" id="recent-order-title">-</h3>
+              <div class="mt-1 flex items-center space-x-3 text-sm text-gray-600">
+                <span id="recent-order-amount">₹0</span>
+                <span>•</span>
+                <span id="recent-order-date">-</span>
+                <span>•</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 text-green-800" id="recent-order-status">Completed</span>
+              </div>
+            </div>
+            <div class="flex items-center space-x-3">
+              <a href="/products" class="inline-flex items-center px-4 py-2 rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors">Browse Products</a>
+              <button type="button" id="recent-order-view-btn" class="inline-flex items-center px-4 py-2 rounded-md bg-primary-600 text-white hover:bg-primary-700 transition-colors">View Order</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Orders Content -->
         <div id="orders-content">
           <!-- Success Redirect Check -->
@@ -176,6 +197,61 @@ import AuthGuard from '../components/AuthGuard.astro';
               </div>
             </div>
           </div>
+
+          <!-- Order Details Modal -->
+          <div id="order-details-modal" class="hidden fixed inset-0 z-50">
+            <div class="absolute inset-0 bg-black bg-opacity-40" id="order-modal-backdrop"></div>
+            <div class="relative max-w-2xl mx-auto mt-24 bg-white rounded-xl shadow-xl overflow-hidden">
+              <div class="p-6 border-b flex items-center justify-between">
+                <h3 class="text-xl font-semibold text-gray-900" id="order-modal-title">Order Details</h3>
+                <button type="button" id="order-modal-close" class="text-gray-500 hover:text-gray-700">✕</button>
+              </div>
+              <div class="p-6 space-y-4">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm text-gray-500">Amount</p>
+                    <p class="text-2xl font-bold text-primary-600" id="order-modal-amount">₹0</p>
+                  </div>
+                  <div class="text-right">
+                    <p class="text-sm text-gray-500">Date</p>
+                    <p class="text-sm font-medium text-gray-900" id="order-modal-date">-</p>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500">Order ID</p>
+                  <p class="text-sm font-mono text-gray-800" id="order-modal-id">-</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500">Project</p>
+                  <p class="text-sm text-gray-800" id="order-modal-desc">-</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 class="text-sm font-semibold text-gray-800 mb-2">Contact</h4>
+                    <div class="text-sm text-gray-700 space-y-1">
+                      <div>Person: <span id="order-modal-contact">-</span></div>
+                      <div>Email: <span id="order-modal-email">-</span></div>
+                      <div>Phone: <span id="order-modal-phone">-</span></div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-semibold text-gray-800 mb-2">Restaurant</h4>
+                    <div class="text-sm text-gray-700 space-y-1">
+                      <div>Name: <span id="order-modal-restaurant">-</span></div>
+                      <div>Cuisine: <span id="order-modal-cuisine">-</span></div>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="text-sm font-semibold text-gray-800 mb-2">Additional Requirements</h4>
+                  <p class="text-sm text-gray-700" id="order-modal-additional">-</p>
+                </div>
+              </div>
+              <div class="p-4 border-t bg-gray-50 text-right">
+                <button type="button" id="order-modal-close-bottom" class="inline-flex items-center px-4 py-2 rounded-md bg-primary-600 text-white hover:bg-primary-700 transition-colors">Close</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -193,11 +269,10 @@ import AuthGuard from '../components/AuthGuard.astro';
     }
 
     init() {
-      this.loadOrders();
-      this.renderOrders();
+      this.loadOrders().then(() => this.renderOrders());
     }
 
-    loadOrders() {
+    async loadOrders() {
       // Load orders from multiple localStorage sources
       const projectRequirements = localStorage.getItem('project-requirements');
       const orderMenuRequirements = localStorage.getItem('order-menu-requirements');
@@ -210,12 +285,29 @@ import AuthGuard from '../components/AuthGuard.astro';
       
       this.orders = [];
       
-      // Get current user
-      const currentUser = window.globalAuthManager?.getCurrentUser() || window.simpleAuthManager?.getCurrentUser();
-      console.log('Current user:', currentUser);
+      // Get current user (from in-app auth or Supabase)
+      let currentUser = window.globalAuthManager?.getCurrentUser() || window.simpleAuthManager?.getCurrentUser();
+      console.log('Current user (app auth):', currentUser);
       
       if (!currentUser) {
         console.log('No current user found');
+        // Try Supabase auth as a fallback
+        try {
+          const { supabase } = await import('../lib/supabase');
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            currentUser = { email: user.email };
+          }
+        } catch (e) {
+          console.warn('Supabase auth fallback failed:', e);
+        }
+        if (!currentUser) return;
+      }
+
+      // Normalize to a plain email string for downstream queries/filters
+      const userEmail = currentUser?.email || null;
+      if (!userEmail) {
+        console.log('No user email available – cannot load orders');
         return;
       }
       
@@ -265,14 +357,97 @@ import AuthGuard from '../components/AuthGuard.astro';
       if (userOrders) {
         try {
           const userOrdersData = JSON.parse(userOrders);
-          const filteredOrders = userOrdersData.filter(order => order.userId === currentUser.email);
+          const filteredOrders = userOrdersData.filter(order => order.userId === userEmail);
           this.orders.push(...filteredOrders);
         } catch (error) {
           console.error('Error parsing user orders:', error);
         }
       }
+
+      // Load Supabase-backed orders and customizations for this user
+      try {
+        await this.loadSupabaseOrders(userEmail);
+      } catch (e) {
+        console.warn('Failed to load Supabase orders:', e);
+      }
+      
+      // Sort newest first
+      this.orders.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
       
       console.log('Total orders loaded:', this.orders.length);
+    }
+
+    async loadSupabaseOrders(userEmail) {
+      try {
+        const { supabase } = await import('../lib/supabase');
+        // Fetch order_customizations (Order Menu System submissions)
+        const { data: customizations, error: customizationsError } = await supabase
+          .from('order_customizations')
+          .select('*')
+          .eq('email', userEmail)
+          .order('created_at', { ascending: false });
+        if (customizationsError) throw customizationsError;
+
+        (customizations || []).forEach(cz => {
+          this.orders.push({
+            orderId: cz.id || `OC-${Date.now()}`,
+            orderDate: cz.created_at || new Date().toISOString(),
+            total: Number(cz.total_amount) || 0,
+            projectName: cz.project_name || 'Order Menu System',
+            description: 'Order Menu System customization',
+            status: 'completed',
+            requirements: {
+              projectName: cz.project_name,
+              contactPerson: cz.contact_person,
+              restaurantName: cz.restaurant_name,
+              cuisineType: cz.cuisine_type,
+              email: cz.email,
+              phone: cz.phone_number,
+              additionalRequirements: cz.additional_requirements,
+              primaryColor: cz.primary_color,
+              secondaryColor: cz.secondary_color,
+              accentColor: cz.accent_color,
+              textColor: cz.text_color
+            }
+          });
+        });
+
+        // Fetch completed cart_customizations (completed orders)
+        const { data: carts, error: cartsError } = await supabase
+          .from('cart_customizations')
+          .select('*')
+          .eq('user_email', userEmail)
+          .eq('cart_status', 'completed')
+          .order('updated_at', { ascending: false });
+        if (cartsError) throw cartsError;
+
+        (carts || []).forEach(cart => {
+          this.orders.push({
+            orderId: cart.id || `CART-${Date.now()}`,
+            orderDate: cart.updated_at || cart.created_at || new Date().toISOString(),
+            total: Number(cart.total_amount) || 0,
+            projectName: cart.project_name || 'Custom Project',
+            description: cart.project_description || 'Project purchased',
+            status: 'completed',
+            requirements: {
+              projectName: cart.project_name,
+              contactPerson: cart.contact_person,
+              restaurantName: cart.restaurant_name,
+              cuisineType: cart.cuisine_type,
+              email: cart.user_email,
+              phone: cart.phone_number,
+              additionalRequirements: cart.additional_requirements,
+              primaryColor: cart.primary_color,
+              secondaryColor: cart.secondary_color,
+              accentColor: cart.accent_color,
+              textColor: cart.text_color
+            }
+          });
+        });
+      } catch (error) {
+        console.error('Error loading Supabase orders:', error);
+        throw error;
+      }
     }
     
     extractPrice(priceString) {
@@ -298,6 +473,9 @@ import AuthGuard from '../components/AuthGuard.astro';
         console.log('No orders found, showing empty state');
         emptyOrders?.classList.remove('hidden');
         ordersList?.classList.add('hidden');
+        // Hide recent activity when there are no orders
+        const recentActivity = document.getElementById('recent-activity');
+        recentActivity?.classList.add('hidden');
         return;
       }
 
@@ -306,6 +484,9 @@ import AuthGuard from '../components/AuthGuard.astro';
       ordersList?.classList.remove('hidden');
 
       this.renderOrdersList();
+
+      // Update recent summary visibility/content
+      this.renderRecentSummary();
     }
 
     renderOrdersList() {
@@ -392,6 +573,65 @@ import AuthGuard from '../components/AuthGuard.astro';
         hour: '2-digit',
         minute: '2-digit'
       });
+    }
+
+    // Render the Recent Order Summary based on the newest completed order
+    renderRecentSummary() {
+      const summary = document.getElementById('recent-order-summary');
+      const titleEl = document.getElementById('recent-order-title');
+      const amountEl = document.getElementById('recent-order-amount');
+      const dateEl = document.getElementById('recent-order-date');
+      const statusEl = document.getElementById('recent-order-status');
+      const viewBtn = document.getElementById('recent-order-view-btn');
+      if (!summary || !titleEl || !amountEl || !dateEl || !statusEl || !viewBtn) return;
+
+      const completed = this.orders
+        .filter(o => (o.status || '').toLowerCase() === 'completed')
+        .sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
+
+      if (completed.length === 0) {
+        summary.classList.add('hidden');
+        return;
+      }
+
+      const latest = completed[0];
+      summary.classList.remove('hidden');
+      titleEl.textContent = latest.projectName || 'Order';
+      amountEl.textContent = `₹${(latest.total || 0).toLocaleString('en-IN')}`;
+      dateEl.textContent = this.formatDate(latest.orderDate);
+      statusEl.textContent = (latest.status || 'Completed').charAt(0).toUpperCase() + (latest.status || 'Completed').slice(1);
+      // Open modal with latest order details on click
+      viewBtn.onclick = () => {
+        this.showOrderDetails(latest);
+      };
+    }
+
+    showOrderDetails(order) {
+      const modal = document.getElementById('order-details-modal');
+      if (!modal) return;
+      const byId = (id) => document.getElementById(id);
+      byId('order-modal-title').textContent = order.projectName || 'Order Details';
+      byId('order-modal-amount').textContent = `₹${(order.total || 0).toLocaleString('en-IN')}`;
+      byId('order-modal-date').textContent = this.formatDate(order.orderDate);
+      byId('order-modal-id').textContent = order.orderId || '-';
+      byId('order-modal-desc').textContent = order.description || '-';
+      const req = order.requirements || {};
+      byId('order-modal-contact').textContent = req.contactPerson || '-';
+      byId('order-modal-email').textContent = req.email || '-';
+      byId('order-modal-phone').textContent = req.phone || '-';
+      byId('order-modal-restaurant').textContent = req.restaurantName || '-';
+      byId('order-modal-cuisine').textContent = req.cuisineType || '-';
+      byId('order-modal-additional').textContent = req.additionalRequirements || '—';
+
+      modal.classList.remove('hidden');
+
+      const closeFns = () => modal.classList.add('hidden');
+      const backdrop = document.getElementById('order-modal-backdrop');
+      const closeTop = document.getElementById('order-modal-close');
+      const closeBottom = document.getElementById('order-modal-close-bottom');
+      backdrop.onclick = closeFns;
+      closeTop.onclick = closeFns;
+      closeBottom.onclick = closeFns;
     }
   }
 

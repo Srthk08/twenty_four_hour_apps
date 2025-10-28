@@ -659,6 +659,12 @@
     const profileLink = document.getElementById('profile-link');
     const mobileProfileLink = document.getElementById('mobile-profile-link');
 
+    // Get Dashboard and My Orders links (desktop and mobile)
+    const dashboardLink = document.getElementById('dashboard-link');
+    const mobileDashboardLink = document.getElementById('mobile-dashboard-link');
+    const myOrdersLink = document.querySelector('#user-dropdown a[href="/orders"]');
+    const mobileMyOrdersLink = document.querySelector('#mobile-user-menu a[href="/orders"]');
+
     // Check if user has menu operator role
     console.log('🔍 Checking user role:', user.role, 'for user:', user.email);
     if (user.role === 'menu_operator' || user.role === 'menu operator') {
@@ -670,14 +676,32 @@
         mobileMenuOperatorLink.classList.remove('hidden');
         mobileMenuOperatorLink.style.display = 'block';
       }
+      // Hide Dashboard and My Orders for menu operator
+      if (dashboardLink) {
+        dashboardLink.classList.add('hidden');
+        dashboardLink.style.display = 'none';
+      }
+      if (mobileDashboardLink) {
+        mobileDashboardLink.classList.add('hidden');
+        mobileDashboardLink.style.display = 'none';
+      }
+      if (myOrdersLink) {
+        myOrdersLink.classList.add('hidden');
+        myOrdersLink.style.display = 'none';
+      }
+      if (mobileMyOrdersLink) {
+        mobileMyOrdersLink.classList.add('hidden');
+        mobileMyOrdersLink.style.display = 'none';
+      }
       
-      // Profile links now always go to regular profile page (not menu operator profile)
-      // This allows all users to access the main profile page with profile update and password change
+      // For menu operator, profile links should point to menu-operator profile to avoid re-writes
       if (profileLink) {
-        profileLink.href = '/profile';
+        profileLink.href = '/menu-operator/profile';
+        profileLink.setAttribute('href', '/menu-operator/profile');
       }
       if (mobileProfileLink) {
-        mobileProfileLink.href = '/profile';
+        mobileProfileLink.href = '/menu-operator/profile';
+        mobileProfileLink.setAttribute('href', '/menu-operator/profile');
       }
     } else {
       if (menuOperatorLink) {
@@ -687,6 +711,23 @@
       if (mobileMenuOperatorLink) {
         mobileMenuOperatorLink.classList.add('hidden');
         mobileMenuOperatorLink.style.display = 'none';
+      }
+      // Show Dashboard and My Orders for non menu operator roles
+      if (dashboardLink) {
+        dashboardLink.classList.remove('hidden');
+        dashboardLink.style.display = 'flex';
+      }
+      if (mobileDashboardLink) {
+        mobileDashboardLink.classList.remove('hidden');
+        mobileDashboardLink.style.display = 'flex';
+      }
+      if (myOrdersLink) {
+        myOrdersLink.classList.remove('hidden');
+        myOrdersLink.style.display = 'flex';
+      }
+      if (mobileMyOrdersLink) {
+        mobileMyOrdersLink.classList.remove('hidden');
+        mobileMyOrdersLink.style.display = 'flex';
       }
       
       // Update profile links to point to regular profile
@@ -790,16 +831,16 @@
       console.log('🔒 Maintaining profile links with stored role:', window.currentUserRole);
       
       if (window.currentUserRole === 'menu_operator' || window.currentUserRole === 'menu operator') {
-        // Profile links now always go to regular profile page (not menu operator profile)
-        if (profileLink.href !== '/profile') {
-          profileLink.href = '/profile';
-          profileLink.setAttribute('href', '/profile');
-          console.log('🔧 Fixed desktop profile link to regular profile');
+        // Keep profile links pointing to menu operator profile for consistency
+        if (profileLink.href !== '/menu-operator/profile') {
+          profileLink.href = '/menu-operator/profile';
+          profileLink.setAttribute('href', '/menu-operator/profile');
+          console.log('🔧 Fixed desktop profile link to menu operator profile');
         }
-        if (mobileProfileLink.href !== '/profile') {
-          mobileProfileLink.href = '/profile';
-          mobileProfileLink.setAttribute('href', '/profile');
-          console.log('🔧 Fixed mobile profile link to regular profile');
+        if (mobileProfileLink.href !== '/menu-operator/profile') {
+          mobileProfileLink.href = '/menu-operator/profile';
+          mobileProfileLink.setAttribute('href', '/menu-operator/profile');
+          console.log('🔧 Fixed mobile profile link to menu operator profile');
         }
       } else {
         if (profileLink.href !== '/profile') {
@@ -1228,10 +1269,6 @@
         const product = currentParams.get('product');
         const price = currentParams.get('price');
         
-        // Add smooth transition effect
-        document.body.style.transition = 'opacity 0.3s ease-in-out';
-        document.body.style.opacity = '0.7';
-        
         setTimeout(() => {
           if (product && price) {
             window.location.href = `/dashboard?product=${product}&price=${price}`;
@@ -1258,10 +1295,6 @@
         const product = currentParams.get('product');
         const price = currentParams.get('price');
         
-        // Add smooth transition effect
-        document.body.style.transition = 'opacity 0.3s ease-in-out';
-        document.body.style.opacity = '0.7';
-        
         setTimeout(() => {
           if (product && price) {
             window.location.href = `/dashboard?product=${product}&price=${price}`;
@@ -1287,8 +1320,9 @@
         // Close dropdown first
         closeUserDropdown();
         
-        // Navigate to profile page directly without role-based redirection
-        window.location.href = '/profile';
+        // Navigate using the link's current href to respect role-based target
+        const target = profileLink.getAttribute('href') || '/profile';
+        window.location.href = target;
       });
     }
     
@@ -1301,8 +1335,9 @@
         // Close mobile menu first
         closeMobileMenu();
         
-        // Navigate to profile page directly without role-based redirection
-        window.location.href = '/profile';
+        // Navigate using the link's current href to respect role-based target
+        const target = mobileProfileLink.getAttribute('href') || '/profile';
+        window.location.href = target;
       });
     }
   }
