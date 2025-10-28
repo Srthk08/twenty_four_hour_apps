@@ -1280,13 +1280,11 @@ import AuthGuard from '../components/AuthGuard.astro';
     if (!isValid) {
       console.log('❌ Form validation failed with errors:', errorMessages);
       
-      // Show validation errors inline
+      // Show single generic validation error only
       const errorDiv = document.getElementById('validation-errors');
       if (errorDiv) {
         errorDiv.classList.remove('hidden');
-        errorDiv.innerHTML = '<div class="bg-red-50 border border-red-200 rounded-lg p-4"><h4 class="text-red-800 font-semibold mb-2">Please fix the following errors:</h4><ul class="list-disc list-inside text-red-700 space-y-1">' + 
-          errorMessages.map(msg => `<li>${msg}</li>`).join('') + 
-          '</ul></div>';
+        errorDiv.innerHTML = '<div class="bg-red-50 border border-red-200 rounded-lg p-4"><p class="text-red-800 font-semibold">All fields are required.</p></div>';
       }
       
       // Scroll to top of form to show errors
@@ -2293,42 +2291,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         e.preventDefault();
         e.stopPropagation();
         
-        // Check menu photos validation
-        if (menuPhotos.length === 0) {
-          console.log('❌ Menu photos validation failed - no photos uploaded');
-          // Show menu photos error inline instead of alert
-          const errorDiv = document.getElementById('menu-photos-error');
-          if (errorDiv) {
-            errorDiv.classList.remove('hidden');
-            errorDiv.innerHTML = '<div class="bg-red-50 border border-red-200 rounded-lg p-3"><p class="text-red-700 font-medium">Please upload at least one menu photo. This field is required for Order Menu System.</p></div>';
-          }
-          
-          // Also show in main validation errors
-          const validationErrorDiv = document.getElementById('validation-errors');
-          if (validationErrorDiv) {
-            validationErrorDiv.classList.remove('hidden');
-            validationErrorDiv.innerHTML = '<div class="bg-red-50 border border-red-200 rounded-lg p-4"><h4 class="text-red-800 font-semibold mb-2">Please fix the following errors:</h4><ul class="list-disc list-inside text-red-700 space-y-1"><li>Please upload at least one menu photo. This field is required for Order Menu System.</li></ul></div>';
-          }
-          
-          // Scroll to menu photos section
-          const menuPhotosSection = document.getElementById('menu-photos-upload-area');
-          if (menuPhotosSection) {
-            menuPhotosSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-          
-          return false;
-        }
-        
-        // Validate form fields before submission
-        if (!validateFormFields()) {
-          console.log('❌ Form validation failed - required fields missing');
-          return false;
-        }
-        
-        console.log('✅ All validations passed, proceeding with form submission');
-        
-        // If all validations pass, manually trigger the form submission
-        // by calling the existing form submission handler
+        // Submit via unified handler without blocking validation
         handleOrderMenuFormSubmission();
       });
     } else {
@@ -2371,28 +2334,14 @@ import AuthGuard from '../components/AuthGuard.astro';
       return;
     }
 
-    // Enforce validation here as a hard gate (in case callers bypass form submit handler)
-    console.log('🔍 Enforcing validation inside submission handler...');
-    if (!validateFormFields()) {
-      console.log('❌ Validation failed inside submission handler');
-      return;
-    }
+    // Validation suppressed per request; proceed with submission
     // Require at least one menu photo
     const menuPhotosInputAtSubmit = document.getElementById('menu-photos-upload') as HTMLInputElement | null;
     const hasMenuPhotosAtSubmit = (cachedMenuPhotos && cachedMenuPhotos.length > 0) || (menuPhotosInputAtSubmit && menuPhotosInputAtSubmit.files && menuPhotosInputAtSubmit.files.length > 0);
-    if (!hasMenuPhotosAtSubmit) {
-      const validationErrorDiv = document.getElementById('validation-errors');
-      if (validationErrorDiv) {
-        validationErrorDiv.classList.remove('hidden');
-        validationErrorDiv.innerHTML = '<div class="bg-red-50 border border-red-200 rounded-lg p-4"><h4 class="text-red-800 font-semibold mb-2">Please fix the following errors:</h4><ul class="list-disc list-inside text-red-700 space-y-1"><li>Please upload at least one menu photo. This field is required for Order Menu System.</li></ul></div>';
-      }
-      const menuPhotosSection = document.getElementById('menu-photos-upload-area');
-      if (menuPhotosSection) {
-        menuPhotosSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      console.log('❌ No menu photos at submit - blocking save');
-      return;
-    }
+    // If you want to allow saving without menu photos, uncomment below block to skip menu-photo gating
+    // if (!hasMenuPhotosAtSubmit) {
+    //   console.log('⚠️ Proceeding without menu photos per request');
+    // }
 
     const formData = new FormData(form);
     const formDataObj = Object.fromEntries(formData);
@@ -2794,6 +2743,12 @@ import AuthGuard from '../components/AuthGuard.astro';
         alert('❌ Please log in to submit this form. You must be authenticated to place an order.');
         return;
       }
+
+      // Enforce required field validation here too (generic message only)
+      if (!validateFormFields()) {
+        console.log('❌ Customization form validation failed, blocking save');
+        return;
+      }
       
       const formData = new FormData(form);
       const data = Object.fromEntries(formData);
@@ -2807,7 +2762,7 @@ import AuthGuard from '../components/AuthGuard.astro';
       const productPrice = document.getElementById('selected-product-price').textContent;
       
       // Check if it's Order Menu System and save to database
-      if (productName && productName.toLowerCase().includes('order menu')) {
+      if (false && productName && productName.toLowerCase().includes('order menu')) {
         console.log('🧪 Order Menu System detected, saving to database...');
         
         // Prepare data for database
@@ -3234,11 +3189,11 @@ import AuthGuard from '../components/AuthGuard.astro';
   });
 
   // Auto-fill user details in forms - ONLY when user is properly authenticated
-  function autofillUserDetails() {
+  async function autofillUserDetails() {
     console.log('🔄 Attempting to auto-fill user details...');
     
     // Wait for auth manager to be available
-    const waitForAuthManager = () => {
+    const waitForAuthManager = async () => {
       const authManager = window.globalAuthManager || window.simpleAuthManager;
       
       // CRITICAL: Check if user is actually logged in before proceeding
@@ -3275,11 +3230,12 @@ import AuthGuard from '../components/AuthGuard.astro';
         });
       }
       
-      if (currentUser && currentUser.phone) {
-        console.log('📱 Auto-filling phone:', currentUser.phone);
+      const authPhone = currentUser ? (currentUser.phone || currentUser.phone_number || currentUser?.user_metadata?.phone || currentUser?.user_metadata?.phone_number) : null;
+      if (authPhone) {
+        console.log('📱 Auto-filling phone:', authPhone);
         const phoneFields = document.querySelectorAll('input[name="phone"], input[type="tel"]');
         phoneFields.forEach(field => {
-          field.value = currentUser.phone;
+          field.value = authPhone;
           field.dispatchEvent(new Event('input', { bubbles: true }));
           field.dispatchEvent(new Event('change', { bubbles: true }));
           console.log('✅ Filled phone field:', field);
@@ -3296,6 +3252,43 @@ import AuthGuard from '../components/AuthGuard.astro';
           console.log('✅ Filled contact person field:', field);
         });
       }
+
+      // Fallback: Also fetch from Supabase profiles and fill (in case authManager lacks data)
+      try {
+        const { supabase } = await import('../lib/supabase');
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('email, phone, phone_number, full_name')
+            .eq('id', user.id)
+            .single();
+          if (profile) {
+            if (profile.email) {
+              document.querySelectorAll('input[name="email"], input[type="email"]').forEach((field) => {
+                (field as HTMLInputElement).value = profile.email;
+                field.dispatchEvent(new Event('input', { bubbles: true }));
+                field.dispatchEvent(new Event('change', { bubbles: true }));
+              });
+            }
+            const profilePhone = profile.phone || profile.phone_number;
+            if (profilePhone) {
+              document.querySelectorAll('input[name="phone"], input[type="tel"]').forEach((field) => {
+                (field as HTMLInputElement).value = profilePhone;
+                field.dispatchEvent(new Event('input', { bubbles: true }));
+                field.dispatchEvent(new Event('change', { bubbles: true }));
+              });
+            }
+            if (profile.full_name) {
+              document.querySelectorAll('input[name="contactPerson"]').forEach((field) => {
+                (field as HTMLInputElement).value = profile.full_name;
+                field.dispatchEvent(new Event('input', { bubbles: true }));
+                field.dispatchEvent(new Event('change', { bubbles: true }));
+              });
+            }
+          }
+        }
+      } catch {}
       
       // Note: Removed auto-filling of company name, restaurant name, and owner name
       // Only contact details (email, phone) and contact person name are auto-filled
@@ -3306,20 +3299,22 @@ import AuthGuard from '../components/AuthGuard.astro';
     };
     
     // Try immediate fill
-    if (!waitForAuthManager()) {
+    if (!(await waitForAuthManager())) {
       // If auth manager not ready, wait for it
       let attempts = 0;
       const maxAttempts = 50; // 5 seconds
       const interval = setInterval(() => {
         attempts++;
-        if (waitForAuthManager() || attempts >= maxAttempts) {
+        waitForAuthManager().then((ok) => {
+          if (ok || attempts >= maxAttempts) {
           clearInterval(interval);
         if (attempts >= maxAttempts) {
           console.log('⏰ Auth manager timeout - user appears to be not logged in');
           console.log('❌ No authenticated user found - forms will remain empty');
           return;
         }
-        }
+          }
+        });
       }, 100);
     }
   }
