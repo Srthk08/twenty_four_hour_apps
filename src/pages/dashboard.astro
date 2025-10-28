@@ -2371,6 +2371,29 @@ import AuthGuard from '../components/AuthGuard.astro';
       return;
     }
 
+    // Enforce validation here as a hard gate (in case callers bypass form submit handler)
+    console.log('🔍 Enforcing validation inside submission handler...');
+    if (!validateFormFields()) {
+      console.log('❌ Validation failed inside submission handler');
+      return;
+    }
+    // Require at least one menu photo
+    const menuPhotosInputAtSubmit = document.getElementById('menu-photos-upload') as HTMLInputElement | null;
+    const hasMenuPhotosAtSubmit = (cachedMenuPhotos && cachedMenuPhotos.length > 0) || (menuPhotosInputAtSubmit && menuPhotosInputAtSubmit.files && menuPhotosInputAtSubmit.files.length > 0);
+    if (!hasMenuPhotosAtSubmit) {
+      const validationErrorDiv = document.getElementById('validation-errors');
+      if (validationErrorDiv) {
+        validationErrorDiv.classList.remove('hidden');
+        validationErrorDiv.innerHTML = '<div class="bg-red-50 border border-red-200 rounded-lg p-4"><h4 class="text-red-800 font-semibold mb-2">Please fix the following errors:</h4><ul class="list-disc list-inside text-red-700 space-y-1"><li>Please upload at least one menu photo. This field is required for Order Menu System.</li></ul></div>';
+      }
+      const menuPhotosSection = document.getElementById('menu-photos-upload-area');
+      if (menuPhotosSection) {
+        menuPhotosSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      console.log('❌ No menu photos at submit - blocking save');
+      return;
+    }
+
     const formData = new FormData(form);
     const formDataObj = Object.fromEntries(formData);
     
