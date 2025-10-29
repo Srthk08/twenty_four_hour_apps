@@ -382,7 +382,7 @@ import AuthGuard from '../components/AuthGuard.astro';
               <input type="text" name="city" id="city-input" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Type to search city..." required autocomplete="off">
               <div id="city-suggestions" class="hidden absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto mt-1"></div>
             </div>
-            <div id="city-error" class="hidden text-red-500 text-sm mt-1">Please select a valid city</div>
+            <div id="city-error" class="hidden text-red-500 text-sm mt-1">City is required</div>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -1001,9 +1001,9 @@ import AuthGuard from '../components/AuthGuard.astro';
           citySuggestions.classList.add('hidden');
         }
         
-        // Show/hide error message
+        // Show/hide error message: only require non-empty
         const errorDiv = document.getElementById('city-error');
-        if (e.target.value === '' || !indianCities.includes(e.target.value)) {
+        if (e.target.value === '') {
           errorDiv.classList.remove('hidden');
         } else {
           errorDiv.classList.add('hidden');
@@ -1150,6 +1150,19 @@ import AuthGuard from '../components/AuthGuard.astro';
         error.classList.add('hidden');
       }
     });
+    
+    // Clear validation popup if it exists
+    const validationPopup = document.getElementById('validation-popup');
+    if (validationPopup) {
+      validationPopup.remove();
+    }
+    
+    // Clear field error highlighting
+    const fields = document.querySelectorAll('#order-menu-form input, #order-menu-form select, #order-menu-form textarea');
+    fields.forEach(field => {
+      field.classList.remove('border-red-500', 'ring-2', 'ring-red-200');
+      field.classList.add('border-gray-300');
+    });
   }
   
   function validateFormFields() {
@@ -1160,15 +1173,21 @@ import AuthGuard from '../components/AuthGuard.astro';
     const stateInput = document.getElementById('state-input');
     const phoneInput = document.getElementById('phone-input');
     
-    // Get all required form fields
-    const projectName = document.querySelector('input[name="projectName"]');
-    const restaurantName = document.querySelector('input[name="restaurantName"]');
-    const ownerName = document.querySelector('input[name="ownerName"]');
-    const contactPerson = document.querySelector('input[name="contactPerson"]');
-    const email = document.querySelector('input[name="email"]');
-    const houseNumber = document.querySelector('input[name="houseNumber"]');
-    const addressLine1 = document.querySelector('input[name="addressLine1"]');
-    const country = document.querySelector('select[name="country"]');
+    // Get all required form fields from the ORDER MENU FORM specifically
+    const orderMenuForm = document.getElementById('order-menu-form');
+    if (!orderMenuForm) {
+      console.error('Order menu form not found for validation');
+      return false;
+    }
+    
+    const projectName = orderMenuForm.querySelector('input[name="projectName"]');
+    const restaurantName = orderMenuForm.querySelector('input[name="restaurantName"]');
+    const ownerName = orderMenuForm.querySelector('input[name="ownerName"]');
+    const contactPerson = orderMenuForm.querySelector('input[name="contactPerson"]');
+    const email = orderMenuForm.querySelector('input[name="email"]');
+    const houseNumber = orderMenuForm.querySelector('input[name="houseNumber"]');
+    const addressLine1 = orderMenuForm.querySelector('input[name="addressLine1"]');
+    const country = orderMenuForm.querySelector('select[name="country"]');
     
     console.log('🔍 Form fields found:');
     console.log('  - projectName:', projectName ? projectName.value : 'not found');
@@ -1186,45 +1205,70 @@ import AuthGuard from '../components/AuthGuard.astro';
     
     let isValid = true;
     let errorMessages = [];
+    let emptyFields = [];
+    
+    // Clear previous error states
+    clearAllFieldErrors();
     
     // Validate required text fields
     if (!projectName || !projectName.value.trim()) {
+      console.log('🔍 Project Name validation failed:');
+      console.log('  - projectName element:', projectName);
+      console.log('  - projectName.value:', projectName ? projectName.value : 'element not found');
+      emptyFields.push('Project Name');
       errorMessages.push('Project Name is required');
       isValid = false;
+      highlightFieldError(projectName);
     }
     
     if (!restaurantName || !restaurantName.value.trim()) {
+      console.log('🔍 Restaurant Name validation failed:');
+      console.log('  - restaurantName element:', restaurantName);
+      console.log('  - restaurantName.value:', restaurantName ? restaurantName.value : 'element not found');
+      emptyFields.push('Restaurant Name');
       errorMessages.push('Restaurant Name is required');
       isValid = false;
+      highlightFieldError(restaurantName);
     }
     
     if (!ownerName || !ownerName.value.trim()) {
+      emptyFields.push('Owner Name');
       errorMessages.push('Owner Name is required');
       isValid = false;
+      highlightFieldError(ownerName);
     }
     
     if (!contactPerson || !contactPerson.value.trim()) {
+      emptyFields.push('Contact Person');
       errorMessages.push('Contact Person is required');
       isValid = false;
+      highlightFieldError(contactPerson);
     }
     
     if (!email || !email.value.trim()) {
+      emptyFields.push('Email');
       errorMessages.push('Email is required');
       isValid = false;
+      highlightFieldError(email);
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
       errorMessages.push('Please enter a valid email address');
       isValid = false;
+      highlightFieldError(email);
     }
     
     // Validate address fields
     if (!houseNumber || !houseNumber.value.trim()) {
+      emptyFields.push('House/Flat Number');
       errorMessages.push('House/Flat Number is required');
       isValid = false;
+      highlightFieldError(houseNumber);
     }
     
     if (!addressLine1 || !addressLine1.value.trim()) {
+      emptyFields.push('Address Line 1');
       errorMessages.push('Address Line 1 is required');
       isValid = false;
+      highlightFieldError(addressLine1);
     }
     
     // Validate pincode
@@ -1234,19 +1278,26 @@ import AuthGuard from '../components/AuthGuard.astro';
         errorDiv.classList.remove('hidden');
         errorDiv.textContent = 'Pincode must be exactly 6 digits';
       }
+      emptyFields.push('Pincode');
       errorMessages.push('Pincode must be exactly 6 digits');
       isValid = false;
+      highlightFieldError(pincodeInput);
     }
     
-    // Validate city - must be from valid cities list
-    if (cityInput && (!cityInput.value || !indianCities.includes(cityInput.value))) {
+    // Validate city - allow any non-empty text
+    if (cityInput && (!cityInput.value || !cityInput.value.trim())) {
+      console.log('🔍 City validation failed:');
+      console.log('  - cityInput.value:', cityInput.value);
+      
       const errorDiv = document.getElementById('city-error');
       if (errorDiv) {
         errorDiv.classList.remove('hidden');
-        errorDiv.textContent = 'Please select a valid city';
+        errorDiv.textContent = 'City is required';
       }
-      errorMessages.push('Please select a valid city');
+      emptyFields.push('City');
+      errorMessages.push('City is required');
       isValid = false;
+      highlightFieldError(cityInput);
     }
     
     // Validate state - must be from valid states list
@@ -1256,13 +1307,17 @@ import AuthGuard from '../components/AuthGuard.astro';
         errorDiv.classList.remove('hidden');
         errorDiv.textContent = 'Please select a valid state';
       }
+      emptyFields.push('State');
       errorMessages.push('Please select a valid state');
       isValid = false;
+      highlightFieldError(stateInput);
     }
     
     if (!country || !country.value) {
+      emptyFields.push('Country');
       errorMessages.push('Country is required');
       isValid = false;
+      highlightFieldError(country);
     }
     
     // Validate phone number - accept 10 digits or +91 + 10 digits
@@ -1272,20 +1327,16 @@ import AuthGuard from '../components/AuthGuard.astro';
         errorDiv.classList.remove('hidden');
         errorDiv.textContent = 'Phone number must be 10 digits or +91 followed by 10 digits';
       }
+      emptyFields.push('Phone Number');
       errorMessages.push('Phone number must be 10 digits or +91 followed by 10 digits');
       isValid = false;
+      highlightFieldError(phoneInput);
     }
     
-    // Show validation errors
+    // Show validation errors with popup
     if (!isValid) {
       console.log('❌ Form validation failed with errors:', errorMessages);
-      
-      // Show single generic validation error only
-      const errorDiv = document.getElementById('validation-errors');
-      if (errorDiv) {
-        errorDiv.classList.remove('hidden');
-        errorDiv.innerHTML = '<div class="bg-red-50 border border-red-200 rounded-lg p-4"><p class="text-red-800 font-semibold">All fields are required.</p></div>';
-      }
+      showValidationPopup(emptyFields, errorMessages);
       
       // Scroll to top of form to show errors
       const form = document.getElementById('order-menu-form');
@@ -1298,6 +1349,86 @@ import AuthGuard from '../components/AuthGuard.astro';
     
     console.log('🔍 validateFormFields() returning:', isValid);
     return isValid;
+  }
+
+  // Helper function to highlight field errors
+  function highlightFieldError(field) {
+    if (field) {
+      field.classList.add('border-red-500', 'ring-2', 'ring-red-200');
+      field.classList.remove('border-gray-300', 'ring-primary-500');
+    }
+  }
+
+  // Helper function to clear all field errors
+  function clearAllFieldErrors() {
+    const fields = document.querySelectorAll('#order-menu-form input, #order-menu-form select, #order-menu-form textarea');
+    fields.forEach(field => {
+      field.classList.remove('border-red-500', 'ring-2', 'ring-red-200');
+      field.classList.add('border-gray-300');
+    });
+    
+    // Clear individual field error messages
+    const fieldErrors = document.querySelectorAll('#pincode-error, #city-error, #state-error, #phone-error');
+    fieldErrors.forEach(error => {
+      if (error) {
+        error.classList.add('hidden');
+      }
+    });
+  }
+
+  // Function to show validation popup
+  function showValidationPopup(emptyFields, errorMessages) {
+    // Create popup if it doesn't exist
+    let popup = document.getElementById('validation-popup');
+    if (!popup) {
+      popup = document.createElement('div');
+      popup.id = 'validation-popup';
+      popup.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+      popup.innerHTML = `
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-red-600">Required Fields Missing</h3>
+            <button id="close-validation-popup" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="mb-4">
+            <p class="text-gray-700 mb-3">Please fill in all required fields marked with <span class="text-red-500 font-bold">*</span>:</p>
+            <ul class="list-disc list-inside text-red-600 space-y-1">
+              ${emptyFields.map(field => `<li>${field}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="flex justify-end">
+            <button id="ok-validation-popup" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+              OK
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(popup);
+      
+      // Add event listeners
+      document.getElementById('close-validation-popup').addEventListener('click', () => {
+        popup.remove();
+      });
+      
+      document.getElementById('ok-validation-popup').addEventListener('click', () => {
+        popup.remove();
+      });
+      
+      // Close popup when clicking outside
+      popup.addEventListener('click', (e) => {
+        if (e.target === popup) {
+          popup.remove();
+        }
+      });
+    } else {
+      // Update existing popup content
+      const emptyFieldsList = popup.querySelector('ul');
+      emptyFieldsList.innerHTML = emptyFields.map(field => `<li>${field}</li>`).join('');
+    }
   }
 
   // Handle Order Menu System form
@@ -2291,7 +2422,15 @@ import AuthGuard from '../components/AuthGuard.astro';
         e.preventDefault();
         e.stopPropagation();
         
-        // Submit via unified handler without blocking validation
+        // Run validation before submission
+        console.log('🔍 Running validation before form submit event...');
+        const formValidationResult = validateFormFields();
+        if (!formValidationResult) {
+          console.log('❌ Validation failed, preventing form submission');
+          return;
+        }
+        
+        // Submit via unified handler after validation passes
         handleOrderMenuFormSubmission();
       });
     } else {
@@ -2302,6 +2441,57 @@ import AuthGuard from '../components/AuthGuard.astro';
   // Handle Order Menu Form submission after validation passes
   async function handleOrderMenuFormSubmission() {
     console.log('🚀 Handling Order Menu Form submission...');
+    
+    const form = document.getElementById('order-menu-form');
+    if (!form) {
+      console.error('Order menu form not found');
+      return;
+    }
+
+    // CRITICAL: Check if user is logged in before allowing form submission
+    const authManager = window.globalAuthManager || window.simpleAuthManager;
+    if (!authManager || !authManager.isUserLoggedIn()) {
+      alert('❌ Please log in to submit this form. You must be authenticated to place an order.');
+      return;
+    }
+
+    // VALIDATION: Check all required fields before proceeding
+    console.log('🔍 Running comprehensive validation before submission...');
+    const formValidationResult = validateFormFields();
+    console.log('🔍 Form validation result:', formValidationResult);
+    
+    if (!formValidationResult) {
+      console.log('❌ Form validation failed - required fields missing');
+      return;
+    }
+    
+    // VALIDATION: Check menu photos are uploaded (Required for Order Menu System)
+    const menuPhotosInputAtSubmit = document.getElementById('menu-photos-upload') as HTMLInputElement | null;
+    const hasMenuPhotosAtSubmit = (cachedMenuPhotos && cachedMenuPhotos.length > 0) || (menuPhotosInputAtSubmit && menuPhotosInputAtSubmit.files && menuPhotosInputAtSubmit.files.length > 0);
+    
+    if (!hasMenuPhotosAtSubmit) {
+      console.log('❌ Menu photos validation failed - no photos uploaded');
+      const errorDiv = document.getElementById('menu-photos-error');
+      if (errorDiv) {
+        errorDiv.classList.remove('hidden');
+        errorDiv.innerHTML = '<div class="bg-red-50 border border-red-200 rounded-lg p-3"><p class="text-red-700 font-medium">Please upload at least one menu photo. This field is required for Order Menu System.</p></div>';
+      }
+      
+      const validationErrorDiv = document.getElementById('validation-errors');
+      if (validationErrorDiv) {
+        validationErrorDiv.classList.remove('hidden');
+        validationErrorDiv.innerHTML = '<div class="bg-red-50 border border-red-200 rounded-lg p-4"><h4 class="text-red-800 font-semibold mb-2">Please fix the following errors:</h4><ul class="list-disc list-inside text-red-700 space-y-1"><li>Please upload at least one menu photo. This field is required for Order Menu System.</li></ul></div>';
+      }
+      
+      const menuPhotosSection = document.getElementById('menu-photos-upload-area');
+      if (menuPhotosSection) {
+        menuPhotosSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      
+      return;
+    }
+    
+    console.log('✅ All validations passed, proceeding with form submission');
     
     // IMMEDIATE CHECK: Are files cached?
     console.log('🔍 IMMEDIATE FILE CHECK:');
@@ -2320,28 +2510,6 @@ import AuthGuard from '../components/AuthGuard.astro';
     const menuCount = cachedMenuPhotos.length;
     const logoCount = cachedLogoFile ? 1 : 0;
     console.log('Cached files => menuPhotos:', menuCount, 'logo:', logoCount);
-    
-    const form = document.getElementById('order-menu-form');
-    if (!form) {
-      console.error('Order menu form not found');
-      return;
-    }
-
-    // CRITICAL: Check if user is logged in before allowing form submission
-    const authManager = window.globalAuthManager || window.simpleAuthManager;
-    if (!authManager || !authManager.isUserLoggedIn()) {
-      alert('❌ Please log in to submit this form. You must be authenticated to place an order.');
-      return;
-    }
-
-    // Validation suppressed per request; proceed with submission
-    // Require at least one menu photo
-    const menuPhotosInputAtSubmit = document.getElementById('menu-photos-upload') as HTMLInputElement | null;
-    const hasMenuPhotosAtSubmit = (cachedMenuPhotos && cachedMenuPhotos.length > 0) || (menuPhotosInputAtSubmit && menuPhotosInputAtSubmit.files && menuPhotosInputAtSubmit.files.length > 0);
-    // If you want to allow saving without menu photos, uncomment below block to skip menu-photo gating
-    // if (!hasMenuPhotosAtSubmit) {
-    //   console.log('⚠️ Proceeding without menu photos per request');
-    // }
 
     const formData = new FormData(form);
     const formDataObj = Object.fromEntries(formData);
@@ -3258,12 +3426,23 @@ import AuthGuard from '../components/AuthGuard.astro';
         const { supabase } = await import('../lib/supabase');
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          const { data: profile } = await supabase
+          console.log('🔍 Attempting to fetch user profile from Supabase...');
+          
+          // Check if profiles table exists first
+          const { data: profile, error: profileError } = await supabase
             .from('profiles')
-            .select('email, phone, phone_number, full_name')
+            .select('email, phone, full_name')
             .eq('id', user.id)
             .single();
+            
+          if (profileError) {
+            console.log('⚠️ Profile fetch failed (this is normal if profiles table doesn\'t exist):', profileError.message);
+            // Don't show this error to user - it's expected if profiles table doesn't exist
+            return true;
+          }
+          
           if (profile) {
+            console.log('✅ Profile data found:', profile);
             if (profile.email) {
               document.querySelectorAll('input[name="email"], input[type="email"]').forEach((field) => {
                 (field as HTMLInputElement).value = profile.email;
@@ -3288,7 +3467,10 @@ import AuthGuard from '../components/AuthGuard.astro';
             }
           }
         }
-      } catch {}
+      } catch (error) {
+        console.log('⚠️ Profile fetch error (this is normal):', error.message);
+        // Don't show this error to user - it's expected if profiles table doesn't exist
+      }
       
       // Note: Removed auto-filling of company name, restaurant name, and owner name
       // Only contact details (email, phone) and contact person name are auto-filled
@@ -4220,6 +4402,14 @@ Status: Submitted
         if (isSaving) return;
         isSaving = true;
         try {
+          // Run validation before submission
+          console.log('🔍 Running validation before save button submission...');
+          const formValidationResult = validateFormFields();
+          if (!formValidationResult) {
+            console.log('❌ Validation failed, preventing save');
+            return;
+          }
+          
           await handleOrderMenuFormSubmission();
           // After successful save, clear both forms if present
           try { document.getElementById('order-menu-form')?.reset(); } catch {}
@@ -4241,6 +4431,14 @@ Status: Submitted
           if (isSaving) return;
           isSaving = true;
           try {
+            // Run validation before submission
+            console.log('🔍 Running validation before fallback save button submission...');
+            const formValidationResult = validateFormFields();
+            if (!formValidationResult) {
+              console.log('❌ Validation failed, preventing save');
+              return;
+            }
+            
             await handleOrderMenuFormSubmission();
             try { document.getElementById('order-menu-form')?.reset(); } catch {}
             try { document.getElementById('customization-form')?.reset(); } catch {}
@@ -4258,6 +4456,14 @@ Status: Submitted
     if (directSaveBtn) {
       directSaveBtn.addEventListener('click', async function() {
         console.log('🔴 Direct save button clicked!');
+        
+        // Run validation before submission
+        console.log('🔍 Running validation before direct save submission...');
+        const formValidationResult = validateFormFields();
+        if (!formValidationResult) {
+          console.log('❌ Validation failed, preventing direct save');
+          return;
+        }
         
         // Route through the same validated submission path (uploads + DB insert)
         try {

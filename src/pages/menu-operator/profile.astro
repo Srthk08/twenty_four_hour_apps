@@ -278,7 +278,7 @@ import MenuOperatorGuard from '../../components/MenuOperatorGuard.astro';
             .single();
 
           if (fallbackError) {
-            console.error('❌ Fallback profile query failed:', fallbackError);
+            console.log('⚠️ Profile fetch failed (this is normal if profiles table doesn\'t exist):', fallbackError.message);
             console.log('🔄 Using fallback profile data...');
             showFallbackProfile(user);
             return;

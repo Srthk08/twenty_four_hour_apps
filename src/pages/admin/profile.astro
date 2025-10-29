@@ -243,7 +243,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           .single();
 
         if (profileError) {
-          console.error('Error getting profile:', profileError);
+          console.log('⚠️ Profile fetch failed (this is normal if profiles table doesn\'t exist):', profileError.message);
           // Use auth user data as fallback
           document.getElementById('admin-full-name').textContent = user.user_metadata?.full_name || 'Admin User';
           document.getElementById('admin-email').textContent = user.email || 'No email';
