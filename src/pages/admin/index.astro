@@ -242,10 +242,18 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   // Wait for Supabase to load
   function waitForSupabase() {
     return new Promise((resolve) => {
-      if (window.supabase) {
+      // Check if window.supabase is already a client instance (has auth property)
+      if (window.supabase && window.supabase.auth && typeof window.supabase.auth.getUser === 'function') {
+        supabase = window.supabase;
+        resolve(supabase);
+      } 
+      // Check if window.supabase is the library (has createClient method)
+      else if (window.supabase && typeof window.supabase.createClient === 'function') {
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         resolve(supabase);
-      } else {
+      } 
+      // Wait for Supabase library to load
+      else {
         setTimeout(() => waitForSupabase().then(resolve), 100);
       }
     });
@@ -501,6 +509,30 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   async function loadTicketsData() {
     try {
       console.log('🔄 Loading support tickets data...');
+      
+      // Ensure Supabase is available
+      if (!supabase) {
+        await waitForSupabase();
+      }
+      
+      // Double-check and try to get from window if still not available
+      if (!supabase && window.supabase) {
+        if (window.supabase.auth && typeof window.supabase.auth.getUser === 'function') {
+          supabase = window.supabase;
+        } else if (typeof window.supabase.createClient === 'function') {
+          supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+      }
+      
+      if (!supabase) {
+        console.error('❌ Supabase client not available for loading tickets');
+        const tbody = document.getElementById('tickets-table-body');
+        if (tbody) {
+          tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Error: Database connection failed</td></tr>';
+        }
+        return;
+      }
+      
       const { data: tickets, error } = await supabase
         .from('support_tickets')
         .select('*')
@@ -508,6 +540,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
       if (error) {
         console.error('Error loading tickets data:', error);
+        const tbody = document.getElementById('tickets-table-body');
+        if (tbody) {
+          tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Error: ${error.message}</td></tr>`;
+        }
         return;
       }
 
@@ -745,6 +781,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         </div>
       `;
 
+      // Lock body scroll
+      document.body.style.overflow = 'hidden';
       modal.classList.remove('hidden');
     } catch (error) {
       console.error('Error viewing contact details:', error);
@@ -805,6 +843,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         </div>
       `;
 
+      // Lock body scroll
+      document.body.style.overflow = 'hidden';
       modal.classList.remove('hidden');
     } catch (error) {
       console.error('Error loading contact details:', error);
@@ -967,6 +1007,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         </div>
       `;
 
+      // Lock body scroll
+      document.body.style.overflow = 'hidden';
       modal.classList.remove('hidden');
     } catch (error) {
       console.error('Error loading customizations:', error);
@@ -1496,6 +1538,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       `;
 
       console.log('🔍 Showing modal...');
+      // Lock body scroll
+      document.body.style.overflow = 'hidden';
       modal.classList.remove('hidden');
       console.log('✅ Modal should now be visible');
       
@@ -1521,7 +1565,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     <div class="mt-3">
       <div class="flex items-center justify-between mb-4">
         <h3 id="modal-title" class="text-lg font-medium text-gray-900">Details</h3>
-        <button onclick="document.getElementById('details-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+        <button onclick="document.getElementById('details-modal').classList.add('hidden'); document.body.style.overflow = '';" class="text-gray-400 hover:text-gray-600">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
@@ -1540,7 +1584,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     <div class="mt-3">
       <div class="flex items-center justify-between mb-6">
         <h3 id="contact-modal-title" class="text-xl font-medium text-gray-900">Contact Form Details</h3>
-        <button onclick="document.getElementById('contact-details-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+        <button onclick="document.getElementById('contact-details-modal').classList.add('hidden'); document.body.style.overflow = '';" class="text-gray-400 hover:text-gray-600">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
@@ -1559,7 +1603,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     <div class="mt-3">
       <div class="flex items-center justify-between mb-6">
         <h3 id="customizations-modal-title" class="text-xl font-medium text-gray-900">Product Customizations</h3>
-        <button onclick="document.getElementById('customizations-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+        <button onclick="document.getElementById('customizations-modal').classList.add('hidden'); document.body.style.overflow = '';" class="text-gray-400 hover:text-gray-600">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>

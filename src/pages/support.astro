@@ -424,6 +424,8 @@ import AuthGuard from '../components/AuthGuard.astro';
   function openTicketModal() {
     const modal = document.getElementById('ticketModal');
     if (modal) {
+      // Lock body scroll
+      document.body.style.overflow = 'hidden';
       modal.classList.remove('hidden');
       
       // Show loading message while waiting for Supabase
@@ -511,6 +513,8 @@ import AuthGuard from '../components/AuthGuard.astro';
     const form = document.getElementById('ticketForm');
     if (modal) {
       modal.classList.add('hidden');
+      // Unlock body scroll
+      document.body.style.overflow = '';
       if (form) {
         form.reset();
       }
@@ -521,6 +525,8 @@ import AuthGuard from '../components/AuthGuard.astro';
   async function openMyTicketsModal() {
     const modal = document.getElementById('myTicketsModal');
     if (modal) {
+      // Lock body scroll
+      document.body.style.overflow = 'hidden';
       modal.classList.remove('hidden');
       await loadMyTickets();
     }
@@ -530,6 +536,8 @@ import AuthGuard from '../components/AuthGuard.astro';
     const modal = document.getElementById('myTicketsModal');
     if (modal) {
       modal.classList.add('hidden');
+      // Unlock body scroll
+      document.body.style.overflow = '';
     }
   }
 

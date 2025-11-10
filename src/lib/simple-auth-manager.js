@@ -75,8 +75,9 @@ class SimpleAuthManager {
     this.isAuthenticated = false;
     this.currentUser = null;
     
-    // Clear session
+    // Clear session from both storages
     sessionStorage.removeItem('simple-auth-session');
+    localStorage.removeItem('simple-auth-user');
     
     // Clear cart data to prevent cross-user contamination
     if (window.clearCartOnUserChange) {

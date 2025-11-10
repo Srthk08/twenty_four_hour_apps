@@ -783,6 +783,8 @@ import { supabase } from '../../lib/supabase';
         ` : ''}
       `;
 
+      // Lock body scroll
+      document.body.style.overflow = 'hidden';
       modal.classList.remove('hidden');
     }
   }
@@ -849,12 +851,16 @@ import { supabase } from '../../lib/supabase';
     // Modal close button
     document.getElementById('close-modal')?.addEventListener('click', () => {
       document.getElementById('order-modal')?.classList.add('hidden');
+      // Unlock body scroll
+      document.body.style.overflow = '';
     });
 
     // Close modal when clicking outside
     document.getElementById('order-modal')?.addEventListener('click', (e) => {
       if (e.target === e.currentTarget) {
         (e.currentTarget as HTMLElement).classList.add('hidden');
+        // Unlock body scroll
+        document.body.style.overflow = '';
       }
     });
     

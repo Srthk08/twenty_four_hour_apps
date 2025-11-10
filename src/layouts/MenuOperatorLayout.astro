@@ -221,7 +221,16 @@ const { title, description } = Astro.props;
     <Toast />
 
     <!-- Alpine.js for dropdown functionality -->
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" onerror="
+      console.warn('⚠️ Alpine.js failed to load from jsdelivr, trying unpkg...');
+      const fallback = document.createElement('script');
+      fallback.defer = true;
+      fallback.src = 'https://unpkg.com/alpinejs@3.13.3/dist/cdn.min.js';
+      fallback.onerror = function() {
+        console.error('❌ Alpine.js failed to load from all CDN sources');
+      };
+      document.head.appendChild(fallback);
+    "></script>
     
     <!-- Immediate script to hide navbar -->
     <script>

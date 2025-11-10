@@ -209,11 +209,30 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
 
   // Global variables
   let currentUser = null;
+  let cachedSupabaseClient = null; // Cache Supabase client to avoid repeated waits
   
-
-  // Wait for Supabase (returns already-initialized client)
-  function waitForSupabase() {
-    return Promise.resolve(supabase);
+  // Wait for Supabase (returns already-initialized client) - with caching
+  async function waitForSupabase(maxRetries = 20, delay = 100) {
+    // Return cached client if available
+    if (cachedSupabaseClient) {
+      return cachedSupabaseClient;
+    }
+    
+    // First try to use window.supabase (client instance from Layout.astro)
+    for (let i = 0; i < maxRetries; i++) {
+      if (window.supabase && window.supabase.auth && typeof window.supabase.auth.getUser === 'function') {
+        cachedSupabaseClient = window.supabase;
+        return cachedSupabaseClient;
+      }
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+    // Fallback to imported supabase client
+    if (supabase && supabase.auth) {
+      cachedSupabaseClient = supabase;
+      return cachedSupabaseClient;
+    }
+    console.error('Supabase client not available after waiting');
+    return null;
   }
 
   // Initialize dashboard
@@ -221,11 +240,18 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
     console.log('📄 DOM Content Loaded - Starting Menu Operator Dashboard initialization');
     console.log('🔄 UPDATED: Product Customizations Dashboard Loading...');
     
+    // Pre-load Supabase client in background for faster access later
+    waitForSupabase().then(client => {
+      if (client) {
+        console.log('✅ Supabase client pre-loaded and cached');
+      }
+    });
+    
     // Setup event listeners immediately
     setupEventListeners();
     
     // Load real data immediately
-        await loadRealData();
+    await loadRealData();
   });
   
   // Additional fallback for window load
@@ -247,11 +273,15 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
     const products = getAvailableProducts();
     grid.innerHTML = generateProductsHTML(products);
     
+    // Lock body scroll
+    document.body.style.overflow = 'hidden';
     modal.classList.remove('hidden');
   };
 
   window.closeProductBrowser = function() {
     document.getElementById('product-browser-modal').classList.add('hidden');
+    // Unlock body scroll
+    document.body.style.overflow = '';
   };
 
   window.selectProduct = function(productId) {
@@ -269,11 +299,15 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
     const product = getProductById(productId);
     content.innerHTML = generateCustomizationFormHTML(product);
     
+    // Lock body scroll
+    document.body.style.overflow = 'hidden';
     modal.classList.remove('hidden');
   };
 
   window.closeCustomizationForm = function() {
     document.getElementById('customization-form-modal').classList.add('hidden');
+    // Unlock body scroll
+    document.body.style.overflow = '';
   };
 
   // Form submission handler
@@ -513,14 +547,17 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
       
       // Wait for Supabase with timeout
       const supabaseClient = await waitForSupabase();
-      if (!supabaseClient) return;
+      if (!supabaseClient) {
+        console.warn('⚠️ Supabase not ready, skipping real data load');
+        return;
+      }
       
       // Load user profile
       await loadUserProfile();
       
       // Load customizations from order_customizations table
-      const customizations = await loadRealProductCustomizations();
-      const photos = await loadRealMenuPhotos();
+      const customizations = await loadRealProductCustomizations(supabaseClient);
+      const photos = await loadRealMenuPhotos(supabaseClient);
       
       console.log('🔄 Real data fetched - Customizations:', customizations?.length || 0, 'Photos:', photos?.length || 0);
       
@@ -545,8 +582,9 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
       console.log('🔄 Loading data from Supabase...');
       
       // Try to load real data first
-      const customizations = await loadRealProductCustomizations();
-      const photos = await loadRealMenuPhotos();
+      const client = await waitForSupabase();
+      const customizations = await loadRealProductCustomizations(client);
+      const photos = await loadRealMenuPhotos(client);
       
       // If no real data, use demo data
       if (!customizations || customizations.length === 0) {
@@ -585,18 +623,20 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
   }
   
   // Load real product customizations from Supabase (from order_customizations table)
-  async function loadRealProductCustomizations() {
+  async function loadRealProductCustomizations(supabaseClient = null) {
     try {
       console.log('🔄 Attempting to load from order_customizations table...');
-      console.log('🔄 Supabase client status:', supabase ? 'Available' : 'Not available');
       
-      if (!supabase) {
+      // Use provided client or wait for one
+      const client = supabaseClient || await waitForSupabase();
+      if (!client) {
         console.error('❌ Supabase client not available');
         throw new Error('Supabase not available');
       }
       
+      console.log('🔄 Supabase client status: Available');
       console.log('🔄 Executing Supabase query (order_customizations)...');
-      let { data, error } = await supabase
+      let { data, error } = await client
         .from('order_customizations')
         .select('*')
         .order('created_at', { ascending: false })
@@ -605,7 +645,7 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
       // REST fallback if RLS blocks or no rows but we expect data
       if (error || !data) {
         console.warn('⚠️ Supabase query error/empty, trying REST fallback:', error?.message);
-        data = await restSelect('order_customizations');
+        data = await restSelect('order_customizations', client);
       }
       
       console.log('🔄 Supabase query completed. Data:', data, 'Error:', error);
@@ -625,17 +665,19 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
   }
   
   // Load real menu photos from Supabase
-  async function loadRealMenuPhotos() {
+  async function loadRealMenuPhotos(supabaseClient = null) {
     try {
       console.log('🔄 Attempting to load from menu_photos table...');
       
-      if (!supabase) {
+      // Use provided client or wait for one
+      const client = supabaseClient || await waitForSupabase();
+      if (!client) {
         console.error('❌ Supabase client not available');
         throw new Error('Supabase not available');
       }
       
       // Derive photos from order_customizations.menu_photos_urls to avoid 404 REST calls
-      const { data, error } = await supabase
+      const { data, error } = await client
         .from('order_customizations')
         .select('id, created_at, menu_photos_urls')
         .order('created_at', { ascending: false })
@@ -678,9 +720,13 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
   }
 
   // Generic REST fallback using current session token
-  async function restSelect(table) {
+  async function restSelect(table, supabaseClient = null) {
     try {
-      const { data: sess } = await supabase.auth.getSession();
+      const client = supabaseClient || await waitForSupabase();
+      if (!client || !client.auth) {
+        throw new Error('Supabase client not available');
+      }
+      const { data: sess } = await client.auth.getSession();
       const token = sess?.session?.access_token || sess?.access_token || '';
       const url = `${supabaseUrl}/rest/v1/${table}?select=*`;
       const resp = await fetch(url, {
@@ -702,9 +748,13 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
   }
 
   // REST select by id helper
-  async function restSelectById(table, id) {
+  async function restSelectById(table, id, supabaseClient = null) {
     try {
-      const { data: sess } = await supabase.auth.getSession();
+      const client = supabaseClient || await waitForSupabase();
+      if (!client || !client.auth) {
+        throw new Error('Supabase client not available');
+      }
+      const { data: sess } = await client.auth.getSession();
       const token = sess?.session?.access_token || sess?.access_token || '';
       const url = `${supabaseUrl}/rest/v1/${table}?id=eq.${encodeURIComponent(id)}&select=*`;
       const resp = await fetch(url, {
@@ -961,16 +1011,15 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
   // Load user profile from Supabase
   async function loadUserProfile() {
     try {
-      // Check if Supabase is available
-      if (typeof window.supabase === 'undefined') {
+      // Wait for Supabase client to be ready
+      const supabaseClient = await waitForSupabase();
+      if (!supabaseClient || !supabaseClient.auth || typeof supabaseClient.auth.getUser !== 'function') {
         console.error('Supabase client not available');
         return;
       }
 
-      const supabase = window.supabase;
-
       // Get current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
       if (userError || !user) {
         console.error('Error getting user:', userError);
         window.location.href = '/login';
@@ -981,7 +1030,7 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
       console.log('🔍 Loading profile for user:', user.email);
       
       // Get user profile with menu_operator role
-      const { data: profile, error: profileError } = await supabase
+      const { data: profile, error: profileError } = await supabaseClient
         .from('profiles')
         .select('*')
         .eq('id', user.id)
@@ -992,7 +1041,7 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
         console.error('Error loading profile:', profileError);
         
         // Try fallback without role filter
-        const { data: fallbackProfile, error: fallbackError } = await supabase
+        const { data: fallbackProfile, error: fallbackError } = await supabaseClient
           .from('profiles')
           .select('*')
           .eq('id', user.id)
@@ -1117,7 +1166,11 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
       const fileExt = file.name.split('.').pop();
       const fileName = `${currentUser.id}/${Date.now()}.${fileExt}`;
       
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const supabaseClient = await waitForSupabase();
+      if (!supabaseClient || !supabaseClient.storage) {
+        throw new Error('Supabase client not available');
+      }
+      const { data: uploadData, error: uploadError } = await supabaseClient.storage
         .from('menu-photos')
         .upload(fileName, file);
 
@@ -1126,12 +1179,12 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
       }
 
       // Get public URL
-      const { data: { publicUrl } } = supabase.storage
+      const { data: { publicUrl } } = supabaseClient.storage
         .from('menu-photos')
         .getPublicUrl(fileName);
 
       // Save to database
-      const { data: photoData, error: dbError } = await supabase
+      const { data: photoData, error: dbError } = await supabaseClient
           .from('menu_photos')
           .insert({
             user_id: currentUser.id,
@@ -1147,7 +1200,8 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
       }
 
         // Reload photos
-        await loadRealMenuPhotos();
+        const client3 = await waitForSupabase();
+        await loadRealMenuPhotos(client3);
 
       // Reset file input
       event.target.value = '';
@@ -1164,6 +1218,8 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
     window.viewCustomization = async function(customizationId) {
       // Ensure modal opens immediately to avoid double-click confusion
       const modal = document.getElementById('customization-details-modal');
+      // Lock body scroll
+      document.body.style.overflow = 'hidden';
       modal?.classList.remove('hidden');
       const container = document.getElementById('customization-details-content');
       if (container) container.innerHTML = '<p class="text-gray-500">Loading details...</p>';
@@ -1171,28 +1227,48 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
       
       try {
         let customization = null;
-        let error = null;
-        // Run client query and REST fallback concurrently with short timeout for faster UX
+        
+        // FIRST: Try to get from cached customizations array (instant, no DB call)
+        if (window.__all_customizations && Array.isArray(window.__all_customizations)) {
+          customization = window.__all_customizations.find(c => c.id === customizationId);
+          if (customization) {
+            console.log('✅ Found customization in cache, using cached data');
+            // Render immediately with cached data
+            renderCustomizationDetails(customization, container, modal);
+            return; // Exit early - no DB call needed!
+          }
+        }
+        
+        // SECOND: If not in cache, fetch from database (with fast parallel queries)
+        console.log('📡 Customization not in cache, fetching from database...');
+        const client = cachedSupabaseClient || await waitForSupabase();
+        
+        // Run both queries in parallel with shorter timeout for faster response
         const clientPromise = (async () => {
           try {
-            const res = await supabase
+            if (!client) return null;
+            const res = await client
               .from('order_customizations')
-          .select('*')
-          .eq('id', customizationId)
-          .single();
+              .select('*')
+              .eq('id', customizationId)
+              .single();
             return res.data || null;
           } catch {
             return null;
           }
         })();
-        const restPromise = restSelectById('order_customizations', customizationId);
-        customization = await withTimeout(Promise.any([
-          clientPromise,
-          restPromise
-        ]), 2500);
+        
+        const restPromise = restSelectById('order_customizations', customizationId, client);
+        
+        // Use Promise.race for faster response (first one wins)
+        customization = await Promise.race([
+          Promise.any([clientPromise, restPromise]),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 1500))
+        ]).catch(() => null);
+        
+        // If still no result, try one more time with REST
         if (!customization) {
-          // If Promise.any returned nulls or timed out, try REST directly once more
-          customization = await restSelectById('order_customizations', customizationId);
+          customization = await restSelectById('order_customizations', customizationId, client);
         }
 
         // If still no record, show empty state (don't leave loading)
@@ -1205,8 +1281,19 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
         }
 
         // Render into modal
+        renderCustomizationDetails(customization, container, modal);
+      } catch (error) {
+        console.error('Error viewing product customization details:', error);
         const container = document.getElementById('customization-details-content');
         if (container) {
+          container.innerHTML = '<p class="text-red-600">Error loading details. Please try again.</p>';
+        }
+      }
+    };
+    
+    // Extract rendering logic to separate function for reuse
+    function renderCustomizationDetails(customization, container, modal) {
+      if (container) {
           // Normalize address parts
           const house = customization.house_flat_number || customization.houseNumber || '';
           const line1 = customization.address_line_1 || customization.addressLine1 || '';
@@ -1343,6 +1430,17 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
                   </div>
                   <pre id="ai-conversion-text" class="w-full p-3 border border-gray-300 rounded-md text-sm whitespace-pre-wrap bg-gray-50"></pre>
                   <div id="ai-conversion-status" class="mt-2 text-xs text-gray-500"></div>
+                  <div id="ai-qr" class="mt-4 hidden">
+                    <div class="flex items-center justify-between mb-2">
+                      <h5 class="text-sm font-semibold text-gray-900">QR Code (scan to view)</h5>
+                      <div class="flex space-x-2">
+                        <button type="button" onclick="downloadAIQr()" class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200">Download</button>
+                        <button type="button" onclick="clearAIQr()" class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200" title="Clear">Clear</button>
+                      </div>
+                    </div>
+                    <img id="ai-qr-image" alt="QR Code" class="border rounded p-2 bg-white max-w-full" />
+                    <div id="ai-qr-note" class="mt-2 text-[11px] text-gray-500"></div>
+                  </div>
                 </div>
               </div>
               <div>
@@ -1351,55 +1449,144 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
               </div>
             </div>
           `;
-          const modal = document.getElementById('customization-details-modal');
-          modal?.classList.remove('hidden');
-        }
-      } catch (error) {
-        console.error('Error viewing product customization details:', error);
-        const container = document.getElementById('customization-details-content');
-        if (container) {
-          container.innerHTML = '<p class="text-red-600">Error loading details. Please try again.</p>';
+        
+        // Ensure modal is visible
+        if (modal) {
+          modal.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
         }
       }
-    };
+    }
 
     window.closeCustomizationDetails = function() {
       const modal = document.getElementById('customization-details-modal');
-      if (modal) modal.classList.add('hidden');
+      if (modal) {
+        modal.classList.add('hidden');
+        // Unlock body scroll
+        document.body.style.overflow = '';
+      }
     };
 
-    // AI conversion using Tesseract.js (client-side OCR) with deblur pre-processing
+    // AI conversion using Tesseract.js (client-side OCR) with enhanced pre-processing + QR generation
     window.convertImagesToTextAI = async function() {
       try {
+        // Check if modal is open
+        const modal = document.getElementById('customization-details-modal');
+        if (!modal || modal.classList.contains('hidden')) {
+          alert('Please open a customization details modal first to view photos.');
+          return;
+        }
+
         const resultWrap = document.getElementById('ai-conversion-result');
         const resultArea = document.getElementById('ai-conversion-text');
         const status = document.getElementById('ai-conversion-status');
+        
+        // Show result area
         if (resultWrap) resultWrap.classList.remove('hidden');
         if (status) status.textContent = 'Converting images to text, please wait...';
         if (resultArea) resultArea.textContent = '';
         const actionBtns = document.getElementById('ai-action-buttons');
         if (actionBtns) actionBtns.classList.add('hidden');
+        const qrWrap = document.getElementById('ai-qr');
+        const qrImg = document.getElementById('ai-qr-image');
+        const qrNote = document.getElementById('ai-qr-note');
+        if (qrWrap) qrWrap.classList.add('hidden');
+        if (qrImg) qrImg.removeAttribute('src');
+        if (qrNote) qrNote.textContent = '';
 
-        // Collect visible image URLs from the modal photos grid
-        const photosGrid = document.getElementById('photos-grid');
-        const imageEls = photosGrid ? photosGrid.querySelectorAll('img') : [];
-        const urls = Array.from(imageEls).map(img => img.src).filter(Boolean);
-
-        if (urls.length === 0) {
-          if (resultArea) resultArea.textContent = 'No photos available to convert.';
+        // Collect visible image URLs from the modal photos grid (search within modal)
+        const photosGrid = modal.querySelector('#photos-grid') || document.getElementById('photos-grid');
+        if (!photosGrid) {
+          if (resultArea) resultArea.textContent = 'No photos grid found. Please ensure the customization details modal is open.';
           if (status) status.textContent = '';
           return;
         }
 
-        // Lazy load Tesseract
+        const imageEls = photosGrid.querySelectorAll('img');
+        const urls = Array.from(imageEls)
+          .map(img => {
+            // Get the actual image source, handling both direct src and href attributes
+            const src = img.src || img.getAttribute('src') || img.getAttribute('data-src');
+            // If image is inside an anchor, try to get href from parent
+            const parentLink = img.closest('a');
+            if (parentLink && parentLink.href && !src) {
+              return parentLink.href;
+            }
+            return src;
+          })
+          .filter(url => url && url !== 'undefined' && url !== 'null' && url.trim() !== '');
+
+        if (urls.length === 0) {
+          if (resultArea) resultArea.textContent = 'No photos available to convert. Make sure photos are loaded in the modal.';
+          if (status) status.textContent = '';
+          return;
+        }
+
+        console.log('Found', urls.length, 'images to convert:', urls);
+
+        // Lazy load Tesseract script if missing
         if (!window.Tesseract) {
+          if (status) status.textContent = 'Loading OCR engine...';
           await new Promise((resolve, reject) => {
             const s = document.createElement('script');
-            s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+            s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js';
             s.onload = resolve;
             s.onerror = reject;
             document.head.appendChild(s);
           });
+        }
+
+        // Check if Web Workers are supported
+        const workersSupported = typeof Worker !== 'undefined';
+        
+        // Try to create/reuse a persistent worker if supported
+        let useWorker = false;
+        if (workersSupported && !window.__tessWorker) {
+          if (status) status.textContent = 'Starting OCR worker...';
+          try {
+            // Try Tesseract.js v4 API with worker
+            if (window.Tesseract && window.Tesseract.createWorker && typeof window.Tesseract.createWorker === 'function') {
+              const worker = window.Tesseract.createWorker({
+                logger: m => { if (status) status.textContent = `${m.status}${m.progress ? ` ${(m.progress*100).toFixed(0)}%` : ''}`; },
+                workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/worker.min.js',
+                corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@4.0.2/tesseract-core.wasm.js',
+                langPath: 'https://tessdata.projectnaptha.com/4.0.0'
+              });
+              
+              // Tesseract.js v4 createWorker returns a promise
+              if (worker && typeof worker.then === 'function') {
+                const resolvedWorker = await worker;
+                if (resolvedWorker && typeof resolvedWorker.loadLanguage === 'function') {
+                  await resolvedWorker.loadLanguage('eng');
+                  await resolvedWorker.initialize('eng');
+                  window.__tessWorker = resolvedWorker;
+                  useWorker = true;
+                }
+              } else if (worker && typeof worker.load === 'function') {
+                await worker.load();
+                await worker.loadLanguage('eng');
+                await worker.initialize('eng');
+                window.__tessWorker = worker;
+                useWorker = true;
+              } else if (worker && typeof worker.loadLanguage === 'function') {
+                // Worker might already be initialized
+                await worker.loadLanguage('eng');
+                await worker.initialize('eng');
+                window.__tessWorker = worker;
+                useWorker = true;
+              }
+            }
+          } catch (workerError) {
+            console.warn('Failed to create Tesseract worker, will use recognize API instead:', workerError);
+            useWorker = false;
+          }
+        } else if (window.__tessWorker) {
+          useWorker = true;
+        }
+        
+        // If worker not available, we'll use Tesseract.recognize directly (no worker)
+        if (!useWorker && (!window.Tesseract || !window.Tesseract.recognize)) {
+          throw new Error('Tesseract.js not available. Please refresh the page.');
         }
 
         const sections = [];
@@ -1412,12 +1599,30 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
             img.crossOrigin = 'anonymous';
             img.src = url;
             await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
+            // Upscale to improve OCR (max dimension ~2000px)
+            const scale = Math.min(2000 / Math.max(img.naturalWidth, img.naturalHeight), 2.5);
+            const targetW = Math.max(1, Math.round(img.naturalWidth * (scale > 1 ? scale : 1)));
+            const targetH = Math.max(1, Math.round(img.naturalHeight * (scale > 1 ? scale : 1)));
             const canvas = document.createElement('canvas');
-            canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+            canvas.width = targetW; canvas.height = targetH;
             const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0);
+            ctx.drawImage(img, 0, 0, targetW, targetH);
 
-            // Simple unsharp mask (deblur) before OCR: blur + high-pass + add
+            // Convert to grayscale and increase contrast
+            let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imgData.data;
+            for (let i = 0; i < data.length; i += 4) {
+              const r = data[i], g = data[i+1], b = data[i+2];
+              // luminance
+              let y = 0.299*r + 0.587*g + 0.114*b;
+              // contrast boost
+              y = (y - 128) * 1.25 + 128;
+              y = Math.max(0, Math.min(255, y));
+              data[i] = data[i+1] = data[i+2] = y;
+            }
+            ctx.putImageData(imgData, 0, 0);
+
+            // Simple unsharp mask: blur + high-pass + add
             // 1) Create blurred version
             const blurCanvas = document.createElement('canvas');
             blurCanvas.width = canvas.width; blurCanvas.height = canvas.height;
@@ -1439,9 +1644,55 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
             }
             ctx.putImageData(out, 0, 0);
 
-            const dataUrl = canvas.toDataURL('image/png');
-
-            const { data: { text } } = await window.Tesseract.recognize(dataUrl, 'eng');
+            let recognizedText = '';
+            try {
+              const dataUrl = canvas.toDataURL('image/png');
+              if (status) status.textContent = `Image ${idx + 1}: recognizing (preprocessed)...`;
+              
+              if (useWorker && window.__tessWorker) {
+                // Use worker if available
+                const { data: { text } } = await window.__tessWorker.recognize(dataUrl);
+                recognizedText = text || '';
+              } else {
+                // Fallback to direct recognize API (no worker)
+                const { data: { text } } = await window.Tesseract.recognize(dataUrl, 'eng');
+                recognizedText = text || '';
+              }
+            } catch (preprocessErr) {
+              // Canvas may be tainted due to CORS; fall back to original URL
+              console.warn('Preprocessed OCR failed, falling back to original URL:', preprocessErr);
+              try {
+                // Hint to avoid referrer issues
+                if (status) status.textContent = `Image ${idx + 1}: recognizing (original URL)...`;
+                
+                if (useWorker && window.__tessWorker) {
+                  const { data: { text } } = await window.__tessWorker.recognize(url);
+                  recognizedText = text || '';
+                } else {
+                  const { data: { text } } = await window.Tesseract.recognize(url, 'eng');
+                  recognizedText = text || '';
+                }
+              } catch (rawErr) {
+                console.warn('OCR failed on original URL, trying blob fallback:', rawErr);
+                try {
+                  const resp = await fetch(url, { mode: 'cors', credentials: 'omit' });
+                  const blob = await resp.blob();
+                  if (status) status.textContent = `Image ${idx + 1}: recognizing (blob)...`;
+                  
+                  if (useWorker && window.__tessWorker) {
+                    const { data: { text } } = await window.__tessWorker.recognize(blob);
+                    recognizedText = text || '';
+                  } else {
+                    const { data: { text } } = await window.Tesseract.recognize(blob, 'eng');
+                    recognizedText = text || '';
+                  }
+                } catch (blobErr) {
+                  console.warn('OCR failed on blob fallback:', blobErr);
+                  recognizedText = '';
+                }
+              }
+            }
+            const text = recognizedText;
             if (text && text.trim()) {
               // Normalize: split into lines, trim, remove empties, convert to bullet points
               const lines = text
@@ -1461,19 +1712,285 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
 
         const combined = sections.length
           ? sections.join('\n\n')
-          : 'No text detected. Try clearer photos or higher contrast images.';
+          : '';
 
-        if (resultArea) resultArea.textContent = combined;
+        console.log('OCR completed. Sections:', sections.length, 'Combined text length:', combined.length);
+
+        // ALWAYS display results first, even if QR generation fails
+        if (resultArea) {
+          // Ensure visibility and correct formatting
+          resultArea.classList.remove('hidden');
+          resultArea.style.display = 'block';
+          resultArea.style.whiteSpace = 'pre-wrap';
+          const displayText = (combined && combined.trim())
+            ? combined
+            : 'No text detected. Try clearer photos or higher contrast images.';
+          resultArea.textContent = displayText;
+          console.log('Result displayed in area:', displayText.substring(0, 100) + '...');
+        }
+        
         const actionBtns2 = document.getElementById('ai-action-buttons');
-        if (actionBtns2 && combined && combined.trim()) actionBtns2.classList.remove('hidden');
-        if (status) status.textContent = 'Done';
+        if (actionBtns2 && combined && combined.trim()) {
+          actionBtns2.classList.remove('hidden');
+        }
+        
+        // Scroll to result area to make it visible
+        if (resultArea) {
+          setTimeout(() => {
+            resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 100);
+        }
+
+        // Generate QR for the combined text (truncate if too long for QR) - this is optional
+        // Don't let QR generation failure affect the displayed results
+        if (combined && combined.trim()) {
+          try {
+            if (status) status.textContent = 'Generating QR...';
+            
+            // Re-get QR elements from the modal to ensure they exist (modal might be dynamically generated)
+            let qrWrapElement = modal.querySelector('#ai-qr') || document.getElementById('ai-qr');
+            let qrImgElement = modal.querySelector('#ai-qr-image') || document.getElementById('ai-qr-image');
+            const qrNoteElement = modal.querySelector('#ai-qr-note') || document.getElementById('ai-qr-note');
+            
+            if (!qrWrapElement || !qrImgElement) {
+              console.warn('QR elements not found in DOM, retrying...');
+              // Wait a bit and try again - modal might still be rendering
+              await new Promise(resolve => setTimeout(resolve, 200));
+              qrWrapElement = modal.querySelector('#ai-qr') || document.getElementById('ai-qr');
+              qrImgElement = modal.querySelector('#ai-qr-image') || document.getElementById('ai-qr-image');
+              if (!qrWrapElement || !qrImgElement) {
+                console.warn('QR elements still not found after retry');
+                if (status) status.textContent = 'Done (QR elements not found)';
+                return;
+              }
+            }
+            
+            // Clean text for QR code - remove website links, promotional content, and unwanted text
+            let cleanTextForQr = combined || '';
+            
+            // Remove website URLs (http://, https://, www.)
+            cleanTextForQr = cleanTextForQr.replace(/https?:\/\/[^\s]+/gi, '');
+            cleanTextForQr = cleanTextForQr.replace(/www\.[^\s]+/gi, '');
+            cleanTextForQr = cleanTextForQr.replace(/[^\s]+\.[a-z]{2,}(\/[^\s]*)?/gi, function(match) {
+              // Keep restaurant-related domains if they look like menu items, but remove obvious URLs
+              if (match.includes('menu') || match.includes('restaurant') || match.includes('food')) {
+                return match; // Might be part of menu item name
+              }
+              return ''; // Remove URL-like patterns
+            });
+            
+            // Remove promotional/portfolio text patterns
+            const promotionalPatterns = [
+              /arun\s+pattnaik/gi,
+              /ux\s+design\s+consultant/gi,
+              /portfolio/gi,
+              /design\s+consultant/gi,
+              /from\s+india/gi,
+              /consultant\s+from/gi,
+              /portfolio\s+website/gi,
+              /visit\s+my\s+website/gi,
+              /check\s+out\s+my\s+portfolio/gi
+            ];
+            
+            promotionalPatterns.forEach(pattern => {
+              cleanTextForQr = cleanTextForQr.replace(pattern, '');
+            });
+            
+            // Remove email addresses (except restaurant-looking emails)
+            cleanTextForQr = cleanTextForQr.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, function(email) {
+              // Keep emails that look like restaurant emails
+              if (email.includes('restaurant') || email.includes('menu') || email.includes('food') || 
+                  email.includes('cafe') || email.includes('dining') || email.includes('order')) {
+                return email;
+              }
+              // Remove promotional/portfolio emails
+              return '';
+            });
+            
+            // Remove social media patterns
+            cleanTextForQr = cleanTextForQr.replace(/@[a-zA-Z0-9_]+/g, ''); // Remove @mentions
+            cleanTextForQr = cleanTextForQr.replace(/facebook|instagram|twitter|linkedin|youtube/gi, '');
+            
+            // Keep "Image 1", "Image 2" labels and bullet points - user wants them
+            
+            // Normalize whitespace (keep bullet points and image labels)
+            cleanTextForQr = cleanTextForQr.replace(/\n{3,}/g, '\n\n');
+            
+            // Clean up: split into lines, trim each, filter empty lines
+            cleanTextForQr = cleanTextForQr
+              .split('\n')
+              .map(line => line.trim())
+              .filter(line => {
+                // Remove lines that are just promotional content
+                const lowerLine = line.toLowerCase();
+                return line.length > 0 && 
+                       !lowerLine.includes('portfolio') &&
+                       !lowerLine.includes('design consultant') &&
+                       !lowerLine.includes('ux design') &&
+                       !lowerLine.match(/^[a-z\s]+\s+from\s+[a-z]+$/i); // Remove "name from country" patterns
+              })
+              .join('\n')
+              .trim();
+            
+            // Limit to safe QR code size (1200 characters)
+            const textForQr = cleanTextForQr.slice(0, 1200);
+            
+            console.log('Cleaned QR text (removed URLs and promotional content):', textForQr.substring(0, 100) + '...');
+            
+            // Generate QR code using online API service (no library needed - avoids CORS/404 errors)
+            let dataUrlQR = null;
+            
+            try {
+              console.log('Generating QR code using online API service...');
+              // Use QR Server API (free, no API key required, no CORS issues)
+              const encodedText = encodeURIComponent(textForQr);
+              const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodedText}&margin=1&format=png`;
+              
+              // Fetch the QR code image
+              const response = await fetch(qrApiUrl, {
+                method: 'GET',
+                mode: 'cors',
+                cache: 'no-cache'
+              });
+              
+              if (response.ok) {
+                const blob = await response.blob();
+                dataUrlQR = await new Promise((resolve) => {
+                  const reader = new FileReader();
+                  reader.onloadend = () => resolve(reader.result);
+                  reader.onerror = () => resolve(null);
+                  reader.readAsDataURL(blob);
+                });
+                console.log('QR code generated successfully using QR Server API');
+              } else {
+                throw new Error('QR API returned error: ' + response.status);
+              }
+            } catch (apiErr) {
+              console.warn('QR Server API failed, trying alternative method:', apiErr);
+              
+              // Fallback: Use Google Charts API
+              try {
+                const encodedText2 = encodeURIComponent(textForQr);
+                const altApiUrl = `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodedText2}`;
+                
+                const response2 = await fetch(altApiUrl, {
+                  method: 'GET',
+                  mode: 'cors',
+                  cache: 'no-cache'
+                });
+                
+                if (response2.ok) {
+                  const blob2 = await response2.blob();
+                  dataUrlQR = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = () => resolve(null);
+                    reader.readAsDataURL(blob2);
+                  });
+                  console.log('QR code generated successfully using Google Charts API');
+                } else {
+                  throw new Error('Google Charts API returned error: ' + response2.status);
+                }
+              } catch (altErr) {
+                console.error('All QR generation methods failed:', altErr);
+                if (status) status.textContent = 'Done (QR generation failed)';
+                return;
+              }
+            }
+            
+            // Display the QR code
+            if (dataUrlQR) {
+              console.log('QR code generated successfully, data URL length:', dataUrlQR.length);
+              console.log('QR elements found:', {
+                qrWrapElement: !!qrWrapElement,
+                qrImgElement: !!qrImgElement,
+                qrNoteElement: !!qrNoteElement
+              });
+              
+              if (qrImgElement) {
+                qrImgElement.src = dataUrlQR;
+                qrImgElement.style.display = 'block';
+                qrImgElement.onload = () => {
+                  console.log('QR image loaded successfully');
+                  console.log('QR image dimensions:', qrImgElement.width, 'x', qrImgElement.height);
+                };
+                qrImgElement.onerror = (err) => {
+                  console.error('QR image failed to load:', err);
+                };
+              } else {
+                console.error('qrImgElement not found!');
+              }
+              
+              if (qrWrapElement) {
+                qrWrapElement.classList.remove('hidden');
+                qrWrapElement.style.display = 'block';
+                console.log('QR wrapper made visible');
+              } else {
+                console.error('qrWrapElement not found!');
+              }
+              
+              if (qrNoteElement) {
+                qrNoteElement.textContent = cleanTextForQr.length > textForQr.length
+                  ? 'Note: Text truncated to fit QR capacity.'
+                  : '';
+              }
+              
+              // Store for download handler
+              window.__lastAIQrDataUrl = dataUrlQR;
+              console.log('QR code generation and display completed successfully');
+              
+              // Force a reflow to ensure visibility
+              if (qrWrapElement) {
+                qrWrapElement.offsetHeight; // Trigger reflow
+              }
+            } else {
+              console.error('Failed to generate QR code using all methods');
+              if (status) status.textContent = 'Done (QR generation failed)';
+            }
+            
+            if (status) status.textContent = 'Done';
+          } catch (qrErr) {
+            console.error('QR generation failed (but text extraction succeeded):', qrErr);
+            console.error('QR error details:', qrErr.message, qrErr.stack);
+            if (status) status.textContent = 'Done (QR generation failed)';
+            // Don't throw - we already have the text results
+          }
+        } else {
+          if (status) status.textContent = 'Done';
+        }
       } catch (e) {
         console.error('AI conversion error:', e);
+        console.error('Error stack:', e.stack);
+        
+        // Only show error if we haven't already displayed results
         const resultArea = document.getElementById('ai-conversion-text');
         const status = document.getElementById('ai-conversion-status');
-        if (resultArea) resultArea.textContent = 'Error converting images. Please try again.';
-        if (status) status.textContent = '';
+        
+        // Check if result area already has content (successful extraction)
+        if (resultArea && (!resultArea.textContent || resultArea.textContent.trim() === '' || resultArea.textContent.includes('Error'))) {
+          resultArea.textContent = 'Error converting images: ' + (e.message || 'Unknown error. Please try again.');
+        } else if (resultArea && resultArea.textContent && !resultArea.textContent.includes('Error')) {
+          // Results were already displayed, just update status
+          console.log('Results were already displayed, error occurred during QR generation');
+          if (status) status.textContent = 'Error during QR generation (but text extracted successfully)';
+        } else {
+          // No results yet, show error
+          if (resultArea) resultArea.textContent = 'Error converting images. Please try again.';
+          if (status) status.textContent = '';
+        }
       }
+    };
+
+    // Download QR helper
+    window.downloadAIQr = function() {
+      const dataUrl = window.__lastAIQrDataUrl;
+      if (!dataUrl) return;
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = 'menu-text-qr.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     };
 
     window.copyAIText = function() {
@@ -1495,6 +2012,24 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
       if (status) status.textContent = '';
       const actionBtns = document.getElementById('ai-action-buttons');
       if (actionBtns) actionBtns.classList.add('hidden');
+    };
+
+    window.clearAIQr = function() {
+      const qrWrap = document.getElementById('ai-qr');
+      const qrImg = document.getElementById('ai-qr-image');
+      const qrNote = document.getElementById('ai-qr-note');
+      if (qrWrap) {
+        qrWrap.classList.add('hidden');
+        qrWrap.style.display = 'none';
+      }
+      if (qrImg) {
+        qrImg.removeAttribute('src');
+        qrImg.style.display = 'none';
+      }
+      if (qrNote) qrNote.textContent = '';
+      // Clear the stored QR data URL
+      window.__lastAIQrDataUrl = null;
+      console.log('QR code cleared');
     };
 
     window.processCustomization = function(customizationId) {

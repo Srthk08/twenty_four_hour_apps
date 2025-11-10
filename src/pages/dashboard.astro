@@ -3605,6 +3605,9 @@ Status: Submitted
   window.openImageModal = function(imageUrl, filename) {
     console.log('Opening image modal for:', filename);
     
+    // Lock body scroll
+    document.body.style.overflow = 'hidden';
+    
     // Create modal overlay
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
@@ -3654,6 +3657,8 @@ Status: Submitted
     if (window.currentImageModal) {
       document.body.removeChild(window.currentImageModal);
       window.currentImageModal = null;
+      // Unlock body scroll
+      document.body.style.overflow = '';
     }
   };
   

@@ -361,14 +361,22 @@ import { supabase } from '../../lib/supabase';
   // Wait for Supabase to load
   function waitForSupabase() {
     return new Promise((resolve) => {
-      if (window.supabase && window.supabase.createClient) {
+      // Check if window.supabase is already a client instance (has auth property)
+      if (window.supabase && window.supabase.auth && typeof window.supabase.auth.getUser === 'function') {
+        supabase = window.supabase;
+        resolve(supabase);
+      } 
+      // Check if window.supabase is the library (has createClient method)
+      else if (window.supabase && typeof window.supabase.createClient === 'function') {
         // Use the same configuration as AdminLayout
         supabase = window.supabase.createClient(
           'https://lmrrdcaavwwletcjcpqv.supabase.co',
           'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ'
         );
         resolve(supabase);
-      } else {
+      } 
+      // Wait for Supabase library to load
+      else {
         setTimeout(() => waitForSupabase().then(resolve), 100);
       }
     });
@@ -495,6 +503,33 @@ import { supabase } from '../../lib/supabase';
   async function loadTicketsData() {
     try {
       console.log('🔄 Loading support tickets data...');
+      
+      // Ensure Supabase is available
+      if (!supabase) {
+        await waitForSupabase();
+      }
+      
+      // Double-check and try to get from window if still not available
+      if (!supabase && window.supabase) {
+        if (window.supabase.auth && typeof window.supabase.auth.getUser === 'function') {
+          supabase = window.supabase;
+        } else if (typeof window.supabase.createClient === 'function') {
+          supabase = window.supabase.createClient(
+            'https://lmrrdcaavwwletcjcpqv.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ'
+          );
+        }
+      }
+      
+      if (!supabase) {
+        console.error('❌ Supabase client not available for loading tickets');
+        const tbody = document.getElementById('tickets-table-body');
+        if (tbody) {
+          tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-red-500">Error: Database connection failed</td></tr>';
+        }
+        return;
+      }
+      
       const { data: tickets, error } = await supabase
         .from('support_tickets')
         .select('*')
@@ -689,12 +724,16 @@ import { supabase } from '../../lib/supabase';
     
     closeBtn?.addEventListener('click', () => {
       modal.classList.add('hidden');
+      // Unlock body scroll
+      document.body.style.overflow = '';
     });
     
     // Close modal when clicking outside
     modal?.addEventListener('click', (e) => {
       if (e.target === modal) {
         modal.classList.add('hidden');
+        // Unlock body scroll
+        document.body.style.overflow = '';
       }
     });
   });
@@ -749,6 +788,8 @@ import { supabase } from '../../lib/supabase';
         </div>
       `;
 
+      // Lock body scroll
+      document.body.style.overflow = 'hidden';
       modal.classList.remove('hidden');
     } catch (error) {
       console.error('Error viewing user details:', error);
@@ -800,6 +841,8 @@ import { supabase } from '../../lib/supabase';
         </div>
       `;
 
+      // Lock body scroll
+      document.body.style.overflow = 'hidden';
       modal.classList.remove('hidden');
     } catch (error) {
       console.error('Error viewing contact details:', error);
@@ -851,6 +894,8 @@ import { supabase } from '../../lib/supabase';
         </div>
       `;
 
+      // Lock body scroll
+      document.body.style.overflow = 'hidden';
       modal.classList.remove('hidden');
     } catch (error) {
       console.error('Error viewing ticket details:', error);
@@ -914,6 +959,8 @@ import { supabase } from '../../lib/supabase';
         </div>
       `;
 
+      // Lock body scroll
+      document.body.style.overflow = 'hidden';
       modal.classList.remove('hidden');
     } catch (error) {
       console.error('Error viewing cart details:', error);
@@ -940,7 +987,7 @@ import { supabase } from '../../lib/supabase';
     if (modal) {
       modal.classList.add('hidden');
       // Restore background scrolling
-      document.body.style.overflow = 'auto';
+      document.body.style.overflow = '';
     }
   }
 
@@ -1292,7 +1339,7 @@ import { supabase } from '../../lib/supabase';
     if (modal) {
       modal.classList.add('hidden');
       // Restore background scrolling
-      document.body.style.overflow = 'auto';
+      document.body.style.overflow = '';
     }
   }
 

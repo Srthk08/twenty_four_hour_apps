@@ -155,10 +155,18 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   // Wait for Supabase to load
   function waitForSupabase() {
     return new Promise((resolve) => {
-      if (window.supabase) {
+      // Check if window.supabase is already a client instance (has auth property)
+      if (window.supabase && window.supabase.auth && typeof window.supabase.auth.getUser === 'function') {
+        supabase = window.supabase;
+        resolve(supabase);
+      } 
+      // Check if window.supabase is the library (has createClient method)
+      else if (window.supabase && typeof window.supabase.createClient === 'function') {
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         resolve(supabase);
-      } else {
+      } 
+      // Wait for Supabase library to load
+      else {
         setTimeout(() => waitForSupabase().then(resolve), 100);
       }
     });
@@ -193,6 +201,15 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       // Wait for Supabase to be available
       if (!supabase) {
         await waitForSupabase();
+      }
+      
+      // Double-check and try to get from window if still not available
+      if (!supabase && window.supabase) {
+        if (window.supabase.auth && typeof window.supabase.auth.getUser === 'function') {
+          supabase = window.supabase;
+        } else if (typeof window.supabase.createClient === 'function') {
+          supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
       }
       
       if (!supabase) {
@@ -564,6 +581,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     const ticket = currentTickets.find(t => t.id === ticketId);
     if (!ticket) return;
 
+    // Lock body scroll
+    document.body.style.overflow = 'hidden';
     document.getElementById('ticket-modal').classList.remove('hidden');
     
     // Populate modal with ticket details
@@ -602,16 +621,36 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
            <div>
              <label class="block text-sm font-medium text-gray-700 mb-2">Admin Replies</label>
              <div id="admin-replies" class="bg-gray-50 p-3 rounded text-sm text-gray-900 max-h-32 overflow-y-auto">
-               ${ticket.adminReplies && ticket.adminReplies.length > 0 ? 
-                 ticket.adminReplies.map(reply => `
-                   <div class="mb-2 p-2 bg-blue-50 rounded border-l-4 border-blue-400">
-                     <div class="font-medium text-blue-800">Admin Reply:</div>
-                     <div class="text-blue-700">${reply.message}</div>
-                     <div class="text-xs text-blue-600 mt-1">${new Date(reply.timestamp).toLocaleString()}</div>
-                   </div>
-                 `).join('') : 
-                 '<div class="text-gray-500">No admin replies yet</div>'
-               }
+               ${(() => {
+                 // Ensure adminReplies is always an array
+                 let replies = [];
+                 if (ticket.adminReplies) {
+                   if (Array.isArray(ticket.adminReplies)) {
+                     replies = ticket.adminReplies;
+                   } else if (typeof ticket.adminReplies === 'string') {
+                     try {
+                       replies = JSON.parse(ticket.adminReplies);
+                       if (!Array.isArray(replies)) {
+                         replies = [{ message: ticket.adminReplies, timestamp: new Date().toISOString() }];
+                       }
+                     } catch (e) {
+                       replies = [{ message: ticket.adminReplies, timestamp: new Date().toISOString() }];
+                     }
+                   } else if (typeof ticket.adminReplies === 'object') {
+                     replies = [ticket.adminReplies];
+                   }
+                 }
+                 
+                 return replies.length > 0 ? 
+                   replies.map(reply => `
+                     <div class="mb-2 p-2 bg-blue-50 rounded border-l-4 border-blue-400">
+                       <div class="font-medium text-blue-800">Admin Reply:</div>
+                       <div class="text-blue-700">${reply.message || reply.reply || reply || 'No message'}</div>
+                       <div class="text-xs text-blue-600 mt-1">${reply.timestamp ? new Date(reply.timestamp).toLocaleString() : (reply.created_at ? new Date(reply.created_at).toLocaleString() : 'Recently')}</div>
+                     </div>
+                   `).join('') : 
+                   '<div class="text-gray-500">No admin replies yet</div>';
+               })()}
              </div>
            </div>
            
@@ -653,6 +692,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   
   function closeTicketModal() {
     document.getElementById('ticket-modal').classList.add('hidden');
+    // Unlock body scroll
+    document.body.style.overflow = '';
   }
   
   
@@ -810,7 +851,18 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   window.changeItemsPerPage = changeItemsPerPage;
 
   // Initialize page when DOM loads
-  document.addEventListener('DOMContentLoaded', initializeSupportPage);
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('📋 Admin support page DOM loaded, initializing...');
+    initializeSupportPage();
+  });
+  
+  // Also try if DOM is already loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeSupportPage);
+  } else {
+    console.log('📋 Admin support page already loaded, initializing immediately...');
+    initializeSupportPage();
+  }
 
   // Show success toast notification
   function showSuccessToast(message) {

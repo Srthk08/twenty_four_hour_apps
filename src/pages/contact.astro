@@ -370,7 +370,12 @@ import Layout from '../layouts/Layout.astro';
   document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       const authManager = window.globalAuthManager || window.simpleAuthManager;
-      if (!authManager || !authManager.isUserLoggedIn()) {
+      
+      // CRITICAL: Also check sessionStorage to ensure no stale data
+      const sessionData = sessionStorage.getItem('simple-auth-session');
+      const hasValidSession = sessionData && sessionData !== 'null' && sessionData !== '{}';
+      
+      if (!authManager || !authManager.isUserLoggedIn() || !hasValidSession) {
         console.log('🚫 User not authenticated - forcing form clear');
         clearAndDisablePersonalFields();
         window.clearForm();
@@ -517,14 +522,27 @@ import Layout from '../layouts/Layout.astro';
     
     // Check if user is logged in
     const authManager = window.globalAuthManager || window.simpleAuthManager;
-      const isLoggedIn = authManager && authManager.isUserLoggedIn();
+    
+    // CRITICAL: Also check sessionStorage to ensure no stale data
+    const sessionData = sessionStorage.getItem('simple-auth-session');
+    const hasValidSession = sessionData && sessionData !== 'null' && sessionData !== '{}';
+    
+    const isLoggedIn = authManager && authManager.isUserLoggedIn() && hasValidSession;
 
       if (isLoggedIn) {
       console.log('✅ User is logged in - enabling form');
         enablePersonalFields();
       
-      // Only pre-fill if user is logged in
+      // Only pre-fill if user is logged in AND we have valid session data
         const currentUser = authManager.getCurrentUser();
+        
+        // Double-check: if currentUser is null or session is invalid, don't prefill
+        if (!currentUser || !hasValidSession) {
+          console.log('⚠️ User object is null or session invalid - clearing form');
+          clearAndDisablePersonalFields();
+          return;
+        }
+        
         if (currentUser && currentUser.email) {
         const firstNameInput = document.getElementById('first_name') as HTMLInputElement;
         const lastNameInput = document.getElementById('last_name') as HTMLInputElement;
@@ -582,7 +600,12 @@ import Layout from '../layouts/Layout.astro';
   // Check if user is logged in
   function isUserLoggedIn() {
     const authManager = window.globalAuthManager || window.simpleAuthManager;
-    const isLoggedIn = authManager && authManager.isUserLoggedIn();
+    
+    // CRITICAL: Also check sessionStorage to ensure no stale data
+    const sessionData = sessionStorage.getItem('simple-auth-session');
+    const hasValidSession = sessionData && sessionData !== 'null' && sessionData !== '{}';
+    
+    const isLoggedIn = authManager && authManager.isUserLoggedIn() && hasValidSession;
     
     // If user is not logged in, ensure form is cleared and project fields are empty
     if (!isLoggedIn) {
@@ -1046,11 +1069,16 @@ import Layout from '../layouts/Layout.astro';
     // Check auth status immediately
     setTimeout(() => {
       const authManager = window.globalAuthManager || window.simpleAuthManager;
-      if (authManager && authManager.isUserLoggedIn()) {
+      
+      // CRITICAL: Also check sessionStorage to ensure no stale data
+      const sessionData = sessionStorage.getItem('simple-auth-session');
+      const hasValidSession = sessionData && sessionData !== 'null' && sessionData !== '{}';
+      
+      if (authManager && authManager.isUserLoggedIn() && hasValidSession) {
         console.log('✅ User is logged in - enabling form');
         enablePersonalFields();
-          prefillForm();
-        } else {
+        prefillForm();
+      } else {
         console.log('❌ User not logged in - clearing form');
         forceClearForm();
       }
@@ -1060,7 +1088,20 @@ import Layout from '../layouts/Layout.astro';
   // Listen for logout events to clear the form
   window.addEventListener('user-logged-out', () => {
     console.log('👤 User logged out - FORCE CLEARING contact form');
+    // Immediately clear all storage to prevent any stale data
+    sessionStorage.removeItem('simple-auth-session');
+    localStorage.removeItem('simple-auth-user');
+    // Force clear the form
     forceClearForm();
+    // Prevent any prefill attempts after logout - double check after a short delay
+    setTimeout(() => {
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      const sessionData = sessionStorage.getItem('simple-auth-session');
+      const hasValidSession = sessionData && sessionData !== 'null' && sessionData !== '{}';
+      if (!authManager || !authManager.isUserLoggedIn() || !hasValidSession) {
+        forceClearForm();
+      }
+    }, 100);
   });
 
   // Listen for login events to pre-fill the form
@@ -1080,7 +1121,12 @@ import Layout from '../layouts/Layout.astro';
       const authManager = window.globalAuthManager || window.simpleAuthManager;
       if (authManager) {
         console.log('✅ Auth manager found on window load, checking user status...');
-        if (authManager.isUserLoggedIn()) {
+        
+        // CRITICAL: Also check sessionStorage to ensure no stale data
+        const sessionData = sessionStorage.getItem('simple-auth-session');
+        const hasValidSession = sessionData && sessionData !== 'null' && sessionData !== '{}';
+        
+        if (authManager.isUserLoggedIn() && hasValidSession) {
           console.log('👤 User is logged in on window load - enabling form');
           enablePersonalFields();
           prefillForm();
@@ -1103,7 +1149,12 @@ import Layout from '../layouts/Layout.astro';
     if (!document.hidden) {
       console.log('🔄 Page became visible - checking authentication');
       const authManager = window.globalAuthManager || window.simpleAuthManager;
-      if (!authManager || !authManager.isUserLoggedIn()) {
+      
+      // CRITICAL: Also check sessionStorage to ensure no stale data
+      const sessionData = sessionStorage.getItem('simple-auth-session');
+      const hasValidSession = sessionData && sessionData !== 'null' && sessionData !== '{}';
+      
+      if (!authManager || !authManager.isUserLoggedIn() || !hasValidSession) {
         console.log('👤 User not logged in - FORCE CLEARING form');
         forceClearForm();
       } else {

@@ -617,6 +617,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         </div>
       `;
 
+      // Lock body scroll
+      document.body.style.overflow = 'hidden';
       modal.classList.remove('hidden');
     }
   }
@@ -689,12 +691,16 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     // Modal close button
     document.getElementById('close-modal')?.addEventListener('click', () => {
       document.getElementById('transaction-modal')?.classList.add('hidden');
+      // Unlock body scroll
+      document.body.style.overflow = '';
     });
 
     // Close modal when clicking outside
     document.getElementById('transaction-modal')?.addEventListener('click', (e) => {
       if (e.target === e.currentTarget) {
         (e.currentTarget as HTMLElement).classList.add('hidden');
+        // Unlock body scroll
+        document.body.style.overflow = '';
       }
     });
   }

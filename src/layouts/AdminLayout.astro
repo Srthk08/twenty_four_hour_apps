@@ -508,10 +508,18 @@ const { title, description } = Astro.props;
     // Wait for Supabase to load
     function waitForSupabase() {
       return new Promise((resolve) => {
-        if (window.supabase) {
+        // Check if window.supabase is already a client instance (has auth property)
+        if (window.supabase && window.supabase.auth && typeof window.supabase.auth.getUser === 'function') {
+          supabase = window.supabase;
+          resolve(supabase);
+        } 
+        // Check if window.supabase is the library (has createClient method)
+        else if (window.supabase && typeof window.supabase.createClient === 'function') {
           supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
           resolve(supabase);
-        } else {
+        } 
+        // Wait for Supabase library to load
+        else {
           setTimeout(() => waitForSupabase().then(resolve), 100);
         }
       });

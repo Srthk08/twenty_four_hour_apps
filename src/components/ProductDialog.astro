@@ -76,6 +76,9 @@
         return;
       }
       
+      // Lock body scroll
+      document.body.style.overflow = 'hidden';
+      
       dialog.classList.remove('hidden');
       // Trigger animation
       setTimeout(() => {
@@ -90,6 +93,8 @@
       dialogContent.classList.add('scale-95', 'opacity-0');
       setTimeout(() => {
         dialog.classList.add('hidden');
+        // Unlock body scroll
+        document.body.style.overflow = '';
       }, 300);
     }
 

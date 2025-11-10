@@ -362,7 +362,11 @@ const { title, description } = Astro.props;
                     </div>
                   </a>
                   <hr class="my-2 border-gray-200">
-                <button onclick="handleMenuOperatorSignOut()" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200">
+                <button 
+                  @click.stop.prevent="handleMenuOperatorSignOut($event)"
+                  class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200" 
+                  type="button"
+                >
                     <div class="flex items-center">
                       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
@@ -425,10 +429,18 @@ const { title, description } = Astro.props;
     // Wait for Supabase to load
     function waitForSupabase() {
       return new Promise((resolve) => {
-        if (window.supabase) {
+        // Check if window.supabase is already a client instance (has auth property)
+        if (window.supabase && window.supabase.auth && typeof window.supabase.auth.getUser === 'function') {
+          supabase = window.supabase;
+          resolve(supabase);
+        } 
+        // Check if window.supabase is the library (has createClient method)
+        else if (window.supabase && typeof window.supabase.createClient === 'function') {
           supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
           resolve(supabase);
-        } else {
+        } 
+        // Wait for Supabase library to load
+        else {
           setTimeout(() => waitForSupabase().then(resolve), 100);
         }
       });
@@ -579,37 +591,128 @@ const { title, description } = Astro.props;
     }
     
     // Simple menu operator sign out function
-    async function handleMenuOperatorSignOut() {
+    async function handleMenuOperatorSignOut(event) {
+      // Prevent default behavior and stop propagation
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      
+      // Close the dropdown immediately - find the Alpine.js instance
       try {
-        console.log('Menu operator signing out...');
+        const profileButton = document.querySelector('[x-data*="open"]');
+        if (profileButton && profileButton.__x) {
+          profileButton.__x.$data.open = false;
+        }
+        // Also try to find by Alpine.js data attribute
+        const dropdownContainer = document.querySelector('[x-data]');
+        if (dropdownContainer && dropdownContainer.__x && dropdownContainer.__x.$data && typeof dropdownContainer.__x.$data.open !== 'undefined') {
+          dropdownContainer.__x.$data.open = false;
+        }
+      } catch (e) {
+        console.log('Could not close dropdown programmatically:', e);
+      }
+      
+      // Show confirmation dialog
+      const confirmed = confirm('Are you sure you want to sign out?');
+      if (!confirmed) {
+        return;
+      }
+      
+      try {
+        console.log('🚪 Menu operator signing out...');
         
-        // Ensure Supabase is available
-        if (!supabase) {
-          await waitForSupabase();
+        // Update UI to show signing out state
+        const nameElement = document.getElementById('menu-operator-name');
+        const avatarElement = document.getElementById('menu-operator-avatar');
+        if (nameElement) nameElement.textContent = 'Signing out...';
+        if (avatarElement) avatarElement.textContent = '...';
+        
+        // Get Supabase client - try multiple sources
+        let supabaseClient = supabase;
+        
+        if (!supabaseClient) {
+          // Try to get from waitForSupabase
+          supabaseClient = await waitForSupabase();
         }
         
-        // Sign out from Supabase
-        await supabase.auth.signOut();
+        if (!supabaseClient && window.supabase) {
+          // Use window.supabase directly if it's a client instance
+          if (window.supabase.auth && typeof window.supabase.auth.signOut === 'function') {
+            supabaseClient = window.supabase;
+          } else if (typeof window.supabase.createClient === 'function') {
+            // Create client if it's the library
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          }
+        }
+        
+        // Sign out from Supabase if available
+        if (supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.signOut === 'function') {
+          try {
+            await supabaseClient.auth.signOut();
+            console.log('✅ Supabase sign out successful');
+          } catch (supabaseError) {
+            console.warn('⚠️ Supabase sign out error (continuing anyway):', supabaseError);
+          }
+        } else {
+          console.warn('⚠️ Supabase client not available for sign out');
+        }
         
         // Clear all cached data
         sessionStorage.clear();
+        localStorage.clear();
+        
+        // Remove specific auth-related items
         localStorage.removeItem('supabase-auth-session');
+        localStorage.removeItem('simple-auth-user');
+        localStorage.removeItem('simple-auth-session');
+        sessionStorage.removeItem('simple-auth-session');
+        sessionStorage.removeItem('simple-auth-user');
         
-        // Redirect to home page
-        window.location.href = '/';
+        // Clear any auth manager state
+        if (window.globalAuthManager) {
+          window.globalAuthManager.isAuthenticated = false;
+          window.globalAuthManager.currentUser = null;
+        }
+        if (window.simpleAuthManager) {
+          window.simpleAuthManager.isAuthenticated = false;
+          window.simpleAuthManager.currentUser = null;
+        }
         
-        } catch (error) {
-        console.error('Error during menu operator sign out:', error);
+        console.log('✅ All storage cleared');
+        
+        // Dispatch logout event
+        window.dispatchEvent(new CustomEvent('user-logged-out'));
+        
+        // Small delay to ensure cleanup completes
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // Redirect to login page
+        window.location.href = '/login';
+        console.log('✅ Redirecting to login page');
+        
+      } catch (error) {
+        console.error('❌ Error during menu operator sign out:', error);
+        // Clear storage anyway
+        try {
+          sessionStorage.clear();
+          localStorage.clear();
+        } catch (e) {
+          console.warn('Error clearing storage:', e);
+        }
         // Force redirect even if logout fails
-        window.location.href = '/';
+        window.location.href = '/login';
       }
     }
 
-    // Make function globally available
+    // Make function globally available immediately
     window.handleMenuOperatorSignOut = handleMenuOperatorSignOut;
     
-    // Start checking menu operator access when page loads
-    document.addEventListener('DOMContentLoaded', checkMenuOperatorAccess);
+    // Attach backup event listener when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      // Start checking menu operator access
+      checkMenuOperatorAccess();
+    });
     
     // Also check when auth state changes
     window.addEventListener('auth-state-changed', checkMenuOperatorAccess);

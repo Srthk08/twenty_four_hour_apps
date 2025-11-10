@@ -628,7 +628,16 @@ const { title, description = "DevExpress - 24 Hour Delivery" } = Astro.props;
     </script>
 
     <!-- Alpine.js for interactivity -->
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" onerror="
+      console.warn('⚠️ Alpine.js failed to load from jsdelivr, trying unpkg...');
+      const fallback = document.createElement('script');
+      fallback.defer = true;
+      fallback.src = 'https://unpkg.com/alpinejs@3.13.3/dist/cdn.min.js';
+      fallback.onerror = function() {
+        console.error('❌ Alpine.js failed to load from all CDN sources');
+      };
+      document.head.appendChild(fallback);
+    "></script>
 
     <!-- EmailJS for email notifications -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
