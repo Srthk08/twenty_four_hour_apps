@@ -2440,20 +2440,42 @@ import AuthGuard from '../components/AuthGuard.astro';
 
   // Handle Order Menu Form submission after validation passes
   async function handleOrderMenuFormSubmission() {
-    console.log('🚀 Handling Order Menu Form submission...');
+    console.log('🚀🚀🚀 STARTING handleOrderMenuFormSubmission() 🚀🚀🚀');
+    console.log('📍 Timestamp:', new Date().toISOString());
     
     const form = document.getElementById('order-menu-form');
     if (!form) {
-      console.error('Order menu form not found');
+      console.error('❌❌❌ Order menu form not found ❌❌❌');
+      alert('❌ Form not found. Please refresh the page and try again.');
       return;
     }
+    console.log('✅ Form found:', form);
 
     // CRITICAL: Check if user is logged in before allowing form submission
     const authManager = window.globalAuthManager || window.simpleAuthManager;
-    if (!authManager || !authManager.isUserLoggedIn()) {
+    console.log('🔍 Auth manager check:', {
+      globalAuthManager: !!window.globalAuthManager,
+      simpleAuthManager: !!window.simpleAuthManager,
+      authManager: !!authManager
+    });
+    
+    if (!authManager) {
+      console.error('❌❌❌ No auth manager found ❌❌❌');
       alert('❌ Please log in to submit this form. You must be authenticated to place an order.');
       return;
     }
+    
+    const isLoggedIn = authManager.isUserLoggedIn();
+    console.log('🔍 User logged in:', isLoggedIn);
+    
+    if (!isLoggedIn) {
+      console.error('❌❌❌ User not logged in ❌❌❌');
+      alert('❌ Please log in to submit this form. You must be authenticated to place an order.');
+      return;
+    }
+    
+    const currentUser = authManager.getCurrentUser();
+    console.log('👤 Current user:', currentUser);
 
     // VALIDATION: Check all required fields before proceeding
     console.log('🔍 Running comprehensive validation before submission...');
@@ -2517,9 +2539,27 @@ import AuthGuard from '../components/AuthGuard.astro';
     console.log('📝 Form data collected:', formDataObj);
     
     try {
+      console.log('📦 Attempting to import Supabase client...');
       // Get Supabase client
       const { supabase } = await import('../lib/supabase');
-      console.log('✅ Supabase client loaded');
+      console.log('✅ Supabase client imported');
+      console.log('🔍 Supabase client type:', typeof supabase);
+      console.log('🔍 Supabase client methods:', supabase ? Object.keys(supabase).slice(0, 10) : 'null');
+      
+      if (!supabase) {
+        console.error('❌❌❌ Supabase client is null/undefined ❌❌❌');
+        alert('❌ Database connection failed. Please refresh the page and try again.');
+        return;
+      }
+      
+      if (typeof supabase.from !== 'function') {
+        console.error('❌❌❌ Supabase client does not have .from() method ❌❌❌');
+        console.error('❌ Supabase object:', supabase);
+        alert('❌ Database connection is not properly initialized. Please refresh the page.');
+        return;
+      }
+      
+      console.log('✅ Supabase client verified and ready');
       
       // Skip client-side bucket listing; assume buckets exist and handle upload errors gracefully.
       
@@ -2666,58 +2706,110 @@ import AuthGuard from '../components/AuthGuard.astro';
       }
       
       // Prepare data for database insertion
-        const insertData = {
-          project_name: formDataObj.projectName,
-          owner_name: formDataObj.ownerName,
-          contact_person: formDataObj.contactPerson,
-          email: formDataObj.email,
-          phone_number: formDataObj.phone,
-          house_flat_number: formDataObj.houseNumber,
-          address_line_1: formDataObj.addressLine1,
-          city: formDataObj.city,
-          state: formDataObj.state,
-          pincode: formDataObj.pincode,
-          country: formDataObj.country,
-          restaurant_name: formDataObj.restaurantName,
-          restaurant_logo_url: restaurantLogoUrl, // Store the uploaded logo URL
-          menu_photos_urls: menuPhotosUrls, // Store the uploaded menu photo URLs (array of objects)
-          additional_requirements: formDataObj.additionalRequirements || '',
-          base_package_cost: 999,
-          gst_amount: 180,
-          total_amount: 1179, // Fixed price for Order Menu System
-          status: 'pending',
-          payment_status: 'pending'
-        };
+      // Keep menuPhotosUrls as array of objects with url, filename, size, path, etc.
+      let menuPhotosUrlsFormatted = null;
+      if (menuPhotosUrls && menuPhotosUrls.length > 0) {
+        // Keep the full object structure so we can display filename, size, etc. in admin panels
+        menuPhotosUrlsFormatted = menuPhotosUrls.map(photo => ({
+          url: photo.url || photo.publicUrl || photo,
+          filename: photo.filename || photo.name || 'menu-photo',
+          size: photo.size || null,
+          path: photo.path || null,
+          mimeType: photo.mimeType || photo.type || null
+        })).filter(photo => photo.url); // Only keep photos with valid URLs
+      }
 
-      console.log('💾 Saving order customization data:', insertData);
+      const insertData = {
+        project_name: formDataObj.projectName || '',
+        owner_name: formDataObj.ownerName || '',
+        contact_person: formDataObj.contactPerson || '',
+        email: formDataObj.email || '',
+        phone_number: formDataObj.phone || '',
+        house_flat_number: formDataObj.houseNumber || '',
+        address_line_1: formDataObj.addressLine1 || '',
+        city: formDataObj.city || '',
+        state: formDataObj.state || '',
+        pincode: formDataObj.pincode || '',
+        country: formDataObj.country || 'India',
+        restaurant_name: formDataObj.restaurantName || '',
+        restaurant_logo_url: restaurantLogoUrl, // Store the uploaded logo URL
+        menu_photos_urls: menuPhotosUrlsFormatted, // Store the uploaded menu photo URLs (array)
+        additional_requirements: formDataObj.additionalRequirements || '',
+        base_package_cost: 999.00,
+        gst_amount: 180.00,
+        total_amount: 1179.00, // Fixed price for Order Menu System
+        status: 'pending'
+      };
 
-      // Save to database using direct REST API call with ?select=* (no columns param)
-      const { data: { session } } = await supabase.auth.getSession();
-      const accessToken = session?.access_token || '';
-      const { supabaseUrl, supabaseAnonKey } = await import('../lib/supabase');
-      const anonKey = supabaseAnonKey;
-      const apiBase = supabaseUrl;
-      const restUrl = `${apiBase}/rest/v1/order_customizations?select=*`;
-      const resp = await fetch(restUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Prefer': 'return=representation',
-          'apikey': anonKey,
-          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {})
-        },
-        body: JSON.stringify(insertData)
-      });
+      console.log('💾💾💾 PREPARING TO SAVE DATA 💾💾💾');
+      console.log('💾 Original menuPhotosUrls:', menuPhotosUrls);
+      console.log('💾 Menu photos URLs formatted:', menuPhotosUrlsFormatted);
+      console.log('💾 Menu photos URLs formatted type:', typeof menuPhotosUrlsFormatted);
+      console.log('💾 Menu photos URLs formatted isArray:', Array.isArray(menuPhotosUrlsFormatted));
+      if (Array.isArray(menuPhotosUrlsFormatted)) {
+        console.log('💾 Menu photos URLs formatted length:', menuPhotosUrlsFormatted.length);
+        menuPhotosUrlsFormatted.forEach((photo, idx) => {
+          console.log(`💾 Photo ${idx + 1}:`, photo);
+        });
+      }
+      console.log('💾 Saving order customization data:', JSON.stringify(insertData, null, 2));
+      console.log('💾 Insert data keys:', Object.keys(insertData));
 
-      if (!resp.ok) {
-        const text = await resp.text();
-        console.error('❌ REST insert failed:', resp.status, text);
-        alert('❌ Error saving your order. Please try again.');
+      // Save to database using Supabase client directly (more reliable than REST API)
+      console.log('📤📤📤 ATTEMPTING DATABASE INSERT 📤📤📤');
+      console.log('📤 Table: order_customizations');
+      console.log('📤 Data being inserted:', insertData);
+      
+      const { data: savedData, error: saveError } = await supabase
+        .from('order_customizations')
+        .insert(insertData)
+        .select();
+
+      console.log('📥📥📥 DATABASE RESPONSE RECEIVED 📥📥📥');
+      console.log('📥 Saved data:', savedData);
+      console.log('📥 Save error:', saveError);
+      console.log('📥 Error type:', saveError ? typeof saveError : 'none');
+      console.log('📥 Error message:', saveError ? saveError.message : 'none');
+      console.log('📥 Error code:', saveError ? saveError.code : 'none');
+      console.log('📥 Error details:', saveError ? saveError.details : 'none');
+      console.log('📥 Error hint:', saveError ? saveError.hint : 'none');
+
+      if (saveError) {
+        console.error('❌❌❌ ERROR SAVING ORDER CUSTOMIZATION ❌❌❌');
+        console.error('❌ Full error object:', saveError);
+        console.error('❌ Error details:', JSON.stringify(saveError, null, 2));
+        console.error('❌ Insert data that failed:', JSON.stringify(insertData, null, 2));
+        
+        // Show user-friendly error message
+        const errorDiv = document.getElementById('validation-errors');
+        if (errorDiv) {
+          errorDiv.classList.remove('hidden');
+          errorDiv.innerHTML = `
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+              <h4 class="text-red-800 font-semibold mb-2">❌ Error Saving Order</h4>
+              <p class="text-red-700">${saveError.message || 'Failed to save your order. Please check all required fields and try again.'}</p>
+              <p class="text-red-600 text-sm mt-2">If this problem persists, please contact support.</p>
+            </div>
+          `;
+        } else {
+          alert(`❌ Error saving your order: ${saveError.message || 'Unknown error'}. Please try again.`);
+        }
         return;
       }
 
-      const data = await resp.json();
-      console.log('✅ Order customization saved successfully (REST):', data);
+      if (!savedData || savedData.length === 0) {
+        console.error('❌❌❌ No data returned from insert operation ❌❌❌');
+        console.error('❌ savedData:', savedData);
+        console.error('❌ savedData length:', savedData ? savedData.length : 'null/undefined');
+        alert('❌ Error saving your order. No data was returned. Please try again.');
+        return;
+      }
+
+      console.log('✅✅✅ ORDER CUSTOMIZATION SAVED SUCCESSFULLY! ✅✅✅');
+      console.log('✅ Saved data:', savedData);
+      console.log('✅ Saved data length:', savedData.length);
+      console.log('✅ First record ID:', savedData[0]?.id);
+      console.log('✅✅✅ SAVE OPERATION COMPLETE ✅✅✅');
 
       // Show success message with upload details
       const successDiv = document.getElementById('validation-errors');
@@ -4398,42 +4490,108 @@ Status: Submitted
       }
     }
     
+    console.log('🔍🔍🔍 SEARCHING FOR SAVE BUTTON 🔍🔍🔍');
+    console.log('🔍 Order menu form:', orderMenuForm);
+    console.log('🔍 Target button (initial):', targetButton);
+    
     if (targetButton) {
-      console.log('🔴 Save button found:', targetButton);
+      console.log('✅✅✅ SAVE BUTTON FOUND! ✅✅✅');
+      console.log('🔴 Save button element:', targetButton);
+      console.log('🔴 Save button ID:', targetButton.id);
+      console.log('🔴 Save button classes:', targetButton.className);
+      console.log('🔴 Save button text:', targetButton.textContent);
+      console.log('🔴 Save button type:', targetButton.type);
+      
       let isSaving = false; // Flag to prevent duplicate saves
+      console.log('📌 Attaching click event listener to save button...');
       targetButton.addEventListener('click', async function(e) {
-        console.log('🔴 Save button clicked (unified flow)!');
+        console.log('🔴🔴🔴 SAVE BUTTON CLICKED! 🔴🔴🔴');
+        console.log('📍 Button element:', targetButton);
+        console.log('📍 Button ID:', targetButton.id);
+        console.log('📍 Button type:', targetButton.type);
+        console.log('📍 Event:', e);
+        console.log('📍 Timestamp:', new Date().toISOString());
+        
         e.preventDefault();
-        if (isSaving) return;
+        e.stopPropagation();
+        
+        if (isSaving) {
+          console.log('⚠️⚠️⚠️ Save already in progress, ignoring click ⚠️⚠️⚠️');
+          alert('⚠️ Save is already in progress. Please wait...');
+          return;
+        }
+        
+        console.log('✅ Setting isSaving flag to true');
         isSaving = true;
+        
         try {
           // Run validation before submission
-          console.log('🔍 Running validation before save button submission...');
+          console.log('🔍🔍🔍 RUNNING VALIDATION 🔍🔍🔍');
           const formValidationResult = validateFormFields();
+          console.log('🔍 Validation result:', formValidationResult);
+          
           if (!formValidationResult) {
-            console.log('❌ Validation failed, preventing save');
+            console.log('❌❌❌ Validation failed, preventing save ❌❌❌');
+            alert('❌ Please fill in all required fields before saving.');
             return;
           }
           
+          console.log('✅✅✅ VALIDATION PASSED, CALLING handleOrderMenuFormSubmission() ✅✅✅');
           await handleOrderMenuFormSubmission();
+          console.log('✅✅✅ handleOrderMenuFormSubmission() COMPLETED ✅✅✅');
+          
           // After successful save, clear both forms if present
           try { document.getElementById('order-menu-form')?.reset(); } catch {}
           try { document.getElementById('customization-form')?.reset(); } catch {}
         } catch (err) {
-          console.error('❌ Save button unified flow error:', err);
+          console.error('❌❌❌ SAVE BUTTON ERROR ❌❌❌');
+          console.error('❌ Error object:', err);
+          console.error('❌ Error message:', err.message);
+          console.error('❌ Error stack:', err.stack);
+          alert(`❌ An error occurred while saving: ${err.message || 'Unknown error'}. Please check the console for details.`);
         } finally {
+          console.log('🔄 Resetting isSaving flag to false');
           isSaving = false;
         }
       });
+      console.log('✅✅✅ CLICK EVENT LISTENER ATTACHED SUCCESSFULLY ✅✅✅');
+      
+      // Test: Try to manually trigger click to verify button is accessible
+      console.log('🧪 Testing button accessibility...');
+      console.log('🧪 Button is in DOM:', document.body.contains(targetButton));
+      console.log('🧪 Button is visible:', targetButton.offsetParent !== null);
+      console.log('🧪 Button is enabled:', !targetButton.disabled);
+      
+      // Add a test function to window for manual testing
+      window.testSaveButton = function() {
+        console.log('🧪🧪🧪 MANUAL TEST: Triggering save button click 🧪🧪🧪');
+        targetButton.click();
+      };
+      console.log('🧪 Test function available: window.testSaveButton()');
+      
     } else {
-      console.error('❌ Save button not found!');
+      console.error('❌❌❌ SAVE BUTTON NOT FOUND! ❌❌❌');
+      console.error('❌ Attempting fallback search...');
+      
       // Fallback: attach by explicit ID if present
       const fallbackBtn = document.getElementById('save-and-pay');
+      console.log('🔍 Fallback button search result:', fallbackBtn);
+      
       if (fallbackBtn) {
+        console.log('✅✅✅ FALLBACK BUTTON FOUND! ✅✅✅');
+        console.log('🔴 Fallback button element:', fallbackBtn);
+        console.log('🔴 Fallback button ID:', fallbackBtn.id);
+        
         let isSaving = false;
+        console.log('📌 Attaching click event listener to fallback button...');
         fallbackBtn.addEventListener('click', async (e) => {
+          console.log('🔴🔴🔴 FALLBACK SAVE BUTTON CLICKED! 🔴🔴🔴');
           e.preventDefault();
-          if (isSaving) return;
+          e.stopPropagation();
+          if (isSaving) {
+            console.log('⚠️⚠️⚠️ Save already in progress, ignoring click ⚠️⚠️⚠️');
+            return;
+          }
           isSaving = true;
           try {
             // Run validation before submission
@@ -4441,16 +4599,31 @@ Status: Submitted
             const formValidationResult = validateFormFields();
             if (!formValidationResult) {
               console.log('❌ Validation failed, preventing save');
+              alert('❌ Please fill in all required fields before saving.');
               return;
             }
             
+            console.log('✅✅✅ FALLBACK VALIDATION PASSED, CALLING handleOrderMenuFormSubmission() ✅✅✅');
             await handleOrderMenuFormSubmission();
+            console.log('✅✅✅ FALLBACK handleOrderMenuFormSubmission() COMPLETED ✅✅✅');
             try { document.getElementById('order-menu-form')?.reset(); } catch {}
             try { document.getElementById('customization-form')?.reset(); } catch {}
+          } catch (err) {
+            console.error('❌❌❌ FALLBACK SAVE BUTTON ERROR ❌❌❌');
+            console.error('❌ Error object:', err);
+            console.error('❌ Error message:', err.message);
+            console.error('❌ Error stack:', err.stack);
+            alert(`❌ An error occurred while saving: ${err.message || 'Unknown error'}. Please check the console for details.`);
           } finally {
+            console.log('🔄 Resetting fallback isSaving flag to false');
             isSaving = false;
           }
         });
+        console.log('✅✅✅ FALLBACK CLICK EVENT LISTENER ATTACHED SUCCESSFULLY ✅✅✅');
+      } else {
+        console.error('❌❌❌ FALLBACK BUTTON ALSO NOT FOUND! ❌❌❌');
+        console.error('❌ All save button search methods failed!');
+        alert('❌ Save button not found. Please refresh the page.');
       }
     }
     

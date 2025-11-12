@@ -762,25 +762,42 @@ import { supabase } from '../../lib/supabase';
         </div>
         ` : ''}
 
-        ${order.menuPhotos && order.menuPhotos.length > 0 ? `
+        ${(() => {
+          let menuPhotos = order.menuPhotos || [];
+          // Handle both string (JSON) and array formats
+          try {
+            if (typeof menuPhotos === 'string') menuPhotos = JSON.parse(menuPhotos);
+          } catch {}
+          // Ensure it's an array
+          if (!Array.isArray(menuPhotos)) menuPhotos = [];
+          if (menuPhotos.length > 0) {
+            return `
         <!-- Menu Photos -->
         <div class="space-y-4">
-          <h4 class="text-md font-medium text-gray-900">Menu Photos (${order.menuPhotos.length})</h4>
+          <h4 class="text-md font-medium text-gray-900">Menu Photos (${menuPhotos.length})</h4>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            ${order.menuPhotos.map(photo => `
+            ${menuPhotos.map(photo => {
+              // Handle both object format {url, filename} and string format
+              const photoUrl = typeof photo === 'string' ? photo : (photo.url || photo.publicUrl || '');
+              const photoFilename = typeof photo === 'object' ? (photo.filename || 'menu-photo') : 'menu-photo';
+              return `
               <div class="relative">
-                <img src="${photo.url || photo}" alt="Menu Photo" class="w-full h-24 object-cover rounded-lg">
-                <a href="${photo.url || photo}" target="_blank" class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all rounded-lg flex items-center justify-center">
+                <img src="${photoUrl}" alt="${photoFilename}" class="w-full h-24 object-cover rounded-lg" title="${photoFilename}">
+                <a href="${photoUrl}" target="_blank" class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all rounded-lg flex items-center justify-center">
                   <svg class="w-6 h-6 text-white opacity-0 hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                   </svg>
                 </a>
               </div>
-            `).join('')}
+            `;
+            }).join('')}
           </div>
         </div>
-        ` : ''}
+        `;
+          }
+          return '';
+        })()}
       `;
 
       // Lock body scroll

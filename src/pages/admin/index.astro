@@ -97,6 +97,22 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         </div>
         </div>
 
+      <!-- Menu Photos from Storage Section -->
+      <div class="mt-8 bg-white rounded-lg shadow p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-bold text-gray-900">Menu Photos from Storage</h3>
+          <button onclick="loadMenuPhotosFromStorage()" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Refresh
+          </button>
+        </div>
+        <div id="menu-photos-storage-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+          <div class="col-span-full text-center text-gray-500 py-8">Click Refresh to load menu photos from storage...</div>
+        </div>
+      </div>
+
       <!-- Detailed Data Sections -->
       <div class="mt-8 space-y-8">
         
@@ -370,6 +386,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       // Update summary cards
       console.log('🔄 Updating summary cards...');
       await updateSummaryCards();
+      
+      // Load menu photos from storage
+      console.log('🔄 Loading menu photos from storage...');
+      await loadMenuPhotosFromStorage();
       
       console.log('✅ All admin data loaded successfully');
     } catch (error) {
@@ -696,6 +716,181 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       }
     }
   }
+
+  // Load menu photos from Supabase storage bucket
+  async function loadMenuPhotosFromStorage() {
+    try {
+      console.log('🔄 Loading menu photos from Supabase storage...');
+      
+      const container = document.getElementById('menu-photos-storage-container');
+      if (!container) {
+        console.error('❌ Container not found');
+        return;
+      }
+      
+      container.innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">Loading menu photos...</div>';
+      
+      if (!supabase) {
+        await waitForSupabase();
+      }
+      
+      if (!supabase) {
+        container.innerHTML = '<div class="col-span-full text-center text-red-500 py-8">Error: Supabase client not available</div>';
+        return;
+      }
+      
+      // Try different bucket names
+      const bucketNames = ['menu-photos', 'MEN U PHOTO', 'menu_photos', 'men-u-photo'];
+      let allPhotos = [];
+      
+      for (const bucketName of bucketNames) {
+        try {
+          console.log(`🔍 Trying bucket: ${bucketName}`);
+          const { data: files, error } = await supabase.storage
+            .from(bucketName)
+            .list('', {
+              limit: 100,
+              offset: 0,
+              sortBy: { column: 'created_at', order: 'desc' }
+            });
+          
+          if (error) {
+            console.log(`⚠️ Bucket ${bucketName} not found or error:`, error.message);
+            continue;
+          }
+          
+          if (files && files.length > 0) {
+            console.log(`✅ Found ${files.length} files in bucket: ${bucketName}`);
+            
+            // Get public URLs for each file
+            for (const file of files) {
+              // Skip folders (folders have id === null)
+              if (file.id === null) {
+                // If it's a folder, recursively list files inside
+                try {
+                  const { data: nestedFiles, error: nestedError } = await supabase.storage
+                    .from(bucketName)
+                    .list(file.name, {
+                      limit: 100,
+                      offset: 0,
+                      sortBy: { column: 'created_at', order: 'desc' }
+                    });
+                  
+                  if (!nestedError && nestedFiles) {
+                    for (const nestedFile of nestedFiles) {
+                      if (nestedFile.id === null) continue; // Skip nested folders
+                      
+                      const filePath = `${file.name}/${nestedFile.name}`;
+                      try {
+                        const { data: urlData } = supabase.storage
+                          .from(bucketName)
+                          .getPublicUrl(filePath);
+                        
+                        if (urlData && urlData.publicUrl) {
+                          allPhotos.push({
+                            name: nestedFile.name,
+                            url: urlData.publicUrl,
+                            size: nestedFile.metadata?.size || 0,
+                            created_at: nestedFile.created_at || new Date().toISOString()
+                          });
+                        }
+                      } catch (urlError) {
+                        console.warn(`⚠️ Could not get URL for ${filePath}:`, urlError);
+                      }
+                    }
+                  }
+                } catch (folderError) {
+                  console.warn(`⚠️ Could not list folder ${file.name}:`, folderError);
+                }
+                continue;
+              }
+              
+              try {
+                // Try to get public URL
+                const { data: urlData } = supabase.storage
+                  .from(bucketName)
+                  .getPublicUrl(file.name);
+                
+                if (urlData && urlData.publicUrl) {
+                  allPhotos.push({
+                    name: file.name,
+                    url: urlData.publicUrl,
+                    size: file.metadata?.size || 0,
+                    created_at: file.created_at || new Date().toISOString()
+                  });
+                }
+              } catch (urlError) {
+                console.warn(`⚠️ Could not get URL for ${file.name}:`, urlError);
+              }
+            }
+            
+            // If we found files in this bucket, break (use first successful bucket)
+            if (allPhotos.length > 0) {
+              console.log(`✅ Using bucket: ${bucketName} with ${allPhotos.length} photos`);
+              break;
+            }
+          }
+        } catch (bucketError) {
+          console.log(`⚠️ Error accessing bucket ${bucketName}:`, bucketError.message);
+          continue;
+        }
+      }
+      
+      if (allPhotos.length === 0) {
+        container.innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">No menu photos found in storage buckets. Tried: ' + bucketNames.join(', ') + '</div>';
+        return;
+      }
+      
+      // Display photos in grid
+      container.innerHTML = allPhotos.map(photo => `
+        <div class="relative group cursor-pointer" onclick="viewImageInModal('${photo.url.replace(/'/g, "\\'")}')">
+          <img 
+            src="${photo.url}" 
+            alt="${photo.name}" 
+            class="w-full h-32 object-cover rounded-lg border border-gray-200 hover:border-blue-400 transition-all"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+          />
+          <div class="hidden absolute inset-0 bg-gray-100 rounded-lg flex items-center justify-center">
+            <span class="text-xs text-gray-500">Failed to load</span>
+          </div>
+          <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
+            <p class="truncate">${photo.name}</p>
+          </div>
+        </div>
+      `).join('');
+      
+      console.log(`✅ Displayed ${allPhotos.length} menu photos`);
+    } catch (error) {
+      console.error('❌ Error loading menu photos from storage:', error);
+      const container = document.getElementById('menu-photos-storage-container');
+      if (container) {
+        container.innerHTML = `<div class="col-span-full text-center text-red-500 py-8">Error loading photos: ${error.message}</div>`;
+      }
+    }
+  }
+  
+  // View image in modal
+  window.viewImageInModal = function(imageUrl) {
+    const modal = document.getElementById('image-modal');
+    const img = document.getElementById('image-modal-img');
+    if (modal && img) {
+      img.src = imageUrl;
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+  };
+  
+  // Close image modal
+  window.closeImageModal = function() {
+    const modal = document.getElementById('image-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+  };
+  
+  // Make function globally accessible
+  window.loadMenuPhotosFromStorage = loadMenuPhotosFromStorage;
 
   async function updateSummaryCards() {
     try {
@@ -1174,21 +1369,63 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           ` : ''}
           
           <!-- Menu Photos Section -->
-          ${customization.menu_photos_urls && customization.menu_photos_urls.length > 0 ? `
+          ${(() => {
+            let photos = customization.menu_photos_urls || [];
+            console.log('🔍 Admin Panel - Raw menu_photos_urls:', photos, 'type:', typeof photos);
+            
+            // Handle both string (JSON) and array formats
+            try {
+              if (typeof photos === 'string') {
+                console.log('📝 Admin Panel - Parsing JSON string');
+                photos = JSON.parse(photos);
+              }
+            } catch (e) {
+              console.error('❌ Admin Panel - Failed to parse JSON:', e);
+            }
+            
+            console.log('🔍 Admin Panel - Parsed photos:', photos, 'isArray:', Array.isArray(photos), 'length:', Array.isArray(photos) ? photos.length : 'N/A');
+            
+            // Handle array of objects (with url property) or array of strings
+            const photoCount = Array.isArray(photos) ? photos.length : 0;
+            console.log('🔍 Admin Panel - Photo count:', photoCount);
+            
+            if (photoCount > 0) {
+              const photosHTML = photos.slice(0, 8).map(photo => {
+                console.log('🔍 Admin Panel - Processing photo:', photo, 'type:', typeof photo);
+                // Handle both object format {url, filename} and string format
+                const photoUrl = typeof photo === 'string' ? photo : (photo.url || photo.publicUrl || '');
+                const photoFilename = typeof photo === 'object' ? (photo.filename || 'menu-photo') : 'menu-photo';
+                console.log('🔍 Admin Panel - Extracted URL:', photoUrl, 'filename:', photoFilename);
+                
+                if (!photoUrl) {
+                  console.warn('⚠️ Admin Panel - No URL found for photo:', photo);
+                  return '';
+                }
+                
+                return `<div data-image-url="${photoUrl.replace(/"/g, '&quot;')}" class="image-view-trigger cursor-pointer hover:opacity-80 transition-opacity inline-block">
+                  <img src="${photoUrl}" alt="${photoFilename}" class="h-20 w-20 object-cover border rounded" title="Click to view full size: ${photoFilename}" onerror="console.error('❌ Failed to load image:', this.src); this.style.display='none';">
+                </div>`;
+              }).filter(Boolean).join('');
+              
+              console.log('🔍 Admin Panel - Generated HTML length:', photosHTML.length);
+              
+              return `
           <div class="bg-gray-50 p-4 rounded-lg">
-            <h5 class="text-lg font-semibold text-gray-900 mb-3">Menu Photos (${customization.menu_photos_urls.length} photos)</h5>
+            <h5 class="text-lg font-semibold text-gray-900 mb-3">Menu Photos (${photoCount} photos)</h5>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-              ${customization.menu_photos_urls.slice(0, 8).map(photoUrl => `
-                <img src="${photoUrl}" alt="Menu Photo" class="h-20 w-20 object-cover border rounded">
-              `).join('')}
-              ${customization.menu_photos_urls.length > 8 ? `
+              ${photosHTML}
+              ${photoCount > 8 ? `
                 <div class="h-20 w-20 border rounded flex items-center justify-center bg-gray-100">
-                  <span class="text-xs text-gray-500">+${customization.menu_photos_urls.length - 8} more</span>
+                  <span class="text-xs text-gray-500">+${photoCount - 8} more</span>
                 </div>
               ` : ''}
             </div>
           </div>
-          ` : ''}
+          `;
+            }
+            console.log('⚠️ Admin Panel - No photos to display');
+            return '';
+          })()}
         </div>
       `).join('');
     } else {
@@ -1368,12 +1605,17 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         movedLogoIntoPhotos = true;
       }
       const photosHtml = Array.isArray(photos) && photos.length
-        ? `<div class="grid grid-cols-3 sm:grid-cols-4 gap-3">${photos.map(p => `
-            <a href="${p.url || p.publicUrl}" target="_blank" class="block">
-              <img src="${p.url || p.publicUrl}" crossorigin="anonymous" alt="${p.filename || 'menu photo'}" class="w-20 h-20 object-cover rounded border"/>
-              <p class="mt-1 text-xs text-gray-500 truncate">${p.filename || ''}</p>
-            </a>
-          `).join('')}</div>`
+        ? `<div class="grid grid-cols-3 sm:grid-cols-4 gap-3">${photos.map(p => {
+            const imgUrl = typeof p === 'string' ? p : (p.url || p.publicUrl || '');
+            const filename = typeof p === 'string' ? 'menu-photo' : (p.filename || 'menu-photo');
+            if (!imgUrl) return '';
+            return `
+            <div data-image-url="${imgUrl.replace(/"/g, '&quot;')}" class="image-view-trigger block cursor-pointer hover:opacity-80 transition-opacity">
+              <img src="${imgUrl}" crossorigin="anonymous" alt="${filename}" class="w-20 h-20 object-cover rounded border" title="Click to view full size: ${filename}"/>
+              <p class="mt-1 text-xs text-gray-500 truncate">${filename}</p>
+            </div>
+          `;
+          }).filter(Boolean).join('')}</div>`
         : '<p class="text-gray-500">No menu photos uploaded</p>';
 
       const hasPhotos = Array.isArray(photos) && photos.length > 0;
@@ -1557,6 +1799,72 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     }
   };
 
+  // Image Modal Functions for viewing full-size images
+  window.openImageModal = function(imageUrl) {
+    console.log('🖼️ Opening image modal for:', imageUrl);
+    const modal = document.getElementById('image-modal');
+    const img = document.getElementById('image-modal-img');
+    if (modal && img && imageUrl) {
+      img.src = imageUrl;
+      img.onerror = function() {
+        console.error('❌ Failed to load image:', imageUrl);
+        alert('Failed to load image. Please check the image URL.');
+        closeImageModal();
+      };
+      // Lock body scroll
+      document.body.style.overflow = 'hidden';
+      modal.classList.remove('hidden');
+    } else {
+      console.error('❌ Image modal elements not found or invalid URL');
+    }
+  };
+
+  window.closeImageModal = function() {
+    const modal = document.getElementById('image-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      // Unlock body scroll
+      document.body.style.overflow = '';
+      // Clear image src to free memory
+      const img = document.getElementById('image-modal-img');
+      if (img) img.src = '';
+    }
+  };
+
+  // Close image modal on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeImageModal();
+    }
+  });
+
+  // Attach click handlers to image-view-trigger elements
+  document.addEventListener('DOMContentLoaded', function() {
+    const imageModal = document.getElementById('image-modal');
+    if (imageModal) {
+      imageModal.addEventListener('click', function(e) {
+        if (e.target === imageModal) {
+          closeImageModal();
+        }
+      });
+    }
+
+    // Use event delegation for dynamically loaded content
+    document.addEventListener('click', function(e) {
+      const trigger = e.target.closest('.image-view-trigger');
+      if (trigger) {
+        e.preventDefault();
+        e.stopPropagation();
+        const imageUrl = trigger.getAttribute('data-image-url');
+        if (imageUrl) {
+          openImageModal(imageUrl);
+        } else {
+          console.error('❌ No image URL found in data-image-url attribute');
+        }
+      }
+    });
+  });
+
 </script>
 
 <!-- Modal for viewing details -->
@@ -1594,6 +1902,18 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <!-- Content will be populated by JavaScript -->
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Image Modal for viewing full-size images -->
+<div id="image-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-[60] flex items-center justify-center p-4">
+  <div class="relative max-w-7xl w-full h-full flex items-center justify-center">
+    <button onclick="closeImageModal()" class="absolute top-4 right-4 z-20 text-white hover:text-gray-200 bg-white bg-opacity-20 hover:bg-opacity-30 backdrop-blur-sm rounded-full p-3 transition-all shadow-lg border-2 border-white border-opacity-30">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+    <img id="image-modal-img" src="" alt="Full size image" class="max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl" />
   </div>
 </div>
 

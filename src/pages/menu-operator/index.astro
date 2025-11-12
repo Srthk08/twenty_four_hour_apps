@@ -125,7 +125,6 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
       </div>
     </div>
 
-    <!-- Menu Photos Section removed as requested -->
       </div>
     </div>
   </div>
@@ -196,6 +195,18 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Image Modal for Photos and Logo -->
+  <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-75 hidden z-[60] flex items-center justify-center p-4">
+    <div class="relative max-w-7xl w-full h-full flex items-center justify-center">
+      <button onclick="closeImageModal()" class="absolute top-4 right-4 z-20 text-white hover:text-gray-200 bg-white bg-opacity-20 hover:bg-opacity-30 backdrop-blur-sm rounded-full p-3 transition-all shadow-lg border-2 border-white border-opacity-30">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+      <img id="image-modal-img" src="" alt="Full size image" class="max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl" />
     </div>
   </div>
 
@@ -691,27 +702,58 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
       const photos = [];
       (data || []).forEach(row => {
         let items = row.menu_photos_urls;
-        if (!items) return;
+        console.log('🔍 Processing row:', row.id, 'menu_photos_urls type:', typeof items, 'value:', items);
+        
+        if (!items) {
+          console.log('⚠️ No menu_photos_urls for row:', row.id);
+          return;
+        }
+        
         try {
-          if (typeof items === 'string') items = JSON.parse(items);
-        } catch {
+          if (typeof items === 'string') {
+            console.log('📝 Parsing JSON string for row:', row.id);
+            items = JSON.parse(items);
+          }
+        } catch (e) {
+          console.error('❌ Failed to parse JSON for row:', row.id, e);
           items = [];
         }
+        
+        console.log('🔍 Parsed items for row:', row.id, 'type:', typeof items, 'isArray:', Array.isArray(items), 'length:', Array.isArray(items) ? items.length : 'N/A');
+        
         if (Array.isArray(items)) {
-          items.forEach(p => {
-            photos.push({
-              id: `${row.id}-${p.path || p.filename || Math.random().toString(36).slice(2)}`,
-              photo_url: p.url || p.publicUrl || null,
-              original_filename: p.filename || 'menu-photo',
-              conversion_status: 'completed',
-              file_size: p.size || null,
-              created_at: row.created_at
-            });
+          items.forEach((p, idx) => {
+            console.log(`🔍 Processing photo ${idx + 1} for row ${row.id}:`, p, 'type:', typeof p);
+            
+            // Handle both object format {url, filename, ...} and string format (just URL)
+            const photoUrl = typeof p === 'string' ? p : (p.url || p.publicUrl || null);
+            const photoFilename = typeof p === 'string' ? 'menu-photo' : (p.filename || 'menu-photo');
+            const photoPath = typeof p === 'object' ? (p.path || null) : null;
+            const photoSize = typeof p === 'object' ? (p.size || null) : null;
+            
+            console.log(`🔍 Extracted photo data: url=${photoUrl}, filename=${photoFilename}`);
+            
+            if (photoUrl) {
+              photos.push({
+                id: `${row.id}-${photoPath || photoFilename || Math.random().toString(36).slice(2)}`,
+                photo_url: photoUrl,
+                original_filename: photoFilename,
+                conversion_status: 'completed',
+                file_size: photoSize,
+                created_at: row.created_at
+              });
+              console.log(`✅ Added photo to array: ${photoUrl}`);
+            } else {
+              console.warn(`⚠️ Skipped photo (no URL):`, p);
+            }
           });
+        } else {
+          console.warn('⚠️ menu_photos_urls is not an array for row:', row.id, 'type:', typeof items);
         }
       });
 
       console.log('✅ Derived photos from order_customizations:', photos.length);
+      console.log('📸 Photos array:', photos);
       return photos;
     } catch (error) {
       console.error('❌ Error loading real menu photos:', error);
@@ -1318,16 +1360,26 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
             if (typeof photos === 'string') photos = JSON.parse(photos);
           } catch {}
           const photosHTML = Array.isArray(photos) && photos.length
-            ? `<div id="photos-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3">${photos.map(p => `
-                <a href="${p.url || p.publicUrl}" target="_blank" class="block">
-                  <img src="${p.url || p.publicUrl}" crossorigin="anonymous" alt="${p.filename || 'menu photo'}" class="w-20 h-20 object-cover rounded border"/>
-                  <p class="mt-1 text-xs text-gray-500 truncate">${p.filename || ''}</p>
-                </a>
-              `).join('')}</div>`
+            ? `<div id="photos-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3">${photos.map((p, idx) => {
+                // Handle both object format {url, filename} and string format (just URL)
+                const imgUrl = typeof p === 'string' ? p : (p.url || p.publicUrl || '');
+                const filename = typeof p === 'string' ? 'menu-photo' : ((p.filename || '').replace(/"/g, '&quot;'));
+                // Use data attribute to store URL safely
+                if (!imgUrl) return '';
+                return `
+                <div data-image-url="${imgUrl.replace(/"/g, '&quot;')}" class="image-view-trigger block cursor-pointer hover:opacity-80 transition-opacity">
+                  <img src="${imgUrl}" crossorigin="anonymous" alt="${filename || 'menu photo'}" class="w-20 h-20 object-cover rounded border"/>
+                  <p class="mt-1 text-xs text-gray-500 truncate">${filename}</p>
+                </div>
+              `;
+              }).filter(Boolean).join('')}</div>`
             : '<p class="text-gray-500">No menu photos uploaded</p>';
 
+          const logoUrl = customization.restaurant_logo_url || '';
           const logoHTML = customization.restaurant_logo_url
-            ? `<img src="${customization.restaurant_logo_url}" alt="Logo" class="w-20 h-20 object-cover rounded border"/>`
+            ? `<div data-image-url="${logoUrl.replace(/"/g, '&quot;')}" class="image-view-trigger inline-block cursor-pointer hover:opacity-80 transition-opacity">
+                <img src="${logoUrl}" alt="Logo" class="w-20 h-20 object-cover rounded border"/>
+              </div>`
             : '<span class="text-gray-500">Not uploaded</span>';
 
           container.innerHTML = `
@@ -1417,30 +1469,46 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
               <div>
                 <div class="flex items-center justify-between mb-2">
                   <h4 class="text-sm font-medium text-gray-500">Menu Photos</h4>
-                  <button type="button" onclick="convertImagesToTextAI()" class="px-3 py-1.5 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors">Convert with AI</button>
                 </div>
                 ${photosHTML}
-                <div id="ai-conversion-result" class="mt-4 hidden">
-                  <div class="flex items-center justify-between mb-2">
-                    <h5 class="text-sm font-semibold text-gray-900">Extracted Menu Text</h5>
-                    <div id="ai-action-buttons" class="space-x-2 hidden">
-                      <button type="button" onclick="copyAIText()" class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200">Copy</button>
-                      <button type="button" onclick="clearAIText()" class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200" title="Clear">Clear</button>
-                    </div>
+                
+                <!-- Manual Menu Conversion Form -->
+                <div class="mt-6 border-t pt-6">
+                  <div class="flex items-center justify-between mb-4">
+                    <h4 class="text-sm font-medium text-gray-500">Manual Menu Conversion</h4>
+                    <button type="button" onclick="addMenuRow()" class="px-3 py-1.5 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors">
+                      + Add Item
+                    </button>
                   </div>
-                  <pre id="ai-conversion-text" class="w-full p-3 border border-gray-300 rounded-md text-sm whitespace-pre-wrap bg-gray-50"></pre>
-                  <div id="ai-conversion-status" class="mt-2 text-xs text-gray-500"></div>
-                  <div id="ai-qr" class="mt-4 hidden">
-                    <div class="flex items-center justify-between mb-2">
-                      <h5 class="text-sm font-semibold text-gray-900">QR Code (scan to view)</h5>
-                      <div class="flex space-x-2">
-                        <button type="button" onclick="downloadAIQr()" class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200">Download</button>
-                        <button type="button" onclick="clearAIQr()" class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200" title="Clear">Clear</button>
-                      </div>
-                    </div>
-                    <img id="ai-qr-image" alt="QR Code" class="border rounded p-2 bg-white max-w-full" />
-                    <div id="ai-qr-note" class="mt-2 text-[11px] text-gray-500"></div>
+                  
+                  <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
+                      <thead class="bg-gray-50">
+                        <tr>
+                          <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase w-16">SR.NO</th>
+                          <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase">CATEGORIES</th>
+                          <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase">NAME</th>
+                          <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase w-32">PRICE</th>
+                          <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase w-24">QUANTITY</th>
+                          <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase w-20">ACTION</th>
+                        </tr>
+                      </thead>
+                      <tbody id="menu-items-table-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Menu items will be added here dynamically -->
+                      </tbody>
+                    </table>
                   </div>
+                  
+                  <div class="mt-4 flex justify-end space-x-3">
+                    <button type="button" onclick="saveMenuItems('${customization.id}')" class="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors">
+                      Save Menu Items
+                    </button>
+                    <button type="button" onclick="clearMenuItems()" class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300 transition-colors">
+                      Clear All
+                    </button>
+                  </div>
+                  
+                  <div id="menu-save-status" class="mt-2 text-sm"></div>
                 </div>
               </div>
               <div>
@@ -1455,6 +1523,24 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
           modal.classList.remove('hidden');
           document.body.style.overflow = 'hidden';
         }
+
+        // Attach event listeners to image triggers after rendering
+        setTimeout(() => {
+          const imageTriggers = container.querySelectorAll('.image-view-trigger');
+          imageTriggers.forEach(trigger => {
+            trigger.addEventListener('click', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              const imageUrl = this.getAttribute('data-image-url');
+              if (imageUrl) {
+                openImageModal(imageUrl);
+              }
+            });
+          });
+          
+          // Load existing menu items if any
+          loadMenuItems(customization.id);
+        }, 100);
       }
     }
 
@@ -1467,7 +1553,318 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
       }
     };
 
+    // Image Modal Functions
+    window.openImageModal = function(imageUrl) {
+      const modal = document.getElementById('image-modal');
+      const img = document.getElementById('image-modal-img');
+      if (modal && img) {
+        img.src = imageUrl;
+        // Lock body scroll
+        document.body.style.overflow = 'hidden';
+        modal.classList.remove('hidden');
+      }
+    };
+
+    window.closeImageModal = function() {
+      const modal = document.getElementById('image-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        // Unlock body scroll
+        document.body.style.overflow = '';
+        // Clear image src to free memory
+        const img = document.getElementById('image-modal-img');
+        if (img) img.src = '';
+      }
+    };
+
+    // Close image modal on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        const imageModal = document.getElementById('image-modal');
+        if (imageModal && !imageModal.classList.contains('hidden')) {
+          closeImageModal();
+        }
+      }
+    });
+
+    // Close image modal when clicking on background
+    document.addEventListener('click', function(e) {
+      const imageModal = document.getElementById('image-modal');
+      if (imageModal && !imageModal.classList.contains('hidden')) {
+        // Close if clicking directly on the modal background
+        if (e.target === imageModal) {
+          closeImageModal();
+        }
+      }
+    });
+
+    // Manual Menu Conversion Functions
+    let menuRowCounter = 0;
+
+    window.addMenuRow = function() {
+      const tbody = document.getElementById('menu-items-table-body');
+      if (!tbody) return;
+      
+      menuRowCounter++;
+      const row = document.createElement('tr');
+      row.className = 'hover:bg-gray-50';
+      row.id = `menu-row-${menuRowCounter}`;
+      
+      row.innerHTML = `
+        <td class="px-3 py-2 text-sm text-gray-900">${menuRowCounter}</td>
+        <td class="px-3 py-2">
+          <input type="text" class="menu-category w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Appetizers" />
+        </td>
+        <td class="px-3 py-2">
+          <input type="text" class="menu-name w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Item name" />
+        </td>
+        <td class="px-3 py-2">
+          <input type="number" step="0.01" min="0" class="menu-price w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0.00" />
+        </td>
+        <td class="px-3 py-2">
+          <input type="number" min="0" class="menu-quantity w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0" />
+        </td>
+        <td class="px-3 py-2">
+          <button type="button" onclick="removeMenuRow('menu-row-${menuRowCounter}')" class="text-red-600 hover:text-red-800 text-sm">
+            Remove
+          </button>
+        </td>
+      `;
+      
+      tbody.appendChild(row);
+      updateMenuRowNumbers();
+    };
+
+    window.removeMenuRow = function(rowId) {
+      const row = document.getElementById(rowId);
+      if (row) {
+        row.remove();
+        updateMenuRowNumbers();
+      }
+    };
+
+    function updateMenuRowNumbers() {
+      const tbody = document.getElementById('menu-items-table-body');
+      if (!tbody) return;
+      
+      const rows = tbody.querySelectorAll('tr');
+      rows.forEach((row, index) => {
+        const srNoCell = row.querySelector('td:first-child');
+        if (srNoCell) {
+          srNoCell.textContent = index + 1;
+        }
+      });
+    }
+
+    window.clearMenuItems = function() {
+      const tbody = document.getElementById('menu-items-table-body');
+      if (tbody) {
+        tbody.innerHTML = '';
+        menuRowCounter = 0;
+      }
+      const statusDiv = document.getElementById('menu-save-status');
+      if (statusDiv) statusDiv.textContent = '';
+    };
+
+    window.saveMenuItems = async function(customizationId) {
+      const tbody = document.getElementById('menu-items-table-body');
+      const statusDiv = document.getElementById('menu-save-status');
+      
+      if (!tbody || !customizationId) {
+        if (statusDiv) statusDiv.innerHTML = '<span class="text-red-600">Error: Missing customization ID</span>';
+        return;
+      }
+
+      const rows = tbody.querySelectorAll('tr');
+      if (rows.length === 0) {
+        if (statusDiv) statusDiv.innerHTML = '<span class="text-yellow-600">No menu items to save. Add items first.</span>';
+        return;
+      }
+
+      const menuItems = [];
+      rows.forEach((row, index) => {
+        const category = row.querySelector('.menu-category')?.value?.trim() || '';
+        const name = row.querySelector('.menu-name')?.value?.trim() || '';
+        const price = parseFloat(row.querySelector('.menu-price')?.value) || 0;
+        const quantity = parseInt(row.querySelector('.menu-quantity')?.value) || 0;
+
+        if (name) { // Only add items with a name
+          menuItems.push({
+            sr_no: index + 1,
+            category: category,
+            name: name,
+            price: price,
+            quantity: quantity
+          });
+        }
+      });
+
+      if (menuItems.length === 0) {
+        if (statusDiv) statusDiv.innerHTML = '<span class="text-yellow-600">Please enter at least one menu item with a name.</span>';
+        return;
+      }
+
+      try {
+        if (statusDiv) statusDiv.innerHTML = '<span class="text-blue-600">Saving menu items...</span>';
+
+        const client = cachedSupabaseClient || await waitForSupabase();
+        if (!client) {
+          throw new Error('Supabase client not available');
+        }
+
+        // Save menu items as JSON in the order_customizations table
+        const { data, error } = await client
+          .from('order_customizations')
+          .update({
+            menu_items: JSON.stringify(menuItems),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', customizationId)
+          .select();
+
+        if (error) {
+          throw error;
+        }
+
+        if (statusDiv) {
+          statusDiv.innerHTML = `<span class="text-green-600">✓ Menu items saved successfully! (${menuItems.length} items)</span>`;
+        }
+        
+        console.log('Menu items saved:', menuItems);
+        
+        // Clear status message after 3 seconds
+        setTimeout(() => {
+          if (statusDiv) statusDiv.textContent = '';
+        }, 3000);
+
+      } catch (error) {
+        console.error('Error saving menu items:', error);
+        if (statusDiv) {
+          statusDiv.innerHTML = `<span class="text-red-600">Error saving menu items: ${error.message}</span>`;
+        }
+      }
+    };
+
+    // Load existing menu items when modal opens
+    function loadMenuItems(customizationId) {
+      if (!customizationId) return;
+      
+      const tbody = document.getElementById('menu-items-table-body');
+      if (!tbody) return;
+
+      // Clear existing rows
+      tbody.innerHTML = '';
+      menuRowCounter = 0;
+
+      // Try to load from cached customization data first
+      if (window.__all_customizations && Array.isArray(window.__all_customizations)) {
+        const customization = window.__all_customizations.find(c => c.id === customizationId);
+        if (customization && customization.menu_items) {
+          try {
+            const menuItems = typeof customization.menu_items === 'string' 
+              ? JSON.parse(customization.menu_items) 
+              : customization.menu_items;
+            
+            if (Array.isArray(menuItems) && menuItems.length > 0) {
+              menuItems.forEach((item, index) => {
+                menuRowCounter++;
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.id = `menu-row-${menuRowCounter}`;
+                
+                row.innerHTML = `
+                  <td class="px-3 py-2 text-sm text-gray-900">${item.sr_no || index + 1}</td>
+                  <td class="px-3 py-2">
+                    <input type="text" class="menu-category w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="${(item.category || '').replace(/"/g, '&quot;')}" placeholder="e.g., Appetizers" />
+                  </td>
+                  <td class="px-3 py-2">
+                    <input type="text" class="menu-name w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="${(item.name || '').replace(/"/g, '&quot;')}" placeholder="Item name" />
+                  </td>
+                  <td class="px-3 py-2">
+                    <input type="number" step="0.01" min="0" class="menu-price w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="${item.price || 0}" placeholder="0.00" />
+                  </td>
+                  <td class="px-3 py-2">
+                    <input type="number" min="0" class="menu-quantity w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="${item.quantity || 0}" placeholder="0" />
+                  </td>
+                  <td class="px-3 py-2">
+                    <button type="button" onclick="removeMenuRow('menu-row-${menuRowCounter}')" class="text-red-600 hover:text-red-800 text-sm">
+                      Remove
+                    </button>
+                  </td>
+                `;
+                
+                tbody.appendChild(row);
+              });
+              updateMenuRowNumbers();
+              return; // Exit early if loaded from cache
+            }
+          } catch (e) {
+            console.warn('Error parsing menu items from cache:', e);
+          }
+        }
+      }
+
+      // If not in cache, try to fetch from database
+      (async () => {
+        try {
+          const client = cachedSupabaseClient || await waitForSupabase();
+          if (!client) return;
+
+          const { data, error } = await client
+            .from('order_customizations')
+            .select('menu_items')
+            .eq('id', customizationId)
+            .single();
+
+          if (error || !data || !data.menu_items) {
+            return; // No menu items found
+          }
+
+          const menuItems = typeof data.menu_items === 'string' 
+            ? JSON.parse(data.menu_items) 
+            : data.menu_items;
+
+          if (Array.isArray(menuItems) && menuItems.length > 0) {
+            menuItems.forEach((item, index) => {
+              menuRowCounter++;
+              const row = document.createElement('tr');
+              row.className = 'hover:bg-gray-50';
+              row.id = `menu-row-${menuRowCounter}`;
+              
+              row.innerHTML = `
+                <td class="px-3 py-2 text-sm text-gray-900">${item.sr_no || index + 1}</td>
+                <td class="px-3 py-2">
+                  <input type="text" class="menu-category w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="${(item.category || '').replace(/"/g, '&quot;')}" placeholder="e.g., Appetizers" />
+                </td>
+                <td class="px-3 py-2">
+                  <input type="text" class="menu-name w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="${(item.name || '').replace(/"/g, '&quot;')}" placeholder="Item name" />
+                </td>
+                <td class="px-3 py-2">
+                  <input type="number" step="0.01" min="0" class="menu-price w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="${item.price || 0}" placeholder="0.00" />
+                </td>
+                <td class="px-3 py-2">
+                  <input type="number" min="0" class="menu-quantity w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="${item.quantity || 0}" placeholder="0" />
+                </td>
+                <td class="px-3 py-2">
+                  <button type="button" onclick="removeMenuRow('menu-row-${menuRowCounter}')" class="text-red-600 hover:text-red-800 text-sm">
+                    Remove
+                  </button>
+                </td>
+              `;
+              
+              tbody.appendChild(row);
+            });
+            updateMenuRowNumbers();
+          }
+        } catch (e) {
+          console.warn('Error loading menu items from database:', e);
+        }
+      })();
+    }
+
+    // AI CONVERSION FUNCTION COMMENTED OUT
     // AI conversion using Tesseract.js (client-side OCR) with enhanced pre-processing + QR generation
+    /*
     window.convertImagesToTextAI = async function() {
       try {
         // Check if modal is open
@@ -1980,8 +2377,11 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
         }
       }
     };
+    */
 
+    // AI CONVERSION HELPER FUNCTIONS COMMENTED OUT
     // Download QR helper
+    /*
     window.downloadAIQr = function() {
       const dataUrl = window.__lastAIQrDataUrl;
       if (!dataUrl) return;
@@ -2031,6 +2431,7 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
       window.__lastAIQrDataUrl = null;
       console.log('QR code cleared');
     };
+    */
 
     window.processCustomization = function(customizationId) {
       console.log('Process product customization:', customizationId);
