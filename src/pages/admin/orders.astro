@@ -753,10 +753,12 @@ import { supabase } from '../../lib/supabase';
         <div class="space-y-4">
           <h4 class="text-md font-medium text-gray-900">Restaurant Logo</h4>
           <div class="flex items-center space-x-4">
-            <img src="${order.logoUrl}" alt="Restaurant Logo" class="w-16 h-16 object-cover rounded-lg">
+            <div data-image-url="${order.logoUrl.replace(/"/g, '&quot;')}" class="image-view-trigger cursor-pointer hover:opacity-80 transition-opacity">
+              <img src="${order.logoUrl}" alt="Restaurant Logo" class="w-16 h-16 object-cover rounded-lg">
+            </div>
             <div>
               <p class="text-sm text-gray-500">Logo uploaded</p>
-              <a href="${order.logoUrl}" target="_blank" class="text-sm text-blue-600 hover:text-blue-800">View full size</a>
+              <span class="text-sm text-blue-600 hover:text-blue-800 cursor-pointer" onclick="openImageModal('${order.logoUrl.replace(/'/g, "\\'")}')">View full size</span>
             </div>
           </div>
         </div>
@@ -780,15 +782,16 @@ import { supabase } from '../../lib/supabase';
               // Handle both object format {url, filename} and string format
               const photoUrl = typeof photo === 'string' ? photo : (photo.url || photo.publicUrl || '');
               const photoFilename = typeof photo === 'object' ? (photo.filename || 'menu-photo') : 'menu-photo';
+              const safeUrl = photoUrl.replace(/"/g, '&quot;').replace(/'/g, "\\'");
               return `
-              <div class="relative">
+              <div class="relative image-view-trigger cursor-pointer" data-image-url="${safeUrl}">
                 <img src="${photoUrl}" alt="${photoFilename}" class="w-full h-24 object-cover rounded-lg" title="${photoFilename}">
-                <a href="${photoUrl}" target="_blank" class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all rounded-lg flex items-center justify-center">
+                <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all rounded-lg flex items-center justify-center">
                   <svg class="w-6 h-6 text-white opacity-0 hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                   </svg>
-                </a>
+                </div>
               </div>
             `;
             }).join('')}
@@ -881,20 +884,6 @@ import { supabase } from '../../lib/supabase';
       }
     });
     
-    // Add a test button to force load real data
-    const testButton = document.createElement('button');
-    testButton.textContent = 'Test Real OMS Data';
-    testButton.className = 'px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 ml-4';
-    testButton.onclick = async () => {
-      console.log('🧪 Testing real OMS data load in Admin panel...');
-      await loadOrders();
-    };
-    
-    // Add test button to the page header
-    const pageHeader = document.querySelector('.mb-8');
-    if (pageHeader) {
-      pageHeader.appendChild(testButton);
-    }
   }
 
   // Sync dropdown values between mobile and desktop
@@ -929,6 +918,72 @@ import { supabase } from '../../lib/supabase';
     syncDropdowns();
   });
 
+  // Image Modal Functions for viewing full-size images
+  window.openImageModal = function(imageUrl) {
+    console.log('🖼️ Opening image modal for:', imageUrl);
+    const modal = document.getElementById('image-modal');
+    const img = document.getElementById('image-modal-img');
+    if (modal && img && imageUrl) {
+      img.src = imageUrl;
+      img.onerror = function() {
+        console.error('❌ Failed to load image:', imageUrl);
+        // Just close the modal without showing alert
+        closeImageModal();
+      };
+      // Lock body scroll
+      document.body.style.overflow = 'hidden';
+      modal.classList.remove('hidden');
+    } else {
+      console.error('❌ Image modal elements not found or invalid URL');
+    }
+  };
+
+  window.closeImageModal = function() {
+    const modal = document.getElementById('image-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      // Unlock body scroll
+      document.body.style.overflow = '';
+      // Clear image src to free memory
+      const img = document.getElementById('image-modal-img');
+      if (img) img.src = '';
+    }
+  };
+
+  // Close image modal on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeImageModal();
+    }
+  });
+
+  // Attach click handlers to image-view-trigger elements
+  document.addEventListener('DOMContentLoaded', function() {
+    const imageModal = document.getElementById('image-modal');
+    if (imageModal) {
+      imageModal.addEventListener('click', function(e) {
+        if (e.target === imageModal) {
+          closeImageModal();
+        }
+      });
+    }
+
+    // Use event delegation for dynamically loaded content
+    document.addEventListener('click', function(e) {
+      const trigger = e.target.closest('.image-view-trigger');
+      if (trigger) {
+        e.preventDefault();
+        e.stopPropagation();
+        const imageUrl = trigger.getAttribute('data-image-url');
+        if (imageUrl) {
+          openImageModal(imageUrl);
+        } else {
+          console.error('❌ No image URL found');
+        }
+      }
+    });
+  });
+
   // Make functions globally available for onclick handlers
   (window as any).viewOrder = viewOrder;
   (window as any).updateOrderStatus = updateOrderStatus;
@@ -937,3 +992,15 @@ import { supabase } from '../../lib/supabase';
   (window as any).prevPage = prevPage;
   (window as any).changeItemsPerPage = changeItemsPerPage;
 </script>
+
+<!-- Image Modal for viewing full-size images -->
+<div id="image-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-[60] flex items-center justify-center p-4">
+  <div class="relative max-w-7xl w-full h-full flex items-center justify-center">
+    <button onclick="closeImageModal()" class="absolute top-4 right-4 z-20 text-white hover:text-gray-200 bg-white bg-opacity-20 hover:bg-opacity-30 backdrop-blur-sm rounded-full p-3 transition-all shadow-lg border-2 border-white border-opacity-30">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+    <img id="image-modal-img" src="" alt="Full size image" class="max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl" />
+  </div>
+</div>
