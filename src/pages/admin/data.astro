@@ -280,8 +280,8 @@ import { supabase } from '../../lib/supabase';
 
 <!-- Customization Forms Modal -->
 <div id="customizationFormsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-  <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-6xl shadow-lg rounded-md bg-white">
-    <div class="mt-3">
+  <div class="relative top-4 sm:top-20 mx-auto p-3 sm:p-5 border w-11/12 max-w-6xl shadow-lg rounded-md bg-white max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-5rem)] flex flex-col overflow-hidden">
+    <div class="mt-3 flex-1 min-h-0 flex flex-col">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-lg font-medium text-gray-900">Customization Forms</h3>
         <button onclick="closeCustomizationFormsModal()" class="text-gray-400 hover:text-gray-600">
@@ -303,16 +303,16 @@ import { supabase } from '../../lib/supabase';
       </div>
       
       <!-- Customization Forms List -->
-      <div id="customizations-list" class="space-y-4 max-h-96 overflow-y-auto">
+      <div id="customizations-list" class="space-y-4 max-h-96 overflow-y-auto flex-1 min-h-0">
         <!-- Customization forms will be loaded here -->
       </div>
       
       <!-- Customization Details View -->
-      <div id="customization-details-view" class="hidden cursor-pointer" style="background-color: rgba(0,0,0,0.1); min-height: 100%;">
-        <div class="flex items-center justify-between mb-4 bg-white p-4 rounded-lg shadow-lg">
+      <div id="customization-details-view" class="hidden cursor-pointer flex-1 min-h-0 flex flex-col overflow-hidden" style="background-color: rgba(0,0,0,0.1);">
+        <div class="flex items-center justify-between mb-4 bg-white p-4 rounded-lg shadow-lg flex-shrink-0">
           <h4 class="text-lg font-medium text-gray-900">Customization Form Details</h4>
           <div class="flex items-center space-x-2">
-            <span class="text-sm text-gray-500">Click outside to close</span>
+            <span class="text-sm text-gray-500 hidden sm:inline">Click outside to close</span>
             <button onclick="backToCustomizationsList()" class="text-gray-400 hover:text-gray-600">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -320,7 +320,7 @@ import { supabase } from '../../lib/supabase';
             </button>
           </div>
         </div>
-        <div id="customization-details-content" class="space-y-4">
+        <div id="customization-details-content" class="space-y-4 pb-4 overflow-y-auto flex-1 min-h-0">
           <!-- Customization details will be loaded here -->
         </div>
       </div>
@@ -1474,16 +1474,18 @@ import { supabase } from '../../lib/supabase';
       }
       const photosHtml = Array.isArray(photos) && photos.length
         ? `<div class="grid grid-cols-3 sm:grid-cols-4 gap-3">${photos.map(p => `
-            <a href="${p.url || p.publicUrl}" target="_blank" class="block">
+            <div data-image-url="${(p.url || p.publicUrl).replace(/"/g, '&quot;')}" class="image-view-trigger block cursor-pointer hover:opacity-80 transition-opacity">
               <img src="${p.url || p.publicUrl}" crossorigin="anonymous" alt="${p.filename || 'menu photo'}" class="w-20 h-20 object-cover rounded border"/>
               <p class="mt-1 text-xs text-gray-500 truncate">${p.filename || ''}</p>
-            </a>
+            </div>
           `).join('')}</div>`
         : '<p class="text-gray-500">No menu photos uploaded</p>';
       const hasPhotos = Array.isArray(photos) && photos.length > 0;
       const logoOnly = (!!customization.restaurant_logo_url || !!customization.logo_url) && !hasPhotos && !movedLogoIntoPhotos;
       const logoHtml = logoOnly
-        ? `<img src="${customization.restaurant_logo_url || customization.logo_url}" alt="Restaurant Logo" class="w-20 h-20 object-cover rounded border"/>`
+        ? `<div data-image-url="${customization.restaurant_logo_url || customization.logo_url}" class="image-view-trigger cursor-pointer hover:opacity-80 transition-opacity inline-block">
+            <img src="${customization.restaurant_logo_url || customization.logo_url}" alt="Restaurant Logo" class="w-20 h-20 object-cover rounded border"/>
+          </div>`
         : '';
 
       detailsContent.innerHTML = `
@@ -1495,31 +1497,31 @@ import { supabase } from '../../lib/supabase';
             <h5 class="text-lg font-semibold text-gray-900 mb-3">Product Information</h5>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="space-y-2">
-                <div class="flex justify-between">
-                  <span class="text-sm font-bold text-gray-600">Product Type:</span>
-                  <span class="text-sm text-gray-900">Order Menu System</span>
+                <div class="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                  <span class="text-sm font-bold text-gray-600 flex-shrink-0">Product Type:</span>
+                  <span class="text-sm text-gray-900 break-words overflow-wrap-anywhere text-right sm:text-left">Order Menu System</span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-sm font-bold text-gray-600">Product Name:</span>
-                  <span class="text-sm text-gray-900">Order Menu System</span>
+                <div class="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                  <span class="text-sm font-bold text-gray-600 flex-shrink-0">Product Name:</span>
+                  <span class="text-sm text-gray-900 break-words overflow-wrap-anywhere text-right sm:text-left">Order Menu System</span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-sm font-bold text-gray-600">Price:</span>
-                  <span class="text-sm text-gray-900">₹${(customization.total_amount || 0).toLocaleString('en-IN')}</span>
+                <div class="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                  <span class="text-sm font-bold text-gray-600 flex-shrink-0">Price:</span>
+                  <span class="text-sm text-gray-900 break-words overflow-wrap-anywhere text-right sm:text-left">₹${(customization.total_amount || 0).toLocaleString('en-IN')}</span>
                 </div>
               </div>
               <div class="space-y-2">
-                <div class="flex justify-between">
-                  <span class="text-sm font-bold text-gray-600">Project Name:</span>
-                  <span class="text-sm text-gray-900">${customization.project_name || 'Not provided'}</span>
+                <div class="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                  <span class="text-sm font-bold text-gray-600 flex-shrink-0">Project Name:</span>
+                  <span class="text-sm text-gray-900 break-words overflow-wrap-anywhere text-right sm:text-left">${customization.project_name || 'Not provided'}</span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-sm font-bold text-gray-600">Restaurant Name:</span>
-                  <span class="text-sm text-gray-900">${customization.restaurant_name || 'Not provided'}</span>
+                <div class="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                  <span class="text-sm font-bold text-gray-600 flex-shrink-0">Restaurant Name:</span>
+                  <span class="text-sm text-gray-900 break-words overflow-wrap-anywhere text-right sm:text-left">${customization.restaurant_name || 'Not provided'}</span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-sm font-bold text-gray-600">Owner Name:</span>
-                  <span class="text-sm text-gray-900">${customization.owner_name || 'Not provided'}</span>
+                <div class="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                  <span class="text-sm font-bold text-gray-600 flex-shrink-0">Owner Name:</span>
+                  <span class="text-sm text-gray-900 break-words overflow-wrap-anywhere text-right sm:text-left">${customization.owner_name || 'Not provided'}</span>
                 </div>
               </div>
             </div>
@@ -1547,27 +1549,27 @@ import { supabase } from '../../lib/supabase';
             <h5 class="text-lg font-semibold text-gray-900 mb-3">Contact Information</h5>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="space-y-2">
-                <div class="flex justify-between">
-                  <span class="text-sm font-bold text-gray-600">Email:</span>
-                  <span class="text-sm text-gray-900">${customization.email || 'Not provided'}</span>
+                <div class="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                  <span class="text-sm font-bold text-gray-600 flex-shrink-0">Email:</span>
+                  <span class="text-sm text-gray-900 break-words overflow-wrap-anywhere text-right sm:text-left">${customization.email || 'Not provided'}</span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-sm font-bold text-gray-600">Phone:</span>
-                  <span class="text-sm text-gray-900">${customization.phone_number || 'Not provided'}</span>
+                <div class="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                  <span class="text-sm font-bold text-gray-600 flex-shrink-0">Phone:</span>
+                  <span class="text-sm text-gray-900 break-words overflow-wrap-anywhere text-right sm:text-left">${customization.phone_number || 'Not provided'}</span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-sm font-bold text-gray-600">Contact Person:</span>
-                  <span class="text-sm text-gray-900">${customization.contact_person || 'Not provided'}</span>
+                <div class="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                  <span class="text-sm font-bold text-gray-600 flex-shrink-0">Contact Person:</span>
+                  <span class="text-sm text-gray-900 break-words overflow-wrap-anywhere text-right sm:text-left">${customization.contact_person || 'Not provided'}</span>
                 </div>
               </div>
               <div class="space-y-2">
-                <div class="flex justify-between">
-                  <span class="text-sm font-bold text-gray-600">Created:</span>
-                  <span class="text-sm text-gray-900">${new Date(customization.created_at).toLocaleString()}</span>
+                <div class="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                  <span class="text-sm font-bold text-gray-600 flex-shrink-0">Created:</span>
+                  <span class="text-sm text-gray-900 break-words overflow-wrap-anywhere text-right sm:text-left">${new Date(customization.created_at).toLocaleString()}</span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-sm font-bold text-gray-600">Updated:</span>
-                  <span class="text-sm text-gray-900">${new Date(customization.updated_at || customization.created_at).toLocaleString()}</span>
+                <div class="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                  <span class="text-sm font-bold text-gray-600 flex-shrink-0">Updated:</span>
+                  <span class="text-sm text-gray-900 break-words overflow-wrap-anywhere text-right sm:text-left">${new Date(customization.updated_at || customization.created_at).toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -1578,31 +1580,31 @@ import { supabase } from '../../lib/supabase';
             <h5 class="text-lg font-semibold text-gray-900 mb-3">Address Information</h5>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="space-y-2">
-                <div class="flex justify-between">
-                  <span class="text-sm font-bold text-gray-600">House/Flat Number:</span>
-                  <span class="text-sm text-gray-900">${customization.house_flat_number || 'Not provided'}</span>
+                <div class="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                  <span class="text-sm font-bold text-gray-600 flex-shrink-0">House/Flat Number:</span>
+                  <span class="text-sm text-gray-900 break-words overflow-wrap-anywhere text-right sm:text-left">${customization.house_flat_number || 'Not provided'}</span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-sm font-bold text-gray-600">Address:</span>
-                  <span class="text-sm text-gray-900">${customization.address_line_1 || 'Not provided'}</span>
+                <div class="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                  <span class="text-sm font-bold text-gray-600 flex-shrink-0">Address:</span>
+                  <span class="text-sm text-gray-900 break-words overflow-wrap-anywhere text-right sm:text-left">${customization.address_line_1 || 'Not provided'}</span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-sm font-bold text-gray-600">City:</span>
-                  <span class="text-sm text-gray-900">${customization.city || 'Not provided'}</span>
+                <div class="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                  <span class="text-sm font-bold text-gray-600 flex-shrink-0">City:</span>
+                  <span class="text-sm text-gray-900 break-words overflow-wrap-anywhere text-right sm:text-left">${customization.city || 'Not provided'}</span>
                 </div>
               </div>
               <div class="space-y-2">
-                <div class="flex justify-between">
-                  <span class="text-sm font-bold text-gray-600">State:</span>
-                  <span class="text-sm text-gray-900">${customization.state || 'Not provided'}</span>
+                <div class="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                  <span class="text-sm font-bold text-gray-600 flex-shrink-0">State:</span>
+                  <span class="text-sm text-gray-900 break-words overflow-wrap-anywhere text-right sm:text-left">${customization.state || 'Not provided'}</span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-sm font-bold text-gray-600">Pincode:</span>
-                  <span class="text-sm text-gray-900">${customization.pincode || 'Not provided'}</span>
+                <div class="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                  <span class="text-sm font-bold text-gray-600 flex-shrink-0">Pincode:</span>
+                  <span class="text-sm text-gray-900 break-words overflow-wrap-anywhere text-right sm:text-left">${customization.pincode || 'Not provided'}</span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-sm font-bold text-gray-600">Country:</span>
-                  <span class="text-sm text-gray-900">${customization.country || 'Not provided'}</span>
+                <div class="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                  <span class="text-sm font-bold text-gray-600 flex-shrink-0">Country:</span>
+                  <span class="text-sm text-gray-900 break-words overflow-wrap-anywhere text-right sm:text-left">${customization.country || 'Not provided'}</span>
                 </div>
               </div>
             </div>
@@ -1613,9 +1615,9 @@ import { supabase } from '../../lib/supabase';
           <div class="bg-gray-50 p-4 rounded-lg mb-4">
             <h5 class="text-lg font-semibold text-gray-900 mb-3">Additional Requirements</h5>
             <div class="space-y-2">
-              <div class="flex justify-between">
-                <span class="text-sm font-bold text-gray-600">Requirements:</span>
-                <span class="text-sm text-gray-900">${customization.additional_requirements}</span>
+              <div class="flex flex-col sm:flex-row sm:justify-between gap-2">
+                <span class="text-sm font-bold text-gray-600 flex-shrink-0">Requirements:</span>
+                <span class="text-sm text-gray-900 break-words overflow-wrap-anywhere">${customization.additional_requirements}</span>
               </div>
             </div>
           </div>
@@ -1626,7 +1628,9 @@ import { supabase } from '../../lib/supabase';
           <div class="bg-gray-50 p-4 rounded-lg mb-4">
             <h5 class="text-lg font-semibold text-gray-900 mb-3">Restaurant Logo</h5>
             <div class="flex items-center space-x-4">
-              <img src="${customization.restaurant_logo_url}" alt="Restaurant Logo" class="h-16 w-16 object-contain border rounded">
+              <div data-image-url="${customization.restaurant_logo_url}" class="image-view-trigger cursor-pointer hover:opacity-80 transition-opacity">
+                <img src="${customization.restaurant_logo_url}" alt="Restaurant Logo" class="h-16 w-16 object-contain border rounded">
+              </div>
               <div>
                 <p class="text-sm text-gray-600">${customization.logo_filename || 'Restaurant Logo'}</p>
                 <p class="text-xs text-gray-500">Logo uploaded successfully</p>
@@ -1715,4 +1719,82 @@ ${customization.additional_requirements ? `Additional Requirements: ${customizat
   window.viewCustomizationDetailsInModal = viewCustomizationDetailsInModal;
   window.backToCustomizationsList = backToCustomizationsList;
   window.viewCustomizationDetails = viewCustomizationDetails;
+
+  // Image Modal Functions for viewing full-size images
+  window.openImageModal = function(imageUrl) {
+    console.log('🖼️ Opening image modal for:', imageUrl);
+    const modal = document.getElementById('image-modal');
+    const img = document.getElementById('image-modal-img');
+    if (modal && img && imageUrl) {
+      img.src = imageUrl;
+      img.onerror = function() {
+        console.error('❌ Failed to load image:', imageUrl);
+        // Just close the modal without showing alert
+        closeImageModal();
+      };
+      // Lock body scroll
+      document.body.style.overflow = 'hidden';
+      modal.classList.remove('hidden');
+    } else {
+      console.error('❌ Image modal elements not found or invalid URL');
+    }
+  };
+
+  window.closeImageModal = function() {
+    const modal = document.getElementById('image-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      // Unlock body scroll
+      document.body.style.overflow = '';
+      // Clear image src to free memory
+      const img = document.getElementById('image-modal-img');
+      if (img) img.src = '';
+    }
+  };
+
+  // Close image modal on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeImageModal();
+    }
+  });
+
+  // Attach click handlers to image-view-trigger elements
+  document.addEventListener('DOMContentLoaded', function() {
+    const imageModal = document.getElementById('image-modal');
+    if (imageModal) {
+      imageModal.addEventListener('click', function(e) {
+        if (e.target === imageModal) {
+          closeImageModal();
+        }
+      });
+    }
+
+    // Use event delegation for dynamically loaded content
+    document.addEventListener('click', function(e) {
+      const trigger = e.target.closest('.image-view-trigger');
+      if (trigger) {
+        e.preventDefault();
+        e.stopPropagation();
+        const imageUrl = trigger.getAttribute('data-image-url');
+        if (imageUrl) {
+          openImageModal(imageUrl);
+        } else {
+          console.error('❌ No image URL found');
+        }
+      }
+    });
+  });
 </script>
+
+<!-- Image Modal for viewing full-size images -->
+<div id="image-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-[60] flex items-center justify-center p-4">
+  <div class="relative max-w-7xl w-full h-full flex items-center justify-center">
+    <button onclick="closeImageModal()" class="absolute top-4 right-4 z-20 text-white hover:text-gray-200 bg-white bg-opacity-20 hover:bg-opacity-30 backdrop-blur-sm rounded-full p-3 transition-all shadow-lg border-2 border-white border-opacity-30">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+    <img id="image-modal-img" src="" alt="Full size image" class="max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl" />
+  </div>
+</div>

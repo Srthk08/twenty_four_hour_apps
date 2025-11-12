@@ -97,22 +97,6 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         </div>
         </div>
 
-      <!-- Menu Photos from Storage Section -->
-      <div class="mt-8 bg-white rounded-lg shadow p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-xl font-bold text-gray-900">Menu Photos from Storage</h3>
-          <button onclick="loadMenuPhotosFromStorage()" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
-            Refresh
-          </button>
-        </div>
-        <div id="menu-photos-storage-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-          <div class="col-span-full text-center text-gray-500 py-8">Click Refresh to load menu photos from storage...</div>
-        </div>
-      </div>
-
       <!-- Detailed Data Sections -->
       <div class="mt-8 space-y-8">
         
@@ -386,10 +370,6 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       // Update summary cards
       console.log('🔄 Updating summary cards...');
       await updateSummaryCards();
-      
-      // Load menu photos from storage
-      console.log('🔄 Loading menu photos from storage...');
-      await loadMenuPhotosFromStorage();
       
       console.log('✅ All admin data loaded successfully');
     } catch (error) {
@@ -717,180 +697,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     }
   }
 
-  // Load menu photos from Supabase storage bucket
-  async function loadMenuPhotosFromStorage() {
-    try {
-      console.log('🔄 Loading menu photos from Supabase storage...');
-      
-      const container = document.getElementById('menu-photos-storage-container');
-      if (!container) {
-        console.error('❌ Container not found');
-        return;
-      }
-      
-      container.innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">Loading menu photos...</div>';
-      
-      if (!supabase) {
-        await waitForSupabase();
-      }
-      
-      if (!supabase) {
-        container.innerHTML = '<div class="col-span-full text-center text-red-500 py-8">Error: Supabase client not available</div>';
-        return;
-      }
-      
-      // Try different bucket names
-      const bucketNames = ['menu-photos', 'MEN U PHOTO', 'menu_photos', 'men-u-photo'];
-      let allPhotos = [];
-      
-      for (const bucketName of bucketNames) {
-        try {
-          console.log(`🔍 Trying bucket: ${bucketName}`);
-          const { data: files, error } = await supabase.storage
-            .from(bucketName)
-            .list('', {
-              limit: 100,
-              offset: 0,
-              sortBy: { column: 'created_at', order: 'desc' }
-            });
-          
-          if (error) {
-            console.log(`⚠️ Bucket ${bucketName} not found or error:`, error.message);
-            continue;
-          }
-          
-          if (files && files.length > 0) {
-            console.log(`✅ Found ${files.length} files in bucket: ${bucketName}`);
-            
-            // Get public URLs for each file
-            for (const file of files) {
-              // Skip folders (folders have id === null)
-              if (file.id === null) {
-                // If it's a folder, recursively list files inside
-                try {
-                  const { data: nestedFiles, error: nestedError } = await supabase.storage
-                    .from(bucketName)
-                    .list(file.name, {
-                      limit: 100,
-                      offset: 0,
-                      sortBy: { column: 'created_at', order: 'desc' }
-                    });
-                  
-                  if (!nestedError && nestedFiles) {
-                    for (const nestedFile of nestedFiles) {
-                      if (nestedFile.id === null) continue; // Skip nested folders
-                      
-                      const filePath = `${file.name}/${nestedFile.name}`;
-                      try {
-                        const { data: urlData } = supabase.storage
-                          .from(bucketName)
-                          .getPublicUrl(filePath);
-                        
-                        if (urlData && urlData.publicUrl) {
-                          allPhotos.push({
-                            name: nestedFile.name,
-                            url: urlData.publicUrl,
-                            size: nestedFile.metadata?.size || 0,
-                            created_at: nestedFile.created_at || new Date().toISOString()
-                          });
-                        }
-                      } catch (urlError) {
-                        console.warn(`⚠️ Could not get URL for ${filePath}:`, urlError);
-                      }
-                    }
-                  }
-                } catch (folderError) {
-                  console.warn(`⚠️ Could not list folder ${file.name}:`, folderError);
-                }
-                continue;
-              }
-              
-              try {
-                // Try to get public URL
-                const { data: urlData } = supabase.storage
-                  .from(bucketName)
-                  .getPublicUrl(file.name);
-                
-                if (urlData && urlData.publicUrl) {
-                  allPhotos.push({
-                    name: file.name,
-                    url: urlData.publicUrl,
-                    size: file.metadata?.size || 0,
-                    created_at: file.created_at || new Date().toISOString()
-                  });
-                }
-              } catch (urlError) {
-                console.warn(`⚠️ Could not get URL for ${file.name}:`, urlError);
-              }
-            }
-            
-            // If we found files in this bucket, break (use first successful bucket)
-            if (allPhotos.length > 0) {
-              console.log(`✅ Using bucket: ${bucketName} with ${allPhotos.length} photos`);
-              break;
-            }
-          }
-        } catch (bucketError) {
-          console.log(`⚠️ Error accessing bucket ${bucketName}:`, bucketError.message);
-          continue;
-        }
-      }
-      
-      if (allPhotos.length === 0) {
-        container.innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">No menu photos found in storage buckets. Tried: ' + bucketNames.join(', ') + '</div>';
-        return;
-      }
-      
-      // Display photos in grid
-      container.innerHTML = allPhotos.map(photo => `
-        <div class="relative group cursor-pointer" onclick="viewImageInModal('${photo.url.replace(/'/g, "\\'")}')">
-          <img 
-            src="${photo.url}" 
-            alt="${photo.name}" 
-            class="w-full h-32 object-cover rounded-lg border border-gray-200 hover:border-blue-400 transition-all"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
-          />
-          <div class="hidden absolute inset-0 bg-gray-100 rounded-lg flex items-center justify-center">
-            <span class="text-xs text-gray-500">Failed to load</span>
-          </div>
-          <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
-            <p class="truncate">${photo.name}</p>
-          </div>
-        </div>
-      `).join('');
-      
-      console.log(`✅ Displayed ${allPhotos.length} menu photos`);
-    } catch (error) {
-      console.error('❌ Error loading menu photos from storage:', error);
-      const container = document.getElementById('menu-photos-storage-container');
-      if (container) {
-        container.innerHTML = `<div class="col-span-full text-center text-red-500 py-8">Error loading photos: ${error.message}</div>`;
-      }
-    }
-  }
-  
   // View image in modal
   window.viewImageInModal = function(imageUrl) {
-    const modal = document.getElementById('image-modal');
-    const img = document.getElementById('image-modal-img');
-    if (modal && img) {
-      img.src = imageUrl;
-      modal.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-    }
+    openImageModal(imageUrl);
   };
   
-  // Close image modal
-  window.closeImageModal = function() {
-    const modal = document.getElementById('image-modal');
-    if (modal) {
-      modal.classList.add('hidden');
-      document.body.style.overflow = '';
-    }
-  };
-  
-  // Make function globally accessible
-  window.loadMenuPhotosFromStorage = loadMenuPhotosFromStorage;
 
   async function updateSummaryCards() {
     try {
@@ -1808,7 +1619,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       img.src = imageUrl;
       img.onerror = function() {
         console.error('❌ Failed to load image:', imageUrl);
-        alert('Failed to load image. Please check the image URL.');
+        // Just close the modal without showing alert
         closeImageModal();
       };
       // Lock body scroll
@@ -1855,11 +1666,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       if (trigger) {
         e.preventDefault();
         e.stopPropagation();
-        const imageUrl = trigger.getAttribute('data-image-url');
+        const imageUrl = trigger.getAttribute('data-image-url') || trigger.getAttribute('href');
         if (imageUrl) {
           openImageModal(imageUrl);
         } else {
-          console.error('❌ No image URL found in data-image-url attribute');
+          console.error('❌ No image URL found');
         }
       }
     });

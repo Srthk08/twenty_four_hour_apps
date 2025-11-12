@@ -1531,7 +1531,7 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
             trigger.addEventListener('click', function(e) {
               e.preventDefault();
               e.stopPropagation();
-              const imageUrl = this.getAttribute('data-image-url');
+              const imageUrl = this.getAttribute('data-image-url') || this.getAttribute('href');
               if (imageUrl) {
                 openImageModal(imageUrl);
               }
@@ -1555,13 +1555,21 @@ import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro
 
     // Image Modal Functions
     window.openImageModal = function(imageUrl) {
+      console.log('🖼️ Opening image modal for:', imageUrl);
       const modal = document.getElementById('image-modal');
       const img = document.getElementById('image-modal-img');
-      if (modal && img) {
+      if (modal && img && imageUrl) {
         img.src = imageUrl;
+        img.onerror = function() {
+          console.error('❌ Failed to load image:', imageUrl);
+          // Just close the modal without showing alert
+          closeImageModal();
+        };
         // Lock body scroll
         document.body.style.overflow = 'hidden';
         modal.classList.remove('hidden');
+      } else {
+        console.error('❌ Image modal elements not found or invalid URL');
       }
     };
 
