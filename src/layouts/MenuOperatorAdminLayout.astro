@@ -289,6 +289,37 @@ const { title, description } = Astro.props;
       console.log('MenuOperatorAdminLayout initialized with currentPage:', currentPage);
     ">
       
+      <!-- Custom Logout Confirmation Modal -->
+      <div id="logout-confirmation-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-[9999]">
+        <div class="flex items-center justify-center min-h-screen p-4">
+          <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div class="p-6">
+              <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4">
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+              </div>
+              <h3 class="text-lg font-medium text-gray-900 text-center mb-2">Sign Out</h3>
+              <p class="text-sm text-gray-500 text-center mb-6">Are you sure you want to sign out?</p>
+              <div class="flex flex-col sm:flex-row gap-3">
+                <button
+                  id="logout-cancel-btn"
+                  class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  id="logout-confirm-btn"
+                  class="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                >
+                  Sign Out
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Top Navigation Bar -->
     <div class="bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -590,6 +621,60 @@ const { title, description } = Astro.props;
       }
     }
     
+    // Show custom logout confirmation modal
+    function showLogoutConfirmation() {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('logout-confirmation-modal');
+        const confirmBtn = document.getElementById('logout-confirm-btn');
+        const cancelBtn = document.getElementById('logout-cancel-btn');
+        
+        if (!modal || !confirmBtn || !cancelBtn) {
+          console.error('Logout modal elements not found');
+          resolve(false);
+          return;
+        }
+        
+        // Show modal
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        
+        // Handle confirm
+        const handleConfirm = () => {
+          modal.classList.add('hidden');
+          document.body.style.overflow = '';
+          confirmBtn.removeEventListener('click', handleConfirm);
+          cancelBtn.removeEventListener('click', handleCancel);
+          resolve(true);
+        };
+        
+        // Handle cancel
+        const handleCancel = () => {
+          modal.classList.add('hidden');
+          document.body.style.overflow = '';
+          confirmBtn.removeEventListener('click', handleConfirm);
+          cancelBtn.removeEventListener('click', handleCancel);
+          resolve(false);
+        };
+        
+        // Attach event listeners
+        confirmBtn.addEventListener('click', handleConfirm);
+        cancelBtn.addEventListener('click', handleCancel);
+        
+        // Close on backdrop click
+        const handleBackdropClick = (e) => {
+          if (e.target === modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+            modal.removeEventListener('click', handleBackdropClick);
+            confirmBtn.removeEventListener('click', handleConfirm);
+            cancelBtn.removeEventListener('click', handleCancel);
+            resolve(false);
+          }
+        };
+        modal.addEventListener('click', handleBackdropClick);
+      });
+    }
+
     // Simple menu operator sign out function
     async function handleMenuOperatorSignOut(event) {
       // Prevent default behavior and stop propagation
@@ -613,8 +698,8 @@ const { title, description } = Astro.props;
         console.log('Could not close dropdown programmatically:', e);
       }
       
-      // Show confirmation dialog
-      const confirmed = confirm('Are you sure you want to sign out?');
+      // Show custom confirmation modal
+      const confirmed = await showLogoutConfirmation();
       if (!confirmed) {
         return;
       }

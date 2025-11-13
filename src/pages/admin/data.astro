@@ -280,54 +280,56 @@ import { supabase } from '../../lib/supabase';
 
 <!-- Customization Forms Modal -->
 <div id="customizationFormsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-  <div class="relative top-4 sm:top-20 mx-auto p-3 sm:p-5 border w-11/12 max-w-6xl shadow-lg rounded-md bg-white max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-5rem)] flex flex-col overflow-hidden">
-    <div class="mt-3 flex-1 min-h-0 flex flex-col">
-      <div class="flex items-center justify-between mb-4">
+  <div class="flex items-start justify-center min-h-screen p-2 sm:p-4 py-4">
+    <div class="relative mx-auto border w-11/12 max-w-6xl shadow-lg rounded-md bg-white my-4 max-h-[calc(100vh-2rem)] flex flex-col overflow-hidden">
+      <div class="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 flex-shrink-0">
         <h3 class="text-lg font-medium text-gray-900">Customization Forms</h3>
-        <button onclick="closeCustomizationFormsModal()" class="text-gray-400 hover:text-gray-600">
+        <button onclick="closeCustomizationFormsModal()" class="text-gray-400 hover:text-gray-600 flex-shrink-0 ml-4">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
       </div>
       
-      <!-- Search Bar -->
-      <div class="mb-4">
-        <input 
-          type="text" 
-          id="customizationSearch" 
-          placeholder="Search by email, restaurant name, or project name..." 
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-          onkeyup="searchCustomizations()"
-        />
-      </div>
-      
-      <!-- Customization Forms List -->
-      <div id="customizations-list" class="space-y-4 max-h-96 overflow-y-auto flex-1 min-h-0">
-        <!-- Customization forms will be loaded here -->
-      </div>
-      
-      <!-- Customization Details View -->
-      <div id="customization-details-view" class="hidden cursor-pointer flex-1 min-h-0 flex flex-col overflow-hidden" style="background-color: rgba(0,0,0,0.1);">
-        <div class="flex items-center justify-between mb-4 bg-white p-4 rounded-lg shadow-lg flex-shrink-0">
-          <h4 class="text-lg font-medium text-gray-900">Customization Form Details</h4>
-          <div class="flex items-center space-x-2">
-            <span class="text-sm text-gray-500 hidden sm:inline">Click outside to close</span>
-            <button onclick="backToCustomizationsList()" class="text-gray-400 hover:text-gray-600">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-              </svg>
-            </button>
+      <div class="flex-1 min-h-0 flex flex-col overflow-hidden p-4 sm:p-5">
+        <!-- Search Bar -->
+        <div class="mb-4 flex-shrink-0">
+          <input 
+            type="text" 
+            id="customizationSearch" 
+            placeholder="Search by email, restaurant name, or project name..." 
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            onkeyup="searchCustomizations()"
+          />
+        </div>
+        
+        <!-- Customization Forms List -->
+        <div id="customizations-list" class="space-y-4 overflow-y-auto flex-1 min-h-0">
+          <!-- Customization forms will be loaded here -->
+        </div>
+        
+        <!-- Customization Details View -->
+        <div id="customization-details-view" class="hidden cursor-pointer flex-1 min-h-0 flex flex-col overflow-hidden" style="background-color: rgba(0,0,0,0.1);">
+          <div class="flex items-center justify-between mb-4 bg-white p-4 rounded-lg shadow-lg flex-shrink-0">
+            <h4 class="text-lg font-medium text-gray-900 break-words overflow-wrap-anywhere">Customization Form Details</h4>
+            <div class="flex items-center space-x-2 flex-shrink-0 ml-4">
+              <span class="text-sm text-gray-500 hidden sm:inline">Click outside to close</span>
+              <button onclick="backToCustomizationsList()" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div id="customization-details-content" class="space-y-4 pb-4 overflow-y-auto flex-1 min-h-0 px-2">
+            <!-- Customization details will be loaded here -->
           </div>
         </div>
-        <div id="customization-details-content" class="space-y-4 pb-4 overflow-y-auto flex-1 min-h-0">
-          <!-- Customization details will be loaded here -->
+        
+        <!-- No Customizations Message -->
+        <div id="no-customizations" class="hidden text-center py-8">
+          <p class="text-gray-500">No customization forms found.</p>
         </div>
-      </div>
-      
-      <!-- No Customizations Message -->
-      <div id="no-customizations" class="hidden text-center py-8">
-        <p class="text-gray-500">No customization forms found.</p>
       </div>
     </div>
   </div>
@@ -1373,25 +1375,25 @@ import { supabase } from '../../lib/supabase';
 
       customizationsList.innerHTML = customizations.map(customization => `
         <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-          <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
             <div class="flex items-center space-x-3">
               <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
                 Order Menu System
               </span>
             </div>
-            <span class="text-sm text-gray-500">${formatDate(customization.created_at)}</span>
+            <span class="text-sm text-gray-500 break-words overflow-wrap-anywhere">${formatDate(customization.created_at)}</span>
           </div>
           
-          <h4 class="font-semibold text-gray-900 mb-2">${customization.project_name || 'No Project Name'}</h4>
+          <h4 class="font-semibold text-gray-900 mb-2 break-words overflow-wrap-anywhere">${customization.project_name || 'No Project Name'}</h4>
           <div class="text-gray-600 text-sm mb-2">
-            <p class="mb-1"><strong>Restaurant Name:</strong> ${customization.restaurant_name || 'Not provided'}</p>
-            <p class="mb-1"><strong>Owner Name:</strong> ${customization.owner_name || 'Not provided'}</p>
-            <p class="mb-1"><strong>Contact Person:</strong> ${customization.contact_person || 'Not provided'}</p>
-            <p class="mb-1"><strong>Total Amount:</strong> ₹${(customization.total_amount || 0).toLocaleString('en-IN')}</p>
-            <p class="mb-1"><strong>Additional Requirements:</strong> ${customization.additional_requirements ? (customization.additional_requirements.length > 100 ? customization.additional_requirements.substring(0, 100) + '...' : customization.additional_requirements) : 'No additional requirements provided'}</p>
+            <p class="mb-1 break-words overflow-wrap-anywhere"><strong>Restaurant Name:</strong> <span class="break-words overflow-wrap-anywhere">${customization.restaurant_name || 'Not provided'}</span></p>
+            <p class="mb-1 break-words overflow-wrap-anywhere"><strong>Owner Name:</strong> <span class="break-words overflow-wrap-anywhere">${customization.owner_name || 'Not provided'}</span></p>
+            <p class="mb-1 break-words overflow-wrap-anywhere"><strong>Contact Person:</strong> <span class="break-words overflow-wrap-anywhere">${customization.contact_person || 'Not provided'}</span></p>
+            <p class="mb-1 break-words overflow-wrap-anywhere"><strong>Total Amount:</strong> ₹${(customization.total_amount || 0).toLocaleString('en-IN')}</p>
+            <p class="mb-1 break-words overflow-wrap-anywhere"><strong>Additional Requirements:</strong> <span class="break-words overflow-wrap-anywhere">${customization.additional_requirements ? (customization.additional_requirements.length > 100 ? customization.additional_requirements.substring(0, 100) + '...' : customization.additional_requirements) : 'No additional requirements provided'}</span></p>
           </div>
-          <p class="text-gray-500 text-xs mb-3">Email: ${customization.email || 'Not provided'}</p>
-          <p class="text-gray-400 text-xs mb-3">Phone: ${customization.phone_number || 'Not provided'}</p>
+          <p class="text-gray-500 text-xs mb-3 break-words overflow-wrap-anywhere">Email: ${customization.email || 'Not provided'}</p>
+          <p class="text-gray-400 text-xs mb-3 break-words overflow-wrap-anywhere">Phone: ${customization.phone_number || 'Not provided'}</p>
           
           <div class="flex justify-between items-center mt-3">
             <button 
@@ -1489,8 +1491,8 @@ import { supabase } from '../../lib/supabase';
         : '';
 
       detailsContent.innerHTML = `
-        <div class="bg-white rounded-lg shadow p-6">
-          <h4 class="text-xl font-bold text-gray-900 mb-6">Customization Form Details</h4>
+        <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+          <h4 class="text-xl font-bold text-gray-900 mb-6 break-words overflow-wrap-anywhere">Customization Form Details</h4>
           
           <!-- Product Information Section -->
           <div class="bg-gray-50 p-4 rounded-lg mb-4">
@@ -1615,9 +1617,9 @@ import { supabase } from '../../lib/supabase';
           <div class="bg-gray-50 p-4 rounded-lg mb-4">
             <h5 class="text-lg font-semibold text-gray-900 mb-3">Additional Requirements</h5>
             <div class="space-y-2">
-              <div class="flex flex-col sm:flex-row sm:justify-between gap-2">
+              <div class="flex flex-col gap-2">
                 <span class="text-sm font-bold text-gray-600 flex-shrink-0">Requirements:</span>
-                <span class="text-sm text-gray-900 break-words overflow-wrap-anywhere">${customization.additional_requirements}</span>
+                <span class="text-sm text-gray-900 break-words overflow-wrap-anywhere whitespace-pre-wrap">${customization.additional_requirements}</span>
               </div>
             </div>
           </div>

@@ -102,7 +102,7 @@ import AuthGuard from '../components/AuthGuard.astro';
                     <div class="text-sm text-gray-500 order-date">Order Date</div>
                     <div class="text-xs text-gray-400 order-id">Order ID: -</div>
                     <div class="mt-2">
-                      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <span class="order-status-badge inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         ✓ Order Confirmed
                       </span>
                     </div>
@@ -185,7 +185,7 @@ import AuthGuard from '../components/AuthGuard.astro';
                 </div>
 
                 <!-- Order Status -->
-                <div class="border-t border-gray-200 pt-6">
+                <div class="border-t border-gray-200 pt-6 order-status-section">
                   <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3">
                       <div class="w-3 h-3 bg-green-500 rounded-full"></div>
@@ -376,34 +376,105 @@ import AuthGuard from '../components/AuthGuard.astro';
       // Sort newest first
       this.orders.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
       
-      console.log('Total orders loaded:', this.orders.length);
+      console.log('✅ Total orders loaded:', this.orders.length);
+      console.log('📋 Order IDs:', this.orders.map(o => o.orderId));
+      console.log('📋 Order details:', this.orders.map(o => ({
+        id: o.orderId,
+        project: o.projectName,
+        status: o.status,
+        date: o.orderDate
+      })));
     }
 
     async loadSupabaseOrders(userEmail) {
       try {
         const { supabase } = await import('../lib/supabase');
+        console.log('🔍 Loading Supabase orders for email:', userEmail);
+        
         // Fetch order_customizations (Order Menu System submissions)
-        const { data: customizations, error: customizationsError } = await supabase
+        // Try both 'email' and 'user_email' field names to handle schema variations
+        // Combine results from both queries to ensure we get all orders
+        let customizations = [];
+        let customizationsError = null;
+        const seenIds = new Set(); // Track IDs to avoid duplicates
+        
+        // Try with 'email' field
+        const { data: customizationsEmail, error: errorEmail } = await supabase
           .from('order_customizations')
           .select('*')
           .eq('email', userEmail)
           .order('created_at', { ascending: false });
-        if (customizationsError) throw customizationsError;
+        
+        if (!errorEmail && customizationsEmail && customizationsEmail.length > 0) {
+          customizationsEmail.forEach(cz => {
+            if (!seenIds.has(cz.id)) {
+              customizations.push(cz);
+              seenIds.add(cz.id);
+            }
+          });
+          console.log('✅ Found', customizationsEmail.length, 'orders using "email" field');
+        } else if (errorEmail) {
+          console.log('⚠️ Error querying with "email" field:', errorEmail.message);
+        }
+        
+        // Also try with 'user_email' field and combine results
+        const { data: customizationsUserEmail, error: errorUserEmail } = await supabase
+          .from('order_customizations')
+          .select('*')
+          .eq('user_email', userEmail)
+          .order('created_at', { ascending: false });
+        
+        if (!errorUserEmail && customizationsUserEmail && customizationsUserEmail.length > 0) {
+          customizationsUserEmail.forEach(cz => {
+            if (!seenIds.has(cz.id)) {
+              customizations.push(cz);
+              seenIds.add(cz.id);
+            }
+          });
+          console.log('✅ Found', customizationsUserEmail.length, 'orders using "user_email" field');
+        } else if (errorUserEmail) {
+          console.log('⚠️ Error querying with "user_email" field:', errorUserEmail.message);
+        }
+        
+        // Set error only if both queries failed
+        if (errorEmail && errorUserEmail) {
+          customizationsError = errorUserEmail || errorEmail;
+          console.error('❌ Both queries failed for order_customizations');
+        }
+        
+        if (customizationsError) {
+          console.warn('⚠️ Error loading order_customizations, continuing with other sources...', customizationsError);
+        }
+        
+        // Sort combined results by created_at
+        customizations.sort((a, b) => {
+          const dateA = new Date(a.created_at || 0);
+          const dateB = new Date(b.created_at || 0);
+          return dateB - dateA; // Newest first
+        });
 
-        (customizations || []).forEach(cz => {
+        console.log('📦 Processing', customizations.length, 'order_customizations...');
+        (customizations || []).forEach((cz, index) => {
+          console.log(`  Order ${index + 1}:`, {
+            id: cz.id,
+            project_name: cz.project_name,
+            email: cz.email || cz.user_email,
+            status: cz.status
+          });
+          
           this.orders.push({
-            orderId: cz.id || `OC-${Date.now()}`,
+            orderId: cz.id || `OC-${Date.now()}-${index}`,
             orderDate: cz.created_at || new Date().toISOString(),
             total: Number(cz.total_amount) || 0,
             projectName: cz.project_name || 'Order Menu System',
             description: 'Order Menu System customization',
-            status: 'completed',
+            status: cz.status || 'pending', // Read actual status from database
             requirements: {
               projectName: cz.project_name,
               contactPerson: cz.contact_person,
               restaurantName: cz.restaurant_name,
               cuisineType: cz.cuisine_type,
-              email: cz.email,
+              email: cz.email || cz.user_email,
               phone: cz.phone_number,
               additionalRequirements: cz.additional_requirements,
               primaryColor: cz.primary_color,
@@ -414,23 +485,49 @@ import AuthGuard from '../components/AuthGuard.astro';
           });
         });
 
-        // Fetch completed cart_customizations (completed orders)
+        // Fetch cart_customizations (all orders, not just completed)
         const { data: carts, error: cartsError } = await supabase
           .from('cart_customizations')
           .select('*')
           .eq('user_email', userEmail)
-          .eq('cart_status', 'completed')
+          .in('cart_status', ['completed', 'pending', 'confirmed', 'in_progress', 'cancelled'])
           .order('updated_at', { ascending: false });
-        if (cartsError) throw cartsError;
-
-        (carts || []).forEach(cart => {
+        
+        if (cartsError) {
+          console.error('❌ Error loading cart_customizations:', cartsError);
+          throw cartsError;
+        }
+        
+        console.log('📦 Processing', (carts || []).length, 'cart_customizations...');
+        (carts || []).forEach((cart, index) => {
+          console.log(`  Cart ${index + 1}:`, {
+            id: cart.id,
+            project_name: cart.project_name,
+            user_email: cart.user_email,
+            cart_status: cart.cart_status
+          });
+          // Map cart_status to status, or use status field if it exists
+          let orderStatus = cart.status || cart.cart_status || 'pending';
+          // Normalize cart_status values to match order status values
+          if (orderStatus === 'completed') {
+            orderStatus = 'completed';
+          } else if (orderStatus === 'cancelled') {
+            orderStatus = 'cancelled';
+          } else if (orderStatus === 'pending') {
+            orderStatus = 'pending';
+          } else if (orderStatus === 'confirmed') {
+            orderStatus = 'confirmed';
+          } else if (orderStatus === 'in_progress' || orderStatus === 'processing') {
+            orderStatus = 'in_progress';
+          }
+          
           this.orders.push({
             orderId: cart.id || `CART-${Date.now()}`,
             orderDate: cart.updated_at || cart.created_at || new Date().toISOString(),
             total: Number(cart.total_amount) || 0,
             projectName: cart.project_name || 'Custom Project',
             description: cart.project_description || 'Project purchased',
-            status: 'completed',
+            status: orderStatus, // Use actual status from database
             requirements: {
               projectName: cart.project_name,
               contactPerson: cart.contact_person,
@@ -562,6 +659,48 @@ import AuthGuard from '../components/AuthGuard.astro';
         additionalReq.textContent = order.requirements.additionalRequirements;
       }
 
+      // Update order status badge
+      const statusBadge = clone.querySelector('.order-status-badge') || clone.querySelector('span.bg-green-100');
+      if (statusBadge) {
+        const statusText = (order.status || 'pending').charAt(0).toUpperCase() + (order.status || 'pending').slice(1).replace('_', ' ');
+        const statusIcon = order.status === 'completed' ? '✓ ' : order.status === 'cancelled' ? '✗ ' : order.status === 'in_progress' ? '⟳ ' : '';
+        statusBadge.textContent = statusIcon + statusText;
+        statusBadge.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ' + this.getStatusColor(order.status);
+      }
+
+      // Update order status section at bottom
+      const orderStatusSection = clone.querySelector('.order-status-section');
+      if (orderStatusSection) {
+        const statusDot = orderStatusSection.querySelector('.w-3.h-3');
+        const statusText = orderStatusSection.querySelector('span.text-green-700');
+        if (statusDot && statusText) {
+          // Update dot color
+          const dotColors = {
+            'pending': 'bg-yellow-500',
+            'confirmed': 'bg-blue-500',
+            'in_progress': 'bg-purple-500',
+            'processing': 'bg-purple-500',
+            'completed': 'bg-green-500',
+            'cancelled': 'bg-red-500'
+          };
+          const statusLower = (order.status || 'pending').toLowerCase();
+          statusDot.className = 'w-3 h-3 ' + (dotColors[statusLower] || 'bg-gray-500') + ' rounded-full';
+          
+          // Update text
+          const textColors = {
+            'pending': 'text-yellow-700',
+            'confirmed': 'text-blue-700',
+            'in_progress': 'text-purple-700',
+            'processing': 'text-purple-700',
+            'completed': 'text-green-700',
+            'cancelled': 'text-red-700'
+          };
+          const statusDisplayText = (order.status || 'pending').charAt(0).toUpperCase() + (order.status || 'pending').slice(1).replace('_', ' ');
+          statusText.textContent = 'Order ' + statusDisplayText;
+          statusText.className = (textColors[statusLower] || 'text-gray-700') + ' font-medium';
+        }
+      }
+
       return clone;
     }
 
@@ -577,7 +716,21 @@ import AuthGuard from '../components/AuthGuard.astro';
       });
     }
 
-    // Render the Recent Order Summary based on the newest completed order
+    // Get status color classes
+    getStatusColor(status) {
+      const statusLower = (status || '').toLowerCase();
+      const colors = {
+        'pending': 'bg-yellow-100 text-yellow-800',
+        'confirmed': 'bg-blue-100 text-blue-800',
+        'in_progress': 'bg-purple-100 text-purple-800',
+        'processing': 'bg-purple-100 text-purple-800',
+        'completed': 'bg-green-100 text-green-800',
+        'cancelled': 'bg-red-100 text-red-800'
+      };
+      return colors[statusLower] || 'bg-gray-100 text-gray-800';
+    }
+
+    // Render the Recent Order Summary based on the newest order (any status)
     renderRecentSummary() {
       const summary = document.getElementById('recent-order-summary');
       const titleEl = document.getElementById('recent-order-title');
@@ -587,21 +740,27 @@ import AuthGuard from '../components/AuthGuard.astro';
       const viewBtn = document.getElementById('recent-order-view-btn');
       if (!summary || !titleEl || !amountEl || !dateEl || !statusEl || !viewBtn) return;
 
-      const completed = this.orders
-        .filter(o => (o.status || '').toLowerCase() === 'completed')
+      // Get the most recent order (any status)
+      const sortedOrders = [...this.orders]
         .sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
 
-      if (completed.length === 0) {
+      if (sortedOrders.length === 0) {
         summary.classList.add('hidden');
         return;
       }
 
-      const latest = completed[0];
+      const latest = sortedOrders[0];
       summary.classList.remove('hidden');
       titleEl.textContent = latest.projectName || 'Order';
       amountEl.textContent = `₹${(latest.total || 0).toLocaleString('en-IN')}`;
       dateEl.textContent = this.formatDate(latest.orderDate);
-      statusEl.textContent = (latest.status || 'Completed').charAt(0).toUpperCase() + (latest.status || 'Completed').slice(1);
+      
+      // Update status badge with correct text and colors
+      const statusText = (latest.status || 'pending').charAt(0).toUpperCase() + (latest.status || 'pending').slice(1).replace('_', ' ');
+      statusEl.textContent = statusText;
+      // Remove all status color classes and add the correct one
+      statusEl.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ' + this.getStatusColor(latest.status);
+      
       // Open modal with latest order details on click
       viewBtn.onclick = () => {
         this.showOrderDetails(latest);

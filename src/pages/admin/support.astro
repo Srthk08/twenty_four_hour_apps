@@ -93,18 +93,18 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
       <!-- Ticket Details Modal -->
       <div id="ticket-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
-          <div class="mt-3">
-            <div class="flex items-center justify-between mb-4">
+        <div class="flex items-start justify-center min-h-screen p-2 sm:p-4 py-4">
+          <div class="relative mx-auto border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white my-4 max-h-[calc(100vh-2rem)] flex flex-col">
+            <div class="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 flex-shrink-0">
               <h3 id="modal-title" class="text-lg font-medium text-gray-900">Ticket Details</h3>
-              <button id="close-modal" class="text-gray-400 hover:text-gray-600">
+              <button id="close-modal" class="text-gray-400 hover:text-gray-600 flex-shrink-0 ml-4">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
               </button>
             </div>
             
-            <div id="modal-content" class="space-y-4">
+            <div id="modal-content" class="space-y-4 p-4 sm:p-5 overflow-y-auto flex-1 min-h-0">
               <!-- Content will be populated by JavaScript -->
               <div class="text-center text-gray-500">
                 Loading ticket details...
@@ -619,7 +619,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
            <!-- Issue Description -->
            <div>
              <label class="block text-sm font-medium text-gray-700 mb-2">Issue Description</label>
-             <div class="bg-gray-50 p-3 rounded text-sm text-gray-900">
+             <div class="bg-gray-50 p-3 rounded text-sm text-gray-900 break-words overflow-wrap-anywhere whitespace-pre-wrap">
                ${ticket.description}
              </div>
            </div>
@@ -627,7 +627,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
            <!-- Admin Replies Section -->
            <div>
              <label class="block text-sm font-medium text-gray-700 mb-2">Admin Replies</label>
-             <div id="admin-replies" class="bg-gray-50 p-3 rounded text-sm text-gray-900 max-h-32 overflow-y-auto">
+             <div id="admin-replies" class="bg-gray-50 p-3 rounded text-sm text-gray-900 max-h-32 overflow-y-auto break-words overflow-wrap-anywhere">
                ${(() => {
                  // Ensure adminReplies is always an array
                  let replies = [];

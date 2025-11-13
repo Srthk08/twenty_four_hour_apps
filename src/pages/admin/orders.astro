@@ -825,7 +825,27 @@ import { supabase } from '../../lib/supabase';
 
     if (newStatus && newStatus !== order.status) {
       try {
-        // Update local array only (since this is example data)
+        // Wait for Supabase to be available
+        if (!supabase) {
+          await waitForSupabase();
+        }
+
+        // Update the database - order_customizations table
+        const { error: updateError } = await supabase
+          .from('order_customizations')
+          .update({ 
+            status: newStatus,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', orderId);
+
+        if (updateError) {
+          console.error('Error updating order status in database:', updateError);
+          alert('Failed to update order status in database: ' + updateError.message);
+          return;
+        }
+
+        // Update local array to reflect the change
         const orderIndex = currentOrders.findIndex(o => o.id === orderId);
         if (orderIndex > -1) {
           currentOrders[orderIndex].status = newStatus;
