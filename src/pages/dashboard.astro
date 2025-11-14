@@ -347,8 +347,27 @@ import AuthGuard from '../components/AuthGuard.astro';
                     <label class="block text-sm font-semibold text-gray-700 mb-2">
                       Phone Number <span class="text-red-500">*</span>
                     </label>
-                    <input type="tel" name="phone" id="phone-input" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="+91 9876543210" required maxlength="15" pattern="(\+91[0-9]{10}|[0-9]{10})" title="Please enter 10 digits or +91 followed by 10 digits">
-                    <div id="phone-error" class="hidden text-red-500 text-sm mt-1">Phone number must be 10 digits or +91 followed by 10 digits</div>
+                    <div class="flex">
+                      <select
+                        id="phone_country_code"
+                        name="phone_country_code"
+                        required
+                        class="px-4 py-3 border border-r-0 border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-gray-50 text-lg"
+                      >
+                        <option value="+91" selected>🇮🇳 +91</option>
+                        <option value="+1">🇺🇸 +1</option>
+                        <option value="+44">🇬🇧 +44</option>
+                        <option value="+61">🇦🇺 +61</option>
+                        <option value="+86">🇨🇳 +86</option>
+                        <option value="+81">🇯🇵 +81</option>
+                        <option value="+49">🇩🇪 +49</option>
+                        <option value="+33">🇫🇷 +33</option>
+                        <option value="+971">🇦🇪 +971</option>
+                        <option value="+966">🇸🇦 +966</option>
+                      </select>
+                      <input type="tel" name="phone" id="phone-input" class="flex-1 px-4 py-3 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="9876543210" required maxlength="10" pattern="[0-9]{10}" title="Please enter 10 digits">
+                    </div>
+                    <div id="phone-error" class="hidden text-red-500 text-sm mt-1">Please enter a valid 10-digit phone number</div>
                   </div>
                 </div>
 
@@ -645,6 +664,88 @@ import AuthGuard from '../components/AuthGuard.astro';
   // Global variables to store files BEFORE form submission (to prevent them from being cleared)
   let cachedMenuPhotos = [];
   let cachedLogoFile = null;
+  
+  // Function to clear logo and menu photos fields after form submission
+  function clearFormFileFields() {
+    try {
+      // Clear logo field
+      const logoUpload = document.getElementById('order-menu-logo-upload') as HTMLInputElement;
+      if (logoUpload) {
+        logoUpload.value = '';
+      }
+      
+      // Reset logo upload area
+      const logoUploadArea = document.getElementById('order-menu-logo-upload-area');
+      if (logoUploadArea) {
+        logoUploadArea.innerHTML = `
+          <div class="flex flex-col items-center">
+            <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <p class="text-gray-600 mb-2">Click to upload logo</p>
+            <p class="text-sm text-gray-500">PNG, JPG, SVG up to 10MB</p>
+          </div>
+        `;
+      }
+      
+      // Hide logo preview
+      const logoPreview = document.getElementById('order-menu-logo-preview');
+      if (logoPreview) {
+        logoPreview.classList.add('hidden');
+      }
+      
+      // Clear menu photos field
+      const menuPhotosUpload = document.getElementById('menu-photos-upload') as HTMLInputElement;
+      if (menuPhotosUpload) {
+        menuPhotosUpload.value = '';
+      }
+      
+      // Reset menu photos upload area
+      const menuPhotosUploadArea = document.getElementById('menu-photos-upload-area');
+      if (menuPhotosUploadArea) {
+        menuPhotosUploadArea.innerHTML = `
+          <div class="flex flex-col items-center">
+            <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <p class="text-gray-600 mb-2">Click to upload menu photos</p>
+            <p class="text-sm text-gray-500">PNG, JPG up to 5MB each</p>
+          </div>
+        `;
+        // Re-add click handler
+        if (menuPhotosUpload) {
+          menuPhotosUploadArea.addEventListener('click', () => {
+            menuPhotosUpload.click();
+          });
+        }
+      }
+      
+      // Clear menu photos preview
+      const menuPhotosPreview = document.getElementById('menu-photos-preview');
+      if (menuPhotosPreview) {
+        menuPhotosPreview.classList.add('hidden');
+      }
+      
+      // Clear menu photos grid
+      const menuPhotosGrid = document.getElementById('menu-photos-grid');
+      if (menuPhotosGrid) {
+        menuPhotosGrid.innerHTML = '';
+      }
+      
+      // Clear cached files
+      cachedMenuPhotos = [];
+      cachedLogoFile = null;
+      
+      // Clear global menuPhotos array if it exists
+      if (typeof menuPhotos !== 'undefined') {
+        menuPhotos = [];
+      }
+      
+      console.log('✅ Form file fields cleared successfully');
+    } catch (error) {
+      console.error('❌ Error clearing form file fields:', error);
+    }
+  }
   
   console.log('Dashboard loaded - using global auth manager');
 
@@ -1075,40 +1176,62 @@ import AuthGuard from '../components/AuthGuard.astro';
       });
     }
     
-    // Phone number validation - allow 10 digits or +91 + 10 digits
-    if (phoneInput) {
+    // Phone number validation with country code
+    const phoneCountryCodeSelect = document.getElementById('phone_country_code') as HTMLSelectElement;
+    if (phoneInput && phoneCountryCodeSelect) {
+      const countryCodeLimits: { [key: string]: number } = {
+        '+91': 10, '+1': 10, '+44': 10, '+61': 9, '+86': 11,
+        '+81': 10, '+49': 11, '+33': 9, '+971': 9, '+966': 9
+      };
+
+      function validatePhone() {
+        const countryCode = phoneCountryCodeSelect.value;
+        const phone = phoneInput.value.replace(/\D/g, '');
+        const maxDigits = countryCodeLimits[countryCode] || 10;
+
+        // Update maxlength and pattern
+        phoneInput.maxLength = maxDigits;
+        phoneInput.pattern = `[0-9]{${maxDigits}}`;
+
+        // For India (+91), validate 10 digits
+        if (countryCode === '+91') {
+          const errorDiv = document.getElementById('phone-error');
+          if (phone.length > 0 && phone.length !== 10) {
+            errorDiv?.classList.remove('hidden');
+            errorDiv.textContent = 'Please enter a valid 10-digit phone number';
+            phoneInput.classList.add('border-red-500');
+          } else {
+            errorDiv?.classList.add('hidden');
+            phoneInput.classList.remove('border-red-500');
+          }
+        } else {
+          // For other countries
+          const errorDiv = document.getElementById('phone-error');
+          if (phone.length > 0 && phone.length !== maxDigits) {
+            errorDiv?.classList.remove('hidden');
+            errorDiv.textContent = `Please enter a valid ${maxDigits}-digit phone number`;
+            phoneInput.classList.add('border-red-500');
+          } else {
+            errorDiv?.classList.add('hidden');
+            phoneInput.classList.remove('border-red-500');
+          }
+        }
+      }
+
       phoneInput.addEventListener('input', function(e) {
-        let value = e.target.value;
-        
-        // Allow +91 at the beginning, then only numbers
-        if (value.startsWith('+91')) {
-          // Keep +91 and allow only numbers after it
-          value = '+91' + value.substring(3).replace(/[^0-9]/g, '');
-          // Limit to +91 + 10 digits = 13 characters total
-          if (value.length > 13) {
-            value = value.slice(0, 13);
-          }
-        } else {
-          // If not starting with +91, allow only numbers
-          value = value.replace(/[^0-9]/g, '');
-          // Limit to 10 digits
-          if (value.length > 10) {
-            value = value.slice(0, 10);
-          }
-        }
-        
-        e.target.value = value;
-        
-        // Show/hide error message
-        const errorDiv = document.getElementById('phone-error');
-        const isValid = (value.length === 10) || (value.length === 13 && value.startsWith('+91'));
-        
-        if (value.length > 0 && !isValid) {
-          errorDiv.classList.remove('hidden');
-        } else {
-          errorDiv.classList.add('hidden');
-        }
+        const value = (e.target as HTMLInputElement).value.replace(/[^0-9]/g, '');
+        const maxDigits = countryCodeLimits[phoneCountryCodeSelect.value] || 10;
+        (e.target as HTMLInputElement).value = value.slice(0, maxDigits);
+        validatePhone();
       });
+
+      phoneCountryCodeSelect.addEventListener('change', function() {
+        phoneInput.value = '';
+        phoneInput.placeholder = phoneCountryCodeSelect.value === '+91' ? '9876543210' : 'Enter phone number';
+        validatePhone();
+      });
+
+      phoneInput.addEventListener('blur', validatePhone);
     }
   }
   
@@ -1320,17 +1443,44 @@ import AuthGuard from '../components/AuthGuard.astro';
       highlightFieldError(country);
     }
     
-    // Validate phone number - accept 10 digits or +91 + 10 digits
-    if (phoneInput && (!phoneInput.value || !(/^[0-9]{10}$/.test(phoneInput.value) || /^\+91[0-9]{10}$/.test(phoneInput.value)))) {
-      const errorDiv = document.getElementById('phone-error');
-      if (errorDiv) {
-        errorDiv.classList.remove('hidden');
-        errorDiv.textContent = 'Phone number must be 10 digits or +91 followed by 10 digits';
+    // Validate phone number based on country code
+    const phoneCountryCodeSelect = document.getElementById('phone_country_code') as HTMLSelectElement;
+    if (phoneInput && phoneCountryCodeSelect) {
+      const countryCode = phoneCountryCodeSelect.value;
+      const phoneDigits = phoneInput.value.replace(/\D/g, '');
+      
+      if (countryCode === '+91') {
+        // For India, validate 10 digits
+        if (!phoneDigits || phoneDigits.length !== 10 || !/^[0-9]{10}$/.test(phoneDigits)) {
+          const errorDiv = document.getElementById('phone-error');
+          if (errorDiv) {
+            errorDiv.classList.remove('hidden');
+            errorDiv.textContent = 'Please enter a valid 10-digit phone number for India';
+          }
+          emptyFields.push('Phone Number');
+          errorMessages.push('Please enter a valid 10-digit phone number for India');
+          isValid = false;
+          highlightFieldError(phoneInput);
+        }
+      } else {
+        // For other countries, validate based on their max digits
+        const countryCodeLimits: { [key: string]: number } = {
+          '+1': 10, '+44': 10, '+61': 9, '+86': 11, '+81': 10,
+          '+49': 11, '+33': 9, '+971': 9, '+966': 9
+        };
+        const maxDigits = countryCodeLimits[countryCode] || 10;
+        if (!phoneDigits || phoneDigits.length !== maxDigits || !/^[0-9]+$/.test(phoneDigits)) {
+          const errorDiv = document.getElementById('phone-error');
+          if (errorDiv) {
+            errorDiv.classList.remove('hidden');
+            errorDiv.textContent = `Please enter a valid ${maxDigits}-digit phone number`;
+          }
+          emptyFields.push('Phone Number');
+          errorMessages.push(`Please enter a valid ${maxDigits}-digit phone number`);
+          isValid = false;
+          highlightFieldError(phoneInput);
+        }
       }
-      emptyFields.push('Phone Number');
-      errorMessages.push('Phone number must be 10 digits or +91 followed by 10 digits');
-      isValid = false;
-      highlightFieldError(phoneInput);
     }
     
     // Show validation errors with popup
@@ -2046,7 +2196,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         country: formDataObj.country,
         contactPerson: formDataObj.contactPerson,
         email: formDataObj.email,
-        phone: formDataObj.phone,
+        phone: phoneCountryCodeSelect ? `${phoneCountryCodeSelect.value}${formDataObj.phone.replace(/\D/g, '')}` : formDataObj.phone,
         additionalRequirements: formDataObj.additionalRequirements,
         restaurantLogo: formDataObj.restaurantLogo,
         menuPhotos: menuPhotos || [],
@@ -2105,6 +2255,9 @@ import AuthGuard from '../components/AuthGuard.astro';
           } catch (e) {
             console.warn('⚠️ Logo upload skipped (RPC flow):', e);
           }
+          const phoneCountryCodeSelect = document.getElementById('phone_country_code') as HTMLSelectElement;
+          const formattedPhone = phoneCountryCodeSelect ? `${phoneCountryCodeSelect.value}${formDataObj.phone.replace(/\D/g, '')}` : formDataObj.phone;
+          
           const { data: customizationData, error: customizationError } = await supabase.rpc('upsert_oms_customization', {
             p_user_email: formDataObj.email,
             p_project_name: formDataObj.projectName,
@@ -2112,7 +2265,7 @@ import AuthGuard from '../components/AuthGuard.astro';
             p_owner_name: formDataObj.ownerName,
             p_restaurant_address: `${formDataObj.houseNumber}, ${formDataObj.addressLine1}, ${formDataObj.city}, ${formDataObj.state} ${formDataObj.pincode}, ${formDataObj.country}`,
             p_contact_person: formDataObj.contactPerson,
-            p_phone_number: formDataObj.phone,
+            p_phone_number: formattedPhone,
             p_house_number: formDataObj.houseNumber,
             p_address_line1: formDataObj.addressLine1,
             p_city: formDataObj.city,
@@ -2120,7 +2273,7 @@ import AuthGuard from '../components/AuthGuard.astro';
             p_pincode: formDataObj.pincode,
             p_country: formDataObj.country,
             p_contact_person: formDataObj.contactPerson,
-            p_phone_number: formDataObj.phone,
+            p_phone_number: formattedPhone,
             p_user_id: null,
             p_logo_url: rpcLogoUrl,
             p_logo_filename: rpcLogoFilename,
@@ -2446,8 +2599,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     const form = document.getElementById('order-menu-form');
     if (!form) {
       console.error('❌❌❌ Order menu form not found ❌❌❌');
-      alert('❌ Form not found. Please refresh the page and try again.');
-      return;
+      throw new Error('Form not found. Please refresh the page and try again.');
     }
     console.log('✅ Form found:', form);
 
@@ -2461,8 +2613,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     
     if (!authManager) {
       console.error('❌❌❌ No auth manager found ❌❌❌');
-      alert('❌ Please log in to submit this form. You must be authenticated to place an order.');
-      return;
+      throw new Error('Please log in to submit this form. You must be authenticated to place an order.');
     }
     
     const isLoggedIn = authManager.isUserLoggedIn();
@@ -2470,8 +2621,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     
     if (!isLoggedIn) {
       console.error('❌❌❌ User not logged in ❌❌❌');
-      alert('❌ Please log in to submit this form. You must be authenticated to place an order.');
-      return;
+      throw new Error('Please log in to submit this form. You must be authenticated to place an order.');
     }
     
     const currentUser = authManager.getCurrentUser();
@@ -2484,7 +2634,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     
     if (!formValidationResult) {
       console.log('❌ Form validation failed - required fields missing');
-      return;
+      throw new Error('Form validation failed. Please fill in all required fields.');
     }
     
     // VALIDATION: Check menu photos are uploaded (Required for Order Menu System)
@@ -2510,7 +2660,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         menuPhotosSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
       
-      return;
+      throw new Error('Please upload at least one menu photo. This field is required for Order Menu System.');
     }
     
     console.log('✅ All validations passed, proceeding with form submission');
@@ -2538,193 +2688,96 @@ import AuthGuard from '../components/AuthGuard.astro';
     
     console.log('📝 Form data collected:', formDataObj);
     
+    // Get phone country code select element
+    const phoneCountryCodeSelect = document.getElementById('phone_country_code') as HTMLSelectElement;
+    console.log('📞 Phone country code select:', phoneCountryCodeSelect ? phoneCountryCodeSelect.value : 'not found');
+    
     try {
-      console.log('📦 Attempting to import Supabase client...');
-      // Get Supabase client
-      const { supabase } = await import('../lib/supabase');
-      console.log('✅ Supabase client imported');
-      console.log('🔍 Supabase client type:', typeof supabase);
-      console.log('🔍 Supabase client methods:', supabase ? Object.keys(supabase).slice(0, 10) : 'null');
-      
-      if (!supabase) {
-        console.error('❌❌❌ Supabase client is null/undefined ❌❌❌');
-        alert('❌ Database connection failed. Please refresh the page and try again.');
-        return;
+      let supabase;
+      try {
+        // Get Supabase client with fast timeout (5 seconds)
+        const importPromise = import('../lib/supabase');
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Supabase import timed out')), 5000);
+        });
+        
+        const supabaseModule = await Promise.race([importPromise, timeoutPromise]) as any;
+        supabase = supabaseModule.supabase;
+      } catch (importError: any) {
+        console.error('❌ Supabase import error:', importError.message);
+        throw new Error('Failed to load database connection. Please refresh the page and try again.');
       }
       
-      if (typeof supabase.from !== 'function') {
-        console.error('❌❌❌ Supabase client does not have .from() method ❌❌❌');
-        console.error('❌ Supabase object:', supabase);
-        alert('❌ Database connection is not properly initialized. Please refresh the page.');
-        return;
+      if (!supabase || typeof supabase.from !== 'function') {
+        throw new Error('Database connection failed. Please refresh the page and try again.');
       }
-      
-      console.log('✅ Supabase client verified and ready');
       
       // Skip client-side bucket listing; assume buckets exist and handle upload errors gracefully.
       
-      // Upload menu photos to Supabase Storage (Required for Order Menu System)
-      let menuPhotosUrls = [];
+      // CRITICAL: Save data FIRST, then upload files in background
+      // This ensures data is saved immediately and doesn't timeout
       
-      // Use cached files (file input is cleared after selection)
-      console.log('📸 Using cached menu photos:', cachedMenuPhotos.length, 'files');
-      console.log('📸 Cached menu photos:', cachedMenuPhotos.map(f => ({ name: f.name, size: f.size, type: f.type })));
-      
-      if (cachedMenuPhotos && cachedMenuPhotos.length > 0) {
-        console.log(`📸 Found ${cachedMenuPhotos.length} cached files`);
-        
-        try {
-          console.log('📸 Starting menu photos upload to Supabase Storage...');
-          
-          for (let i = 0; i < cachedMenuPhotos.length; i++) {
-            const photo = cachedMenuPhotos[i];
-            console.log(`📸 Uploading photo ${i + 1}/${cachedMenuPhotos.length}: ${photo.name}`);
-            console.log(`📸 File size: ${photo.size} bytes`);
-            console.log(`📸 File type: ${photo.type}`);
-            
-            // Create unique filename
-            const timestamp = Date.now();
-            const randomId = Math.random().toString(36).substring(2, 8);
-            const safeName = photo.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-            const path = `menu_photos/${timestamp}_${randomId}_${safeName}`;
-            
-            console.log(`📸 Upload path: ${path}`);
-            
-            try {
-              // Upload the File object directly (more reliable across browsers)
-              const { error: uploadError } = await supabase.storage
-                .from('menu-photos')
-                .upload(path, photo, {
-                  upsert: true,
-                  contentType: photo.type,
-                  cacheControl: '3600'
-                });
-              
-              if (uploadError) {
-                console.error(`❌ Upload error for photo ${i + 1}:`, uploadError);
-                continue;
-              }
-              
-              // Get public URL
-              const { data: urlData } = supabase.storage
-                .from('menu-photos')
-                .getPublicUrl(path);
-              
-              if (urlData && urlData.publicUrl) {
-                menuPhotosUrls.push({
-                  url: urlData.publicUrl,
-                  filename: photo.name,
-                  mimeType: photo.type,
-                  size: photo.size,
-                  path: path
-                });
-                console.log(`✅ Photo ${i + 1} uploaded successfully: ${urlData.publicUrl}`);
-              } else {
-                console.error(`❌ Failed to get public URL for photo ${i + 1}`);
-              }
-              
-            } catch (fileErr) {
-              console.error(`❌ Exception uploading photo ${i + 1}:`, fileErr);
-            }
-          }
-          
-          console.log(`📸 Menu photos upload completed. ${menuPhotosUrls.length} photos uploaded successfully.`);
-          console.log('📸 Uploaded URLs:', menuPhotosUrls);
-          
-        } catch (e) {
-          console.error('❌ Menu photos upload failed:', e);
+      // Get current user ID if available
+      let userId = null;
+      try {
+        if (currentUser && currentUser.id) {
+          userId = currentUser.id;
+        } else if (authManager && typeof authManager.getCurrentUser === 'function') {
+          const user = authManager.getCurrentUser();
+          userId = user?.id || null;
         }
-      } else {
-        console.log('⚠️ No menu photos found in file input');
-        console.log('🔍 Checking menuPhotos array as fallback...');
-        console.log('📸 menuPhotos array:', menuPhotos);
-        console.log('📸 menuPhotos length:', menuPhotos ? menuPhotos.length : 'undefined');
+      } catch (userError) {
+        console.warn('⚠️ Could not get user ID:', userError);
       }
       
-      // Upload restaurant logo to Supabase Storage (Optional)
+      // Upload logo FIRST (before database insert) to get URL immediately
       let restaurantLogoUrl = null;
-      
-      // Use cached logo file; if missing, fall back to current input's file
       const logoInputElForRest = document.getElementById('order-menu-logo-upload') as HTMLInputElement | null;
-      const fallbackInputFile = logoInputElForRest && logoInputElForRest.files && logoInputElForRest.files[0] ? logoInputElForRest.files[0] : null;
+      const fallbackInputFile = logoInputElForRest?.files?.[0] || null;
       const resolvedLogoFile = cachedLogoFile || fallbackInputFile;
-      console.log('🏷️ Using logo file:', resolvedLogoFile ? resolvedLogoFile.name : 'none', '(source:', cachedLogoFile ? 'cache' : (fallbackInputFile ? 'input' : 'none'), ')');
       
       if (resolvedLogoFile) {
-        const logoFile = resolvedLogoFile;
-        console.log(`🏷️ Uploading logo: ${logoFile.name}`);
-        console.log(`🏷️ Logo size: ${logoFile.size} bytes`);
-        console.log(`🏷️ Logo type: ${logoFile.type}`);
-        
         try {
-          // Ensure Supabase client is available in this scope
-          const { supabase } = await import('../lib/supabase');
-          console.log('🏷️ Starting restaurant logo upload to Supabase Storage...');
-          
-          // Create unique filename
+          console.log('📤 Uploading logo before database insert...');
           const timestamp = Date.now();
           const randomId = Math.random().toString(36).substring(2, 8);
-          const safeName = logoFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+          const safeName = resolvedLogoFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
           const path = `logos/${timestamp}_${randomId}_${safeName}`;
           
-          console.log(`🏷️ Upload path: ${path}`);
-          
-          // Upload the File object directly (more reliable across browsers)
           const { error: uploadError } = await supabase.storage
             .from('logos')
-            .upload(path, logoFile, { 
+            .upload(path, resolvedLogoFile, { 
               upsert: true, 
-              contentType: logoFile.type,
+              contentType: resolvedLogoFile.type,
               cacheControl: '3600'
             });
           
-          if (uploadError) {
-            console.error('❌ Logo upload error:', uploadError);
-            const errDiv = document.getElementById('error-message');
-            if (errDiv) {
-              errDiv.classList.remove('hidden');
-              errDiv.textContent = `Logo upload failed: ${uploadError.message || uploadError}`;
-            }
-          } else {
-            // Get public URL
+          if (!uploadError) {
             const { data: urlData } = supabase.storage
               .from('logos')
               .getPublicUrl(path);
             
-            if (urlData && urlData.publicUrl) {
+            if (urlData?.publicUrl) {
               restaurantLogoUrl = urlData.publicUrl;
-              console.log(`✅ Logo uploaded successfully: ${urlData.publicUrl}`);
-            } else {
-              console.error('❌ Failed to get logo public URL');
+              console.log('✅ Logo uploaded successfully:', restaurantLogoUrl);
             }
+          } else {
+            console.error('❌ Logo upload error:', uploadError);
           }
-        } catch (e) {
-          console.error('❌ Logo upload failed:', e);
+        } catch (logoErr) {
+          console.error('❌ Logo upload exception:', logoErr);
+          // Continue without logo - don't block save
         }
-      } else {
-        console.log('ℹ️ No logo uploaded (optional field)');
-      }
-      
-      // Prepare data for database insertion
-      // Keep menuPhotosUrls as array of objects with url, filename, size, path, etc.
-      let menuPhotosUrlsFormatted = null;
-      if (menuPhotosUrls && menuPhotosUrls.length > 0) {
-        // Keep the full object structure so we can display filename, size, etc. in admin panels
-        menuPhotosUrlsFormatted = menuPhotosUrls.map(photo => ({
-          url: photo.url || photo.publicUrl || photo,
-          filename: photo.filename || photo.name || 'menu-photo',
-          size: photo.size || null,
-          path: photo.path || null,
-          mimeType: photo.mimeType || photo.type || null
-        })).filter(photo => photo.url); // Only keep photos with valid URLs
       }
 
-      const insertData = {
+      // Prepare data for database insertion (with logo URL if available)
+      const now = new Date().toISOString();
+      const insertData: any = {
         project_name: formDataObj.projectName || '',
         owner_name: formDataObj.ownerName || '',
         contact_person: formDataObj.contactPerson || '',
         email: formDataObj.email || '',
-        phone_number: formDataObj.phone || '',
+        phone_number: phoneCountryCodeSelect ? `${phoneCountryCodeSelect.value}${(formDataObj.phone || '').replace(/\D/g, '')}` : (formDataObj.phone || ''),
         house_flat_number: formDataObj.houseNumber || '',
         address_line_1: formDataObj.addressLine1 || '',
         city: formDataObj.city || '',
@@ -2732,53 +2785,94 @@ import AuthGuard from '../components/AuthGuard.astro';
         pincode: formDataObj.pincode || '',
         country: formDataObj.country || 'India',
         restaurant_name: formDataObj.restaurantName || '',
-        restaurant_logo_url: restaurantLogoUrl, // Store the uploaded logo URL
-        menu_photos_urls: menuPhotosUrlsFormatted, // Store the uploaded menu photo URLs (array)
+        restaurant_logo_url: restaurantLogoUrl, // Include logo URL if uploaded
+        menu_photos_urls: null, // Will be updated after upload (menu photos can be large)
         additional_requirements: formDataObj.additionalRequirements || '',
         base_package_cost: 999.00,
         gst_amount: 180.00,
         total_amount: 1179.00, // Fixed price for Order Menu System
-        status: 'pending'
+        status: 'pending',
+        created_at: now,
+        updated_at: now
       };
-
-      console.log('💾💾💾 PREPARING TO SAVE DATA 💾💾💾');
-      console.log('💾 Original menuPhotosUrls:', menuPhotosUrls);
-      console.log('💾 Menu photos URLs formatted:', menuPhotosUrlsFormatted);
-      console.log('💾 Menu photos URLs formatted type:', typeof menuPhotosUrlsFormatted);
-      console.log('💾 Menu photos URLs formatted isArray:', Array.isArray(menuPhotosUrlsFormatted));
-      if (Array.isArray(menuPhotosUrlsFormatted)) {
-        console.log('💾 Menu photos URLs formatted length:', menuPhotosUrlsFormatted.length);
-        menuPhotosUrlsFormatted.forEach((photo, idx) => {
-          console.log(`💾 Photo ${idx + 1}:`, photo);
-        });
-      }
-      console.log('💾 Saving order customization data:', JSON.stringify(insertData, null, 2));
-      console.log('💾 Insert data keys:', Object.keys(insertData));
-
-      // Save to database using Supabase client directly (more reliable than REST API)
-      console.log('📤📤📤 ATTEMPTING DATABASE INSERT 📤📤📤');
-      console.log('📤 Table: order_customizations');
-      console.log('📤 Data being inserted:', insertData);
       
-      const { data: savedData, error: saveError } = await supabase
-        .from('order_customizations')
-        .insert(insertData)
-        .select();
+      // Add user_id if available (some tables require it)
+      if (userId) {
+        insertData.user_id = userId;
+      }
+      
+      console.log('🕐 Timestamp added - Created at:', now);
 
-      console.log('📥📥📥 DATABASE RESPONSE RECEIVED 📥📥📥');
-      console.log('📥 Saved data:', savedData);
-      console.log('📥 Save error:', saveError);
-      console.log('📥 Error type:', saveError ? typeof saveError : 'none');
-      console.log('📥 Error message:', saveError ? saveError.message : 'none');
-      console.log('📥 Error code:', saveError ? saveError.code : 'none');
-      console.log('📥 Error details:', saveError ? saveError.details : 'none');
-      console.log('📥 Error hint:', saveError ? saveError.hint : 'none');
+      // Minimal logging for speed
+      console.log('💾 Saving order customization data...');
 
+      // Save to database IMMEDIATELY (skip connection test to save time)
+      const dbInsertStartTime = Date.now();
+      console.log('📤 Saving to database...');
+      
+      let savedData, saveError;
+      try {
+        // Fast database insert with 10 second timeout
+        const insertPromise = supabase
+          .from('order_customizations')
+          .insert(insertData)
+          .select();
+        
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Database insert timed out after 10 seconds')), 10000);
+        });
+        
+        const result = await Promise.race([insertPromise, timeoutPromise]) as any;
+        
+        savedData = result.data;
+        saveError = result.error;
+        
+        const dbInsertElapsed = Math.round((Date.now() - dbInsertStartTime) / 1000);
+        console.log(`✅ Database insert completed in ${dbInsertElapsed} seconds`);
+      } catch (dbError: any) {
+        console.error('❌ Database insert exception:', dbError.message);
+        
+        // Check if it's a timeout error
+        if (dbError.message && dbError.message.includes('timed out')) {
+          saveError = {
+            message: 'Database operation timed out. Please check your internet connection and try again.',
+            code: 'TIMEOUT',
+            details: 'The database insert took longer than 10 seconds to complete.',
+            hint: 'This may be due to network issues or database overload. Please try again.'
+          };
+        } else {
+          saveError = dbError;
+        }
+        savedData = null;
+        
+        // Don't throw here - let the error handling below deal with it
+      }
       if (saveError) {
-        console.error('❌❌❌ ERROR SAVING ORDER CUSTOMIZATION ❌❌❌');
-        console.error('❌ Full error object:', saveError);
-        console.error('❌ Error details:', JSON.stringify(saveError, null, 2));
-        console.error('❌ Insert data that failed:', JSON.stringify(insertData, null, 2));
+        console.error('❌ Error saving:', saveError.message || saveError.code || 'Unknown error');
+        
+        // Create detailed error message
+        let errorMessage = saveError.message || saveError.hint || 'Failed to save your order.';
+        let errorDetails = '';
+        
+        // Add specific error details based on error code
+        if (saveError.code === '23505') {
+          errorMessage = 'This order already exists. A duplicate order with the same details was detected.';
+          errorDetails = 'Please check if you have already submitted this order.';
+        } else if (saveError.code === '23503') {
+          errorMessage = 'Database constraint violation. Some required reference data is missing.';
+          errorDetails = 'Please refresh the page and try again.';
+        } else if (saveError.code === '42501') {
+          errorMessage = 'Permission denied. You may not have permission to save orders.';
+          errorDetails = 'Please ensure you are logged in and have the correct permissions.';
+        } else if (saveError.code === 'PGRST116') {
+          errorMessage = 'Table not found. The database table may not exist.';
+          errorDetails = 'Please contact support. Error code: PGRST116';
+        } else if (saveError.code === 'TIMEOUT') {
+          errorMessage = 'Database operation timed out.';
+          errorDetails = 'Please check your internet connection and try again.';
+        } else if (saveError.message) {
+          errorDetails = saveError.hint || saveError.details || '';
+        }
         
         // Show user-friendly error message
         const errorDiv = document.getElementById('validation-errors');
@@ -2787,95 +2881,146 @@ import AuthGuard from '../components/AuthGuard.astro';
           errorDiv.innerHTML = `
             <div class="bg-red-50 border border-red-200 rounded-lg p-4">
               <h4 class="text-red-800 font-semibold mb-2">❌ Error Saving Order</h4>
-              <p class="text-red-700">${saveError.message || 'Failed to save your order. Please check all required fields and try again.'}</p>
-              <p class="text-red-600 text-sm mt-2">If this problem persists, please contact support.</p>
+              <p class="text-red-700 font-medium">${errorMessage}</p>
+              ${errorDetails ? `<p class="text-red-600 text-sm mt-2">${errorDetails}</p>` : ''}
+              <p class="text-red-600 text-sm mt-2">Error Code: ${saveError.code || 'Unknown'}</p>
+              <p class="text-red-600 text-sm mt-2">If this problem persists, please contact support with the error code above.</p>
+              <button onclick="console.log('Error details:', ${JSON.stringify(saveError).replace(/"/g, '&quot;')});" class="mt-2 text-xs text-red-600 underline">View technical details in console</button>
             </div>
           `;
-        } else {
-          alert(`❌ Error saving your order: ${saveError.message || 'Unknown error'}. Please try again.`);
         }
-        return;
+        
+        // Also show alert for immediate feedback
+        alert(`❌ Error saving order:\n\n${errorMessage}\n\n${errorDetails || 'Please check the console for more details.'}`);
+        
+        // Throw error to be caught by button handler
+        throw new Error(errorMessage);
       }
 
       if (!savedData || savedData.length === 0) {
         console.error('❌❌❌ No data returned from insert operation ❌❌❌');
         console.error('❌ savedData:', savedData);
         console.error('❌ savedData length:', savedData ? savedData.length : 'null/undefined');
-        alert('❌ Error saving your order. No data was returned. Please try again.');
-        return;
+        throw new Error('Error saving your order. No data was returned from database. Please try again.');
       }
 
-      console.log('✅✅✅ ORDER CUSTOMIZATION SAVED SUCCESSFULLY! ✅✅✅');
-      console.log('✅ Saved data:', savedData);
-      console.log('✅ Saved data length:', savedData.length);
-      console.log('✅ First record ID:', savedData[0]?.id);
-      console.log('✅✅✅ SAVE OPERATION COMPLETE ✅✅✅');
+      console.log('✅ Order saved successfully! ID:', savedData[0]?.id);
 
-      // Show success message with upload details
+      const savedRecordId = savedData[0]?.id;
+      
+      // Show success message immediately (files will upload in background)
       const successDiv = document.getElementById('validation-errors');
       if (successDiv) {
-        let uploadDetails = '';
-        if (menuPhotosUrls.length > 0) {
-          uploadDetails += `<p class="text-green-700 mt-2">📸 ${menuPhotosUrls.length} menu photo${menuPhotosUrls.length > 1 ? 's' : ''} uploaded successfully!</p>`;
-        }
-        if (restaurantLogoUrl) {
-          uploadDetails += `<p class="text-green-700 mt-2">🏷️ Restaurant logo uploaded successfully!</p>`;
-        }
-        
         successDiv.classList.remove('hidden');
         successDiv.innerHTML = `
           <div class="bg-green-50 border border-green-200 rounded-lg p-4">
             <h4 class="text-green-800 font-semibold mb-2">✅ Order Submitted Successfully!</h4>
-            <p class="text-green-700">Your order has been saved with all uploaded files.</p>
-            ${uploadDetails}
-            <p class="text-green-700 mt-2">You will be redirected to the payment page.</p>
+            <p class="text-green-700">Your order has been saved. Files are uploading in the background...</p>
           </div>
         `;
       }
 
-      // Clear forms after successful save
-      try { document.getElementById('order-menu-form')?.reset(); } catch {}
-      try { document.getElementById('customization-form')?.reset(); } catch {}
-      // Explicitly clear file inputs and previews (logo + menu photos)
-      try {
-        const logoInput = document.getElementById('order-menu-logo-upload');
-        const logoPreview = document.getElementById('order-menu-logo-preview');
-        const logoUploadArea = document.getElementById('order-menu-logo-upload-area');
-        if (logoInput) (logoInput as any).value = '';
-        if (logoPreview) logoPreview.classList.add('hidden');
-        if (logoUploadArea) logoUploadArea.innerHTML = `
-          <div class="flex flex-col items-center">
-            <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            <p class="text-gray-600 mb-2">Click to upload logo</p>
-            <p class="text-sm text-gray-500">PNG, JPG, SVG up to 10MB</p>
-          </div>
-        `;
-      } catch {}
-      try {
-        const menuInput = document.getElementById('menu-photos-upload');
-        const menuPreview = document.getElementById('menu-photos-preview');
-        const menuGrid = document.getElementById('menu-photos-grid');
-        const menuArea = document.getElementById('menu-photos-upload-area');
-        if (menuInput) (menuInput as any).value = '';
-        if (menuPreview) menuPreview.classList.add('hidden');
-        if (menuGrid) menuGrid.innerHTML = '';
-        if (menuArea) menuArea.innerHTML = `
-          <div class="flex flex-col items-center">
-            <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            <p class="text-gray-700 mb-2 font-medium">Click to upload menu photos</p>
-            <p class="text-sm text-gray-500">PNG, JPG, SVG up to 10MB each</p>
-            <button type="button" onclick="document.getElementById('menu-photos-upload').click()" class="mt-4 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-all transform hover:scale-105 shadow-lg">Choose Photos</button>
-          </div>
-        `;
-      } catch {}
+      // Upload files in background and update record (non-blocking)
+      // This runs asynchronously and doesn't block the main save operation
+      // Start background uploads but don't wait for them
+      Promise.resolve().then(async () => {
+        try {
+          console.log('📸 Starting background file uploads...');
+          let menuPhotosUrls = [];
+          let restaurantLogoUrl = null;
+          
+          // Upload menu photos in parallel (faster than sequential)
+          if (cachedMenuPhotos && cachedMenuPhotos.length > 0) {
+            console.log(`📸 Uploading ${cachedMenuPhotos.length} menu photos in background...`);
+            
+            const uploadPromises = cachedMenuPhotos.map(async (photo, i) => {
+              try {
+                const timestamp = Date.now();
+                const randomId = Math.random().toString(36).substring(2, 8);
+                const safeName = photo.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+                const path = `menu_photos/${timestamp}_${randomId}_${i}_${safeName}`;
+                
+                const { error: uploadError } = await supabase.storage
+                  .from('menu-photos')
+                  .upload(path, photo, {
+                    upsert: true,
+                    contentType: photo.type,
+                    cacheControl: '3600'
+                  });
+                
+                if (uploadError) {
+                  console.error(`❌ Upload error for photo ${i + 1}:`, uploadError);
+                  return null;
+                }
+                
+                const { data: urlData } = supabase.storage
+                  .from('menu-photos')
+                  .getPublicUrl(path);
+                
+                if (urlData?.publicUrl) {
+                  return {
+                    url: urlData.publicUrl,
+                    filename: photo.name,
+                    mimeType: photo.type,
+                    size: photo.size,
+                    path: path
+                  };
+                }
+                return null;
+              } catch (fileErr) {
+                console.error(`❌ Exception uploading photo ${i + 1}:`, fileErr);
+                return null;
+              }
+            });
+            
+            const uploadResults = await Promise.all(uploadPromises);
+            menuPhotosUrls = uploadResults.filter(result => result !== null);
+            console.log(`✅ ${menuPhotosUrls.length} menu photos uploaded successfully`);
+          }
+          
+          // Logo is already uploaded and saved with initial insert, so we only need to update menu photos
+          // Update database record with menu photos URLs (logo URL was already saved in initial insert)
+          if (savedRecordId && menuPhotosUrls.length > 0) {
+            const menuPhotosUrlsFormatted = menuPhotosUrls.length > 0 ? menuPhotosUrls.map(photo => ({
+              url: photo.url,
+              filename: photo.filename || 'menu-photo',
+              size: photo.size || null,
+              path: photo.path || null,
+              mimeType: photo.mimeType || null
+            })) : null;
+            
+            const { error: updateError } = await supabase
+              .from('order_customizations')
+              .update({
+                menu_photos_urls: menuPhotosUrlsFormatted,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', savedRecordId);
+            
+            if (updateError) {
+              console.error('❌ Error updating record with file URLs:', updateError);
+            } else {
+              console.log('✅ Record updated with file URLs successfully');
+            }
+          }
+        } catch (bgError) {
+          console.error('❌ Background file upload error:', bgError);
+          // Don't throw - this is background operation
+        }
+      }).catch(err => {
+        console.error('❌ Background upload promise error:', err);
+      });
+      
+      // IMPORTANT: Return immediately after saving data
+      // Button will reset in finally block, files upload in background
+      return;
 
-    } catch (error) {
+      // Note: Form clearing is handled by button handler after successful save
+
+    } catch (error: any) {
       console.error('❌ Error in form submission:', error);
-      alert('❌ An error occurred while submitting your order. Please try again.');
+      // Re-throw error so button handler can catch it and reset button state
+      throw new Error(error.message || 'An error occurred while submitting your order. Please try again.');
     }
   }
 
@@ -4521,37 +4666,117 @@ Status: Submitted
           return;
         }
         
+        // Run validation BEFORE setting isSaving flag
+        console.log('🔍🔍🔍 RUNNING VALIDATION FIRST 🔍🔍🔍');
+        const formValidationResult = validateFormFields();
+        console.log('🔍 Validation result:', formValidationResult);
+        
+        if (!formValidationResult) {
+          console.log('❌❌❌ Validation failed, preventing save ❌❌❌');
+          alert('❌ Please fill in all required fields before saving.');
+          return; // Don't set isSaving flag if validation fails
+        }
+        
+        // Only set isSaving flag after validation passes
         console.log('✅ Setting isSaving flag to true');
         isSaving = true;
         
+        // Disable button to prevent multiple clicks
+        targetButton.disabled = true;
+        const originalButtonText = targetButton.innerHTML;
+        targetButton.innerHTML = `
+          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12a8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>Saving...</span>
+        `;
+        
         try {
-          // Run validation before submission
-          console.log('🔍🔍🔍 RUNNING VALIDATION 🔍🔍🔍');
-          const formValidationResult = validateFormFields();
-          console.log('🔍 Validation result:', formValidationResult);
-          
-          if (!formValidationResult) {
-            console.log('❌❌❌ Validation failed, preventing save ❌❌❌');
-            alert('❌ Please fill in all required fields before saving.');
-            return;
-          }
-          
           console.log('✅✅✅ VALIDATION PASSED, CALLING handleOrderMenuFormSubmission() ✅✅✅');
-          await handleOrderMenuFormSubmission();
-          console.log('✅✅✅ handleOrderMenuFormSubmission() COMPLETED ✅✅✅');
+          console.log('🕐 Save operation started at:', new Date().toISOString());
           
-          // After successful save, clear both forms if present
-          try { document.getElementById('order-menu-form')?.reset(); } catch {}
-          try { document.getElementById('customization-form')?.reset(); } catch {}
-        } catch (err) {
+          const saveStartTime = Date.now();
+          let timeoutWarning: NodeJS.Timeout | null = null;
+          let timeoutForced: NodeJS.Timeout | null = null;
+          
+          // Timeout warning after 30 seconds
+          timeoutWarning = setTimeout(() => {
+            console.warn('⚠️ Save operation is taking longer than expected. Please wait...');
+            const elapsed = Math.round((Date.now() - saveStartTime) / 1000);
+            console.warn(`⚠️ Elapsed time: ${elapsed} seconds`);
+          }, 30000);
+          
+          try {
+            // Call the save operation directly without aggressive timeout
+            // The function has its own timeout protection for database operations
+            await handleOrderMenuFormSubmission();
+            
+          // Clear timeout warning if operation completed
+          if (timeoutWarning) clearTimeout(timeoutWarning);
+            
+            const elapsed = Math.round((Date.now() - saveStartTime) / 1000);
+            console.log('✅✅✅ handleOrderMenuFormSubmission() COMPLETED ✅✅✅');
+            console.log('✅✅✅ DATA SUCCESSFULLY SAVED TO SUPABASE ✅✅✅');
+            console.log(`🕐 Save operation completed in ${elapsed} seconds`);
+            console.log('🕐 Save operation completed at:', new Date().toISOString());
+            
+            // After successful save, clear both forms if present
+            try { document.getElementById('order-menu-form')?.reset(); } catch {}
+            try { document.getElementById('customization-form')?.reset(); } catch {}
+            
+            // Clear logo and menu photos fields
+            clearFormFileFields();
+            
+            // Show success confirmation
+            console.log('✅ Button will be reset in finally block');
+          } catch (saveError: any) {
+            // Clear timeout warning on error
+            if (timeoutWarning) clearTimeout(timeoutWarning);
+            
+            const elapsed = Math.round((Date.now() - saveStartTime) / 1000);
+            console.error('❌ Save operation error:', saveError);
+            console.error(`🕐 Save operation failed after ${elapsed} seconds`);
+            throw saveError;
+          }
+        } catch (err: any) {
           console.error('❌❌❌ SAVE BUTTON ERROR ❌❌❌');
+          console.error('🕐 Error occurred at:', new Date().toISOString());
           console.error('❌ Error object:', err);
           console.error('❌ Error message:', err.message);
           console.error('❌ Error stack:', err.stack);
-          alert(`❌ An error occurred while saving: ${err.message || 'Unknown error'}. Please check the console for details.`);
+          
+          // Show error message to user
+          const errorMessage = err.message || 'An error occurred while saving. Please try again.';
+          const errorDiv = document.getElementById('validation-errors');
+          if (errorDiv) {
+            errorDiv.classList.remove('hidden');
+            errorDiv.innerHTML = `
+              <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <h4 class="text-red-800 font-semibold mb-2">❌ Error Saving Order</h4>
+                <p class="text-red-700">${errorMessage}</p>
+                <p class="text-red-600 text-sm mt-2">Please check the console for more details and try again.</p>
+              </div>
+            `;
+          }
+          // Always show alert for immediate feedback
+          alert(`❌ Error: ${errorMessage}\n\nPlease check the console and try again.`);
         } finally {
           console.log('🔄 Resetting isSaving flag to false');
           isSaving = false;
+          // Ensure button is always reset, even if there was an error
+          try {
+            targetButton.disabled = false;
+            targetButton.innerHTML = originalButtonText;
+            console.log('✅ Button state reset successfully');
+          } catch (resetError) {
+            console.error('❌ Error resetting button state:', resetError);
+            // Force reset as fallback
+            if (targetButton) {
+              targetButton.disabled = false;
+              targetButton.textContent = 'Save and Pay';
+            }
+          }
         }
       });
       console.log('✅✅✅ CLICK EVENT LISTENER ATTACHED SUCCESSFULLY ✅✅✅');
@@ -4592,24 +4817,68 @@ Status: Submitted
             console.log('⚠️⚠️⚠️ Save already in progress, ignoring click ⚠️⚠️⚠️');
             return;
           }
+          
+          // Run validation BEFORE setting isSaving flag
+          console.log('🔍 Running validation before fallback save button submission...');
+          const formValidationResult = validateFormFields();
+          if (!formValidationResult) {
+            console.log('❌ Validation failed, preventing save');
+            alert('❌ Please fill in all required fields before saving.');
+            return; // Don't set isSaving flag if validation fails
+          }
+          
+          // Only set isSaving flag after validation passes
           isSaving = true;
+          
+          // Disable button to prevent multiple clicks
+          fallbackBtn.disabled = true;
+          const originalButtonText = fallbackBtn.innerHTML;
+          fallbackBtn.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12a8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Saving...</span>
+          `;
+          
           try {
-            // Run validation before submission
-            console.log('🔍 Running validation before fallback save button submission...');
-            const formValidationResult = validateFormFields();
-            if (!formValidationResult) {
-              console.log('❌ Validation failed, preventing save');
-              alert('❌ Please fill in all required fields before saving.');
-              return;
-            }
-            
+            const fallbackStartTime = Date.now();
             console.log('✅✅✅ FALLBACK VALIDATION PASSED, CALLING handleOrderMenuFormSubmission() ✅✅✅');
+            console.log('🕐 Fallback save operation started at:', new Date().toISOString());
+            
+            let fallbackTimeoutWarning: NodeJS.Timeout | null = null;
+            let fallbackTimeoutForced: NodeJS.Timeout | null = null;
+            
+            // Timeout warning after 30 seconds
+            fallbackTimeoutWarning = setTimeout(() => {
+              console.warn('⚠️ Fallback save operation is taking longer than expected. Please wait...');
+              const elapsed = Math.round((Date.now() - fallbackStartTime) / 1000);
+              console.warn(`⚠️ Elapsed time: ${elapsed} seconds`);
+            }, 30000);
+            
+            // Call the save operation directly without aggressive timeout
+            // The function has its own timeout protection for database operations
             await handleOrderMenuFormSubmission();
+            
+            // Clear timeout warning if operation completed
+            if (fallbackTimeoutWarning) clearTimeout(fallbackTimeoutWarning);
+            
+            const fallbackElapsed = Math.round((Date.now() - fallbackStartTime) / 1000);
             console.log('✅✅✅ FALLBACK handleOrderMenuFormSubmission() COMPLETED ✅✅✅');
+            console.log(`🕐 Fallback save operation completed in ${fallbackElapsed} seconds`);
+            console.log('🕐 Fallback save operation completed at:', new Date().toISOString());
+            
             try { document.getElementById('order-menu-form')?.reset(); } catch {}
             try { document.getElementById('customization-form')?.reset(); } catch {}
+            
+            // Clear logo and menu photos fields
+            clearFormFileFields();
           } catch (err) {
+            // Clear timeout warning on error
+            if (fallbackTimeoutWarning) clearTimeout(fallbackTimeoutWarning);
+            
             console.error('❌❌❌ FALLBACK SAVE BUTTON ERROR ❌❌❌');
+            console.error('🕐 Fallback error occurred at:', new Date().toISOString());
             console.error('❌ Error object:', err);
             console.error('❌ Error message:', err.message);
             console.error('❌ Error stack:', err.stack);
@@ -4617,6 +4886,19 @@ Status: Submitted
           } finally {
             console.log('🔄 Resetting fallback isSaving flag to false');
             isSaving = false;
+            // Ensure button is always reset, even if there was an error
+            try {
+              fallbackBtn.disabled = false;
+              fallbackBtn.innerHTML = originalButtonText;
+              console.log('✅ Fallback button state reset successfully');
+            } catch (resetError) {
+              console.error('❌ Error resetting fallback button state:', resetError);
+              // Force reset as fallback
+              if (fallbackBtn) {
+                fallbackBtn.disabled = false;
+                fallbackBtn.textContent = 'Save and Pay';
+              }
+            }
           }
         });
         console.log('✅✅✅ FALLBACK CLICK EVENT LISTENER ATTACHED SUCCESSFULLY ✅✅✅');

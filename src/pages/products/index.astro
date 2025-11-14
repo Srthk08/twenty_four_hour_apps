@@ -319,7 +319,26 @@ const processedProducts = products
           return;
         }
         
-        // Non-admin users see dialog for other products
+        // Non-admin users - check if logged in first
+        const authManager = window.globalAuthManager || window.simpleAuthManager;
+        const isLoggedIn = authManager && authManager.isUserLoggedIn();
+        
+        if (!isLoggedIn) {
+          // User not logged in - redirect to login page with smooth transition
+          console.log('User not logged in - redirecting to login');
+          const loginUrl = `/login?redirect=/products/${productSlug}`;
+          
+          // Add smooth fade-out transition
+          document.body.style.transition = 'opacity 0.3s ease-out';
+          document.body.style.opacity = '0';
+          
+          setTimeout(() => {
+            window.location.href = loginUrl;
+          }, 200);
+          return;
+        }
+        
+        // Logged in but not admin - show dialog or redirect to contact
         console.log('Non-admin user - showing dialog');
         if (window.showProductDialog) {
           window.showProductDialog();

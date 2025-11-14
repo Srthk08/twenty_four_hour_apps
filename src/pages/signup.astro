@@ -122,9 +122,23 @@ import Layout from '../layouts/Layout.astro';
             </label>
             <div class="mt-1">
               <div class="flex">
-                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                  +91
-                </span>
+                <select
+                  id="country_code"
+                  name="country_code"
+                  required
+                  class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                >
+                  <option value="+91" selected>🇮🇳 +91</option>
+                  <option value="+1">🇺🇸 +1</option>
+                  <option value="+44">🇬🇧 +44</option>
+                  <option value="+61">🇦🇺 +61</option>
+                  <option value="+86">🇨🇳 +86</option>
+                  <option value="+81">🇯🇵 +81</option>
+                  <option value="+49">🇩🇪 +49</option>
+                  <option value="+33">🇫🇷 +33</option>
+                  <option value="+971">🇦🇪 +971</option>
+                  <option value="+966">🇸🇦 +966</option>
+                </select>
                 <input
                   id="phone"
                   name="phone"
@@ -554,26 +568,60 @@ import Layout from '../layouts/Layout.astro';
     if (phoneInput) phoneInput.value = '';
     if (companyNameInput) companyNameInput.value = '';
     
-    // Phone number validation
-    if (phoneInput) {
-      phoneInput.addEventListener('input', function(e) {
-        // Remove any non-numeric characters
-        e.target.value = e.target.value.replace(/[^0-9]/g, '');
-        
-        // Limit to 10 digits
-        if (e.target.value.length > 10) {
-          e.target.value = e.target.value.slice(0, 10);
-        }
-        
-        // Show/hide error message
-        if (phoneError) {
-          if (e.target.value.length > 0 && e.target.value.length !== 10) {
-            phoneError.classList.remove('hidden');
+    // Phone number validation with country code
+    const countryCodeSelect = document.getElementById('country_code') as HTMLSelectElement;
+    if (phoneInput && countryCodeSelect) {
+      const countryCodeLimits: { [key: string]: number } = {
+        '+91': 10, '+1': 10, '+44': 10, '+61': 9, '+86': 11,
+        '+81': 10, '+49': 11, '+33': 9, '+971': 9, '+966': 9
+      };
+
+      function validatePhone() {
+        const countryCode = countryCodeSelect.value;
+        const phone = phoneInput.value.replace(/\D/g, '');
+        const maxDigits = countryCodeLimits[countryCode] || 10;
+
+        // Update maxlength and pattern
+        phoneInput.maxLength = maxDigits;
+        phoneInput.pattern = `[0-9]{${maxDigits}}`;
+
+        // For India (+91), validate 10 digits
+        if (countryCode === '+91') {
+          if (phone.length > 0 && phone.length !== 10) {
+            phoneError?.classList.remove('hidden');
+            phoneError.textContent = 'Please enter a valid 10-digit phone number';
+            phoneInput.classList.add('border-red-500');
           } else {
-            phoneError.classList.add('hidden');
+            phoneError?.classList.add('hidden');
+            phoneInput.classList.remove('border-red-500');
+          }
+        } else {
+          // For other countries
+          if (phone.length > 0 && phone.length !== maxDigits) {
+            phoneError?.classList.remove('hidden');
+            phoneError.textContent = `Please enter a valid ${maxDigits}-digit phone number`;
+            phoneInput.classList.add('border-red-500');
+          } else {
+            phoneError?.classList.add('hidden');
+            phoneInput.classList.remove('border-red-500');
           }
         }
+      }
+
+      phoneInput.addEventListener('input', function(e) {
+        const value = (e.target as HTMLInputElement).value.replace(/[^0-9]/g, '');
+        const maxDigits = countryCodeLimits[countryCodeSelect.value] || 10;
+        (e.target as HTMLInputElement).value = value.slice(0, maxDigits);
+        validatePhone();
       });
+
+      countryCodeSelect.addEventListener('change', function() {
+        phoneInput.value = '';
+        phoneInput.placeholder = countryCodeSelect.value === '+91' ? '9876543210' : 'Enter phone number';
+        validatePhone();
+      });
+
+      phoneInput.addEventListener('blur', validatePhone);
     }
     
     // Check for admin signup URL parameter
@@ -630,6 +678,7 @@ import Layout from '../layouts/Layout.astro';
     const password = formData.get('password') as string;
     const confirmPassword = formData.get('confirm_password') as string;
     const fullName = formData.get('full_name') as string;
+    const countryCode = formData.get('country_code') as string || '+91';
     const phone = formData.get('phone') as string;
     const companyName = formData.get('company_name') as string;
     const adminCode = formData.get('admin_code') as string;
@@ -655,13 +704,31 @@ import Layout from '../layouts/Layout.astro';
       return;
     }
 
-    // Validate phone number
-    if (!phone || phone.length !== 10 || !/^[0-9]{10}$/.test(phone)) {
-      if (errorText) {
-        errorText.textContent = 'Please enter a valid 10-digit phone number.';
+    // Validate phone number based on country code
+    const phoneDigits = phone ? phone.replace(/\D/g, '') : '';
+    if (countryCode === '+91') {
+      // For India, validate 10 digits
+      if (!phone || phoneDigits.length !== 10 || !/^[0-9]{10}$/.test(phoneDigits)) {
+        if (errorText) {
+          errorText.textContent = 'Please enter a valid 10-digit phone number for India.';
+        }
+        errorMessage?.classList.remove('hidden');
+        return;
       }
-      errorMessage?.classList.remove('hidden');
-      return;
+    } else {
+      // For other countries, validate based on country code limits
+      const countryCodeLimits: { [key: string]: number } = {
+        '+1': 10, '+44': 10, '+61': 9, '+86': 11, '+81': 10,
+        '+49': 11, '+33': 9, '+971': 9, '+966': 9
+      };
+      const maxDigits = countryCodeLimits[countryCode] || 10;
+      if (!phone || phoneDigits.length !== maxDigits || !/^[0-9]+$/.test(phoneDigits)) {
+        if (errorText) {
+          errorText.textContent = `Please enter a valid ${maxDigits}-digit phone number.`;
+        }
+        errorMessage?.classList.remove('hidden');
+        return;
+      }
     }
 
     // Show loading state - center icon and hide text
@@ -685,7 +752,7 @@ import Layout from '../layouts/Layout.astro';
         options: {
           data: {
             full_name: fullName,
-            phone: phone ? `+91${phone}` : '',
+            phone: phone ? `${countryCode}${phone.replace(/\D/g, '')}` : '',
             company_name: companyName,
           }
         }
@@ -727,7 +794,7 @@ import Layout from '../layouts/Layout.astro';
               id: data.user.id,
               email: email,
               full_name: fullName || '',
-              phone: phone ? `+91${phone}` : '',
+              phone: phone ? `${countryCode}${phone.replace(/\D/g, '')}` : '',
               company_name: companyName || '',
               role: userRole,
               status: 'pending_verification',
@@ -806,7 +873,7 @@ import Layout from '../layouts/Layout.astro';
             id: data.user.id,
             email: email,
             full_name: fullName || '',
-            phone: phone ? `+91${phone}` : '',
+            phone: phone ? `${countryCode}${phone.replace(/\D/g, '')}` : '',
             company_name: companyName || '',
             role: userRole,
             status: 'active',

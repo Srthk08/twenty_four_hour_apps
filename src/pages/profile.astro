@@ -74,13 +74,34 @@ import AuthGuard from '../components/AuthGuard.astro';
                 <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
                   Phone Number
                 </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  class="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm sm:text-base"
-                  placeholder="+91 98765 43210"
-                />
+                <div class="flex">
+                  <select
+                    id="country_code"
+                    name="country_code"
+                    class="px-3 py-2 sm:py-2.5 border border-r-0 border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm sm:text-base bg-gray-50"
+                  >
+                    <option value="+91" selected>🇮🇳 +91</option>
+                    <option value="+1">🇺🇸 +1</option>
+                    <option value="+44">🇬🇧 +44</option>
+                    <option value="+61">🇦🇺 +61</option>
+                    <option value="+86">🇨🇳 +86</option>
+                    <option value="+81">🇯🇵 +81</option>
+                    <option value="+49">🇩🇪 +49</option>
+                    <option value="+33">🇫🇷 +33</option>
+                    <option value="+971">🇦🇪 +971</option>
+                    <option value="+966">🇸🇦 +966</option>
+                  </select>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    class="flex-1 px-3 py-2 sm:py-2.5 border border-gray-300 rounded-r-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm sm:text-base"
+                    placeholder="9876543210"
+                    maxlength="10"
+                    pattern="[0-9]{10}"
+                  />
+                </div>
+                <p id="phone-error" class="hidden mt-1 text-xs sm:text-sm text-red-600">Please enter a valid 10-digit phone number</p>
               </div>
 
               <div>
@@ -325,7 +346,34 @@ import AuthGuard from '../components/AuthGuard.astro';
       const companyNameInput = document.getElementById('company_name') as HTMLInputElement;
 
       if (fullNameInput) fullNameInput.value = userData.full_name || userData.fullName || '';
-      if (phoneInput) phoneInput.value = userData.phone || '';
+      
+      // Parse phone number to extract country code and number
+      if (phoneInput && userData.phone) {
+        const phoneValue = userData.phone.toString();
+        // Check if phone starts with country code
+        if (phoneValue.startsWith('+91')) {
+          const countryCodeSelect = document.getElementById('country_code') as HTMLSelectElement;
+          if (countryCodeSelect) {
+            countryCodeSelect.value = '+91';
+          }
+          phoneInput.value = phoneValue.substring(3).replace(/\D/g, '');
+        } else if (phoneValue.startsWith('+')) {
+          // Extract country code (first 1-4 digits after +)
+          const match = phoneValue.match(/^(\+\d{1,4})(\d+)$/);
+          if (match) {
+            const countryCodeSelect = document.getElementById('country_code') as HTMLSelectElement;
+            if (countryCodeSelect) {
+              countryCodeSelect.value = match[1];
+            }
+            phoneInput.value = match[2];
+          } else {
+            phoneInput.value = phoneValue.replace(/\D/g, '');
+          }
+        } else {
+          phoneInput.value = phoneValue.replace(/\D/g, '');
+        }
+      }
+      
       if (companyNameInput) companyNameInput.value = userData.company_name || userData.companyName || '';
       
       // CRITICAL: Set email value immediately
@@ -405,6 +453,88 @@ import AuthGuard from '../components/AuthGuard.astro';
     }
   }
 
+  // Phone number validation based on country code
+  function setupPhoneValidation() {
+    const countryCodeSelect = document.getElementById('country_code') as HTMLSelectElement;
+    const phoneInput = document.getElementById('phone') as HTMLInputElement;
+    const phoneError = document.getElementById('phone-error') as HTMLElement;
+
+    if (!countryCodeSelect || !phoneInput) return;
+
+    // Country code to max digits mapping
+    const countryCodeLimits: { [key: string]: number } = {
+      '+91': 10, // India
+      '+1': 10,  // USA/Canada
+      '+44': 10, // UK
+      '+61': 9,  // Australia
+      '+86': 11, // China
+      '+81': 10, // Japan
+      '+49': 11, // Germany
+      '+33': 9,  // France
+      '+971': 9, // UAE
+      '+966': 9  // Saudi Arabia
+    };
+
+    function validatePhone() {
+      const countryCode = countryCodeSelect.value;
+      const phone = phoneInput.value.replace(/\D/g, ''); // Remove non-digits
+      const maxDigits = countryCodeLimits[countryCode] || 10;
+
+      // Update maxlength based on country code
+      phoneInput.maxLength = maxDigits;
+      phoneInput.pattern = `[0-9]{${maxDigits}}`;
+
+      // For India (+91), validate 10 digits
+      if (countryCode === '+91') {
+        if (phone.length > 0 && phone.length !== 10) {
+          phoneError?.classList.remove('hidden');
+          phoneError.textContent = 'Please enter a valid 10-digit phone number';
+          phoneInput.classList.add('border-red-500');
+          return false;
+        } else {
+          phoneError?.classList.add('hidden');
+          phoneInput.classList.remove('border-red-500');
+          return true;
+        }
+      } else {
+        // For other countries, validate based on their max digits
+        if (phone.length > 0 && phone.length > maxDigits) {
+          phoneError?.classList.remove('hidden');
+          phoneError.textContent = `Please enter a valid phone number (max ${maxDigits} digits)`;
+          phoneInput.classList.add('border-red-500');
+          return false;
+        } else if (phone.length > 0 && phone.length < maxDigits) {
+          phoneError?.classList.remove('hidden');
+          phoneError.textContent = `Please enter a valid phone number (${maxDigits} digits required)`;
+          phoneInput.classList.add('border-red-500');
+          return false;
+        } else {
+          phoneError?.classList.add('hidden');
+          phoneInput.classList.remove('border-red-500');
+          return true;
+        }
+      }
+    }
+
+    // Restrict input to numbers only
+    phoneInput.addEventListener('input', function(e) {
+      const value = (e.target as HTMLInputElement).value.replace(/\D/g, '');
+      const maxDigits = countryCodeLimits[countryCodeSelect.value] || 10;
+      (e.target as HTMLInputElement).value = value.slice(0, maxDigits);
+      validatePhone();
+    });
+
+    // Validate on country code change
+    countryCodeSelect.addEventListener('change', function() {
+      phoneInput.value = '';
+      phoneInput.placeholder = countryCodeSelect.value === '+91' ? '9876543210' : 'Enter phone number';
+      validatePhone();
+    });
+
+    // Validate on blur
+    phoneInput.addEventListener('blur', validatePhone);
+  }
+
   // Handle form submission - PERMANENT UPDATE TO SUPABASE
   const profileForm = document.getElementById('profile-form') as HTMLFormElement;
   profileForm?.addEventListener('submit', async (e) => {
@@ -412,6 +542,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     
     const formData = new FormData(profileForm);
     const fullName = formData.get('full_name') as string;
+    const countryCode = formData.get('country_code') as string;
     const phone = formData.get('phone') as string;
     const companyName = formData.get('company_name') as string;
 
@@ -421,15 +552,30 @@ import AuthGuard from '../components/AuthGuard.astro';
       return;
     }
 
-    // Show loading state
+    // Phone validation
+    const phoneInput = document.getElementById('phone') as HTMLInputElement;
+    const countryCodeSelect = document.getElementById('country_code') as HTMLSelectElement;
+    if (phone && phone.trim()) {
+      const phoneDigits = phone.replace(/\D/g, '');
+      const countryCode = countryCodeSelect?.value || '+91';
+      
+      if (countryCode === '+91' && phoneDigits.length !== 10) {
+        showError('Please enter a valid 10-digit phone number for India');
+        phoneInput?.focus();
+        return;
+      }
+    }
+
+    // Show loading state immediately
     const updateBtn = document.getElementById('update-btn') as HTMLButtonElement;
+    const originalButtonText = updateBtn.innerHTML;
     updateBtn.disabled = true;
     updateBtn.innerHTML = `
-      <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12a8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
-      Updating...
+      <span>Updating...</span>
     `;
 
     try {
@@ -438,49 +584,67 @@ import AuthGuard from '../components/AuthGuard.astro';
       const currentUser = authManager?.getCurrentUser();
       if (!currentUser) {
         showError('User not authenticated');
+        updateBtn.disabled = false;
+        updateBtn.innerHTML = originalButtonText;
         return;
       }
 
-      // Update profile in Supabase for permanent storage
-      const { data, error } = await supabase
+      // Format phone number with country code
+      const formattedPhone = phone && phone.trim() ? `${countryCode}${phone.replace(/\D/g, '')}` : null;
+
+      // Prepare update data
+      const updateData = {
+        full_name: fullName.trim(),
+        phone: formattedPhone,
+        company_name: companyName.trim() || null,
+        updated_at: new Date().toISOString()
+      };
+
+      // Update sessionStorage immediately for instant feedback (no database call)
+      try {
+        const sessionData = sessionStorage.getItem('simple-auth-session');
+        if (sessionData) {
+          const session = JSON.parse(sessionData);
+          if (session.user) {
+            session.user.full_name = fullName.trim();
+            session.user.phone = formattedPhone || undefined;
+            session.user.company_name = companyName.trim() || undefined;
+            sessionStorage.setItem('simple-auth-session', JSON.stringify(session));
+            console.log('✅ Profile updated in sessionStorage (instant)');
+          }
+        }
+      } catch (localError) {
+        console.warn('⚠️ SessionStorage update warning (non-critical):', localError);
+      }
+
+      // Update auth manager local state (synchronous, no database call)
+      if (authManager && typeof authManager.updateProfile === 'function') {
+        try {
+          // Check if updateProfile is async - if so, don't await it
+          const profileUpdate = authManager.updateProfile({
+            full_name: fullName.trim(),
+            phone: formattedPhone || undefined,
+            company_name: companyName.trim() || undefined
+          });
+          // If it returns a promise, handle it in background
+          if (profileUpdate && typeof profileUpdate.then === 'function') {
+            profileUpdate.catch(err => console.warn('Background profile update warning:', err));
+          }
+          console.log('✅ Profile updated in auth manager (instant)');
+        } catch (localError) {
+          console.warn('⚠️ Auth manager update warning (non-critical):', localError);
+        }
+      }
+
+      // Update profile in Supabase (optimized - no select, just update)
+      // Run in background after showing success
+      const supabaseUpdate = supabase
         .from('profiles')
-        .update({
-          full_name: fullName.trim(),
-          phone: phone.trim() || null,
-          company_name: companyName.trim() || null,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', currentUser.id);
 
-      if (error) {
-        console.error('Supabase update error:', error);
-        showError('Failed to update profile in database: ' + error.message);
-        return;
-      }
-
-      console.log('✅ Profile updated in Supabase:', data);
-
-      // Update local session data
-      if (authManager) {
-        const updatedUser = {
-          ...currentUser,
-          full_name: fullName.trim(),
-          phone: phone.trim() || undefined,
-          company_name: companyName.trim() || undefined
-        };
-        
-        // Update the global auth manager
-        authManager.updateProfile({
-          full_name: fullName.trim(),
-          phone: phone.trim() || undefined,
-          company_name: companyName.trim() || undefined
-        });
-        
-        console.log('✅ Profile updated in global auth manager');
-      }
-
-      // Show success message
-      showSuccess('Profile updated successfully and permanently!');
+      // Show success immediately (optimistic update)
+      showSuccess('Profile updated successfully!');
       
       // Hide any previous error messages
       const errorMessage = document.getElementById('error-message');
@@ -488,16 +652,37 @@ import AuthGuard from '../components/AuthGuard.astro';
         errorMessage.classList.add('hidden');
       }
 
+      // Reset button state immediately
+      updateBtn.disabled = false;
+      updateBtn.innerHTML = originalButtonText;
+
       // Dispatch auth state change event
       window.dispatchEvent(new CustomEvent('auth-state-changed'));
+
+      // Complete database update in background (non-blocking)
+      supabaseUpdate.then(({ error }) => {
+        if (error) {
+          console.error('Supabase update error (background):', error);
+          // Show a subtle error notification without disrupting user
+          const errorMsg = document.getElementById('error-message');
+          const errorText = document.getElementById('error-text');
+          if (errorMsg && errorText) {
+            errorText.textContent = 'Profile saved locally. Database sync failed - changes will sync on next login.';
+            errorMsg.classList.remove('hidden');
+            setTimeout(() => errorMsg.classList.add('hidden'), 5000);
+          }
+        } else {
+          console.log('✅ Profile synced to database successfully');
+        }
+      }).catch(err => {
+        console.error('Background sync error:', err);
+      });
       
     } catch (error: any) {
       console.error('Profile update error:', error);
-      showError(error.message || 'Failed to update profile');
-    } finally {
-      // Reset button state
+      showError(error.message || 'Failed to update profile. Please try again.');
       updateBtn.disabled = false;
-      updateBtn.innerHTML = 'Update Profile';
+      updateBtn.innerHTML = originalButtonText;
     }
   });
 
@@ -606,6 +791,7 @@ import AuthGuard from '../components/AuthGuard.astro';
   document.addEventListener('DOMContentLoaded', () => {
     console.log('DOMContentLoaded event fired');
     populateUserData();
+    setupPhoneValidation();
   });
 
   // Also populate when the script loads (in case DOMContentLoaded already fired)
