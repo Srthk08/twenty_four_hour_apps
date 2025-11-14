@@ -1,11 +1,12 @@
-# SPA (Single Page Application) routing for Astro
-/*    /index.html   200
-
 # API routes (if any)
 /api/*  /api/:splat  200
 
 # Auth callback routes
 /auth/callback  /auth/callback/index.html  200
+
+# Password reset routes (MUST be before catch-all)
+/forgot-password  /forgot-password/index.html  200
+/reset-password  /reset-password/index.html  200
 
 # Admin routes
 /admin/*  /admin/index.html  200
@@ -22,3 +23,6 @@
 /cart  /cart/index.html  200
 /orders  /orders/index.html  200
 /support  /support/index.html  200
+
+# SPA (Single Page Application) routing for Astro - MUST be last
+/*    /index.html   200

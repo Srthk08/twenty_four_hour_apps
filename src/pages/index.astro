@@ -344,6 +344,37 @@ try {
     }
   });
   
+  // Check for password reset tokens and redirect immediately
+  (function() {
+    // Check URL hash for password reset tokens
+    const hash = window.location.hash || '';
+    if (hash.includes('access_token')) {
+      const hashParams = new URLSearchParams(hash.substring(1));
+      const type = hashParams.get('type');
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+      
+      // If this is a password reset (recovery) flow, redirect to reset-password page
+      if (type === 'recovery' && accessToken && refreshToken) {
+        console.log('Password reset tokens detected on home page, redirecting to reset-password');
+        window.location.href = `/reset-password${hash}`;
+        return;
+      }
+    }
+    
+    // Also check URL search params
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchType = urlParams.get('type');
+    const searchAccessToken = urlParams.get('access_token');
+    const searchRefreshToken = urlParams.get('refresh_token');
+    
+    if (searchType === 'recovery' && searchAccessToken && searchRefreshToken) {
+      console.log('Password reset tokens detected in search params, redirecting to reset-password');
+      window.location.href = `/reset-password?${window.location.search.substring(1)}`;
+      return;
+    }
+  })();
+
   // Ultra-fast loading - minimal JavaScript
   document.addEventListener('DOMContentLoaded', function() {
     // Only handle anchor links - everything else loads immediately

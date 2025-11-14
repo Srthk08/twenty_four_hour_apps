@@ -59,6 +59,77 @@ const { title, description = "DevExpress - 24 Hour Delivery" } = Astro.props;
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
+    <!-- CRITICAL: Prevent redirects on forgot-password and reset-password pages -->
+    <script is:inline>
+      // Run immediately to prevent redirects
+      (function() {
+        'use strict';
+        const path = window.location.pathname;
+        
+        // Forgot password page protection
+        if (path === '/forgot-password' || path === '/forgot-password/') {
+          let blocked = false;
+          const originalPushState = history.pushState;
+          const originalReplaceState = history.replaceState;
+          
+          history.pushState = function() {
+            const newPath = arguments[2];
+            if ((newPath === '/' || newPath === '/index.html') && !blocked) {
+              blocked = true;
+              console.log('Blocked redirect to home, staying on forgot-password');
+              return originalPushState.apply(history, [arguments[0], arguments[1], '/forgot-password']);
+            }
+            return originalPushState.apply(history, arguments);
+          };
+          
+          history.replaceState = function() {
+            const newPath = arguments[2];
+            if ((newPath === '/' || newPath === '/index.html') && !blocked) {
+              blocked = true;
+              return originalReplaceState.apply(history, [arguments[0], arguments[1], '/forgot-password']);
+            }
+            return originalReplaceState.apply(history, arguments);
+          };
+          
+          setInterval(function() {
+            const currentPath = window.location.pathname;
+            if ((currentPath === '/' || currentPath === '/index.html') && !blocked) {
+              blocked = true;
+              window.history.pushState(null, '', '/forgot-password');
+            }
+          }, 50);
+        }
+        
+        // Reset password page protection
+        if (path === '/reset-password' || path === '/reset-password/') {
+          const hash = window.location.hash;
+          const search = window.location.search;
+          let blocked = false;
+          let allowRedirect = false;
+          window.allowPasswordResetRedirect = function() { allowRedirect = true; };
+          
+          const originalPushState = history.pushState;
+          history.pushState = function() {
+            const newPath = arguments[2];
+            if ((newPath === '/' || newPath === '/index.html') && !allowRedirect && !blocked) {
+              blocked = true;
+              console.log('Blocked redirect to home, staying on reset-password');
+              return originalPushState.apply(history, [arguments[0], arguments[1], '/reset-password' + search + hash]);
+            }
+            return originalPushState.apply(history, arguments);
+          };
+          
+          setInterval(function() {
+            const currentPath = window.location.pathname;
+            if ((currentPath === '/' || currentPath === '/index.html') && !allowRedirect && !blocked) {
+              blocked = true;
+              window.history.pushState(null, '', '/reset-password' + search + hash);
+            }
+          }, 50);
+        }
+      })();
+    </script>
+
     <!-- Tailwind CSS is integrated via Astro, no CDN needed -->
     
     <!-- Text-white override CSS inline -->

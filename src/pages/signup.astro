@@ -64,7 +64,7 @@ import Layout from '../layouts/Layout.astro';
           <!-- Email -->
           <div>
             <label for="email" class="block text-sm font-medium text-gray-700">
-              Email Address *
+              Email Address * <span class="text-gray-500 text-xs">(Gmail only)</span>
             </label>
             <div class="mt-1">
               <input
@@ -73,9 +73,12 @@ import Layout from '../layouts/Layout.astro';
                 type="email"
                 required
                 autocomplete="off"
+                pattern="[a-zA-Z0-9][a-zA-Z0-9._-]*@gmail\.com"
+                title="Please enter a valid Gmail address (username@gmail.com)"
                 class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                placeholder="your@email.com"
+                placeholder="username@gmail.com"
               />
+              <p class="mt-1 text-xs text-gray-500">Only Gmail addresses are accepted (e.g., username@gmail.com)</p>
             </div>
           </div>
 
@@ -721,6 +724,43 @@ import Layout from '../layouts/Layout.astro';
     if (emailInput) {
       emailInput.setAttribute('autocomplete', 'off');
       emailInput.setAttribute('data-lpignore', 'true');
+      
+      // Real-time Gmail validation
+      emailInput.addEventListener('blur', function() {
+        const emailValue = this.value.trim().toLowerCase();
+        if (emailValue) {
+          // Check if it's a Gmail address
+          if (!emailValue.endsWith('@gmail.com')) {
+            this.classList.add('border-red-500');
+            this.classList.remove('border-gray-300');
+          } else {
+            // Validate format
+            const emailRegex = /^[a-zA-Z0-9._-]+@gmail\.com$/;
+            if (!emailRegex.test(emailValue)) {
+              this.classList.add('border-red-500');
+              this.classList.remove('border-gray-300');
+            } else {
+              this.classList.remove('border-red-500');
+              this.classList.add('border-gray-300');
+            }
+          }
+        } else {
+          this.classList.remove('border-red-500');
+          this.classList.add('border-gray-300');
+        }
+      });
+      
+      // Remove error styling on input
+      emailInput.addEventListener('input', function() {
+        const emailValue = this.value.trim().toLowerCase();
+        if (emailValue && emailValue.endsWith('@gmail.com')) {
+          const emailRegex = /^[a-zA-Z0-9._-]+@gmail\.com$/;
+          if (emailRegex.test(emailValue)) {
+            this.classList.remove('border-red-500');
+            this.classList.add('border-gray-300');
+          }
+        }
+      });
     }
     if (passwordInput) {
       passwordInput.setAttribute('autocomplete', 'new-password');
@@ -754,6 +794,9 @@ import Layout from '../layouts/Layout.astro';
 
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
+    e.stopPropagation();
+    
+    console.log('=== FORM SUBMISSION STARTED ===');
     
     const formData = new FormData(form);
     const email = formData.get('email') as string;
@@ -766,6 +809,107 @@ import Layout from '../layouts/Layout.astro';
 
     // Hide previous errors
     errorMessage?.classList.add('hidden');
+
+    // ===== GMAIL VALIDATION - MUST RUN FIRST =====
+    // This validation MUST run and block submission if invalid
+    console.log('=== GMAIL VALIDATION START ===');
+    console.log('Raw email value:', email);
+    console.log('Email type:', typeof email);
+    
+    if (!email || !email.trim()) {
+      console.log('VALIDATION FAILED: Email is empty');
+      if (errorText) {
+        errorText.textContent = 'Email address is required.';
+      }
+      errorMessage?.classList.remove('hidden');
+      
+      const emailInput = document.getElementById('email') as HTMLInputElement;
+      if (emailInput) {
+        emailInput.classList.add('border-red-500');
+        emailInput.focus();
+      }
+      
+      // Re-enable submit button
+      const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
+      console.log('=== FORM SUBMISSION BLOCKED: Empty email ===');
+      return;
+    }
+
+    const emailTrimmed = email.trim();
+    const emailLower = emailTrimmed.toLowerCase();
+    
+    console.log('Email after trim and lowercase:', emailLower);
+    
+    // Check if email ends with @gmail.com
+    if (!emailLower.endsWith('@gmail.com')) {
+      console.log('VALIDATION FAILED: Email does not end with @gmail.com');
+      console.log('Email value:', emailLower);
+      if (errorText) {
+        errorText.textContent = 'Please use a Gmail address (username@gmail.com format).';
+      }
+      errorMessage?.classList.remove('hidden');
+      
+      // Highlight the email field
+      const emailInput = document.getElementById('email') as HTMLInputElement;
+      if (emailInput) {
+        emailInput.classList.add('border-red-500');
+        emailInput.focus();
+      }
+      
+      // Re-enable submit button
+      const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
+      console.log('=== FORM SUBMISSION BLOCKED: Not Gmail ===');
+      return;
+    }
+    
+    // Validate email format more strictly - username part must be valid
+    // Gmail username can contain: letters, numbers, dots, underscores, hyphens
+    // Must start with a letter or number
+    const emailRegex = /^[a-zA-Z0-9][a-zA-Z0-9._-]*@gmail\.com$/;
+    const regexTestResult = emailRegex.test(emailLower);
+    console.log('Testing email regex:', regexTestResult);
+    console.log('Email being tested:', emailLower);
+    if (!regexTestResult) {
+      console.log('VALIDATION FAILED: Invalid Gmail format');
+      console.log('Regex pattern:', emailRegex);
+      if (errorText) {
+        errorText.textContent = 'Invalid Gmail format. Please use username@gmail.com format (username must start with a letter or number and can contain letters, numbers, dots, underscores, and hyphens).';
+      }
+      errorMessage?.classList.remove('hidden');
+      
+      // Highlight the email field
+      const emailInput = document.getElementById('email') as HTMLInputElement;
+      if (emailInput) {
+        emailInput.classList.add('border-red-500');
+        emailInput.focus();
+      }
+      
+      // Re-enable submit button
+      const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
+      console.log('=== FORM SUBMISSION BLOCKED: Invalid format ===');
+      return;
+    }
+    
+    // Remove error styling if validation passes
+    const emailInput = document.getElementById('email') as HTMLInputElement;
+    if (emailInput) {
+      emailInput.classList.remove('border-red-500');
+    }
+    
+    // Use the trimmed email for the rest of the form
+    const validatedEmail = emailTrimmed;
+    console.log('=== GMAIL VALIDATION PASSED ===');
+    console.log('Validated email:', validatedEmail);
+    console.log('=== PROCEEDING WITH FORM SUBMISSION ===');
 
     // Validate passwords match
     if (password !== confirmPassword) {
@@ -846,11 +990,32 @@ import Layout from '../layouts/Layout.astro';
     `;
 
     try {
-      console.log('Attempting to sign up with Supabase:', email);
+      console.log('Attempting to sign up with Supabase:', validatedEmail);
+      
+      // Final validation check before submitting - ensure it's still Gmail
+      const finalEmailCheck = validatedEmail.toLowerCase().trim();
+      console.log('Final email check before Supabase:', finalEmailCheck);
+      if (!finalEmailCheck.endsWith('@gmail.com')) {
+        console.error('CRITICAL: Email validation bypassed! Email:', finalEmailCheck);
+        if (errorText) {
+          errorText.textContent = 'Invalid email format. Only Gmail addresses are allowed.';
+        }
+        errorMessage?.classList.remove('hidden');
+        
+        // Re-enable submit button
+        const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.textContent = 'Create Account';
+        }
+        throw new Error('Invalid email format. Only Gmail addresses are allowed.');
+      }
+      
+      console.log('Final validation passed, proceeding to Supabase signup');
       
       // Sign up with Supabase directly
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: validatedEmail,
         password,
         options: {
           data: {
@@ -881,13 +1046,13 @@ import Layout from '../layouts/Layout.astro';
         
         const profileData = {
           id: data.user.id,
-          email: email,
+          email: validatedEmail,
           full_name: fullName || '',
           phone: phone ? `${countryCode}${phone.replace(/\D/g, '')}` : '',
           company_name: companyName || '',
           role: userRole,
           status: 'pending_verification',
-          username: fullName?.toLowerCase().replace(/\s+/g, '_') || email.split('@')[0],
+          username: fullName?.toLowerCase().replace(/\s+/g, '_') || validatedEmail.split('@')[0],
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
@@ -908,7 +1073,7 @@ import Layout from '../layouts/Layout.astro';
             try {
               const { error: rpcError } = await supabase.rpc('create_profile_for_existing_user', {
                 user_id: data.user.id,
-                user_email: email,
+                user_email: validatedEmail,
                 user_full_name: fullName || '',
                 user_phone: phone ? `${countryCode}${phone.replace(/\D/g, '')}` : '',
                 user_company_name: companyName || '',

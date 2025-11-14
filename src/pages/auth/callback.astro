@@ -108,6 +108,15 @@ try {
         const params = new URLSearchParams(hash.replace('#', ''));
         const access_token = params.get('access_token');
         const refresh_token = params.get('refresh_token') || params.get('provider_refresh_token');
+        const type = params.get('type');
+
+        // Check if this is a password reset (recovery) flow
+        if (type === 'recovery' && access_token && refresh_token) {
+          console.log('Password reset callback detected, redirecting to reset-password page');
+          // Redirect to reset-password page with tokens preserved in hash
+          window.location.href = `/reset-password${hash}`;
+          return;
+        }
 
         if (access_token && refresh_token) {
           const { data } = await supabase.auth.setSession({ access_token, refresh_token });
@@ -133,22 +142,42 @@ try {
       // 2) If using PKCE (code param), exchange code for a session
       const urlHasCode = window.location.search.includes('code=');
       if (urlHasCode) {
-        const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
-        if (error) {
-          console.error('Auth callback (PKCE) error:', error);
-        } else if (data?.session) {
-          // Persist to sessionStorage so Header.astro/UI picks up Google email
-          sessionStorage.setItem('simple-auth-session', JSON.stringify({
-            user: data.session.user,
-            access_token: data.session.access_token,
-            timestamp: Date.now()
-          }));
-          window.dispatchEvent(new CustomEvent('user-logged-in', { detail: data.session.user }));
+        // Check if this might be a password reset (check for type=recovery in URL)
+        const urlParams = new URLSearchParams(window.location.search);
+        const type = urlParams.get('type');
+        
+        // If it's a recovery type, redirect to reset-password after exchange
+        if (type === 'recovery') {
+          const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+          if (error) {
+            console.error('Auth callback (PKCE recovery) error:', error);
+            window.location.href = '/reset-password?error=invalid_token';
+            return;
+          } else if (data?.session) {
+            // For password reset, redirect to reset-password page
+            // The reset-password page will handle the session
+            window.location.href = '/reset-password';
+            return;
+          }
+        } else {
+          // Regular OAuth flow
+          const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+          if (error) {
+            console.error('Auth callback (PKCE) error:', error);
+          } else if (data?.session) {
+            // Persist to sessionStorage so Header.astro/UI picks up Google email
+            sessionStorage.setItem('simple-auth-session', JSON.stringify({
+              user: data.session.user,
+              access_token: data.session.access_token,
+              timestamp: Date.now()
+            }));
+            window.dispatchEvent(new CustomEvent('user-logged-in', { detail: data.session.user }));
 
-          // Clean URL (remove query) and redirect
-          window.history.replaceState({}, document.title, '/auth/callback');
-          window.location.href = '/dashboard';
-          return;
+            // Clean URL (remove query) and redirect
+            window.history.replaceState({}, document.title, '/auth/callback');
+            window.location.href = '/dashboard';
+            return;
+          }
         }
       }
 
