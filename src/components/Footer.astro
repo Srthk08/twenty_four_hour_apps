@@ -157,16 +157,34 @@
             return;
           }
           
-          // If user is not admin and product is not Order Menu System, show dialog
-          if (productSlug !== 'order-menu-system') {
-            if (window.showProductDialog) {
-              window.showProductDialog();
-            }
+          // ALL products require authentication - check if user is logged in
+          const authManager = window.globalAuthManager || window.simpleAuthManager;
+          const isLoggedIn = authManager && authManager.isUserLoggedIn();
+          
+          if (!isLoggedIn) {
+            // User not logged in - redirect to login
+            console.log('❌ User not logged in - authentication required, redirecting to login');
+            const loginUrl = `/login?redirect=/products/${productSlug}`;
+            window.location.href = loginUrl;
             return;
           }
           
-          // If product is Order Menu System, allow access for all users
-          window.location.href = `/products/${productSlug}`;
+          // Check if this is the Order Menu System product - it should work for all users
+          const isOrderMenuSystem = productSlug === 'order-menu-system';
+          
+          if (isOrderMenuSystem) {
+            // Order Menu System - allow access for all logged-in users
+            console.log('Order Menu System - allowing access for logged-in user');
+            window.location.href = `/products/${productSlug}`;
+            return;
+          }
+          
+          // User is logged in but not admin - show dialog (except for OMS)
+          if (window.showProductDialog) {
+            window.showProductDialog();
+          } else {
+            window.location.href = '/contact';
+          }
         });
       });
     }

@@ -90,7 +90,17 @@ import AuthGuard from '../components/AuthGuard.astro';
                     <option value="+33">🇫🇷 +33</option>
                     <option value="+971">🇦🇪 +971</option>
                     <option value="+966">🇸🇦 +966</option>
+                    <option value="other">Other</option>
                   </select>
+                  <input
+                    type="text"
+                    id="country_code_custom"
+                    name="country_code_custom"
+                    class="hidden px-3 py-2 sm:py-2.5 border border-r-0 border-gray-300 rounded-none shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm sm:text-base bg-gray-50"
+                    placeholder="+XXX"
+                    maxlength="5"
+                    pattern="\+[0-9]{1,4}"
+                  />
                   <input
                     type="tel"
                     id="phone"
@@ -456,10 +466,49 @@ import AuthGuard from '../components/AuthGuard.astro';
   // Phone number validation based on country code
   function setupPhoneValidation() {
     const countryCodeSelect = document.getElementById('country_code') as HTMLSelectElement;
+    const countryCodeCustom = document.getElementById('country_code_custom') as HTMLInputElement;
     const phoneInput = document.getElementById('phone') as HTMLInputElement;
     const phoneError = document.getElementById('phone-error') as HTMLElement;
 
     if (!countryCodeSelect || !phoneInput) return;
+
+    // Function to get the actual country code (from select or custom input)
+    function getCountryCode(): string {
+      if (countryCodeSelect.value === 'other' && countryCodeCustom) {
+        return countryCodeCustom.value.trim() || '+91';
+      }
+      return countryCodeSelect.value;
+    }
+
+    // Show/hide custom country code input
+    function toggleCustomCountryCode() {
+      if (countryCodeSelect.value === 'other') {
+        if (countryCodeCustom) {
+          countryCodeCustom.classList.remove('hidden');
+          countryCodeCustom.required = true;
+          countryCodeCustom.value = '+';
+        }
+      } else {
+        if (countryCodeCustom) {
+          countryCodeCustom.classList.add('hidden');
+          countryCodeCustom.required = false;
+          countryCodeCustom.value = '';
+        }
+      }
+    }
+
+    // Handle custom country code input - ensure it starts with +
+    if (countryCodeCustom) {
+      countryCodeCustom.addEventListener('input', function(e) {
+        let value = (e.target as HTMLInputElement).value;
+        if (!value.startsWith('+')) {
+          value = '+' + value.replace(/\+/g, '');
+        }
+        // Only allow + and numbers
+        value = value.replace(/[^+0-9]/g, '');
+        (e.target as HTMLInputElement).value = value;
+      });
+    }
 
     // Country code to max digits mapping
     const countryCodeLimits: { [key: string]: number } = {
@@ -476,13 +525,13 @@ import AuthGuard from '../components/AuthGuard.astro';
     };
 
     function validatePhone() {
-      const countryCode = countryCodeSelect.value;
+      const countryCode = getCountryCode();
       const phone = phoneInput.value.replace(/\D/g, ''); // Remove non-digits
-      const maxDigits = countryCodeLimits[countryCode] || 10;
+      const maxDigits = countryCodeLimits[countryCode] || 15; // Default to 15 for custom codes
 
       // Update maxlength based on country code
       phoneInput.maxLength = maxDigits;
-      phoneInput.pattern = `[0-9]{${maxDigits}}`;
+      phoneInput.pattern = `[0-9]{1,${maxDigits}}`;
 
       // For India (+91), validate 10 digits
       if (countryCode === '+91') {
@@ -498,14 +547,14 @@ import AuthGuard from '../components/AuthGuard.astro';
         }
       } else {
         // For other countries, validate based on their max digits
-        if (phone.length > 0 && phone.length > maxDigits) {
+        if (phone.length > 0 && phone.length < 5) {
           phoneError?.classList.remove('hidden');
-          phoneError.textContent = `Please enter a valid phone number (max ${maxDigits} digits)`;
+          phoneError.textContent = 'Please enter a valid phone number (at least 5 digits)';
           phoneInput.classList.add('border-red-500');
           return false;
-        } else if (phone.length > 0 && phone.length < maxDigits) {
+        } else if (phone.length > 0 && phone.length > maxDigits) {
           phoneError?.classList.remove('hidden');
-          phoneError.textContent = `Please enter a valid phone number (${maxDigits} digits required)`;
+          phoneError.textContent = `Please enter a valid phone number (max ${maxDigits} digits)`;
           phoneInput.classList.add('border-red-500');
           return false;
         } else {
@@ -519,20 +568,29 @@ import AuthGuard from '../components/AuthGuard.astro';
     // Restrict input to numbers only
     phoneInput.addEventListener('input', function(e) {
       const value = (e.target as HTMLInputElement).value.replace(/\D/g, '');
-      const maxDigits = countryCodeLimits[countryCodeSelect.value] || 10;
+      const countryCode = getCountryCode();
+      const maxDigits = countryCodeLimits[countryCode] || 15;
       (e.target as HTMLInputElement).value = value.slice(0, maxDigits);
       validatePhone();
     });
 
     // Validate on country code change
     countryCodeSelect.addEventListener('change', function() {
+      toggleCustomCountryCode();
       phoneInput.value = '';
-      phoneInput.placeholder = countryCodeSelect.value === '+91' ? '9876543210' : 'Enter phone number';
+      const countryCode = getCountryCode();
+      phoneInput.placeholder = countryCode === '+91' ? '9876543210' : 'Enter phone number';
       validatePhone();
     });
 
+    // Initialize custom country code visibility
+    toggleCustomCountryCode();
+
     // Validate on blur
     phoneInput.addEventListener('blur', validatePhone);
+    if (countryCodeCustom) {
+      countryCodeCustom.addEventListener('blur', validatePhone);
+    }
   }
 
   // Handle form submission - PERMANENT UPDATE TO SUPABASE
@@ -542,7 +600,12 @@ import AuthGuard from '../components/AuthGuard.astro';
     
     const formData = new FormData(profileForm);
     const fullName = formData.get('full_name') as string;
-    const countryCode = formData.get('country_code') as string;
+    let countryCode = formData.get('country_code') as string;
+    // Use custom country code if "other" is selected
+    if (countryCode === 'other') {
+      const customCode = formData.get('country_code_custom') as string;
+      countryCode = customCode?.trim() || '+91';
+    }
     const phone = formData.get('phone') as string;
     const companyName = formData.get('company_name') as string;
 

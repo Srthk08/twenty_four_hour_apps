@@ -480,16 +480,38 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       }
 
       console.log('✅ Contact data loaded successfully:', contacts?.length || 0, 'contacts found');
+      if (contacts && contacts.length > 0) {
+        console.log('📞 Sample contact phone data:', contacts[0]?.phone, 'Type:', typeof contacts[0]?.phone);
+        console.log('📞 Full sample contact:', contacts[0]);
+      }
 
       const tbody = document.getElementById('contact-table-body');
       if (!tbody) return;
 
       if (contacts && contacts.length > 0) {
-        tbody.innerHTML = contacts.map(contact => `
+        // Helper function to check if a value is a non-empty string after trimming
+        const getPhoneValue = (value) => {
+          if (!value) return null;
+          if (typeof value !== 'string') return null;
+          const trimmed = value.trim();
+          return trimmed.length > 0 ? trimmed : null;
+        };
+        
+        tbody.innerHTML = contacts.map(contact => {
+          // Debug phone field (check for empty strings too)
+          const phoneValue = getPhoneValue(contact.phone) || 
+                             getPhoneValue(contact.phone_number) || 
+                             getPhoneValue(contact.contact_phone) || 
+                             getPhoneValue(contact.mobile) || 
+                             getPhoneValue(contact.telephone) || 
+                             null;
+          console.log('📞 Rendering contact phone:', contact.id, 'Phone:', phoneValue, 'Raw contact.phone:', contact.phone);
+          
+          return `
           <tr>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${contact.first_name} ${contact.last_name}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${contact.email}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${contact.phone || '-'}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${phoneValue || '-'}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${contact.company_name || '-'}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${contact.project_type || '-'}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatDate(contact.created_at)}</td>
@@ -497,7 +519,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
               <button onclick="viewContactDetails('${contact.id}')" class="text-blue-600 hover:text-blue-900">View Details</button>
             </td>
           </tr>
-        `).join('');
+          `;
+        }).join('');
       } else {
         tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No contact submissions found</td></tr>';
       }
@@ -757,6 +780,29 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         return;
       }
 
+      // Debug: Log all contact fields to see what's available
+      console.log('📞 Full contact object:', contact);
+      console.log('📞 contact.phone:', contact.phone, 'Type:', typeof contact.phone, 'Length:', contact.phone?.length);
+      console.log('📞 contact.phone_number:', contact.phone_number, 'Type:', typeof contact.phone_number);
+      console.log('📞 All contact keys:', Object.keys(contact));
+      
+      // Helper function to check if a value is a non-empty string after trimming
+      const getPhoneValue = (value) => {
+        if (!value) return null;
+        if (typeof value !== 'string') return null;
+        const trimmed = value.trim();
+        return trimmed.length > 0 ? trimmed : null;
+      };
+      
+      // Try to find phone in any possible field (check for empty strings too)
+      const phoneValue = getPhoneValue(contact.phone) || 
+                         getPhoneValue(contact.phone_number) || 
+                         getPhoneValue(contact.contact_phone) || 
+                         getPhoneValue(contact.mobile) || 
+                         getPhoneValue(contact.telephone) || 
+                         null;
+      console.log('📞 Resolved phone value:', phoneValue);
+
       const modal = document.getElementById('details-modal');
       const modalTitle = document.getElementById('modal-title');
       const modalContent = document.getElementById('modal-content');
@@ -768,9 +814,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             <h4 class="text-lg font-semibold text-gray-900 mb-3">Contact Information</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p class="text-sm text-gray-600"><strong>Name:</strong> ${contact.first_name} ${contact.last_name}</p>
+                <p class="text-sm text-gray-600"><strong>First Name:</strong> ${contact.first_name || 'Not provided'}</p>
+                <p class="text-sm text-gray-600"><strong>Last Name:</strong> ${contact.last_name || 'Not provided'}</p>
                 <p class="text-sm text-gray-600"><strong>Email:</strong> ${contact.email || 'Not provided'}</p>
-                <p class="text-sm text-gray-600"><strong>Phone:</strong> ${contact.phone || 'Not provided'}</p>
+                <p class="text-sm text-gray-600"><strong>Phone:</strong> ${phoneValue || 'Not provided'}</p>
               </div>
               <div>
                 <p class="text-sm text-gray-600"><strong>Company:</strong> ${contact.company_name || 'Not provided'}</p>
@@ -782,7 +829,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           
           <div class="bg-gray-50 p-4 rounded-lg">
             <h5 class="font-medium text-gray-900 mb-2">Project Details</h5>
-            <p class="text-sm text-gray-600 break-words overflow-wrap-anywhere whitespace-pre-wrap">${contact.project_details || contact.message || 'No additional details provided'}</p>
+            <p class="text-sm text-gray-600 break-words overflow-wrap-anywhere whitespace-pre-wrap max-w-full overflow-hidden word-break-break-word" style="word-break: break-word; overflow-wrap: break-word; max-width: 100%;">${contact.project_details || contact.message || 'No additional details provided'}</p>
           </div>
         </div>
       `;
@@ -870,7 +917,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <p class="text-sm text-gray-600"><strong>Email:</strong> <span class="font-mono text-indigo-600">${contact.email || 'Not provided'}</span></p>
-              <p class="text-sm text-gray-600"><strong>Phone:</strong> ${contact.phone || 'Not provided'}</p>
+              <p class="text-sm text-gray-600"><strong>Phone:</strong> ${contact.phone || contact.phone_number || 'Not provided'}</p>
               <p class="text-sm text-gray-600"><strong>Company:</strong> ${contact.company_name || 'Not provided'}</p>
             </div>
             <div>
@@ -881,7 +928,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           
           <div class="bg-white p-3 rounded border">
             <h5 class="font-medium text-gray-900 mb-2">Project Details:</h5>
-            <p class="text-sm text-gray-600 whitespace-pre-wrap">${contact.project_details || contact.message || 'No additional details provided'}</p>
+            <p class="text-sm text-gray-600 whitespace-pre-wrap break-words overflow-wrap-anywhere max-w-full overflow-hidden word-break-break-word" style="word-break: break-word; overflow-wrap: break-word; max-width: 100%;">${contact.project_details || contact.message || 'No additional details provided'}</p>
           </div>
         </div>
       `).join('');
@@ -1690,7 +1737,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           </svg>
         </button>
       </div>
-      <div id="modal-content" class="text-gray-600 p-4 sm:p-5 overflow-y-auto flex-1 min-h-0">
+      <div id="modal-content" class="text-gray-600 p-4 sm:p-5 overflow-y-auto flex-1 min-h-0 max-w-full" style="overflow-x: hidden; word-wrap: break-word;">
         <!-- Content will be populated by JavaScript -->
       </div>
     </div>

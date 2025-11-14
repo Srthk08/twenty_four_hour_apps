@@ -205,7 +205,7 @@ import { supabase } from '../../lib/supabase';
 
    <!-- View Details Modal -->
    <div id="details-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-     <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+     <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white max-w-full" style="overflow-x: hidden;">
        <div class="mt-3">
          <div class="flex items-center justify-between mb-4">
            <h3 id="modal-title" class="text-lg font-medium text-gray-900">Details</h3>
@@ -215,7 +215,7 @@ import { supabase } from '../../lib/supabase';
              </svg>
            </button>
          </div>
-         <div id="modal-content" class="space-y-4">
+         <div id="modal-content" class="space-y-4 max-w-full" style="overflow-x: hidden; word-wrap: break-word;">
            <!-- Content will be loaded here -->
          </div>
        </div>
@@ -485,7 +485,15 @@ import { supabase } from '../../lib/supabase';
           <tr>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${contact.first_name} ${contact.last_name}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${contact.email || 'Not provided'}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${contact.phone || '-'}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${(() => {
+              const getPhoneValue = (value) => {
+                if (!value) return null;
+                if (typeof value !== 'string') return null;
+                const trimmed = value.trim();
+                return trimmed.length > 0 ? trimmed : null;
+              };
+              return getPhoneValue(contact.phone) || getPhoneValue(contact.phone_number) || '-';
+            })()}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${contact.company_name || '-'}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${contact.project_type || '-'}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatDate(contact.created_at)}</td>
@@ -813,6 +821,29 @@ import { supabase } from '../../lib/supabase';
         return;
       }
 
+      // Debug: Log all contact fields to see what's available
+      console.log('📞 Full contact object (data.astro viewContactDetails):', contact);
+      console.log('📞 contact.phone:', contact.phone, 'Type:', typeof contact.phone, 'Length:', contact.phone?.length);
+      console.log('📞 contact.phone_number:', contact.phone_number, 'Type:', typeof contact.phone_number);
+      console.log('📞 All contact keys:', Object.keys(contact));
+      
+      // Helper function to check if a value is a non-empty string after trimming
+      const getPhoneValue = (value) => {
+        if (!value) return null;
+        if (typeof value !== 'string') return null;
+        const trimmed = value.trim();
+        return trimmed.length > 0 ? trimmed : null;
+      };
+      
+      // Try to find phone in any possible field (check for empty strings too)
+      const phoneValue = getPhoneValue(contact.phone) || 
+                         getPhoneValue(contact.phone_number) || 
+                         getPhoneValue(contact.contact_phone) || 
+                         getPhoneValue(contact.mobile) || 
+                         getPhoneValue(contact.telephone) || 
+                         null;
+      console.log('📞 Resolved phone value (data.astro viewContactDetails):', phoneValue);
+
       const modal = document.getElementById('details-modal');
       const modalTitle = document.getElementById('modal-title');
       const modalContent = document.getElementById('modal-content');
@@ -824,9 +855,10 @@ import { supabase } from '../../lib/supabase';
             <h4 class="text-lg font-semibold text-gray-900 mb-3">Contact Information</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p class="text-sm text-gray-600"><strong>Name:</strong> ${contact.first_name} ${contact.last_name}</p>
+                <p class="text-sm text-gray-600"><strong>First Name:</strong> ${contact.first_name || 'Not provided'}</p>
+                <p class="text-sm text-gray-600"><strong>Last Name:</strong> ${contact.last_name || 'Not provided'}</p>
                 <p class="text-sm text-gray-600"><strong>Email:</strong> ${contact.email || 'Not provided'}</p>
-                <p class="text-sm text-gray-600"><strong>Phone:</strong> ${contact.phone || 'Not provided'}</p>
+                <p class="text-sm text-gray-600"><strong>Phone:</strong> ${phoneValue || 'Not provided'}</p>
               </div>
               <div>
                 <p class="text-sm text-gray-600"><strong>Company:</strong> ${contact.company_name || 'Not provided'}</p>
@@ -838,7 +870,7 @@ import { supabase } from '../../lib/supabase';
           
           <div class="bg-gray-50 p-4 rounded-lg">
             <h5 class="font-medium text-gray-900 mb-2">Project Details</h5>
-            <p class="text-sm text-gray-600">${contact.project_details || contact.message || 'No additional details provided'}</p>
+            <p class="text-sm text-gray-600 break-words overflow-wrap-anywhere whitespace-pre-wrap max-w-full overflow-hidden word-break-break-word" style="word-break: break-word; overflow-wrap: break-word; max-width: 100%;">${contact.project_details || contact.message || 'No additional details provided'}</p>
           </div>
         </div>
       `;
@@ -1035,7 +1067,15 @@ import { supabase } from '../../lib/supabase';
           <h4 class="font-semibold text-gray-900 mb-2">${contact.first_name} ${contact.last_name || ''}</h4>
           <p class="text-gray-600 text-sm mb-2">${contact.message ? (contact.message.length > 100 ? contact.message.substring(0, 100) + '...' : contact.message) : 'No message'}</p>
           <p class="text-gray-500 text-xs mb-3">Email: ${contact.email || 'Not provided'}</p>
-          <p class="text-gray-400 text-xs mb-3">Phone: ${contact.phone || 'Not provided'}</p>
+          <p class="text-gray-400 text-xs mb-3">Phone: ${(() => {
+              const getPhoneValue = (value) => {
+                if (!value) return null;
+                if (typeof value !== 'string') return null;
+                const trimmed = value.trim();
+                return trimmed.length > 0 ? trimmed : null;
+              };
+              return getPhoneValue(contact.phone) || getPhoneValue(contact.phone_number) || 'Not provided';
+            })()}</p>
           
           <div class="flex justify-between items-center mt-3">
             <button 
@@ -1230,6 +1270,29 @@ import { supabase } from '../../lib/supabase';
         return;
       }
 
+      // Debug: Log all contact fields to see what's available
+      console.log('📞 Full contact object (data.astro):', contact);
+      console.log('📞 contact.phone:', contact.phone, 'Type:', typeof contact.phone, 'Length:', contact.phone?.length);
+      console.log('📞 contact.phone_number:', contact.phone_number, 'Type:', typeof contact.phone_number);
+      console.log('📞 All contact keys:', Object.keys(contact));
+      
+      // Helper function to check if a value is a non-empty string after trimming
+      const getPhoneValue = (value) => {
+        if (!value) return null;
+        if (typeof value !== 'string') return null;
+        const trimmed = value.trim();
+        return trimmed.length > 0 ? trimmed : null;
+      };
+      
+      // Try to find phone in any possible field (check for empty strings too)
+      const phoneValue = getPhoneValue(contact.phone) || 
+                         getPhoneValue(contact.phone_number) || 
+                         getPhoneValue(contact.contact_phone) || 
+                         getPhoneValue(contact.mobile) || 
+                         getPhoneValue(contact.telephone) || 
+                         null;
+      console.log('📞 Resolved phone value (data.astro):', phoneValue);
+
       // Hide the contacts list and show details view
       document.getElementById('contacts-list').classList.add('hidden');
       document.getElementById('contact-details-view').classList.remove('hidden');
@@ -1276,7 +1339,7 @@ import { supabase } from '../../lib/supabase';
                 </div>
                 <div class="flex justify-between">
                   <span class="text-sm font-bold text-gray-600">Phone:</span>
-                  <span class="text-sm text-gray-900">${contact.phone || 'Not provided'}</span>
+                  <span class="text-sm text-gray-900">${phoneValue || 'Not provided'}</span>
                 </div>
               </div>
               <div class="space-y-2">
@@ -1300,9 +1363,9 @@ import { supabase } from '../../lib/supabase';
           <div class="bg-gray-50 p-4 rounded-lg">
             <h5 class="text-lg font-semibold text-gray-900 mb-3">Message</h5>
             <div class="space-y-2">
-              <div class="flex justify-between">
-                <span class="text-sm font-bold text-gray-600">Message:</span>
-                <span class="text-sm text-gray-900 whitespace-pre-wrap">${contact.message || 'No message provided'}</span>
+              <div class="flex flex-col sm:flex-row sm:justify-between gap-2">
+                <span class="text-sm font-bold text-gray-600 flex-shrink-0">Message:</span>
+                <span class="text-sm text-gray-900 whitespace-pre-wrap break-words overflow-wrap-anywhere max-w-full overflow-hidden word-break-break-word sm:text-right" style="word-break: break-word; overflow-wrap: break-word; max-width: 100%;">${contact.message || 'No message provided'}</span>
               </div>
             </div>
           </div>

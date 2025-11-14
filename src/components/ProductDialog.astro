@@ -58,6 +58,25 @@
 </div>
 
 <script>
+  // Immediate check - run before DOMContentLoaded to prevent any dialog display
+  (function() {
+    const currentPath = window.location.pathname;
+    const productSlug = currentPath.split('/').pop();
+    const isOMS = productSlug === 'order-menu-system' || currentPath.includes('/order-menu-system');
+    
+    if (isOMS) {
+      // Override showProductDialog immediately to prevent any calls
+      window.showProductDialog = function() {
+        console.log('ProductDialog: OMS page detected, blocking dialog (immediate check)');
+        const dialog = document.getElementById('product-dialog');
+        if (dialog) {
+          dialog.classList.add('hidden');
+        }
+        return;
+      };
+    }
+  })();
+
   // Dialog functionality
   document.addEventListener('DOMContentLoaded', function() {
     const dialog = document.getElementById('product-dialog');
@@ -65,14 +84,22 @@
     const closeDialog = document.getElementById('close-dialog');
     const closeDialogBtn = document.getElementById('close-dialog-btn');
 
-    // Show dialog function
-    function showDialog() {
-      // Check if we're on OMS product page - if so, don't show dialog
+    // Helper function to check if we're on OMS page
+    function isOrderMenuSystemPage() {
       const currentPath = window.location.pathname;
       const productSlug = currentPath.split('/').pop();
-      
-      if (productSlug === 'order-menu-system') {
-        console.log('ProductDialog: OMS page detected, not showing dialog');
+      return productSlug === 'order-menu-system' || currentPath.includes('/order-menu-system');
+    }
+
+    // Show dialog function
+    function showDialog() {
+      // ALWAYS check if we're on OMS product page - if so, never show dialog
+      if (isOrderMenuSystemPage()) {
+        console.log('ProductDialog: OMS page detected, blocking dialog display');
+        // Ensure dialog is hidden
+        if (dialog) {
+          dialog.classList.add('hidden');
+        }
         return;
       }
       
@@ -117,17 +144,29 @@
       }
     });
 
-    // Make showDialog globally available
+    // Make showDialog globally available (but with OMS check built-in)
     window.showProductDialog = showDialog;
     
-    // Check if we're on OMS page and hide dialog if so
-    const currentPath = window.location.pathname;
-    const productSlug = currentPath.split('/').pop();
-    
-    if (productSlug === 'order-menu-system') {
+    // Check if we're on OMS page and hide dialog if so (on page load)
+    if (isOrderMenuSystemPage()) {
       console.log('ProductDialog: OMS page detected on load, hiding dialog');
-      dialog.classList.add('hidden');
+      if (dialog) {
+        dialog.classList.add('hidden');
+      }
     }
+    
+    // Also listen for navigation changes (in case user navigates to OMS)
+    let lastPath = window.location.pathname;
+    setInterval(() => {
+      if (window.location.pathname !== lastPath) {
+        lastPath = window.location.pathname;
+        if (isOrderMenuSystemPage() && dialog && !dialog.classList.contains('hidden')) {
+          console.log('ProductDialog: OMS page detected after navigation, hiding dialog');
+          dialog.classList.add('hidden');
+          document.body.style.overflow = '';
+        }
+      }
+    }, 500);
   });
 </script>
 

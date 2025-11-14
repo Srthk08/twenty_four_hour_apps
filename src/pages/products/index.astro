@@ -289,7 +289,7 @@ const processedProducts = products
     }
   });
 
-  // Product click handler - OMS bypass for deployment
+  // Product click handler - ALL products require authentication
   document.addEventListener('DOMContentLoaded', function() {
     const productButtons = document.querySelectorAll('.product-view-btn');
     
@@ -302,14 +302,9 @@ const processedProducts = products
         
         console.log('Product clicked:', productSlug);
         
-        // CRITICAL: Always allow Order Menu System - NO CHECKS
-        if (productSlug === 'order-menu-system') {
-          console.log('OMS product - direct redirect');
-          window.location.href = `/products/${productSlug}`;
-          return;
-        }
-        
-        // For other products, check admin status
+        // ALL products require authentication - no exceptions
+        // Authentication check is required for ALL products including order-menu-system
+        // First check admin status
         const isAdmin = checkIfUserIsAdmin();
         console.log('Is admin:', isAdmin);
         
@@ -319,13 +314,14 @@ const processedProducts = products
           return;
         }
         
-        // Non-admin users - check if logged in first
+        // Non-admin users - MUST be logged in to access any product
         const authManager = window.globalAuthManager || window.simpleAuthManager;
         const isLoggedIn = authManager && authManager.isUserLoggedIn();
         
         if (!isLoggedIn) {
           // User not logged in - redirect to login page with smooth transition
-          console.log('User not logged in - redirecting to login');
+          // This is a security requirement - no product access without login
+          console.log('❌ User not logged in - authentication required, redirecting to login');
           const loginUrl = `/login?redirect=/products/${productSlug}`;
           
           // Add smooth fade-out transition
@@ -338,7 +334,17 @@ const processedProducts = products
           return;
         }
         
-        // Logged in but not admin - show dialog or redirect to contact
+        // Check if this is the Order Menu System product - it should work for all users
+        const isOrderMenuSystem = productSlug === 'order-menu-system';
+        
+        if (isOrderMenuSystem) {
+          // Order Menu System - allow access for all logged-in users
+          console.log('Order Menu System - allowing access for logged-in user');
+          window.location.href = `/products/${productSlug}`;
+          return;
+        }
+        
+        // Logged in but not admin - show dialog or redirect to contact (except for OMS)
         console.log('Non-admin user - showing dialog');
         if (window.showProductDialog) {
           window.showProductDialog();

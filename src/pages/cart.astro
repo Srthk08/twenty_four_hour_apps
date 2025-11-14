@@ -2539,10 +2539,12 @@ import { sharedDataStore } from '../lib/shared-data-store';
             additional_requirements: cartData.additional_requirements || formData.additionalRequirements || '',
             base_package_cost: cartData.base_package_cost || 999.00,
             gst_amount: cartData.gst_amount || 180.00,
-            total_amount: cartData.total_amount || 1179.00
+            total_amount: cartData.total_amount || 1179.00,
+            status: 'completed' // Set status to completed when order is placed
           };
           
           console.log('🔍 Debug - Final insert data:', insertData);
+          console.log('✅ Status being set to:', insertData.status);
           
           // Insert directly into the table
           const { data: customizationData, error: customizationError } = await supabase
@@ -2561,6 +2563,23 @@ import { sharedDataStore } from '../lib/shared-data-store';
           // Handle the insert response
           if (customizationData && customizationData.length > 0) {
             console.log('✅ Order customization saved successfully:', customizationData[0]);
+            console.log('✅ Status saved in database:', customizationData[0].status);
+            
+            // Verify status was saved correctly
+            if (customizationData[0].status !== 'completed') {
+              console.warn('⚠️ WARNING: Status was not saved as "completed". Actual status:', customizationData[0].status);
+              // Try to update it to completed
+              const { error: updateError } = await supabase
+                .from('order_customizations')
+                .update({ status: 'completed' })
+                .eq('id', customizationData[0].id);
+              
+              if (updateError) {
+                console.error('❌ Failed to update status to completed:', updateError);
+              } else {
+                console.log('✅ Status updated to completed after insert');
+              }
+            }
             
             // Update the cart data with the new ID
             cartData.customization_id = customizationData[0].id;

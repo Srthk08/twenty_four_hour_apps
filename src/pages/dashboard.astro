@@ -250,6 +250,76 @@ import AuthGuard from '../components/AuthGuard.astro';
           </form>
         </div>
 
+        <!-- Order Menu System Price Page (shown first when OMS is selected) -->
+        <div id="order-menu-price-page" class="bg-white rounded-lg shadow-sm p-8 hidden">
+          <div class="max-w-2xl mx-auto text-center">
+            <h2 class="text-3xl font-bold text-amber-800 mb-8">Order Menu System Pricing</h2>
+            <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl shadow-lg p-8 mb-8">
+              <div class="text-center">
+                <h3 class="text-2xl font-bold text-amber-800 mb-4">Order Menu System</h3>
+                <p class="text-amber-700 mb-6">Complete order management solution with all essential features</p>
+                <div class="text-5xl font-bold text-amber-600 mb-2">₹999</div>
+                <div class="text-sm text-amber-600 mb-8">One-time payment • Delivery in 1 day</div>
+                
+                <ul class="space-y-3 mb-8 text-left max-w-md mx-auto">
+                  <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-gray-700">All essential OMS features</span>
+                  </li>
+                  <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-gray-700">Digital menu integration</span>
+                  </li>
+                  <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-gray-700">Real-time order tracking</span>
+                  </li>
+                  <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-gray-700">Payment processing</span>
+                  </li>
+                  <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-gray-700">Analytics dashboard</span>
+                  </li>
+                </ul>
+                
+                <div class="bg-white rounded-lg p-4 mb-6">
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="text-gray-600">Base Price:</span>
+                    <span class="font-medium">₹999</span>
+                  </div>
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="text-gray-600">GST (18%):</span>
+                    <span class="font-medium">₹180</span>
+                  </div>
+                  <div class="flex justify-between items-center font-bold text-lg border-t pt-2 mt-2">
+                    <span>Total Price:</span>
+                    <span class="text-amber-600">₹1,179</span>
+                  </div>
+                </div>
+                
+                <button 
+                  id="proceed-to-oms-form"
+                  class="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 px-6 rounded-lg font-medium transition-colors text-lg"
+                >
+                  Proceed to Customization Form
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Order Menu System Custom Form (shown when Order Menu System is selected) -->
         <div id="order-menu-customization-form" class="bg-white rounded-lg shadow-sm p-8 hidden">
           <div class="flex items-center justify-between mb-8">
@@ -364,7 +434,17 @@ import AuthGuard from '../components/AuthGuard.astro';
                         <option value="+33">🇫🇷 +33</option>
                         <option value="+971">🇦🇪 +971</option>
                         <option value="+966">🇸🇦 +966</option>
+                        <option value="other">Other</option>
                       </select>
+                      <input
+                        type="text"
+                        id="phone_country_code_custom"
+                        name="phone_country_code_custom"
+                        class="hidden px-4 py-3 border border-r-0 border-gray-300 rounded-none focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-gray-50 text-lg"
+                        placeholder="+XXX"
+                        maxlength="5"
+                        pattern="\+[0-9]{1,4}"
+                      />
                       <input type="tel" name="phone" id="phone-input" class="flex-1 px-4 py-3 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="9876543210" required maxlength="10" pattern="[0-9]{10}" title="Please enter 10 digits">
                     </div>
                     <div id="phone-error" class="hidden text-red-500 text-sm mt-1">Please enter a valid 10-digit phone number</div>
@@ -939,6 +1019,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         // Hide all forms first with smooth transition
         const productForm = document.getElementById('product-customization-form');
         const orderMenuForm = document.getElementById('order-menu-customization-form');
+        const orderMenuPricePage = document.getElementById('order-menu-price-page');
         const recentActivity = document.getElementById('recent-activity');
         
         // Smooth hide transitions
@@ -956,6 +1037,14 @@ import AuthGuard from '../components/AuthGuard.astro';
           setTimeout(() => orderMenuForm.classList.add('hidden'), 300);
         }
         
+        // Always hide price page - we go directly to customization form for OMS
+        if (orderMenuPricePage && !orderMenuPricePage.classList.contains('hidden')) {
+          orderMenuPricePage.style.transition = 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out';
+          orderMenuPricePage.style.opacity = '0';
+          orderMenuPricePage.style.transform = 'translateY(-10px)';
+          setTimeout(() => orderMenuPricePage.classList.add('hidden'), 300);
+        }
+        
         if (recentActivity && !recentActivity.classList.contains('hidden')) {
           recentActivity.style.transition = 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out';
           recentActivity.style.opacity = '0';
@@ -968,9 +1057,8 @@ import AuthGuard from '../components/AuthGuard.astro';
           // Force common price for Order Menu System
           const forcedPrice = selectedProduct.type === 'order-menu' ? 999 : parseInt(price);
           if (selectedProduct.type === 'order-menu') {
-            // Show Order Menu System form
+            // Show Order Menu System customization form directly (skip price page)
             document.getElementById('order-menu-product-name').textContent = selectedProduct.name;
-            // Price is now displayed in the right column pricing section
             
             const orderMenuForm = document.getElementById('order-menu-customization-form');
             orderMenuForm.classList.remove('hidden');
@@ -1178,20 +1266,59 @@ import AuthGuard from '../components/AuthGuard.astro';
     
     // Phone number validation with country code
     const phoneCountryCodeSelect = document.getElementById('phone_country_code') as HTMLSelectElement;
+    const phoneCountryCodeCustom = document.getElementById('phone_country_code_custom') as HTMLInputElement;
     if (phoneInput && phoneCountryCodeSelect) {
+      // Function to get the actual country code (from select or custom input)
+      function getCountryCode(): string {
+        if (phoneCountryCodeSelect.value === 'other' && phoneCountryCodeCustom) {
+          return phoneCountryCodeCustom.value.trim() || '+91';
+        }
+        return phoneCountryCodeSelect.value;
+      }
+
+      // Show/hide custom country code input
+      function toggleCustomCountryCode() {
+        if (phoneCountryCodeSelect.value === 'other') {
+          if (phoneCountryCodeCustom) {
+            phoneCountryCodeCustom.classList.remove('hidden');
+            phoneCountryCodeCustom.required = true;
+            phoneCountryCodeCustom.value = '+';
+          }
+        } else {
+          if (phoneCountryCodeCustom) {
+            phoneCountryCodeCustom.classList.add('hidden');
+            phoneCountryCodeCustom.required = false;
+            phoneCountryCodeCustom.value = '';
+          }
+        }
+      }
+
+      // Handle custom country code input - ensure it starts with +
+      if (phoneCountryCodeCustom) {
+        phoneCountryCodeCustom.addEventListener('input', function(e) {
+          let value = (e.target as HTMLInputElement).value;
+          if (!value.startsWith('+')) {
+            value = '+' + value.replace(/\+/g, '');
+          }
+          // Only allow + and numbers
+          value = value.replace(/[^+0-9]/g, '');
+          (e.target as HTMLInputElement).value = value;
+        });
+      }
+
       const countryCodeLimits: { [key: string]: number } = {
         '+91': 10, '+1': 10, '+44': 10, '+61': 9, '+86': 11,
         '+81': 10, '+49': 11, '+33': 9, '+971': 9, '+966': 9
       };
 
       function validatePhone() {
-        const countryCode = phoneCountryCodeSelect.value;
+        const countryCode = getCountryCode();
         const phone = phoneInput.value.replace(/\D/g, '');
-        const maxDigits = countryCodeLimits[countryCode] || 10;
+        const maxDigits = countryCodeLimits[countryCode] || 15; // Default to 15 for custom codes
 
         // Update maxlength and pattern
         phoneInput.maxLength = maxDigits;
-        phoneInput.pattern = `[0-9]{${maxDigits}}`;
+        phoneInput.pattern = `[0-9]{1,${maxDigits}}`;
 
         // For India (+91), validate 10 digits
         if (countryCode === '+91') {
@@ -1207,9 +1334,13 @@ import AuthGuard from '../components/AuthGuard.astro';
         } else {
           // For other countries
           const errorDiv = document.getElementById('phone-error');
-          if (phone.length > 0 && phone.length !== maxDigits) {
+          if (phone.length > 0 && phone.length < 5) {
             errorDiv?.classList.remove('hidden');
-            errorDiv.textContent = `Please enter a valid ${maxDigits}-digit phone number`;
+            errorDiv.textContent = 'Please enter a valid phone number (at least 5 digits)';
+            phoneInput.classList.add('border-red-500');
+          } else if (phone.length > 0 && phone.length > maxDigits) {
+            errorDiv?.classList.remove('hidden');
+            errorDiv.textContent = `Please enter a valid phone number (max ${maxDigits} digits)`;
             phoneInput.classList.add('border-red-500');
           } else {
             errorDiv?.classList.add('hidden');
@@ -1220,18 +1351,28 @@ import AuthGuard from '../components/AuthGuard.astro';
 
       phoneInput.addEventListener('input', function(e) {
         const value = (e.target as HTMLInputElement).value.replace(/[^0-9]/g, '');
-        const maxDigits = countryCodeLimits[phoneCountryCodeSelect.value] || 10;
+        const countryCode = getCountryCode();
+        const maxDigits = countryCodeLimits[countryCode] || 15;
         (e.target as HTMLInputElement).value = value.slice(0, maxDigits);
         validatePhone();
       });
 
       phoneCountryCodeSelect.addEventListener('change', function() {
+        toggleCustomCountryCode();
         phoneInput.value = '';
-        phoneInput.placeholder = phoneCountryCodeSelect.value === '+91' ? '9876543210' : 'Enter phone number';
+        const countryCode = getCountryCode();
+        phoneInput.placeholder = countryCode === '+91' ? '9876543210' : 'Enter phone number';
         validatePhone();
       });
 
+      // Initialize custom country code visibility
+      toggleCustomCountryCode();
+
+      // Validate on blur
       phoneInput.addEventListener('blur', validatePhone);
+      if (phoneCountryCodeCustom) {
+        phoneCountryCodeCustom.addEventListener('blur', validatePhone);
+      }
     }
   }
   
@@ -2196,7 +2337,14 @@ import AuthGuard from '../components/AuthGuard.astro';
         country: formDataObj.country,
         contactPerson: formDataObj.contactPerson,
         email: formDataObj.email,
-        phone: phoneCountryCodeSelect ? `${phoneCountryCodeSelect.value}${formDataObj.phone.replace(/\D/g, '')}` : formDataObj.phone,
+        phone: (() => {
+          let countryCode = phoneCountryCodeSelect?.value || '+91';
+          const phoneCountryCodeCustom = document.getElementById('phone_country_code_custom') as HTMLInputElement;
+          if (countryCode === 'other' && phoneCountryCodeCustom) {
+            countryCode = phoneCountryCodeCustom.value.trim() || '+91';
+          }
+          return phoneCountryCodeSelect ? `${countryCode}${formDataObj.phone.replace(/\D/g, '')}` : formDataObj.phone;
+        })(),
         additionalRequirements: formDataObj.additionalRequirements,
         restaurantLogo: formDataObj.restaurantLogo,
         menuPhotos: menuPhotos || [],
@@ -2256,7 +2404,12 @@ import AuthGuard from '../components/AuthGuard.astro';
             console.warn('⚠️ Logo upload skipped (RPC flow):', e);
           }
           const phoneCountryCodeSelect = document.getElementById('phone_country_code') as HTMLSelectElement;
-          const formattedPhone = phoneCountryCodeSelect ? `${phoneCountryCodeSelect.value}${formDataObj.phone.replace(/\D/g, '')}` : formDataObj.phone;
+          const phoneCountryCodeCustom = document.getElementById('phone_country_code_custom') as HTMLInputElement;
+          let countryCode = phoneCountryCodeSelect?.value || '+91';
+          if (countryCode === 'other' && phoneCountryCodeCustom) {
+            countryCode = phoneCountryCodeCustom.value.trim() || '+91';
+          }
+          const formattedPhone = phoneCountryCodeSelect ? `${countryCode}${formDataObj.phone.replace(/\D/g, '')}` : formDataObj.phone;
           
           const { data: customizationData, error: customizationError } = await supabase.rpc('upsert_oms_customization', {
             p_user_email: formDataObj.email,
@@ -2777,7 +2930,14 @@ import AuthGuard from '../components/AuthGuard.astro';
         owner_name: formDataObj.ownerName || '',
         contact_person: formDataObj.contactPerson || '',
         email: formDataObj.email || '',
-        phone_number: phoneCountryCodeSelect ? `${phoneCountryCodeSelect.value}${(formDataObj.phone || '').replace(/\D/g, '')}` : (formDataObj.phone || ''),
+        phone_number: (() => {
+          const phoneCountryCodeCustom = document.getElementById('phone_country_code_custom') as HTMLInputElement;
+          let countryCode = phoneCountryCodeSelect?.value || '+91';
+          if (countryCode === 'other' && phoneCountryCodeCustom) {
+            countryCode = phoneCountryCodeCustom.value.trim() || '+91';
+          }
+          return phoneCountryCodeSelect ? `${countryCode}${(formDataObj.phone || '').replace(/\D/g, '')}` : (formDataObj.phone || '');
+        })(),
         house_flat_number: formDataObj.houseNumber || '',
         address_line_1: formDataObj.addressLine1 || '',
         city: formDataObj.city || '',
@@ -2791,7 +2951,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         base_package_cost: 999.00,
         gst_amount: 180.00,
         total_amount: 1179.00, // Fixed price for Order Menu System
-        status: 'pending',
+        status: 'completed', // Set status to completed when order is placed
         created_at: now,
         updated_at: now
       };
@@ -3549,6 +3709,49 @@ import AuthGuard from '../components/AuthGuard.astro';
   // Global event listeners for order menu form buttons (backup)
   document.addEventListener('DOMContentLoaded', () => {
     console.log('🔧 Setting up global event listeners for order menu form buttons');
+    
+    // Add event listener for proceed to form button
+    const proceedBtn = document.getElementById('proceed-to-oms-form');
+    if (proceedBtn) {
+      console.log('✅ Proceed to OMS form button found, adding event listener');
+      proceedBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('🚀 Proceed to OMS form button clicked!');
+        
+        // Hide price page
+        const pricePage = document.getElementById('order-menu-price-page');
+        if (pricePage) {
+          pricePage.style.transition = 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out';
+          pricePage.style.opacity = '0';
+          pricePage.style.transform = 'translateY(-10px)';
+          setTimeout(() => {
+            pricePage.classList.add('hidden');
+          }, 300);
+        }
+        
+        // Show customization form
+        setTimeout(() => {
+          const orderMenuForm = document.getElementById('order-menu-customization-form');
+          if (orderMenuForm) {
+            orderMenuForm.classList.remove('hidden');
+            orderMenuForm.style.transition = 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out';
+            orderMenuForm.style.opacity = '0';
+            orderMenuForm.style.transform = 'translateY(10px)';
+            
+            setTimeout(() => {
+              orderMenuForm.style.opacity = '1';
+              orderMenuForm.style.transform = 'translateY(0)';
+              // Reinitialize pincode autocomplete when form becomes visible
+              if (window.reinitializePincodeAutocomplete) {
+                window.reinitializePincodeAutocomplete();
+              }
+            }, 50);
+          }
+        }, 300);
+      });
+    } else {
+      console.log('❌ Proceed to OMS form button not found');
+    }
     
     // Add event listener for close button
     const closeBtn = document.getElementById('close-order-menu-form');

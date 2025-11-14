@@ -94,7 +94,17 @@ import Layout from '../layouts/Layout.astro';
                   <option value="+33">🇫🇷 +33</option>
                   <option value="+971">🇦🇪 +971</option>
                   <option value="+966">🇸🇦 +966</option>
+                  <option value="other">Other</option>
                 </select>
+                <input
+                  type="text"
+                  id="phone_country_code_custom"
+                  name="phone_country_code_custom"
+                  class="hidden px-4 py-3 border border-r-0 border-gray-300 rounded-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-gray-50"
+                  placeholder="+XXX"
+                  maxlength="5"
+                  pattern="\+[0-9]{1,4}"
+                />
                 <input
                   type="tel"
                   id="phone"
@@ -773,6 +783,20 @@ import Layout from '../layouts/Layout.astro';
       return;
     }
     
+    // IMPORTANT: Capture phone value EARLY before any form manipulation
+    const phoneInputElement = document.getElementById('phone') as HTMLInputElement;
+    const phoneCountryCodeSelect = document.getElementById('phone_country_code') as HTMLSelectElement;
+    const phoneCountryCodeCustomInput = document.getElementById('phone_country_code_custom') as HTMLInputElement;
+    
+    // Store phone values immediately to prevent loss
+    const capturedPhoneValue = phoneInputElement?.value?.trim() || '';
+    const capturedCountryCode = phoneCountryCodeSelect?.value || '+91';
+    const capturedCustomCountryCode = phoneCountryCodeCustomInput?.value?.trim() || '';
+    
+    console.log('🔒 Captured phone value early:', capturedPhoneValue);
+    console.log('🔒 Captured country code early:', capturedCountryCode);
+    console.log('🔒 Captured custom country code early:', capturedCustomCountryCode);
+    
     // Force validation to recognize pre-filled fields before validation
     forceFormValidation();
     
@@ -780,18 +804,28 @@ import Layout from '../layouts/Layout.astro';
     const formData = new FormData(form);
     const data = Object.fromEntries(formData);
     
+    // Restore captured phone value if form data doesn't have it
+    if (capturedPhoneValue && !data.phone) {
+      data.phone = capturedPhoneValue;
+      console.log('📞 Restored phone value from early capture:', data.phone);
+    }
+    
     console.log('📝 Form data collected for validation:', data);
+    console.log('📝 Phone input element value:', phoneInputElement?.value);
     
     // Validate phone number if provided
-    const phoneInput = document.getElementById('phone') as HTMLInputElement;
-    const phoneCountryCodeSelect = document.getElementById('phone_country_code') as HTMLSelectElement;
-    if (phoneInput && phoneInput.value.trim()) {
-      const phoneDigits = phoneInput.value.replace(/\D/g, '');
-      const countryCode = phoneCountryCodeSelect?.value || '+91';
+    // Note: phoneInputElement, phoneCountryCodeSelect, and phoneCountryCodeCustomInput are already declared above
+    if (phoneInputElement && phoneInputElement.value.trim()) {
+      const phoneDigits = phoneInputElement.value.replace(/\D/g, '');
+      // Get country code from select or custom input (use captured values)
+      let countryCode = capturedCountryCode || phoneCountryCodeSelect?.value || '+91';
+      if (countryCode === 'other') {
+        countryCode = capturedCustomCountryCode || phoneCountryCodeCustomInput?.value?.trim() || '+91';
+      }
       
       if (countryCode === '+91' && phoneDigits.length !== 10) {
         showError('Please enter a valid 10-digit phone number for India');
-        phoneInput.focus();
+        phoneInputElement?.focus();
         return;
       }
     }
@@ -891,19 +925,63 @@ import Layout from '../layouts/Layout.astro';
         console.log('ℹ️ User not logged in, proceeding without authentication');
       }
       
-      // Format phone number with country code if provided
-      const phoneCountryCode = data.phone_country_code as string || '+91';
-      const phoneNumber = data.phone as string;
-      const formattedPhone = phoneNumber && phoneNumber.trim() 
-        ? `${phoneCountryCode}${phoneNumber.replace(/\D/g, '')}` 
+      // Use captured values from early capture (most reliable)
+      let phoneNumber = capturedPhoneValue || data.phone as string || '';
+      
+      // Get country code - use captured value first, then fallback to form data
+      let phoneCountryCode = capturedCountryCode || data.phone_country_code as string || '+91';
+      
+      // Use custom country code if "other" is selected
+      if (phoneCountryCode === 'other') {
+        phoneCountryCode = capturedCustomCountryCode || 
+                          phoneCountryCodeCustomInput?.value?.trim() || 
+                          (data.phone_country_code_custom as string)?.trim() || 
+                          '+91';
+      }
+      
+      // Ensure country code starts with +
+      if (phoneCountryCode && !phoneCountryCode.startsWith('+')) {
+        phoneCountryCode = '+' + phoneCountryCode.replace(/^\+/, '');
+      }
+      
+      // Final fallback: try to get from input elements if still empty
+      if (!phoneNumber && phoneInputElement) {
+        phoneNumber = phoneInputElement.value?.trim() || '';
+        console.log('📞 Phone from input element (final fallback):', phoneNumber);
+      }
+      
+      console.log('📞 Final phone number captured:', phoneNumber);
+      console.log('📞 Final country code:', phoneCountryCode);
+      console.log('📞 Phone input element exists:', !!phoneInputElement);
+      console.log('📞 Phone input element current value:', phoneInputElement?.value);
+      console.log('📞 Phone input element disabled:', phoneInputElement?.disabled);
+      
+      // Format phone number: remove all non-digits, then combine with country code
+      const phoneDigits = phoneNumber ? phoneNumber.replace(/\D/g, '') : '';
+      const formattedPhone = phoneDigits && phoneDigits.length > 0
+        ? `${phoneCountryCode}${phoneDigits}` 
         : null;
+      
+      console.log('📞 Phone digits extracted:', phoneDigits, '(length:', phoneDigits.length, ')');
+      console.log('📞 Formatted phone:', formattedPhone);
+      console.log('📞 Will save phone as:', formattedPhone);
+      
+      // Warn if phone was provided but couldn't be captured
+      if (phoneInputElement && phoneInputElement.value && !formattedPhone) {
+        console.warn('⚠️ Phone input has value but formatted phone is null!', {
+          inputValue: phoneInputElement.value,
+          phoneDigits,
+          countryCode: phoneCountryCode
+        });
+      }
 
       // Prepare data for Supabase
+      // The database table uses 'phone' field, not 'phone_number'
       const contactData = {
         first_name: data.first_name as string,
         last_name: data.last_name as string,
         email: data.email as string,
-        phone: formattedPhone,
+        phone: formattedPhone, // Save to 'phone' field only (database schema uses 'phone')
         company_name: data.company as string || null,
         project_type: data.project_type as string,
         project_details: data.message as string,
@@ -912,6 +990,7 @@ import Layout from '../layouts/Layout.astro';
       };
       
       console.log('📝 Sending contact data to Supabase:', contactData);
+      console.log('📝 Phone field in contactData:', contactData.phone);
       
       // Test Supabase connection first
       console.log('🔍 Testing Supabase connection...');
@@ -939,6 +1018,10 @@ import Layout from '../layouts/Layout.astro';
       }
       
       console.log('✅ Contact message saved successfully:', savedMessage);
+      if (savedMessage && savedMessage.length > 0) {
+        console.log('📞 Phone number saved in database:', savedMessage[0].phone);
+        console.log('📞 Full saved contact data:', savedMessage[0]);
+      }
       
       // Show success message
       successMessage?.classList.remove('hidden');
@@ -1021,10 +1104,49 @@ import Layout from '../layouts/Layout.astro';
   // Phone number validation for contact form
   function setupContactPhoneValidation() {
     const countryCodeSelect = document.getElementById('phone_country_code') as HTMLSelectElement;
+    const countryCodeCustom = document.getElementById('phone_country_code_custom') as HTMLInputElement;
     const phoneInput = document.getElementById('phone') as HTMLInputElement;
     const phoneError = document.getElementById('phone-error') as HTMLElement;
 
     if (!countryCodeSelect || !phoneInput) return;
+
+    // Function to get the actual country code (from select or custom input)
+    function getCountryCode(): string {
+      if (countryCodeSelect.value === 'other' && countryCodeCustom) {
+        return countryCodeCustom.value.trim() || '+91';
+      }
+      return countryCodeSelect.value;
+    }
+
+    // Show/hide custom country code input
+    function toggleCustomCountryCode() {
+      if (countryCodeSelect.value === 'other') {
+        if (countryCodeCustom) {
+          countryCodeCustom.classList.remove('hidden');
+          countryCodeCustom.required = true;
+          countryCodeCustom.value = '+';
+        }
+      } else {
+        if (countryCodeCustom) {
+          countryCodeCustom.classList.add('hidden');
+          countryCodeCustom.required = false;
+          countryCodeCustom.value = '';
+        }
+      }
+    }
+
+    // Handle custom country code input - ensure it starts with +
+    if (countryCodeCustom) {
+      countryCodeCustom.addEventListener('input', function(e) {
+        let value = (e.target as HTMLInputElement).value;
+        if (!value.startsWith('+')) {
+          value = '+' + value.replace(/\+/g, '');
+        }
+        // Only allow + and numbers
+        value = value.replace(/[^+0-9]/g, '');
+        (e.target as HTMLInputElement).value = value;
+      });
+    }
 
     // Country code to max digits mapping
     const countryCodeLimits: { [key: string]: number } = {
@@ -1041,13 +1163,13 @@ import Layout from '../layouts/Layout.astro';
     };
 
     function validatePhone() {
-      const countryCode = countryCodeSelect.value;
+      const countryCode = getCountryCode();
       const phone = phoneInput.value.replace(/\D/g, ''); // Remove non-digits
-      const maxDigits = countryCodeLimits[countryCode] || 10;
+      const maxDigits = countryCodeLimits[countryCode] || 15; // Default to 15 for custom codes
 
       // Update maxlength based on country code
       phoneInput.maxLength = maxDigits;
-      phoneInput.pattern = `[0-9]{${maxDigits}}`;
+      phoneInput.pattern = `[0-9]{1,${maxDigits}}`;
 
       // For India (+91), validate 10 digits
       if (countryCode === '+91') {
@@ -1068,9 +1190,9 @@ import Layout from '../layouts/Layout.astro';
           phoneError.textContent = `Please enter a valid phone number (max ${maxDigits} digits)`;
           phoneInput.classList.add('border-red-500');
           return false;
-        } else if (phone.length > 0 && phone.length < maxDigits) {
+        } else if (phone.length > 0 && phone.length < 5) {
           phoneError?.classList.remove('hidden');
-          phoneError.textContent = `Please enter a valid phone number (${maxDigits} digits required)`;
+          phoneError.textContent = 'Please enter a valid phone number (at least 5 digits)';
           phoneInput.classList.add('border-red-500');
           return false;
         } else {
@@ -1084,20 +1206,29 @@ import Layout from '../layouts/Layout.astro';
     // Restrict input to numbers only
     phoneInput.addEventListener('input', function(e) {
       const value = (e.target as HTMLInputElement).value.replace(/\D/g, '');
-      const maxDigits = countryCodeLimits[countryCodeSelect.value] || 10;
+      const countryCode = getCountryCode();
+      const maxDigits = countryCodeLimits[countryCode] || 15;
       (e.target as HTMLInputElement).value = value.slice(0, maxDigits);
       validatePhone();
     });
 
     // Validate on country code change
     countryCodeSelect.addEventListener('change', function() {
+      toggleCustomCountryCode();
       phoneInput.value = '';
-      phoneInput.placeholder = countryCodeSelect.value === '+91' ? '9876543210' : 'Enter phone number';
+      const countryCode = getCountryCode();
+      phoneInput.placeholder = countryCode === '+91' ? '9876543210' : 'Enter phone number';
       validatePhone();
     });
 
+    // Initialize custom country code visibility
+    toggleCustomCountryCode();
+
     // Validate on blur
     phoneInput.addEventListener('blur', validatePhone);
+    if (countryCodeCustom) {
+      countryCodeCustom.addEventListener('blur', validatePhone);
+    }
   }
 
   // Add input event listeners to show signup alert for logged out users
