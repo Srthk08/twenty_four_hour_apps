@@ -1,0 +1,224 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { createClient } from '@supabase/supabase-js';
+
+// Supabase configuration
+const SUPABASE_URL = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Handle the OAuth callback
+let authResult = null;
+let error = null;
+
+try {
+  const { data, error: authError } = await supabase.auth.getSession();
+  
+  if (authError) {
+    error = authError.message;
+  } else if (data.session) {
+    authResult = data.session;
+  }
+} catch (err) {
+  error = err.message;
+}
+---
+
+<Layout title="Authentication Callback">
+  <main class="min-h-screen flex items-center justify-center bg-white">
+    <div class="max-w-md w-full space-y-8">
+      <div class="text-center">
+        <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+          {error ? 'Authentication Error' : 'Processing Authentication...'}
+        </h2>
+        <p class="mt-2 text-sm text-gray-700">
+          {error ? 'There was an error with your authentication.' : 'Please wait while we complete your sign-in.'}
+        </p>
+      </div>
+
+      <div class="mt-8 space-y-6">
+        {error ? (
+          <div class="bg-red-50 border border-red-200 rounded-md p-4">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800">Authentication Failed</h3>
+                <div class="mt-2 text-sm text-red-700">
+                  <p>{error}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div class="bg-white border border-gray-200 rounded-md p-4">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-gray-800">Processing...</h3>
+                <div class="mt-2 text-sm text-gray-700">
+                  <p>Setting up your account and redirecting...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div class="flex space-x-4">
+          <a href="/login" class="flex-1 bg-gray-800 text-white text-center py-2 px-4 rounded-md hover:bg-gray-900 transition duration-150 ease-in-out">
+            Back to Login
+          </a>
+          <a href="/" class="flex-1 bg-gray-600 text-white text-center py-2 px-4 rounded-md hover:bg-gray-700 transition duration-150 ease-in-out">
+            Go Home
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+  <style>
+    /* Ensure white background on this page regardless of parent styles */
+    main { background-color: #fff !important; }
+    body { background-color: #fff !important; }
+  </style>
+</Layout>
+
+<script>
+  import { createClient } from '@supabase/supabase-js';
+
+  const SUPABASE_URL = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+  
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Handle the OAuth callback
+  async function handleAuthCallback() {
+    try {
+      // 1) If tokens are in the hash fragment (#access_token=...), set the session directly
+      const hash = window.location.hash || '';
+      if (hash.includes('access_token')) {
+        const params = new URLSearchParams(hash.replace('#', ''));
+        const access_token = params.get('access_token');
+        const refresh_token = params.get('refresh_token') || params.get('provider_refresh_token');
+        const type = params.get('type');
+
+        // Check if this is a password reset (recovery) flow
+        if (type === 'recovery' && access_token && refresh_token) {
+          console.log('Password reset callback detected, redirecting to reset-password page');
+          // Redirect to reset-password page with tokens preserved in hash
+          window.location.href = `/reset-password${hash}`;
+          return;
+        }
+
+        if (access_token && refresh_token) {
+          const { data } = await supabase.auth.setSession({ access_token, refresh_token });
+
+          // Persist to sessionStorage so Header.astro/UI picks up Google email
+          if (data?.session?.user) {
+            sessionStorage.setItem('simple-auth-session', JSON.stringify({
+              user: data.session.user,
+              access_token: data.session.access_token,
+              timestamp: Date.now()
+            }));
+            // Notify app
+            window.dispatchEvent(new CustomEvent('user-logged-in', { detail: data.session.user }));
+          }
+
+          // Clean URL (remove hash) and go to dashboard
+          window.history.replaceState({}, document.title, '/auth/callback');
+          window.location.href = '/dashboard';
+          return;
+        }
+      }
+
+      // 2) If using PKCE (code param), exchange code for a session
+      const urlHasCode = window.location.search.includes('code=');
+      if (urlHasCode) {
+        // Check if this might be a password reset (check for type=recovery in URL)
+        const urlParams = new URLSearchParams(window.location.search);
+        const type = urlParams.get('type');
+        
+        // If it's a recovery type, redirect to reset-password after exchange
+        if (type === 'recovery') {
+          const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+          if (error) {
+            console.error('Auth callback (PKCE recovery) error:', error);
+            window.location.href = '/reset-password?error=invalid_token';
+            return;
+          } else if (data?.session) {
+            // For password reset, redirect to reset-password page
+            // The reset-password page will handle the session
+            window.location.href = '/reset-password';
+            return;
+          }
+        } else {
+          // Regular OAuth flow
+          const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+          if (error) {
+            console.error('Auth callback (PKCE) error:', error);
+          } else if (data?.session) {
+            // Persist to sessionStorage so Header.astro/UI picks up Google email
+            sessionStorage.setItem('simple-auth-session', JSON.stringify({
+              user: data.session.user,
+              access_token: data.session.access_token,
+              timestamp: Date.now()
+            }));
+            window.dispatchEvent(new CustomEvent('user-logged-in', { detail: data.session.user }));
+
+            // Clean URL (remove query) and redirect
+            window.history.replaceState({}, document.title, '/auth/callback');
+            window.location.href = '/dashboard';
+            return;
+          }
+        }
+      }
+
+      // 3) Fallback: attempt to read current session
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error('Auth callback error:', error);
+        return;
+      }
+
+      if (data.session?.user) {
+        // Persist Google session too
+        sessionStorage.setItem('simple-auth-session', JSON.stringify({
+          user: data.session.user,
+          access_token: data.session.access_token,
+          timestamp: Date.now()
+        }));
+        window.dispatchEvent(new CustomEvent('user-logged-in', { detail: data.session.user }));
+
+        // Redirect to dashboard
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 1000);
+      }
+    } catch (err) {
+      console.error('Callback error:', err);
+    }
+  }
+
+  // Run the callback handler
+  handleAuthCallback();
+
+  // Listen for auth state changes
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session?.user) {
+      console.log('User signed in:', session.user);
+      
+      // Redirect to dashboard
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 1000);
+    }
+  });
+</script>

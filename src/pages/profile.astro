@@ -1,0 +1,870 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AuthGuard from '../components/AuthGuard.astro';
+---
+
+<Layout title="Profile - DevExpress">
+  <AuthGuard>
+    <section class="py-6 sm:py-8 lg:py-12 bg-gray-50 min-h-screen">
+      <div class="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8">
+        <!-- Page Header -->
+        <div class="mb-6 sm:mb-8">
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 text-center sm:text-left">Profile Settings</h1>
+          <p class="text-sm sm:text-base text-gray-600 mt-2 text-center sm:text-left">Manage your account information and preferences.</p>
+        </div>
+
+        <!-- Profile Form -->
+        <div class="bg-white rounded-lg shadow-sm">
+          <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+            <h2 class="text-base sm:text-lg font-medium text-gray-900">Personal Information</h2>
+          </div>
+          
+          <form id="profile-form" class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+            <!-- Success Message -->
+            <div id="success-message" class="hidden p-3 sm:p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div class="flex items-center">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-green-400 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span id="success-text" class="text-sm sm:text-base text-green-800">Profile updated successfully!</span>
+              </div>
+            </div>
+
+            <!-- Error Message -->
+            <div id="error-message" class="hidden p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div class="flex items-center">
+                <svg class="w-4 h-4 sm:w-5 sm:w-5 text-red-400 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                </svg>
+                <span id="error-text" class="text-sm sm:text-base text-red-800">An error occurred while updating profile.</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 sm:gap-6">
+              <div>
+                <label for="full_name" class="block text-sm font-medium text-gray-700 mb-1">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  id="full_name"
+                  name="full_name"
+                  class="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm sm:text-base"
+                  placeholder="Enter your full name"
+                  required
+                />
+              </div>
+
+              <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  class="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm sm:text-base bg-gray-50"
+                  placeholder="your@email.com"
+                  readonly
+                />
+                <p class="mt-1 text-xs sm:text-sm text-gray-500">Email cannot be changed</p>
+              </div>
+
+              <div>
+                <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
+                  Phone Number
+                </label>
+                <div class="flex">
+                  <select
+                    id="country_code"
+                    name="country_code"
+                    class="px-3 py-2 sm:py-2.5 border border-r-0 border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm sm:text-base bg-gray-50"
+                  >
+                    <option value="+91" selected>🇮🇳 +91</option>
+                    <option value="+1">🇺🇸 +1</option>
+                    <option value="+44">🇬🇧 +44</option>
+                    <option value="+61">🇦🇺 +61</option>
+                    <option value="+86">🇨🇳 +86</option>
+                    <option value="+81">🇯🇵 +81</option>
+                    <option value="+49">🇩🇪 +49</option>
+                    <option value="+33">🇫🇷 +33</option>
+                    <option value="+971">🇦🇪 +971</option>
+                    <option value="+966">🇸🇦 +966</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <input
+                    type="text"
+                    id="country_code_custom"
+                    name="country_code_custom"
+                    class="hidden px-3 py-2 sm:py-2.5 border border-r-0 border-gray-300 rounded-none shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm sm:text-base bg-gray-50"
+                    placeholder="+XXX"
+                    maxlength="5"
+                    pattern="\+[0-9]{1,4}"
+                  />
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    class="flex-1 px-3 py-2 sm:py-2.5 border border-gray-300 rounded-r-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm sm:text-base"
+                    placeholder="9876543210"
+                    maxlength="10"
+                    pattern="[0-9]{10}"
+                  />
+                </div>
+                <p id="phone-error" class="hidden mt-1 text-xs sm:text-sm text-red-600">Please enter a valid 10-digit phone number</p>
+              </div>
+
+              <div>
+                <label for="company_name" class="block text-sm font-medium text-gray-700 mb-1">
+                  Company Name
+                </label>
+                <input
+                  type="text"
+                  id="company_name"
+                  name="company_name"
+                  class="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm sm:text-base"
+                  placeholder="Your company name"
+                />
+              </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-2">
+              <button
+                type="button"
+                onclick="window.location.href='/dashboard'"
+                class="w-full sm:w-auto px-4 py-2.5 sm:py-2 border border-gray-300 rounded-md shadow-sm text-sm sm:text-base font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                id="update-btn"
+                class="w-full sm:w-auto px-4 py-2.5 sm:py-2 border border-transparent rounded-md shadow-sm text-sm sm:text-base font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+              >
+                Update Profile
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Password Change Section -->
+        <div class="mt-6 sm:mt-8 bg-white rounded-lg shadow-sm">
+          <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+            <h2 class="text-base sm:text-lg font-medium text-gray-900">Change Password</h2>
+          </div>
+          
+          <form id="password-form" class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+            <!-- Password Success Message -->
+            <div id="password-success-message" class="hidden p-3 sm:p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div class="flex items-center">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-green-400 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="text-sm sm:text-base text-green-800">Password changed successfully!</span>
+              </div>
+            </div>
+
+            <!-- Password Error Message -->
+            <div id="password-error-message" class="hidden p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div class="flex items-center">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-red-400 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                </svg>
+                <span id="password-error-text" class="text-sm sm:text-base text-red-800">An error occurred while changing password.</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 sm:gap-6">
+              <div>
+                <label for="current_password" class="block text-sm font-medium text-gray-700 mb-1">
+                  Current Password
+                </label>
+                <input
+                  type="password"
+                  id="current_password"
+                  name="current_password"
+                  class="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm sm:text-base"
+                  placeholder="Enter current password"
+                  required
+                />
+              </div>
+
+              <div>
+                <label for="new_password" class="block text-sm font-medium text-gray-700 mb-1">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  id="new_password"
+                  name="new_password"
+                  class="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm sm:text-base"
+                  placeholder="Enter new password"
+                  required
+                />
+              </div>
+
+              <div>
+                <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-1">
+                  Confirm New Password
+                </label>
+                <input
+                  type="password"
+                  id="confirm_password"
+                  name="confirm_password"
+                  class="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm sm:text-base"
+                  placeholder="Confirm new password"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="flex justify-end pt-2">
+              <button
+                type="submit"
+                id="change-password-btn"
+                class="w-full sm:w-auto px-4 py-2.5 sm:py-2 border border-transparent rounded-md shadow-sm text-sm sm:text-base font-medium text-white bg-secondary-600 hover:bg-secondary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-500 transition-colors"
+              >
+                Change Password
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </AuthGuard>
+</Layout>
+
+<style>
+  /* Custom responsive styles */
+  @media (max-width: 640px) {
+    .min-h-screen {
+      min-height: 100vh;
+    }
+    
+    /* Ensure proper spacing on very small screens */
+    .px-3 {
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+    
+    /* Make buttons more touch-friendly on mobile */
+    button {
+      min-height: 44px;
+    }
+    
+    /* Improve form spacing on mobile */
+    .space-y-4 > * + * {
+      margin-top: 1rem;
+    }
+  }
+  
+  @media (min-width: 641px) and (max-width: 1024px) {
+    /* Tablet-specific adjustments */
+    .max-w-4xl {
+      max-width: 90%;
+    }
+    
+    .px-4 {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1025px) {
+    /* Desktop optimizations */
+    .max-w-4xl {
+      max-width: 64rem;
+    }
+  }
+  
+  /* Ensure proper focus states across all devices */
+  input:focus, button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  /* Improve touch targets on mobile */
+  @media (max-width: 640px) {
+    input, button {
+      touch-action: manipulation;
+    }
+  }
+</style>
+
+<script>
+  // Import supabase in the script section
+  import { supabase } from '../lib/supabase';
+
+  // Using global authentication manager and Supabase for permanent updates
+
+  // Function to populate form with user data
+  function populateUserData() {
+    console.log('populateUserData called');
+    
+    // First, try to get user data from global auth manager
+    let userData = null;
+    
+    try {
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      if (authManager && authManager.isUserLoggedIn()) {
+        userData = authManager.getCurrentUser();
+        console.log('Found user data in global auth manager:', userData);
+      }
+    } catch (e) {
+      console.error('Error reading global auth manager:', e);
+    }
+    
+    // If no global auth manager data, try sessionStorage
+    if (!userData) {
+      try {
+        const cachedAuth = sessionStorage.getItem('simple-auth-session');
+        if (cachedAuth) {
+          const parsed = JSON.parse(cachedAuth);
+          if (parsed.user && parsed.user.email) {
+            userData = parsed.user;
+            console.log('Found user data in sessionStorage:', userData);
+          }
+        }
+      } catch (e) {
+        console.error('Error reading sessionStorage:', e);
+      }
+    }
+    
+    // If still no data, try localStorage as last resort
+    if (!userData) {
+      try {
+        const storedUser = localStorage.getItem('simple-auth-user');
+        if (storedUser) {
+          const parsed = JSON.parse(storedUser);
+          if (parsed.email) {
+            userData = parsed;
+            console.log('Found user data in localStorage:', userData);
+          }
+        }
+      } catch (e) {
+        console.error('Error reading localStorage:', e);
+      }
+    }
+    
+    // Now populate the form with whatever data we have
+    if (userData) {
+      console.log('Populating form with user data:', userData);
+      
+      const fullNameInput = document.getElementById('full_name') as HTMLInputElement;
+      const emailInput = document.getElementById('email') as HTMLInputElement;
+      const phoneInput = document.getElementById('phone') as HTMLInputElement;
+      const companyNameInput = document.getElementById('company_name') as HTMLInputElement;
+
+      if (fullNameInput) fullNameInput.value = userData.full_name || userData.fullName || '';
+      
+      // Parse phone number to extract country code and number
+      if (phoneInput && userData.phone) {
+        const phoneValue = userData.phone.toString();
+        // Check if phone starts with country code
+        if (phoneValue.startsWith('+91')) {
+          const countryCodeSelect = document.getElementById('country_code') as HTMLSelectElement;
+          if (countryCodeSelect) {
+            countryCodeSelect.value = '+91';
+          }
+          phoneInput.value = phoneValue.substring(3).replace(/\D/g, '');
+        } else if (phoneValue.startsWith('+')) {
+          // Extract country code (first 1-4 digits after +)
+          const match = phoneValue.match(/^(\+\d{1,4})(\d+)$/);
+          if (match) {
+            const countryCodeSelect = document.getElementById('country_code') as HTMLSelectElement;
+            if (countryCodeSelect) {
+              countryCodeSelect.value = match[1];
+            }
+            phoneInput.value = match[2];
+          } else {
+            phoneInput.value = phoneValue.replace(/\D/g, '');
+          }
+        } else {
+          phoneInput.value = phoneValue.replace(/\D/g, '');
+        }
+      }
+      
+      if (companyNameInput) companyNameInput.value = userData.company_name || userData.companyName || '';
+      
+      // CRITICAL: Set email value immediately
+      if (emailInput) {
+        emailInput.value = userData.email || 'No email available';
+        emailInput.readOnly = true;
+        emailInput.disabled = false;
+        emailInput.classList.add('bg-gray-50', 'cursor-not-allowed');
+        console.log('Email field populated with:', userData.email);
+      }
+    } else {
+      console.log('No user data found, setting fallback values');
+      
+      // Set fallback values if no user data
+      const emailInput = document.getElementById('email') as HTMLInputElement;
+      if (emailInput) {
+        emailInput.value = 'Please log in to view email';
+        emailInput.readOnly = true;
+        emailInput.disabled = true;
+        emailInput.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
+      }
+    }
+  }
+
+  // Function to show success message
+  function showSuccess(message: string) {
+    const successMessage = document.getElementById('success-message');
+    if (successMessage) {
+      successMessage.classList.remove('hidden');
+      setTimeout(() => {
+        successMessage.classList.add('hidden');
+      }, 5000);
+    }
+    
+    // Reset button state when showing success message
+    const updateBtn = document.getElementById('update-btn') as HTMLButtonElement;
+    if (updateBtn) {
+      updateBtn.disabled = false;
+      updateBtn.innerHTML = 'Update Profile';
+    }
+  }
+
+  // Function to show password success message
+  function showPasswordSuccess(message: string) {
+    const passwordSuccessMessage = document.getElementById('password-success-message');
+    if (passwordSuccessMessage) {
+      passwordSuccessMessage.classList.remove('hidden');
+      setTimeout(() => {
+        passwordSuccessMessage.classList.add('hidden');
+      }, 5000);
+    }
+  }
+
+  // Function to show error message
+  function showError(message: string) {
+    const errorMessage = document.getElementById('error-message');
+    const errorText = document.getElementById('error-text');
+    if (errorMessage && errorText) {
+      errorText.textContent = message;
+      errorMessage.classList.remove('hidden');
+      setTimeout(() => {
+        errorMessage.classList.add('hidden');
+      }, 5000);
+    }
+  }
+
+  // Function to show password error message
+  function showPasswordError(message: string) {
+    const passwordErrorMessage = document.getElementById('password-error-message');
+    const passwordErrorText = document.getElementById('password-error-text');
+    if (passwordErrorMessage && passwordErrorText) {
+      passwordErrorText.textContent = message;
+      passwordErrorMessage.classList.remove('hidden');
+      setTimeout(() => {
+        passwordErrorMessage.classList.add('hidden');
+      }, 5000);
+    }
+  }
+
+  // Phone number validation based on country code
+  function setupPhoneValidation() {
+    const countryCodeSelect = document.getElementById('country_code') as HTMLSelectElement;
+    const countryCodeCustom = document.getElementById('country_code_custom') as HTMLInputElement;
+    const phoneInput = document.getElementById('phone') as HTMLInputElement;
+    const phoneError = document.getElementById('phone-error') as HTMLElement;
+
+    if (!countryCodeSelect || !phoneInput) return;
+
+    // Function to get the actual country code (from select or custom input)
+    function getCountryCode(): string {
+      if (countryCodeSelect.value === 'other' && countryCodeCustom) {
+        return countryCodeCustom.value.trim() || '+91';
+      }
+      return countryCodeSelect.value;
+    }
+
+    // Show/hide custom country code input
+    function toggleCustomCountryCode() {
+      if (countryCodeSelect.value === 'other') {
+        if (countryCodeCustom) {
+          countryCodeCustom.classList.remove('hidden');
+          countryCodeCustom.required = true;
+          countryCodeCustom.value = '+';
+        }
+      } else {
+        if (countryCodeCustom) {
+          countryCodeCustom.classList.add('hidden');
+          countryCodeCustom.required = false;
+          countryCodeCustom.value = '';
+        }
+      }
+    }
+
+    // Handle custom country code input - ensure it starts with +
+    if (countryCodeCustom) {
+      countryCodeCustom.addEventListener('input', function(e) {
+        let value = (e.target as HTMLInputElement).value;
+        if (!value.startsWith('+')) {
+          value = '+' + value.replace(/\+/g, '');
+        }
+        // Only allow + and numbers
+        value = value.replace(/[^+0-9]/g, '');
+        (e.target as HTMLInputElement).value = value;
+      });
+    }
+
+    // Country code to max digits mapping
+    const countryCodeLimits: { [key: string]: number } = {
+      '+91': 10, // India
+      '+1': 10,  // USA/Canada
+      '+44': 10, // UK
+      '+61': 9,  // Australia
+      '+86': 11, // China
+      '+81': 10, // Japan
+      '+49': 11, // Germany
+      '+33': 9,  // France
+      '+971': 9, // UAE
+      '+966': 9  // Saudi Arabia
+    };
+
+    function validatePhone() {
+      const countryCode = getCountryCode();
+      const phone = phoneInput.value.replace(/\D/g, ''); // Remove non-digits
+      const maxDigits = countryCodeLimits[countryCode] || 15; // Default to 15 for custom codes
+
+      // Update maxlength based on country code
+      phoneInput.maxLength = maxDigits;
+      phoneInput.pattern = `[0-9]{1,${maxDigits}}`;
+
+      // For India (+91), validate 10 digits
+      if (countryCode === '+91') {
+        if (phone.length > 0 && phone.length !== 10) {
+          phoneError?.classList.remove('hidden');
+          phoneError.textContent = 'Please enter a valid 10-digit phone number';
+          phoneInput.classList.add('border-red-500');
+          return false;
+        } else {
+          phoneError?.classList.add('hidden');
+          phoneInput.classList.remove('border-red-500');
+          return true;
+        }
+      } else {
+        // For other countries, validate based on their max digits
+        if (phone.length > 0 && phone.length < 5) {
+          phoneError?.classList.remove('hidden');
+          phoneError.textContent = 'Please enter a valid phone number (at least 5 digits)';
+          phoneInput.classList.add('border-red-500');
+          return false;
+        } else if (phone.length > 0 && phone.length > maxDigits) {
+          phoneError?.classList.remove('hidden');
+          phoneError.textContent = `Please enter a valid phone number (max ${maxDigits} digits)`;
+          phoneInput.classList.add('border-red-500');
+          return false;
+        } else {
+          phoneError?.classList.add('hidden');
+          phoneInput.classList.remove('border-red-500');
+          return true;
+        }
+      }
+    }
+
+    // Restrict input to numbers only
+    phoneInput.addEventListener('input', function(e) {
+      const value = (e.target as HTMLInputElement).value.replace(/\D/g, '');
+      const countryCode = getCountryCode();
+      const maxDigits = countryCodeLimits[countryCode] || 15;
+      (e.target as HTMLInputElement).value = value.slice(0, maxDigits);
+      validatePhone();
+    });
+
+    // Validate on country code change
+    countryCodeSelect.addEventListener('change', function() {
+      toggleCustomCountryCode();
+      phoneInput.value = '';
+      const countryCode = getCountryCode();
+      phoneInput.placeholder = countryCode === '+91' ? '9876543210' : 'Enter phone number';
+      validatePhone();
+    });
+
+    // Initialize custom country code visibility
+    toggleCustomCountryCode();
+
+    // Validate on blur
+    phoneInput.addEventListener('blur', validatePhone);
+    if (countryCodeCustom) {
+      countryCodeCustom.addEventListener('blur', validatePhone);
+    }
+  }
+
+  // Handle form submission - PERMANENT UPDATE TO SUPABASE
+  const profileForm = document.getElementById('profile-form') as HTMLFormElement;
+  profileForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(profileForm);
+    const fullName = formData.get('full_name') as string;
+    let countryCode = formData.get('country_code') as string;
+    // Use custom country code if "other" is selected
+    if (countryCode === 'other') {
+      const customCode = formData.get('country_code_custom') as string;
+      countryCode = customCode?.trim() || '+91';
+    }
+    const phone = formData.get('phone') as string;
+    const companyName = formData.get('company_name') as string;
+
+    // Basic validation
+    if (!fullName.trim()) {
+      showError('Full name is required');
+      return;
+    }
+
+    // Phone validation
+    const phoneInput = document.getElementById('phone') as HTMLInputElement;
+    const countryCodeSelect = document.getElementById('country_code') as HTMLSelectElement;
+    if (phone && phone.trim()) {
+      const phoneDigits = phone.replace(/\D/g, '');
+      const countryCode = countryCodeSelect?.value || '+91';
+      
+      if (countryCode === '+91' && phoneDigits.length !== 10) {
+        showError('Please enter a valid 10-digit phone number for India');
+        phoneInput?.focus();
+        return;
+      }
+    }
+
+    // Show loading state immediately
+    const updateBtn = document.getElementById('update-btn') as HTMLButtonElement;
+    const originalButtonText = updateBtn.innerHTML;
+    updateBtn.disabled = true;
+    updateBtn.innerHTML = `
+      <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12a8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span>Updating...</span>
+    `;
+
+    try {
+      // Get current user
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      const currentUser = authManager?.getCurrentUser();
+      if (!currentUser) {
+        showError('User not authenticated');
+        updateBtn.disabled = false;
+        updateBtn.innerHTML = originalButtonText;
+        return;
+      }
+
+      // Format phone number with country code
+      const formattedPhone = phone && phone.trim() ? `${countryCode}${phone.replace(/\D/g, '')}` : null;
+
+      // Prepare update data
+      const updateData = {
+        full_name: fullName.trim(),
+        phone: formattedPhone,
+        company_name: companyName.trim() || null,
+        updated_at: new Date().toISOString()
+      };
+
+      // Update sessionStorage immediately for instant feedback (no database call)
+      try {
+        const sessionData = sessionStorage.getItem('simple-auth-session');
+        if (sessionData) {
+          const session = JSON.parse(sessionData);
+          if (session.user) {
+            session.user.full_name = fullName.trim();
+            session.user.phone = formattedPhone || undefined;
+            session.user.company_name = companyName.trim() || undefined;
+            sessionStorage.setItem('simple-auth-session', JSON.stringify(session));
+            console.log('✅ Profile updated in sessionStorage (instant)');
+          }
+        }
+      } catch (localError) {
+        console.warn('⚠️ SessionStorage update warning (non-critical):', localError);
+      }
+
+      // Update auth manager local state (synchronous, no database call)
+      if (authManager && typeof authManager.updateProfile === 'function') {
+        try {
+          // Check if updateProfile is async - if so, don't await it
+          const profileUpdate = authManager.updateProfile({
+            full_name: fullName.trim(),
+            phone: formattedPhone || undefined,
+            company_name: companyName.trim() || undefined
+          });
+          // If it returns a promise, handle it in background
+          if (profileUpdate && typeof profileUpdate.then === 'function') {
+            profileUpdate.catch(err => console.warn('Background profile update warning:', err));
+          }
+          console.log('✅ Profile updated in auth manager (instant)');
+        } catch (localError) {
+          console.warn('⚠️ Auth manager update warning (non-critical):', localError);
+        }
+      }
+
+      // Update profile in Supabase (optimized - no select, just update)
+      // Run in background after showing success
+      const supabaseUpdate = supabase
+        .from('profiles')
+        .update(updateData)
+        .eq('id', currentUser.id);
+
+      // Show success immediately (optimistic update)
+      showSuccess('Profile updated successfully!');
+      
+      // Hide any previous error messages
+      const errorMessage = document.getElementById('error-message');
+      if (errorMessage) {
+        errorMessage.classList.add('hidden');
+      }
+
+      // Reset button state immediately
+      updateBtn.disabled = false;
+      updateBtn.innerHTML = originalButtonText;
+
+      // Dispatch auth state change event
+      window.dispatchEvent(new CustomEvent('auth-state-changed'));
+
+      // Complete database update in background (non-blocking)
+      supabaseUpdate.then(({ error }) => {
+        if (error) {
+          console.error('Supabase update error (background):', error);
+          // Show a subtle error notification without disrupting user
+          const errorMsg = document.getElementById('error-message');
+          const errorText = document.getElementById('error-text');
+          if (errorMsg && errorText) {
+            errorText.textContent = 'Profile saved locally. Database sync failed - changes will sync on next login.';
+            errorMsg.classList.remove('hidden');
+            setTimeout(() => errorMsg.classList.add('hidden'), 5000);
+          }
+        } else {
+          console.log('✅ Profile synced to database successfully');
+        }
+      }).catch(err => {
+        console.error('Background sync error:', err);
+      });
+      
+    } catch (error: any) {
+      console.error('Profile update error:', error);
+      showError(error.message || 'Failed to update profile. Please try again.');
+      updateBtn.disabled = false;
+      updateBtn.innerHTML = originalButtonText;
+    }
+  });
+
+  // Handle password change form submission - PERMANENT PASSWORD UPDATE
+  const passwordForm = document.getElementById('password-form') as HTMLFormElement;
+  passwordForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(passwordForm);
+    const currentPassword = formData.get('current_password') as string;
+    const newPassword = formData.get('new_password') as string;
+    const confirmPassword = formData.get('confirm_password') as string;
+
+    // Validation
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      showPasswordError('All password fields are required');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      showPasswordError('New password and confirm password do not match');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      showPasswordError('New password must be at least 6 characters long');
+      return;
+    }
+
+    // Show loading state
+    const changePasswordBtn = document.getElementById('change-password-btn') as HTMLButtonElement;
+    if (!changePasswordBtn) {
+      console.error('Change password button not found');
+      return;
+    }
+    
+    changePasswordBtn.disabled = true;
+    changePasswordBtn.innerHTML = `
+      <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12a8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Changing Password...
+    `;
+
+    try {
+      // Get current user
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      const currentUser = authManager?.getCurrentUser();
+      
+      if (!currentUser || !currentUser.id) {
+        showPasswordError('User not authenticated. Please login again.');
+        // Reset button state
+        changePasswordBtn.disabled = false;
+        changePasswordBtn.innerHTML = 'Change Password';
+        return;
+      }
+
+      console.log('Changing password for user:', currentUser.id);
+
+      // Update password in Supabase for permanent change
+      const { data, error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) {
+        console.error('Password update error:', error);
+        showPasswordError('Failed to update password: ' + error.message);
+        return;
+      }
+
+      console.log('✅ Password updated in Supabase:', data);
+
+      // Show success message
+      showPasswordSuccess('Password changed successfully and permanently!');
+      
+      // Clear password form
+      passwordForm.reset();
+      
+      // Hide any previous error messages
+      const passwordErrorMessage = document.getElementById('password-error-message');
+      if (passwordErrorMessage) {
+        passwordErrorMessage.classList.add('hidden');
+      }
+
+      // Dispatch auth state change event
+      window.dispatchEvent(new CustomEvent('auth-state-changed'));
+      
+    } catch (error: any) {
+      console.error('Password change error:', error);
+      showPasswordError(error.message || 'Failed to change password');
+    } finally {
+      // Always reset button state
+      if (changePasswordBtn) {
+        changePasswordBtn.disabled = false;
+        changePasswordBtn.innerHTML = 'Change Password';
+      }
+    }
+  });
+
+  // CRITICAL: Populate user data immediately when script loads
+  console.log('Script loaded, populating user data immediately');
+  populateUserData();
+
+  // Populate user data when page loads
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOMContentLoaded event fired');
+    populateUserData();
+    setupPhoneValidation();
+  });
+
+  // Also populate when the script loads (in case DOMContentLoaded already fired)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOMContentLoaded event listener added');
+      populateUserData();
+    });
+  } else {
+    console.log('Document already loaded, populating immediately');
+    populateUserData();
+  }
+</script>

@@ -1,0 +1,192 @@
+---
+// Product Dialog Component
+// Shows a popup when users click on products that are under development
+---
+
+<div id="product-dialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="dialog-content">
+    <div class="p-6">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900">Product Under Development</h3>
+        </div>
+        <button id="close-dialog" class="text-gray-400 hover:text-gray-600 transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="mb-6">
+        <p class="text-gray-600 mb-4">
+          This product is currently under development and will be available in a few days. 
+          We're working hard to bring you the best experience possible.
+        </p>
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div class="flex items-start space-x-3">
+            <div class="flex-shrink-0">
+              <svg class="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <h4 class="text-sm font-medium text-blue-900 mb-1">Available Now</h4>
+              <p class="text-sm text-blue-700">
+                The <strong>Order Menu System</strong> is fully functional and ready to use. 
+                You can explore its features and place an order right now!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex justify-end">
+        <button id="close-dialog-btn" class="px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-medium transition-colors">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Immediate check - run before DOMContentLoaded to prevent any dialog display
+  (function() {
+    const currentPath = window.location.pathname;
+    const productSlug = currentPath.split('/').pop();
+    const isOMS = productSlug === 'order-menu-system' || currentPath.includes('/order-menu-system');
+    
+    if (isOMS) {
+      // Override showProductDialog immediately to prevent any calls
+      window.showProductDialog = function() {
+        console.log('ProductDialog: OMS page detected, blocking dialog (immediate check)');
+        const dialog = document.getElementById('product-dialog');
+        if (dialog) {
+          dialog.classList.add('hidden');
+        }
+        return;
+      };
+    }
+  })();
+
+  // Dialog functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const dialog = document.getElementById('product-dialog');
+    const dialogContent = document.getElementById('dialog-content');
+    const closeDialog = document.getElementById('close-dialog');
+    const closeDialogBtn = document.getElementById('close-dialog-btn');
+
+    // Helper function to check if we're on OMS page
+    function isOrderMenuSystemPage() {
+      const currentPath = window.location.pathname;
+      const productSlug = currentPath.split('/').pop();
+      return productSlug === 'order-menu-system' || currentPath.includes('/order-menu-system');
+    }
+
+    // Show dialog function
+    function showDialog() {
+      // ALWAYS check if we're on OMS product page - if so, never show dialog
+      if (isOrderMenuSystemPage()) {
+        console.log('ProductDialog: OMS page detected, blocking dialog display');
+        // Ensure dialog is hidden
+        if (dialog) {
+          dialog.classList.add('hidden');
+        }
+        return;
+      }
+      
+      // Lock body scroll
+      document.body.style.overflow = 'hidden';
+      
+      dialog.classList.remove('hidden');
+      // Trigger animation
+      setTimeout(() => {
+        dialogContent.classList.remove('scale-95', 'opacity-0');
+        dialogContent.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+
+    // Hide dialog function
+    function hideDialog() {
+      dialogContent.classList.remove('scale-100', 'opacity-100');
+      dialogContent.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        dialog.classList.add('hidden');
+        // Unlock body scroll
+        document.body.style.overflow = '';
+      }, 300);
+    }
+
+    // Close dialog events
+    closeDialog.addEventListener('click', hideDialog);
+    closeDialogBtn.addEventListener('click', hideDialog);
+    
+    // Close on backdrop click
+    dialog.addEventListener('click', function(e) {
+      if (e.target === dialog) {
+        hideDialog();
+      }
+    });
+
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && !dialog.classList.contains('hidden')) {
+        hideDialog();
+      }
+    });
+
+    // Make showDialog globally available (but with OMS check built-in)
+    window.showProductDialog = showDialog;
+    
+    // Check if we're on OMS page and hide dialog if so (on page load)
+    if (isOrderMenuSystemPage()) {
+      console.log('ProductDialog: OMS page detected on load, hiding dialog');
+      if (dialog) {
+        dialog.classList.add('hidden');
+      }
+    }
+    
+    // Also listen for navigation changes (in case user navigates to OMS)
+    let lastPath = window.location.pathname;
+    setInterval(() => {
+      if (window.location.pathname !== lastPath) {
+        lastPath = window.location.pathname;
+        if (isOrderMenuSystemPage() && dialog && !dialog.classList.contains('hidden')) {
+          console.log('ProductDialog: OMS page detected after navigation, hiding dialog');
+          dialog.classList.add('hidden');
+          document.body.style.overflow = '';
+        }
+      }
+    }, 500);
+  });
+</script>
+
+<style>
+  #product-dialog {
+    backdrop-filter: blur(4px);
+  }
+  
+  #dialog-content {
+    animation: dialogSlideIn 0.3s ease-out forwards;
+  }
+  
+  @keyframes dialogSlideIn {
+    from {
+      transform: scale(0.95) translateY(-10px);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+  }
+</style>

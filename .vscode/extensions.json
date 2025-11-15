@@ -1,0 +1,12 @@
+{
+  // VS Code will show an "Install All" button for these
+  "recommendations": [
+    "astro-build.astro-vscode",          // Astro language support
+    "bradlc.vscode-tailwindcss",         // Tailwind CSS IntelliSense
+    "supabase.supabase",                 // Supabase tools
+    "esbenp.prettier-vscode"             // Prettier (optional but recommended)
+  ],
+  "unwantedRecommendations": [
+    // Add extensions here you explicitly do NOT want suggested
+  ]
+}

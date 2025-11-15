@@ -1,0 +1,3964 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AuthGuard from '../components/AuthGuard.astro';
+import { sharedDataStore } from '../lib/shared-data-store';
+---
+
+<style>
+  /* Product type badge styles */
+  .product-type-badge {
+    transition: all 0.3s ease;
+  }
+  
+  .product-type-badge:hover {
+    transform: scale(1.05);
+  }
+  
+  /* Ensure proper spacing for buttons */
+  .cart-actions button {
+    min-width: 120px;
+  }
+  
+  /* Ensure cuisine type field is properly hidden for non-restaurant products */
+  #restaurant-cuisine-fields.hidden {
+    display: none !important;
+  }
+  
+  /* Button sizing for different screen sizes */
+  @media (min-width: 640px) {
+    .sm\:w-48 {
+      width: 12rem; /* 192px */
+    }
+  }
+  
+  /* Ensure buttons have proper padding on laptop screens */
+  @media (min-width: 1024px) {
+    .lg\:py-3 {
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+    .lg\:px-6 {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+</style>
+
+<Layout title="Shopping Cart">
+
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Page Header -->
+      <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-blue-900 mb-4">Shopping Cart</h1>
+        <p class="text-xl text-blue-800">Customize your project and proceed to checkout</p>
+      </div>
+
+                <!-- Cart Content - Now always visible since AuthGuard handles authentication -->
+        <div id="cart-content">
+      
+        <!-- Empty Cart Message -->
+        <div id="empty-cart" class="text-center py-16">
+          <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m0 0h9m-9 0V19a2 2 0 002 2h7a2 2 0 002-2v-.5"></path>
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-blue-900 mb-2">Your cart is empty</h2>
+          <p class="text-blue-800 mb-6">Browse our products and add something to get started</p>
+          <a href="/products" class="inline-block bg-primary-600 hover:bg-primary-700 text-white font-medium px-8 py-3 rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
+            Browse Products
+          </a>
+        </div>
+
+        <!-- Cart Items -->
+        <div id="cart-items" class="hidden space-y-6">
+          <!-- Cart Item Template -->
+          <div id="cart-item-template" class="hidden bg-white rounded-xl shadow-lg p-8">
+            <div class="flex flex-col lg:flex-row gap-8">
+              <!-- Product Info -->
+              <div class="flex-1">
+                <div class="flex items-start justify-between mb-6">
+                  <div>
+                    <h3 class="text-2xl font-bold text-gray-900 product-name mb-2">Product Name</h3>
+                    <p class="text-blue-800 product-description text-lg mb-4">Product description</p>
+                    <p class="text-3xl font-bold text-primary-600 product-price">₹0</p>
+                    
+                    <!-- Product Type Badge -->
+                    <div class="mt-4">
+                      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium product-type-badge bg-gray-100 text-gray-800">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="product-type-text">Product Type</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Customization Options -->
+              <div class="flex-1 space-y-6">
+                <!-- Product Name Input -->
+                <div>
+                  <label class="block text-lg font-semibold text-blue-900 mb-3">Custom Product Name</label>
+                  <input type="text" class="product-name-input w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter your custom product name">
+                  <p class="text-sm text-blue-700 mt-2">Give your product a unique name</p>
+                </div>
+
+                <!-- Restaurant Name Input (shown only for restaurant products) -->
+                <div id="restaurant-name-customization" class="hidden">
+                  <label class="block text-lg font-semibold text-blue-900 mb-3">Restaurant Name</label>
+                  <input type="text" class="restaurant-name-input w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter your restaurant name">
+                  <p class="text-sm text-blue-700 mt-2">Enter the name of your restaurant</p>
+                </div>
+
+
+                <!-- Color Selection -->
+                <div>
+                  <label class="block text-lg font-semibold text-blue-900 mb-3">Choose Color Theme</label>
+                  <div class="flex flex-wrap gap-4">
+                    <button type="button" class="color-option w-12 h-12 rounded-full border-4 border-gray-300 hover:border-gray-400 transition-all transform hover:scale-110" data-color="#3B82F6" style="background-color: #3B82F6;"></button>
+                    <button type="button" class="color-option w-12 h-12 rounded-full border-4 border-gray-300 hover:border-gray-400 transition-all transform hover:scale-110" data-color="#8B5CF6" style="background-color: #8B5CF6;"></button>
+                    <button type="button" class="color-option w-12 h-12 rounded-full border-4 border-gray-300 hover:border-gray-400 transition-all transform hover:scale-110" data-color="#10B981" style="background-color: #10B981;"></button>
+                    <button type="button" class="color-option w-12 h-12 rounded-full border-4 border-gray-300 hover:border-gray-400 transition-all transform hover:scale-110" data-color="#F59E0B" style="background-color: #F59E0B;"></button>
+                    <button type="button" class="color-option w-12 h-12 rounded-full border-4 border-gray-300 hover:border-gray-400 transition-all transform hover:scale-110" data-color="#EF4444" style="background-color: #EF4444;"></button>
+                    <button type="button" class="color-option w-12 h-12 rounded-full border-4 border-gray-300 hover:border-gray-400 transition-all transform hover:scale-110" data-color="#000000" style="background-color: #000000;"></button>
+                  </div>
+                  <p class="text-sm text-blue-700 mt-2">Select your preferred color scheme</p>
+                </div>
+
+                <!-- Additional Options -->
+                <div>
+                  <label class="block text-lg font-semibold text-blue-900 mb-3">Additional Features</label>
+                  <div class="space-y-3">
+                    <label class="flex items-center p-3 bg-white rounded-lg hover:bg-gray-50 transition-colors cursor-pointer border border-gray-200">
+                      <input type="checkbox" class="feature-checkbox rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5" data-feature="responsive" data-price="500">
+                      <span class="ml-3 text-lg text-blue-900">Responsive Design (+₹500)</span>
+                    </label>
+                    <label class="flex items-center p-3 bg-white rounded-lg hover:bg-gray-50 transition-colors cursor-pointer border border-gray-200">
+                      <input type="checkbox" class="feature-checkbox rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5" data-feature="seo" data-price="300">
+                      <span class="ml-3 text-lg text-blue-900">SEO Optimization (+₹300)</span>
+                    </label>
+                    <label class="flex items-center p-3 bg-white rounded-lg hover:bg-gray-50 transition-colors cursor-pointer border border-gray-200">
+                      <input type="checkbox" class="feature-checkbox rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5" data-feature="analytics" data-price="200">
+                      <span class="ml-3 text-lg text-blue-900">Analytics Integration (+₹200)</span>
+                    </label>
+                  </div>
+                  <p class="text-sm text-blue-700 mt-2">Select additional features for your product</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div id="cart-actions" class="hidden mt-8 space-y-4">
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <button id="delete-selected" class="px-4 py-2 sm:px-6 sm:py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl text-sm sm:text-base">
+              Delete Project
+            </button>
+            <button id="proceed-to-requirements" class="px-4 py-2 sm:px-6 sm:py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl text-sm sm:text-base">
+              Submit & Review Details
+            </button>
+
+          </div>
+        </div>
+
+        <!-- Project Requirements Form -->
+        <div id="project-requirements" class="hidden bg-white rounded-xl shadow-lg p-8 mt-8">
+          <h3 class="text-2xl font-bold text-gray-900 mb-6">Project Requirements</h3>
+          
+          <form id="requirements-form" class="space-y-8">
+            <!-- Project Details Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-lg font-semibold text-white mb-3">
+                  Project Name <span class="text-red-500">*</span>
+                </label>
+                <input type="text" name="projectName" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter your project name">
+              </div>
+              
+              <div>
+                <label class="block text-lg font-semibold text-white mb-3">
+                  Contact Person <span class="text-red-500">*</span>
+                </label>
+                <input type="text" name="contactPerson" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Your full name">
+              </div>
+              
+                          <!-- App Name Field (for all products) -->
+            <div id="app-name-fields">
+              <label class="block text-lg font-semibold text-white mb-3">
+                App Name <span class="text-red-500">*</span>
+              </label>
+              <input type="text" name="appName" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter your app name">
+            </div>
+
+            <!-- Product Description Field (for all products) -->
+            <div id="product-description-fields">
+              <label class="block text-lg font-semibold text-white mb-3">
+                Product Description <span class="text-red-500">*</span>
+              </label>
+              <textarea name="productDescription" required rows="3" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Describe your product requirements and features"></textarea>
+            </div>
+
+                        <!-- Restaurant Specific Fields (hidden by default) -->
+            <div id="restaurant-fields" class="hidden">
+              <div>
+                <label class="block text-lg font-semibold text-white mb-3">
+                  Restaurant Name <span class="text-red-500">*</span>
+                </label>
+                <input type="text" name="restaurantName" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter restaurant name">
+              </div>
+              </div>
+              
+            <!-- Cuisine Type Field (ONLY for restaurant products) -->
+            <div id="restaurant-cuisine-fields" class="hidden">
+              <div>
+                <label class="block text-lg font-semibold text-white mb-3">
+                Cuisine Type <span class="text-red-500">*</span>
+                </label>
+                <select name="cuisineType" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg">
+                  <option value="">Select cuisine type</option>
+                  <option value="indian">Indian</option>
+                  <option value="chinese">Chinese</option>
+                  <option value="italian">Italian</option>
+                  <option value="mexican">Mexican</option>
+                  <option value="continental">Continental</option>
+                  <option value="fast-food">Fast Food</option>
+                  <option value="beverages">Beverages</option>
+                  <option value="desserts">Desserts</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Order Menu System Specific Fields -->
+            <div id="order-menu-fields" class="hidden">
+              <h4 class="text-xl font-semibold text-white mb-6">Order Menu System Details</h4>
+              
+              <!-- Restaurant Information -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <label class="block text-lg font-semibold text-white mb-3">
+                    Restaurant Name <span class="text-red-500">*</span>
+                  </label>
+                  <input type="text" name="orderMenuRestaurantName" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Enter restaurant name">
+                </div>
+                
+              </div>
+              
+              <!-- Professional Address -->
+              <div class="mb-6">
+                <h4 class="text-lg font-semibold text-white mb-4">Restaurant Address <span class="text-red-500">*</span></h4>
+                
+                <!-- House/Flat Number -->
+                <div class="mb-4">
+                  <label class="block text-sm font-medium text-white mb-2">
+                    House/Flat Number <span class="text-red-500">*</span>
+                  </label>
+                  <input type="text" name="houseNumber" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="e.g., 123, Flat 4B">
+                </div>
+
+                <!-- Address Line 1 -->
+                <div class="mb-4">
+                  <label class="block text-sm font-medium text-white mb-2">
+                    Address Line 1 <span class="text-red-500">*</span>
+                  </label>
+                  <input type="text" name="addressLine1" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="e.g., Main Street, Sector 15">
+              </div>
+              
+                <!-- City and State Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div class="relative">
+                    <label class="block text-sm font-medium text-white mb-2">
+                      City <span class="text-red-500">*</span>
+                </label>
+                    <input type="text" name="city" id="cart-city-input" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="e.g., Mumbai" autocomplete="off">
+                    <div id="cart-city-suggestions" class="hidden absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto"></div>
+                  </div>
+                  <div class="relative">
+                    <label class="block text-sm font-medium text-white mb-2">
+                      State <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="state" id="cart-state-input" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="e.g., Maharashtra" autocomplete="off">
+                    <div id="cart-state-suggestions" class="hidden absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto"></div>
+                  </div>
+                </div>
+
+                <!-- Pincode and Country Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-white mb-2">
+                      Pincode <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="pincode" id="cart-pincode-input" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="e.g., 400001" maxlength="6">
+                  </div>
+                <div>
+                  <label class="block text-sm font-medium text-white mb-2">
+                    Country <span class="text-red-500">*</span>
+                  </label>
+                  <select name="country" id="cart-country-select" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" required>
+                    <option value="India" selected>India</option>
+                    <option value="United States">United States</option>
+                    <option value="United Kingdom">United Kingdom</option>
+                    <option value="Canada">Canada</option>
+                    <option value="Australia">Australia</option>
+                    <option value="Germany">Germany</option>
+                    <option value="France">France</option>
+                    <option value="Japan">Japan</option>
+                    <option value="Singapore">Singapore</option>
+                    <option value="UAE">UAE</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                </div>
+              </div>
+
+            </div>
+
+
+            <!-- Contact Information Section -->
+            <div>
+              <h4 class="text-xl font-semibold text-gray-800 mb-4">Contact Information</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-lg font-semibold text-white mb-3">
+                    Email <span class="text-red-500">*</span>
+                  </label>
+                  <input type="email" name="email" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="your@email.com">
+                </div>
+                
+                <div>
+                  <label class="block text-lg font-semibold text-white mb-3">
+                    Phone Number <span class="text-red-500">*</span>
+                  </label>
+                  <input type="tel" name="phone" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="+91 9876543210">
+                </div>
+              </div>
+            </div>
+
+
+
+            <!-- Additional Requirements Section -->
+            <div>
+              <label class="block text-lg font-semibold text-white mb-3">
+                Additional Requirements
+              </label>
+              <textarea name="additionalRequirements" rows="4" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="Any specific features, integrations, or customizations you need..."></textarea>
+            </div>
+
+            <!-- Requirements Form Actions -->
+            <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200">
+              <button type="button" id="back-to-cart" class="flex-1 sm:flex-none sm:w-32 bg-blue-500 hover:bg-gray-600 text-white font-medium py-1.5 px-4 rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl text-sm">
+                Back to Cart
+              </button>
+              <button type="button" id="submit-requirements" class="flex-1 sm:flex-none sm:w-40 bg-green-600 hover:bg-green-700 text-white font-medium py-1.5 px-4 rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl text-sm">
+                Submit & Proceed to Payment
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Order Review Section -->
+        <div id="order-review" class="hidden bg-white rounded-xl shadow-lg p-8 mt-8" style="display: none;">
+          <h3 class="text-2xl font-bold text-gray-900 mb-6">Review Your Project Details</h3>
+          
+          <div class="space-y-6">
+            <!-- Project Summary -->
+            <div class="bg-white rounded-lg p-6 border border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-800 mb-4">Project Summary</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-sm text-gray-200">Project Name:</p>
+                  <p class="font-medium" id="review-project-name">-</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-200">Contact Person:</p>
+                  <p class="font-medium" id="review-contact-person">-</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-200">App Name:</p>
+                  <p class="font-medium" id="review-app-name">-</p>
+                </div>
+                <div id="review-restaurant-info" class="hidden">
+                  <p class="text-sm text-gray-200">Restaurant Name:</p>
+                  <p class="font-medium" id="review-restaurant-name">-</p>
+                </div>
+                <div id="review-cuisine-info" class="hidden">
+                  <p class="text-sm text-gray-200">Cuisine Type:</p>
+                  <p class="font-medium" id="review-cuisine-type">-</p>
+                </div>
+              </div>
+              
+              <!-- Order Menu System specific review elements -->
+              <div id="review-order-menu-info" class="hidden">
+                <h4 class="text-lg font-semibold text-gray-800 mb-4">Restaurant Information</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p class="text-sm text-gray-200">Restaurant Name:</p>
+                    <p class="font-medium" id="review-restaurant-name">-</p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-200">Owner Name:</p>
+                    <p class="font-medium" id="review-owner-name">-</p>
+                  </div>
+                  <div class="md:col-span-2">
+                    <p class="text-sm text-gray-200">Restaurant Address:</p>
+                    <p class="font-medium" id="review-restaurant-address">-</p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-200">Contact Email:</p>
+                    <p class="font-medium" id="review-contact-email">-</p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-200">Contact Phone:</p>
+                    <p class="font-medium" id="review-contact-phone">-</p>
+                  </div>
+                </div>
+                
+                <!-- Menu Items Review -->
+                <div class="mt-6">
+                  <h5 class="text-md font-semibold text-gray-800 mb-3">Menu Items</h5>
+                  <div id="review-menu-items" class="space-y-2">
+                    <!-- Menu items will be populated here -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Customization Summary -->
+            <div class="bg-white rounded-lg p-6 border border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-800 mb-4">Customization</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-sm text-gray-200">Selected Colors:</p>
+                  <div class="flex space-x-2 mt-2">
+                    <div class="w-6 h-6 rounded-full border-2 border-gray-300" id="review-primary-color" style="background-color: #3B82F6;"></div>
+                    <div class="w-6 h-6 rounded-full border-2 border-gray-300" id="review-secondary-color" style="background-color: #A5CF6;"></div>
+                    <div class="w-6 h-6 rounded-full border-2 border-gray-300" id="review-accent-color" style="background-color: #F59E0B;"></div>
+                    <div class="w-6 h-6 rounded-full border-2 border-gray-300" id="review-text-color" style="background-color: #1F2937;"></div>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-200">Logo Status:</p>
+                  <p class="font-medium" id="review-logo-status">Not uploaded</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-200">Photos Status:</p>
+                  <p class="font-medium" id="review-photos-status">Not uploaded</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="bg-white rounded-lg p-6 border border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-800 mb-4">Contact Information</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-sm text-gray-200">Email:</p>
+                  <p class="font-medium" id="review-email">-</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-200">Phone:</p>
+                  <p class="font-medium" id="review-phone">-</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Additional Requirements -->
+            <div class="bg-white rounded-lg p-6 border border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-800 mb-4">Additional Requirements</h4>
+              <p class="text-sm text-gray-200">Special Features & Requirements:</p>
+              <p class="font-medium mt-2" id="review-additional-requirements">-</p>
+            </div>
+
+            <!-- Total Amount -->
+            <div class="bg-primary-50 rounded-lg p-6">
+              <div class="flex justify-between items-center">
+                <h4 class="text-lg font-semibold text-primary-800">Total Amount</h4>
+                <div class="text-2xl font-bold text-primary-600" id="review-total">₹0</div>
+              </div>
+            </div>
+
+            <!-- Review Actions -->
+            <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200">
+              <button type="button" id="back-to-requirements" class="flex-1 sm:flex-none sm:w-32 bg-blue-500 hover:bg-gray-600 text-white font-medium py-1.5 px-4 rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl text-sm">
+                Back to Requirements
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Section -->
+        <div id="payment-section" class="hidden bg-white rounded-xl shadow-lg p-8 mt-8">
+          <div id="payment-loading" class="text-center py-8 hidden">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+            <p class="text-gray-200">Loading payment details...</p>
+          </div>
+          
+          <div id="payment-content">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6">Complete Your Order & Payment</h3>
+          
+          <!-- Order Summary -->
+          <div class="bg-white rounded-lg p-6 mb-6 border border-gray-200">
+            <h4 class="text-lg font-semibold text-gray-800 mb-4">Order Summary</h4>
+            <div class="space-y-3">
+              <div class="flex justify-between">
+                <span class="text-gray-200">Project Name:</span>
+                <span class="font-medium" id="payment-project-name">-</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-200">Contact Person:</span>
+                <span class="font-medium" id="payment-contact-person">-</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-200">App Name:</span>
+                <span class="font-medium" id="payment-app-name">-</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-200">Email:</span>
+                <span class="font-medium" id="payment-email">-</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-200">Phone:</span>
+                <span class="font-medium" id="payment-phone">-</span>
+              </div>
+              <div class="border-t pt-3 mt-3">
+                <div class="flex justify-between text-lg font-bold">
+                  <span>Total Amount:</span>
+                  <span class="text-green-600">₹<span id="payment-total-amount">0</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="space-y-6">
+            <!-- Payment Methods -->
+            <div>
+              <h4 class="text-lg font-semibold text-gray-800 mb-4">Choose Payment Method</h4>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-primary-400 transition-colors cursor-pointer">
+                  <input type="radio" name="paymentMethod" value="card" class="w-5 h-5 text-primary-600 focus:ring-primary-500" checked>
+                  <div class="ml-3">
+                    <div class="font-medium text-gray-900">Credit/Debit Card</div>
+                    <div class="text-sm text-gray-300">Visa, Mastercard, RuPay</div>
+                  </div>
+                </label>
+                
+                <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-primary-400 transition-colors cursor-pointer">
+                  <input type="radio" name="paymentMethod" value="upi" class="w-5 h-5 text-primary-600 focus:ring-primary-500">
+                  <div class="ml-3">
+                    <div class="font-medium text-gray-900">UPI</div>
+                    <div class="text-sm text-gray-300">Google Pay, PhonePe, Paytm</div>
+                  </div>
+                </label>
+                
+                <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-primary-400 transition-colors cursor-pointer">
+                  <input type="radio" name="paymentMethod" value="netbanking" class="w-5 h-5 text-primary-600 focus:ring-primary-500">
+                  <div class="ml-3">
+                    <div class="font-medium text-gray-900">Net Banking</div>
+                    <div class="text-sm text-gray-300">All major banks</div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Card Details (shown when card is selected) -->
+            <div id="card-details" class="border-2 border-gray-200 rounded-lg p-6">
+              <h4 class="text-lg font-semibold text-gray-800 mb-4">Card Details</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-white mb-2">Card Number</label>
+                  <input type="text" name="cardNumber" placeholder="1234 5678 9012 3456" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-white mb-2">Cardholder Name</label>
+                  <input type="text" name="cardholderName" placeholder="John Doe" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-white mb-2">Expiry Date</label>
+                  <input type="text" name="expiryDate" placeholder="MM/YY" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-white mb-2">CVV</label>
+                  <input type="text" name="cvv" placeholder="123" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                </div>
+              </div>
+            </div>
+
+            <!-- UPI Details (hidden by default) -->
+            <div id="upi-details" class="hidden border-2 border-gray-200 rounded-lg p-6">
+              <h4 class="text-lg font-semibold text-gray-800 mb-4">UPI Details</h4>
+              <div>
+                <label class="block text-sm font-medium text-white mb-2">UPI ID</label>
+                <input type="text" name="upiId" placeholder="username@upi" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+              </div>
+            </div>
+
+            <!-- Net Banking Details (hidden by default) -->
+            <div id="netbanking-details" class="hidden border-2 border-gray-200 rounded-lg p-6">
+              <h4 class="text-lg font-semibold text-gray-800 mb-4">Net Banking</h4>
+              <div>
+                <label class="block text-sm font-medium text-white mb-2">Select Bank</label>
+                <select name="bank" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                  <option value="">Choose your bank</option>
+                  <option value="sbi">State Bank of India</option>
+                  <option value="hdfc">HDFC Bank</option>
+                  <option value="icici">ICICI Bank</option>
+                  <option value="axis">Axis Bank</option>
+                  <option value="kotak">Kotak Mahindra Bank</option>
+                  <option value="yes">Yes Bank</option>
+                  <option value="other">Other Banks</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Final Payment Button -->
+            <div class="pt-6 border-t border-gray-200">
+              <button id="final-payment" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-xl text-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
+                Pay ₹<span id="final-amount">0</span> & Complete Order
+              </button>
+              <p class="text-sm text-gray-300 text-center mt-3">Your payment is secured with SSL encryption</p>
+            </div>
+          </div>
+          </div> <!-- End payment-content -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+</Layout>
+
+<script>
+  console.log('🚀 Cart page script loaded');
+  
+  // Import required modules
+  import { sharedDataStore } from '../lib/shared-data-store';
+  import { supabase } from '../lib/supabase';
+  
+  // Test if basic DOM elements exist
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 DOM Content Loaded - Cart page initialization starting...');
+    
+    const testElements = [
+      'empty-cart',
+      'cart-items', 
+      'cart-actions',
+      'project-requirements',
+      'cart-content'
+    ];
+    
+    testElements.forEach(id => {
+      const element = document.getElementById(id);
+      console.log(`🔍 Element ${id}:`, !!element);
+    });
+    
+    try {
+      console.log('🔍 Creating Cart instance...');
+      
+      // Check authentication before initializing cart
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      console.log('🔍 Auth manager available:', !!authManager);
+      
+      if (authManager) {
+        const currentUser = authManager.getCurrentUser();
+        console.log('🔍 Current user:', currentUser ? `${currentUser.email} (${currentUser.full_name || 'No name'})` : 'Not logged in');
+      }
+      
+      const cart = new Cart();
+      console.log('✅ Cart created, items count:', cart.items.length);
+      
+      
+      // Cart is ready - no automatic items added
+      console.log('✅ Cart initialized with', cart.items.length, 'items');
+      
+      // Force cart content to be visible
+      const cartContent = document.getElementById('cart-content');
+      if (cartContent) {
+        cartContent.style.display = 'block';
+        cartContent.style.visibility = 'visible';
+        console.log('✅ Forced cart content to be visible');
+      }
+      
+      // Set up event listeners after DOM is ready
+      
+      // Submit Requirements button (from requirements form)
+      const submitBtn = document.getElementById('submit-requirements');
+      
+      submitBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        cart.submitRequirements();
+      });
+
+      // Prevent form submission
+      const requirementsForm = document.getElementById('requirements-form');
+      requirementsForm?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      });
+      
+    } catch (error) {
+      console.error('❌ Error initializing cart:', error);
+      alert('Error initializing cart: ' + error.message);
+    }
+  });
+
+  // Cart functionality
+  class Cart {
+    private items: any[];
+    private requirements: any;
+    private currentSharedOrderId: string | null;
+
+    constructor() {
+      this.items = [];
+      this.requirements = {};
+      this.currentSharedOrderId = null;
+      this.isSubmitting = false; // Flag to prevent duplicate submissions
+      this.debouncedSaveToSupabase = this.debounce(this.saveCartToSupabase.bind(this), 1000);
+      this.init().catch(error => {
+        console.error('❌ Error initializing cart:', error);
+      });
+    }
+
+    async init() {
+      console.log('🚀 Cart initialization started');
+      
+      // Initialize empty arrays
+      this.items = [];
+      this.requirements = {};
+      
+      // Check if user is authenticated
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      const currentUser = authManager?.getCurrentUser();
+      
+      if (currentUser) {
+        console.log('👤 User authenticated:', currentUser.email, '- loading user cart');
+        // Don't clear localStorage for authenticated users - let them keep their cart
+      } else {
+        console.log('👤 No authenticated user - checking localStorage');
+        // For anonymous users, check if this is a new session
+        this.checkAndClearNewUserCart();
+      }
+      
+      await this.loadCart();
+      console.log('📦 Cart loaded, items count:', this.items.length);
+      
+      // Only validate cart ownership if there are items and user is authenticated
+      if (this.items.length > 0 && currentUser) {
+        if (!window.validateCartOwnership()) {
+          console.log('🔄 Cart ownership validation failed, clearing cart...');
+          this.items = [];
+          this.requirements = {};
+          localStorage.removeItem('cart-items');
+          localStorage.removeItem('cart-requirements');
+          localStorage.removeItem('user-cart-data');
+          console.log('📦 Cart cleared after validation, items count:', this.items.length);
+        }
+      }
+      
+      this.checkUrlParams();
+      // Populate form fields with loaded data first
+      this.populateFormFields();
+      console.log('📝 Form fields populated');
+      this.renderCart();
+      console.log('🎨 Cart rendered');
+      this.bindEvents();
+      console.log('🔗 Events bound, initialization complete');
+    }
+
+    checkAndClearNewUserCart() {
+      console.log('🔍 Checking if this is a new user session...');
+      
+      // Check if there's a session flag in sessionStorage
+      const hasVisitedCart = sessionStorage.getItem('has-visited-cart');
+      
+      if (!hasVisitedCart) {
+        console.log('🆕 New user session detected - checking if cart should be cleared');
+        
+        // Only clear cart if there's no valid cart data in localStorage
+        const cartData = localStorage.getItem('cart-items');
+        if (cartData) {
+          try {
+            const parsedCart = JSON.parse(cartData);
+            if (Array.isArray(parsedCart) && parsedCart.length > 0) {
+              console.log('👤 Returning user with existing cart data - keeping cart');
+              // Set flag to indicate user has visited cart
+              sessionStorage.setItem('has-visited-cart', 'true');
+              return;
+            }
+          } catch (error) {
+            console.log('🔄 Invalid cart data found - clearing it');
+          }
+        }
+        
+        console.log('🆕 Truly new user - clearing any existing cart data');
+        // Clear all cart-related data from localStorage
+        localStorage.removeItem('cart-items');
+        localStorage.removeItem('cart-requirements');
+        localStorage.removeItem('user-cart-data');
+        localStorage.removeItem('cart-customizations');
+        
+        // Set flag to indicate user has visited cart
+        sessionStorage.setItem('has-visited-cart', 'true');
+        console.log('✅ Cart cleared for new user session');
+      } else {
+        console.log('👤 Returning user session - keeping existing cart data');
+      }
+    }
+
+    checkUrlParams() {
+      console.log('🔍 Checking URL parameters...');
+      const urlParams = new URLSearchParams(window.location.search);
+      const product = urlParams.get('product');
+      const price = urlParams.get('price');
+
+      console.log('📦 URL parameters found:', { product, price });
+
+      if (product && price) {
+        console.log('✅ Product and price found, adding to cart...');
+        this.addProductFromUrl(product, parseInt(price));
+        // Clear URL parameters
+        window.history.replaceState({}, document.title, window.location.pathname);
+        console.log('✅ URL parameters cleared');
+      } else {
+        console.log('❌ No product or price found in URL parameters');
+      }
+    }
+
+    addProductFromUrl(productId, price) {
+      console.log('🛒 Adding product from URL:', { productId, price });
+      
+      // Clear existing items first - only one product at a time
+      this.items = [];
+      
+      const productNames = {
+        '1': 'Restaurant Menu System',
+        '2': 'Android TV App', 
+        '3': 'Streaming Mobile App',
+        '4': 'Restaurant Website',
+        'restaurant-menu': 'Restaurant Menu System',
+        'android-tv': 'Android TV App',
+        'mobile-streaming': 'Mobile Streaming App',
+        'restaurant-menu-system': 'Restaurant Menu System',
+        'android-tv-app': 'Android TV App',
+        'streaming-mobile-app': 'Streaming Mobile App',
+        'restaurant-website': 'Restaurant Website'
+      };
+
+      const productDescriptions = {
+        '1': 'Digital menu system with QR code ordering, real-time updates, and analytics dashboard.',
+        '2': 'Custom Android TV application with streaming capabilities and smart remote support.',
+        '3': 'Cross-platform mobile app for video streaming with offline download support.',
+        '4': 'Professional restaurant website with online ordering and reservation system.',
+        'restaurant-menu': 'Digital menu system with QR code ordering, real-time updates, and analytics dashboard.',
+        'android-tv': 'Custom Android TV application with streaming capabilities and smart remote support.',
+        'mobile-streaming': 'Cross-platform mobile app for video streaming with offline download support.',
+        'restaurant-menu-system': 'Digital menu system with QR code ordering, real-time updates, and analytics dashboard.',
+        'android-tv-app': 'Custom Android TV application with streaming capabilities and smart remote support.',
+        'streaming-mobile-app': 'Cross-platform mobile app for video streaming with offline download support.',
+        'restaurant-website': 'Professional restaurant website with online ordering and reservation system.'
+      };
+
+      const newItem = {
+        id: productId,
+        name: productNames[productId] || 'Custom Product',
+        description: productDescriptions[productId] || 'Professional digital solution',
+        price: price,
+        quantity: 1,
+        customName: '',
+        logo: null,
+        color: '#3B82F6',
+        features: []
+      };
+
+      console.log('📦 Created cart item:', newItem);
+
+      this.items.push(newItem);
+      this.saveCart();
+      
+      console.log('✅ Product added to cart, items count:', this.items.length);
+    }
+
+    async loadCart() {
+      // Clear any existing cart data first
+      this.items = [];
+      this.requirements = {};
+      
+      // Check if user is authenticated
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      const currentUser = authManager?.getCurrentUser();
+      
+      console.log('👤 Loading cart for user:', currentUser ? currentUser.email : 'anonymous');
+      
+      if (currentUser && supabase) {
+        try {
+          console.log('🔄 Loading cart from Supabase for user:', currentUser.email);
+          const { data: cartData, error } = await supabase
+            .from('cart_customizations')
+            .select('*')
+            .eq('user_email', currentUser.email)
+            .eq('cart_status', 'active')
+            .order('created_at', { ascending: false });
+
+          if (error) {
+            console.error('❌ Error loading cart from Supabase:', error);
+            // On error, ensure cart is empty for this user
+            this.items = [];
+            this.clearUserCartFromLocalStorage(currentUser.email);
+            return;
+          } else if (cartData && cartData.length > 0) {
+            console.log('✅ Loaded cart from Supabase:', cartData);
+            console.log('📊 Cart data details:', {
+              count: cartData.length,
+              firstItem: cartData[0],
+              basePrice: cartData[0]?.base_price,
+              productName: cartData[0]?.product_name
+            });
+            // Convert Supabase data back to cart items format
+            this.items = cartData.map(item => ({
+              id: item.product_id,
+              name: item.product_name,
+              description: item.product_description,
+              price: item.base_price,
+              quantity: 1,
+              customName: item.custom_name || '',
+              restaurantName: item.restaurant_name_customization || '',
+              color: item.selected_color || '#3B82F6',
+              features: item.selected_features || [],
+              projectName: item.project_name || '',
+              contactPerson: item.contact_person || '',
+              cuisineType: item.cuisine_type || '',
+              appName: item.app_name || '',
+              productDescription: item.product_description_custom || '',
+              email: item.contact_email || currentUser.email,
+              phone: item.contact_phone || '',
+              primaryColor: item.primary_color || '#3B82F6',
+              secondaryColor: item.secondary_color || '#A5CF6',
+              accentColor: item.accent_color || '#F59E0B',
+              textColor: item.text_color || '#1F2937',
+              additionalRequirements: item.additional_requirements || ''
+            }));
+            
+            console.log('🔄 Mapped cart items:', this.items);
+            console.log('💰 First item price:', this.items[0]?.price);
+            
+            // Update requirements object with loaded data
+            if (this.items.length > 0) {
+              const item = this.items[0];
+              this.requirements = {
+                projectName: item.projectName,
+                contactPerson: item.contactPerson,
+                restaurantName: item.restaurantName,
+                cuisineType: item.cuisineType,
+                appName: item.appName,
+                productDescription: item.productDescription,
+                email: item.email,
+                phone: item.phone,
+                primaryColor: item.primaryColor,
+                secondaryColor: item.secondaryColor,
+                accentColor: item.accentColor,
+                textColor: item.textColor,
+                additionalRequirements: item.additionalRequirements
+              };
+            }
+            
+            console.log('✅ Cart loaded from Supabase with', this.items.length, 'items');
+            return; // Exit early since we loaded from Supabase
+          } else {
+            // No cart data found in Supabase for this user, ensure cart is empty
+            console.log('🔄 No cart data found in Supabase for user:', currentUser.email, '- starting with empty cart');
+            this.items = [];
+            this.clearUserCartFromLocalStorage(currentUser.email);
+            return;
+          }
+        } catch (error) {
+          console.error('❌ Error loading cart from Supabase:', error);
+          // On error, ensure cart is empty for this user
+          this.items = [];
+          this.clearUserCartFromLocalStorage(currentUser.email);
+          return;
+        }
+      }
+
+      // For anonymous users, check if they have a valid cart in localStorage
+      // Only load from localStorage if it's a valid cart for anonymous users
+      console.log('🔄 Loading cart from localStorage for anonymous user');
+      const cartData = localStorage.getItem('cart-items');
+      if (cartData) {
+        try {
+          const parsedCart = JSON.parse(cartData);
+          // Only load if it's a valid cart with items
+          if (Array.isArray(parsedCart) && parsedCart.length > 0) {
+            this.items = parsedCart;
+            console.log('✅ Cart loaded from localStorage with', this.items.length, 'items');
+          } else {
+            this.items = [];
+            console.log('🔄 Invalid cart data in localStorage, starting with empty cart');
+          }
+        } catch (error) {
+          console.error('❌ Error parsing localStorage cart data:', error);
+          this.items = [];
+          localStorage.removeItem('cart-items');
+        }
+      } else {
+        this.items = [];
+        console.log('🔄 No cart data in localStorage, starting with empty cart');
+      }
+    }
+
+    saveCart() {
+      // Save to localStorage for all users as a fallback
+      localStorage.setItem('cart-items', JSON.stringify(this.items));
+      console.log('💾 Cart saved to localStorage, items count:', this.items.length);
+      
+      // For authenticated users, also try to save to Supabase
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      const currentUser = authManager?.getCurrentUser();
+      
+      if (currentUser) {
+        console.log('💾 Cart data will also be saved to Supabase for authenticated user');
+        // Trigger Supabase save
+        this.debouncedSaveToSupabase();
+      }
+    }
+
+    clearUserCartFromLocalStorage(userEmail) {
+      // Clear localStorage when user changes to prevent cross-user data leakage
+      console.log('🧹 Clearing localStorage cart data for user:', userEmail);
+      
+      const storedCart = localStorage.getItem('cart-items');
+      if (storedCart) {
+        try {
+          const cartData = JSON.parse(storedCart);
+          // Always clear localStorage for authenticated users to prevent cross-user contamination
+          if (userEmail) {
+            console.log('🧹 Clearing localStorage cart data for authenticated user');
+            localStorage.removeItem('cart-items');
+            this.items = [];
+            return;
+          }
+          
+          // For anonymous users, check if the stored cart belongs to a different user
+          if (cartData.length > 0 && cartData[0].email && cartData[0].email !== userEmail) {
+            console.log('🧹 Clearing localStorage cart data from different user');
+            localStorage.removeItem('cart-items');
+            this.items = [];
+          }
+        } catch (error) {
+          console.error('❌ Error checking localStorage cart data:', error);
+          // If there's an error parsing, clear it anyway
+          localStorage.removeItem('cart-items');
+          this.items = [];
+        }
+      }
+      
+      // Also clear any other cart-related localStorage items
+      localStorage.removeItem('cart-requirements');
+      localStorage.removeItem('user-cart-data');
+      
+      // Ensure cart is empty
+      this.items = [];
+      this.requirements = {};
+    }
+
+    populateFormFields() {
+      if (this.items.length === 0) return;
+
+      const item = this.items[0];
+      console.log('🔄 Populating form fields with loaded data:', item);
+
+      // Populate basic product info
+      const projectNameInput = document.getElementById('projectName') as HTMLInputElement;
+      if (projectNameInput && item.projectName) {
+        projectNameInput.value = item.projectName;
+      }
+
+      const contactPersonInput = document.getElementById('contactPerson') as HTMLInputElement;
+      if (contactPersonInput && item.contactPerson) {
+        contactPersonInput.value = item.contactPerson;
+      }
+
+      const restaurantNameInput = document.getElementById('restaurantName') as HTMLInputElement;
+      if (restaurantNameInput && item.restaurantName) {
+        restaurantNameInput.value = item.restaurantName;
+      }
+
+      const cuisineTypeSelect = document.getElementById('cuisineType') as HTMLSelectElement;
+      if (cuisineTypeSelect && item.cuisineType) {
+        cuisineTypeSelect.value = item.cuisineType;
+      }
+
+      const appNameInput = document.getElementById('appName') as HTMLInputElement;
+      if (appNameInput && item.appName) {
+        appNameInput.value = item.appName;
+      }
+
+      const productDescriptionTextarea = document.getElementById('productDescription') as HTMLTextAreaElement;
+      if (productDescriptionTextarea && item.productDescription) {
+        productDescriptionTextarea.value = item.productDescription;
+      }
+
+      const emailInput = document.getElementById('email') as HTMLInputElement;
+      if (emailInput && item.email) {
+        emailInput.value = item.email;
+      }
+
+      const phoneInput = document.getElementById('phone') as HTMLInputElement;
+      if (phoneInput && item.phone) {
+        phoneInput.value = item.phone;
+      }
+
+
+      const additionalRequirementsTextarea = document.getElementById('additionalRequirements') as HTMLTextAreaElement;
+      if (additionalRequirementsTextarea && item.additionalRequirements) {
+        additionalRequirementsTextarea.value = item.additionalRequirements;
+      }
+
+      // Populate feature checkboxes
+      if (item.features && Array.isArray(item.features)) {
+        item.features.forEach(feature => {
+          const checkbox = document.querySelector(`input[data-feature="${feature}"]`) as HTMLInputElement;
+          if (checkbox) {
+            checkbox.checked = true;
+          }
+        });
+      }
+
+      // Update the requirements object
+      this.requirements = {
+        projectName: item.projectName || '',
+        contactPerson: item.contactPerson || '',
+        restaurantName: item.restaurantName || '',
+        cuisineType: item.cuisineType || '',
+        appName: item.appName || '',
+        productDescription: item.productDescription || '',
+        email: item.email || '',
+        phone: item.phone || '',
+        primaryColor: item.primaryColor || '#3B82F6',
+        secondaryColor: item.secondaryColor || '#A5CF6',
+        accentColor: item.accentColor || '#F59E0B',
+        textColor: item.textColor || '#1F2937',
+        additionalRequirements: item.additionalRequirements || ''
+      };
+
+      console.log('✅ Form fields populated successfully');
+    }
+
+    addItem(product) {
+      // Only allow one product at a time
+      if (this.items.length > 0) {
+        // Replace existing item
+        this.items = [];
+      }
+      
+      this.items.push({
+        ...product,
+        quantity: 1,
+        customName: '',
+        logo: null,
+        color: '#3B82F6',
+        features: []
+      });
+      this.saveCart();
+      this.renderCart();
+    }
+
+    removeItem(productId) {
+      this.items = this.items.filter(item => item.id !== productId);
+      this.saveCart();
+      this.renderCart();
+    }
+
+    updateItem(productId, updates) {
+      const item = this.items.find(item => item.id === productId);
+      if (item) {
+        Object.assign(item, updates);
+        this.saveCart();
+        this.renderCart();
+      }
+    }
+
+        renderCart() {
+      console.log('🎨 renderCart called with items:', this.items.length);
+      
+      const emptyCart = document.getElementById('empty-cart');
+      const cartItems = document.getElementById('cart-items');
+      const cartActions = document.getElementById('cart-actions');
+      const projectRequirements = document.getElementById('project-requirements');
+      const cartContent = document.getElementById('cart-content');
+
+      console.log('🔍 DOM elements found:', {
+        emptyCart: !!emptyCart,
+        cartItems: !!cartItems,
+        cartActions: !!cartActions,
+        projectRequirements: !!projectRequirements,
+        cartContent: !!cartContent
+      });
+
+      if (this.items.length === 0) {
+        console.log('📭 Showing empty cart');
+        emptyCart?.classList.remove('hidden');
+        cartItems?.classList.add('hidden');
+        cartActions?.classList.add('hidden');
+        projectRequirements?.classList.add('hidden');
+      } else {
+        console.log('📦 Showing cart with items');
+        emptyCart?.classList.add('hidden');
+        cartItems?.classList.remove('hidden');
+        cartActions?.classList.remove('hidden');
+        projectRequirements?.classList.add('hidden');
+      }
+
+      this.renderCartItems();
+      this.updateSummary();
+    }
+
+    renderCartItems() {
+      const cartItemsContainer = document.getElementById('cart-items');
+      if (!cartItemsContainer) return;
+
+      cartItemsContainer.innerHTML = '';
+      
+      this.items.forEach(item => {
+        const itemElement = this.createCartItemElement(item);
+        cartItemsContainer.appendChild(itemElement);
+      });
+    }
+
+    createCartItemElement(item) {
+      const template = document.getElementById('cart-item-template');
+      if (!template) return document.createElement('div');
+
+      const clone = template.cloneNode(true);
+      clone.classList.remove('hidden');
+      clone.id = `cart-item-${item.id}`;
+
+      // Set product info
+      clone.querySelector('.product-name').textContent = item.name;
+      clone.querySelector('.product-description').textContent = item.description;
+      clone.querySelector('.product-price').textContent = `₹${item.price}`;
+
+      // Set product type badge
+      const productTypeText = clone.querySelector('.product-type-text');
+      const productTypeBadge = clone.querySelector('.product-type-badge');
+      
+      if (item.id === 'restaurant-menu' || item.id === 'restaurant-menu-system' || item.id === 'restaurant-website' || item.id === '1' || item.id === '4') {
+        productTypeText.textContent = 'Restaurant Solution';
+        productTypeBadge.className = 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium product-type-badge bg-green-100 text-green-800';
+      } else if (item.id === 'order-menu-system' || item.id === '5') {
+        productTypeText.textContent = 'Order Menu System';
+        productTypeBadge.className = 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium product-type-badge bg-blue-100 text-blue-800';
+      } else if (item.id === 'android-tv' || item.id === 'android-tv-app' || item.id === '2') {
+        productTypeText.textContent = 'Android TV App';
+        productTypeBadge.className = 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium product-type-badge bg-purple-100 text-purple-800';
+      } else if (item.id === 'mobile-streaming' || item.id === 'streaming-mobile-app' || item.id === '3') {
+        productTypeText.textContent = 'Mobile Streaming App';
+        productTypeBadge.className = 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium product-type-badge bg-orange-100 text-orange-800';
+      } else {
+        productTypeText.textContent = 'Custom Product';
+        productTypeBadge.className = 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium product-type-badge bg-gray-100 text-gray-800';
+      }
+
+      // Show/hide restaurant name field based on product type
+      const restaurantNameField = clone.querySelector('#restaurant-name-customization');
+      if (item.id === 'restaurant-menu' || item.id === 'restaurant-menu-system' || item.id === 'restaurant-website' || item.id === '1' || item.id === '4') {
+        restaurantNameField?.classList.remove('hidden');
+      } else {
+        restaurantNameField?.classList.add('hidden');
+      }
+
+      // Set custom name if exists
+      const nameInput = clone.querySelector('.product-name-input');
+      if (nameInput && item.customName) {
+        nameInput.value = item.customName;
+      }
+
+      // Set restaurant name if exists
+      const restaurantNameInput = clone.querySelector('.restaurant-name-input');
+      if (restaurantNameInput && item.restaurantName) {
+        restaurantNameInput.value = item.restaurantName;
+      }
+
+      // Set selected color
+      const colorOptions = clone.querySelectorAll('.color-option');
+      colorOptions.forEach(option => {
+        if (option.dataset.color === item.color) {
+          option.classList.add('border-2', 'border-gray-900');
+        }
+      });
+
+      // Set selected features
+      const featureCheckboxes = clone.querySelectorAll('.feature-checkbox');
+      featureCheckboxes.forEach(checkbox => {
+        if (item.features.includes(checkbox.dataset.feature)) {
+          checkbox.checked = true;
+        }
+      });
+
+      // Bind events
+      this.bindItemEvents(clone, item);
+
+      return clone;
+    }
+
+    bindItemEvents(itemElement, item) {
+      // Custom name input
+      const nameInput = itemElement.querySelector('.product-name-input');
+      nameInput?.addEventListener('input', (e) => {
+        this.updateItem(item.id, { customName: e.target.value });
+        // Removed auto-save to prevent duplicate entries
+        // this.debouncedSaveToSupabase();
+      });
+
+      // Restaurant name input
+      const restaurantNameInput = itemElement.querySelector('.restaurant-name-input');
+      restaurantNameInput?.addEventListener('input', (e) => {
+        this.updateItem(item.id, { restaurantName: e.target.value });
+        // Removed auto-save to prevent duplicate entries
+        // this.debouncedSaveToSupabase();
+      });
+
+      // Logo upload
+      const logoUpload = itemElement.querySelector('.logo-upload');
+      const logoUploadBtn = itemElement.querySelector('.logo-upload-btn');
+      const logoPreview = itemElement.querySelector('.logo-preview');
+
+      logoUploadBtn.addEventListener('click', () => logoUpload.click());
+      logoUpload.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            logoPreview.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover rounded-lg">`;
+            this.updateItem(item.id, { logo: e.target.result });
+            // Removed auto-save to prevent duplicate entries
+            // this.debouncedSaveToSupabase();
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // Color selection
+      const colorOptions = itemElement.querySelectorAll('.color-option');
+      colorOptions.forEach(option => {
+        option.addEventListener('click', () => {
+          colorOptions.forEach(opt => opt.classList.remove('border-2', 'border-gray-900'));
+          option.classList.add('border-2', 'border-gray-900');
+          this.updateItem(item.id, { color: option.dataset.color });
+          // Removed auto-save to prevent duplicate entries
+          // this.debouncedSaveToSupabase();
+        });
+      });
+
+      // Feature selection
+      const featureCheckboxes = itemElement.querySelectorAll('.feature-checkbox');
+      featureCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+          const features = Array.from(featureCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.dataset.feature);
+          this.updateItem(item.id, { features });
+          // Removed auto-save to prevent duplicate entries
+          // this.debouncedSaveToSupabase();
+        });
+      });
+    }
+
+    updateSummary() {
+      console.log('💰 updateSummary called with items:', this.items);
+      
+      const subtotal = this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const featuresTotal = this.items.reduce((sum, item) => {
+        return sum + (item.features.length * 500); // Each feature costs ₹500
+      }, 0);
+      const tax = Math.round((subtotal + featuresTotal) * 0.18); // 18% GST
+      const total = subtotal + featuresTotal + tax;
+
+      console.log('💰 Amount calculation:', {
+        subtotal,
+        featuresTotal,
+        tax,
+        total,
+        itemsCount: this.items.length
+      });
+
+      // Update summary display
+      const subtotalElement = document.getElementById('subtotal');
+      const featuresTotalElement = document.getElementById('features-total');
+      const taxElement = document.getElementById('tax');
+      const totalElement = document.getElementById('total');
+      const finalAmountElement = document.getElementById('final-amount');
+
+      console.log('💰 Summary elements found:', {
+        subtotalElement: !!subtotalElement,
+        featuresTotalElement: !!featuresTotalElement,
+        taxElement: !!taxElement,
+        totalElement: !!totalElement,
+        finalAmountElement: !!finalAmountElement
+      });
+
+      if (subtotalElement) {
+        subtotalElement.textContent = `₹${subtotal.toLocaleString()}`;
+        console.log('✅ Updated subtotal:', subtotalElement.textContent);
+      }
+      if (featuresTotalElement) {
+        featuresTotalElement.textContent = `₹${featuresTotal.toLocaleString()}`;
+        console.log('✅ Updated features total:', featuresTotalElement.textContent);
+      }
+      if (taxElement) {
+        taxElement.textContent = `₹${tax.toLocaleString()}`;
+        console.log('✅ Updated tax:', taxElement.textContent);
+      }
+      if (totalElement) {
+        totalElement.textContent = `₹${total.toLocaleString()}`;
+        console.log('✅ Updated total:', totalElement.textContent);
+      }
+      if (finalAmountElement) {
+        finalAmountElement.textContent = total.toLocaleString();
+        console.log('✅ Updated final amount:', finalAmountElement.textContent);
+      }
+    }
+
+    bindEvents() {
+      // Delete selected project button
+      document.getElementById('delete-selected')?.addEventListener('click', () => {
+        this.deleteSelectedProject();
+      });
+
+      // Submit & Review Details button (from cart)
+      document.getElementById('proceed-to-requirements')?.addEventListener('click', () => {
+        this.showProjectRequirements();
+      });
+
+
+
+      // Submit Requirements button (from requirements form)
+      // Event listener moved to DOMContentLoaded
+
+      // Back to cart button
+      document.getElementById('back-to-cart')?.addEventListener('click', () => {
+        this.backToCart();
+      });
+
+      // Back to requirements button
+      document.getElementById('back-to-requirements')?.addEventListener('click', () => {
+        this.backToRequirements();
+      });
+
+      // Final payment button
+      document.getElementById('final-payment')?.addEventListener('click', () => {
+        this.processFinalPayment();
+      });
+
+      // Payment method switching
+      document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          this.switchPaymentMethod(e.target.value);
+        });
+      });
+
+    }
+
+    continueShopping() {
+      // Clear cart and redirect to products
+      this.items = [];
+      this.saveCart();
+      window.location.href = '/products';
+    }
+
+    deleteSelectedProject() {
+      if (confirm('Are you sure you want to delete this project? You will be redirected to products page.')) {
+        // Clear cart
+        this.items = [];
+        this.saveCart();
+        // Redirect to products page
+        window.location.href = '/products';
+      }
+    }
+
+    async     showProjectRequirements() {
+      // Hide cart actions and show requirements form
+      const cartActions = document.getElementById('cart-actions');
+      const projectRequirements = document.getElementById('project-requirements');
+      
+      if (cartActions) cartActions.classList.add('hidden');
+      if (projectRequirements) projectRequirements.classList.remove('hidden');
+      
+      // Pre-fill form with user data if logged in
+      this.prefillRequirementsForm();
+      
+      // Show appropriate fields based on project type
+      this.showProjectTypeFields();
+      
+      // Removed initial save to prevent duplicate entries
+      // this.saveCartToSupabase();
+      
+      // Scroll to requirements form
+      projectRequirements?.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async submitRequirements() {
+      console.log('🚀 submitRequirements function called!');
+      
+      const submitBtn = document.getElementById('submit-requirements');
+      const originalText = submitBtn.innerHTML;
+      
+      // Prevent duplicate submissions
+      if (this.isSubmitting || submitBtn.disabled) {
+        console.log('❌ Form already being submitted, ignoring duplicate call');
+        return;
+      }
+      
+      this.isSubmitting = true;
+      
+      try {
+        console.log('🚀 Starting submitRequirements...');
+        
+        // Validate requirements form - only check visible required fields
+        const form = document.getElementById('requirements-form');
+        const isOrderMenuSystem = this.items[0] && (this.items[0].id === 'order-menu-system' || this.items[0].id === '5');
+        
+        if (isOrderMenuSystem) {
+          // For Order Menu System, check Order Menu System fields plus Project Name and Contact Person
+          const requiredFields = [
+            'projectName',
+            'contactPerson',
+            'orderMenuRestaurantName',
+            'orderMenuHouseNumber',
+            'orderMenuAddressLine1',
+            'orderMenuCity',
+            'orderMenuState',
+            'orderMenuPincode',
+            'email',
+            'phone'
+          ];
+          
+          let isValid = true;
+          for (const fieldName of requiredFields) {
+            const field = form.querySelector(`[name="${fieldName}"]`) as HTMLInputElement | HTMLTextAreaElement;
+            if (field && !field.value.trim()) {
+              field.focus();
+              field.reportValidity();
+              isValid = false;
+              break;
+            }
+          }
+          
+
+          
+          if (!isValid) {
+            console.log('❌ Order Menu System form validation failed');
+            return;
+          }
+        } else {
+          // For other products, temporarily remove required from hidden fields before validation
+          const hiddenRequiredFields = form.querySelectorAll('#order-menu-fields [required], #restaurant-fields [required], #restaurant-cuisine-fields [required]');
+          const originalRequiredStates = [];
+          
+          // Store original required states and remove required from hidden fields
+          hiddenRequiredFields.forEach((field, index) => {
+            originalRequiredStates[index] = field.required;
+            field.required = false;
+          });
+          
+          // Validate form
+        if (!(form as HTMLFormElement).checkValidity()) {
+          console.log('❌ Form validation failed');
+          (form as HTMLFormElement).reportValidity();
+            
+            // Restore original required states
+            hiddenRequiredFields.forEach((field, index) => {
+              field.required = originalRequiredStates[index];
+            });
+          return;
+          }
+          
+          // Restore original required states
+          hiddenRequiredFields.forEach((field, index) => {
+            field.required = originalRequiredStates[index];
+          });
+        }
+
+        console.log('✅ Form validation passed');
+
+        // Show loading state
+        submitBtn.innerHTML = `
+          <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Saving & Processing...
+        `;
+        submitBtn.disabled = true;
+
+        // Collect form data based on product type
+        const currentItem = this.items[0];
+        
+        if (isOrderMenuSystem) {
+          // Collect menu items first
+          const collectedMenuItems = this.collectMenuItems();
+          console.log('🍽️ Collected menu items for Order Menu System:', collectedMenuItems);
+          
+          // Collect Order Menu System specific data
+          this.requirements = {
+            // Order Menu System fields
+            restaurantName: (form.querySelector('[name="orderMenuRestaurantName"]') as HTMLInputElement)?.value || '',
+            houseNumber: (form.querySelector('[name="houseNumber"]') as HTMLInputElement)?.value || '',
+            addressLine1: (form.querySelector('[name="addressLine1"]') as HTMLInputElement)?.value || '',
+            city: (form.querySelector('[name="city"]') as HTMLInputElement)?.value || '',
+            state: (form.querySelector('[name="state"]') as HTMLInputElement)?.value || '',
+            pincode: (form.querySelector('[name="pincode"]') as HTMLInputElement)?.value || '',
+            country: (form.querySelector('[name="country"]') as HTMLInputElement)?.value || 'India',
+            email: (form.querySelector('[name="email"]') as HTMLInputElement)?.value || '',
+            phone: (form.querySelector('[name="phone"]') as HTMLInputElement)?.value || '',
+            additionalRequirements: (form.querySelector('[name="additionalRequirements"]') as HTMLTextAreaElement)?.value || '',
+            
+            
+            
+          };
+        } else {
+          // Collect standard form data for other products
+        this.requirements = {
+          projectName: (form.querySelector('[name="projectName"]') as HTMLInputElement)?.value || '',
+          contactPerson: (form.querySelector('[name="contactPerson"]') as HTMLInputElement)?.value || '',
+          restaurantName: (form.querySelector('[name="restaurantName"]') as HTMLInputElement)?.value || '',
+          cuisineType: (form.querySelector('[name="cuisineType"]') as HTMLSelectElement)?.value || '',
+          appName: (form.querySelector('[name="appName"]') as HTMLInputElement)?.value || '',
+          productDescription: (form.querySelector('[name="productDescription"]') as HTMLTextAreaElement)?.value || '',
+          email: (form.querySelector('[name="email"]') as HTMLInputElement)?.value || '',
+          phone: (form.querySelector('[name="phone"]') as HTMLInputElement)?.value || '',
+          additionalRequirements: (form.querySelector('[name="additionalRequirements"]') as HTMLTextAreaElement)?.value || ''
+        };
+        }
+
+        console.log('📝 Collected form data:', this.requirements);
+
+        // Try to save to Supabase with timeout
+        let savedData = null;
+        try {
+          console.log('🔍 Attempting to save to Supabase...');
+          savedData = await Promise.race([
+            this.saveCartToSupabase(),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Database timeout')), 10000)
+            )
+          ]);
+        } catch (dbError) {
+          console.warn('⚠️ Database save failed, but continuing:', dbError);
+          // Continue without database save - we'll show a warning
+        }
+
+        if (savedData) {
+          console.log('✅ Cart data saved successfully:', savedData);
+          // Update cart item with saved data
+          if (this.items.length > 0) {
+            this.items[0].savedData = savedData;
+            this.saveCart();
+          }
+        } else {
+          console.log('⚠️ No database save, but continuing with local data');
+        }
+
+        // Show success message
+        submitBtn.innerHTML = `
+          <svg class="w-4 h-4 text-white inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          Success! Redirecting...
+        `;
+        
+        // Update review page with collected data
+        this.updateOrderReview();
+
+        // Hide requirements form and show payment directly
+        const projectRequirements = document.getElementById('project-requirements');
+        const paymentSection = document.getElementById('payment-section');
+        
+        console.log('🔄 Showing payment page directly...');
+        console.log('🔍 Project requirements element:', !!projectRequirements);
+        console.log('🔍 Payment section element:', !!paymentSection);
+        
+        // Test if payment section is in DOM
+        if (paymentSection) {
+          console.log('🔍 Payment section parent:', paymentSection.parentElement);
+          console.log('🔍 Payment section offsetHeight:', paymentSection.offsetHeight);
+          console.log('🔍 Payment section offsetWidth:', paymentSection.offsetWidth);
+          console.log('🔍 Payment section computed style display:', window.getComputedStyle(paymentSection).display);
+        }
+        
+        if (projectRequirements) {
+          projectRequirements.classList.add('hidden');
+          projectRequirements.style.display = 'none';
+          console.log('✅ Hidden project requirements');
+        }
+        
+        if (paymentSection) {
+          // Remove hidden class and force visibility
+          paymentSection.classList.remove('hidden');
+          paymentSection.style.setProperty('display', 'block', 'important');
+          paymentSection.style.setProperty('visibility', 'visible', 'important');
+          paymentSection.style.setProperty('opacity', '1', 'important');
+          paymentSection.style.setProperty('position', 'relative', 'important');
+          paymentSection.style.setProperty('z-index', '999', 'important');
+          paymentSection.style.setProperty('height', 'auto', 'important');
+          paymentSection.style.setProperty('width', '100%', 'important');
+          paymentSection.style.setProperty('background-color', '#ffffff', 'important');
+          console.log('✅ Showed payment section with forced visibility');
+          
+          // Show loading state first
+          const paymentLoading = document.getElementById('payment-loading');
+          const paymentContent = document.getElementById('payment-content');
+          
+          if (paymentLoading) {
+            paymentLoading.classList.remove('hidden');
+            paymentLoading.style.display = 'block';
+          }
+          if (paymentContent) {
+            paymentContent.style.display = 'none';
+          }
+          
+          // Update payment summary with user data
+          this.updatePaymentSummary();
+          
+          // Hide loading and show content after a short delay
+          setTimeout(() => {
+            if (paymentLoading) {
+              paymentLoading.classList.add('hidden');
+              paymentLoading.style.display = 'none';
+            }
+            if (paymentContent) {
+              paymentContent.style.display = 'block';
+            }
+            
+            // For OMS, payment link removed; just show payment section
+            if (isOrderMenuSystem) {
+              console.log('🍽️ Order Menu System detected - payment link removed, showing payment section only.');
+              paymentSection.scrollIntoView({ behavior: 'smooth' });
+            } else {
+              // Scroll to payment section for other products
+              paymentSection.scrollIntoView({ behavior: 'smooth' });
+              console.log('✅ Scrolled to payment page');
+            }
+          }, 500);
+          
+        } else {
+          console.error('❌ Payment section element not found!');
+          alert('Error: Payment page not found. Please refresh the page and try again.');
+        }
+        
+        // Reset button after 2 seconds
+        setTimeout(() => {
+          submitBtn.innerHTML = originalText;
+          submitBtn.disabled = false;
+          this.isSubmitting = false;
+        }, 2000);
+
+      } catch (error) {
+        console.error('❌ Error in submitRequirements:', error);
+        
+        // Show error message but still proceed
+        submitBtn.innerHTML = `
+          <svg class="w-4 h-4 text-white inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+          Error
+        `;
+        
+        // Show warning but continue
+        alert('Warning: Could not save to database, but you can still proceed with your order. Please contact support if this persists.');
+        
+        // Still proceed to payment page even if database save failed
+        this.updateOrderReview();
+        
+        const projectRequirements = document.getElementById('project-requirements');
+        const paymentSection = document.getElementById('payment-section');
+        
+        if (projectRequirements) {
+          projectRequirements.classList.add('hidden');
+          projectRequirements.style.display = 'none';
+        }
+        
+        if (paymentSection) {
+          // Remove hidden class and force visibility
+          paymentSection.classList.remove('hidden');
+          paymentSection.style.setProperty('display', 'block', 'important');
+          paymentSection.style.setProperty('visibility', 'visible', 'important');
+          paymentSection.style.setProperty('opacity', '1', 'important');
+          paymentSection.style.setProperty('position', 'relative', 'important');
+          paymentSection.style.setProperty('z-index', '999', 'important');
+          paymentSection.style.setProperty('height', 'auto', 'important');
+          paymentSection.style.setProperty('width', '100%', 'important');
+          paymentSection.style.setProperty('background-color', '#ffffff', 'important');
+          
+          // Show loading state first
+          const paymentLoading = document.getElementById('payment-loading');
+          const paymentContent = document.getElementById('payment-content');
+          
+          if (paymentLoading) {
+            paymentLoading.classList.remove('hidden');
+            paymentLoading.style.display = 'block';
+          }
+          if (paymentContent) {
+            paymentContent.style.display = 'none';
+          }
+          
+          this.updatePaymentSummary();
+          
+          // Hide loading and show content after a short delay
+          setTimeout(() => {
+            if (paymentLoading) {
+              paymentLoading.classList.add('hidden');
+              paymentLoading.style.display = 'none';
+            }
+            if (paymentContent) {
+              paymentContent.style.display = 'block';
+            }
+            
+            paymentSection.scrollIntoView({ behavior: 'smooth' });
+          }, 500);
+        }
+        
+        // Reset button after 3 seconds
+        setTimeout(() => {
+          submitBtn.innerHTML = originalText;
+          submitBtn.disabled = false;
+          this.isSubmitting = false;
+        }, 3000);
+      }
+    }
+
+    showProjectTypeFields() {
+      if (this.items.length === 0) return;
+      
+      const item = this.items[0];
+      console.log('🔍 Debug - Product ID:', item.id);
+      
+      const appNameFields = document.getElementById('app-name-fields');
+      const productDescriptionFields = document.getElementById('product-description-fields');
+      const restaurantFields = document.getElementById('restaurant-fields');
+      const restaurantCuisineFields = document.getElementById('restaurant-cuisine-fields');
+
+      console.log('🔍 Debug - Field elements found:', {
+        appNameFields: !!appNameFields,
+        productDescriptionFields: !!productDescriptionFields,
+        restaurantFields: !!restaurantFields,
+        restaurantCuisineFields: !!restaurantCuisineFields
+      });
+
+      // Update upload labels and text based on project type
+      const uploadLabel = document.getElementById('upload-label');
+      const uploadText = document.getElementById('upload-text');
+      const photosLabel = document.getElementById('photos-label');
+      const photosText = document.getElementById('photos-text');
+
+      // Hide all fields by default - will show appropriate ones based on product type
+      appNameFields?.classList.add('hidden');
+      productDescriptionFields?.classList.add('hidden');
+      restaurantFields?.classList.add('hidden');
+      restaurantCuisineFields?.classList.add('hidden');
+
+      // Show appropriate fields based on project type
+      if (item.id === 'restaurant-menu' || item.id === 'restaurant-menu-system' || item.id === 'restaurant-website' || item.id === '1' || item.id === '4') {
+        console.log('🍕 Showing restaurant fields for restaurant product:', item.id);
+        
+        // Show restaurant-specific fields
+        if (restaurantFields) {
+          restaurantFields.classList.remove('hidden');
+          restaurantFields.style.display = 'block';
+        }
+        
+        // Show cuisine type ONLY for restaurant products
+        if (restaurantCuisineFields) {
+          restaurantCuisineFields.classList.remove('hidden');
+          restaurantCuisineFields.style.display = 'block';
+        }
+        
+        console.log('🔍 Debug - Restaurant fields visibility:', {
+          restaurantFieldsHidden: restaurantFields?.classList.contains('hidden'),
+          restaurantCuisineFieldsHidden: restaurantCuisineFields?.classList.contains('hidden'),
+          restaurantFieldsDisplay: restaurantFields?.style.display,
+          restaurantCuisineFieldsDisplay: restaurantCuisineFields?.style.display
+        });
+        
+        // Make restaurant fields required
+        const restaurantNameInput = document.querySelector('input[name="restaurantName"]');
+        const cuisineTypeSelect = document.querySelector('select[name="cuisineType"]');
+        if (restaurantNameInput) restaurantNameInput.required = true;
+        if (cuisineTypeSelect) cuisineTypeSelect.required = true;
+        
+        // Show image upload sections for restaurant products
+        const logoUploadSection = document.getElementById('logo-upload-section');
+        const photosUploadSection = document.getElementById('photos-upload-section');
+        
+        if (logoUploadSection) {
+          logoUploadSection.classList.remove('hidden');
+          logoUploadSection.style.display = 'block';
+        }
+        if (photosUploadSection) {
+          photosUploadSection.classList.remove('hidden');
+          photosUploadSection.style.display = 'block';
+        }
+        
+        // Show general fields for restaurant products
+        const projectNameField = document.querySelector('input[name="projectName"]');
+        const contactPersonField = document.querySelector('input[name="contactPerson"]');
+        const appNameField = document.querySelector('input[name="appName"]');
+        const productDescriptionField = document.querySelector('textarea[name="productDescription"]');
+        
+        if (projectNameField) {
+          projectNameField.closest('div').classList.remove('hidden');
+          projectNameField.required = true;
+        }
+        if (contactPersonField) {
+          contactPersonField.closest('div').classList.remove('hidden');
+          contactPersonField.required = true;
+        }
+        if (appNameField) {
+          appNameField.closest('div').classList.remove('hidden');
+          appNameField.required = true;
+        }
+        if (productDescriptionField) {
+          productDescriptionField.closest('div').classList.remove('hidden');
+          productDescriptionField.required = true;
+        }
+        
+        // Update upload labels for restaurant
+        if (uploadLabel) uploadLabel.textContent = 'Restaurant Logo';
+        if (uploadText) uploadText.textContent = 'Upload logo or drag and drop';
+        if (photosLabel) photosLabel.textContent = 'Menu Photos (Required)';
+        if (photosText) photosText.textContent = 'Upload menu photos or drag and drop';
+      } else if (item.id === 'order-menu-system' || item.id === '5') {
+        console.log('🍽️ Showing Order Menu System fields for product:', item.id);
+        
+        // Show Order Menu System specific fields
+        const orderMenuFields = document.getElementById('order-menu-fields');
+        if (orderMenuFields) {
+          orderMenuFields.classList.remove('hidden');
+          orderMenuFields.style.display = 'block';
+        }
+        
+        // Hide regular restaurant fields for Order Menu System
+        if (restaurantFields) {
+          restaurantFields.classList.add('hidden');
+          restaurantFields.style.display = 'none';
+        }
+        if (restaurantCuisineFields) {
+          restaurantCuisineFields.classList.add('hidden');
+          restaurantCuisineFields.style.display = 'none';
+        }
+        
+        // Hide upload sections for Order Menu System
+        const logoUploadSection = document.getElementById('logo-upload-section');
+        const photosUploadSection = document.getElementById('photos-upload-section');
+        if (logoUploadSection) {
+          logoUploadSection.classList.add('hidden');
+          logoUploadSection.style.display = 'none';
+        }
+        if (photosUploadSection) {
+          photosUploadSection.classList.add('hidden');
+          photosUploadSection.style.display = 'none';
+        }
+        
+        // Make Order Menu System fields required
+        const orderMenuRestaurantName = document.querySelector('input[name="orderMenuRestaurantName"]');
+        const orderMenuOwnerName = document.querySelector('input[name="orderMenuOwnerName"]');
+        const orderMenuAddress = document.querySelector('textarea[name="orderMenuAddress"]');
+        
+        if (orderMenuRestaurantName) orderMenuRestaurantName.required = true;
+        if (orderMenuOwnerName) orderMenuOwnerName.required = true;
+        if (orderMenuAddress) orderMenuAddress.required = true;
+        
+        // Hide unwanted fields for Order Menu System
+        const projectNameField = document.querySelector('input[name="projectName"]');
+        const contactPersonField = document.querySelector('input[name="contactPerson"]');
+        const appNameField = document.querySelector('input[name="appName"]');
+        const productDescriptionField = document.querySelector('textarea[name="productDescription"]');
+        
+        // Keep Project Name and Contact Person fields visible for Order Menu System
+        // These fields are needed for the database schema
+        if (projectNameField) {
+          projectNameField.required = true;
+        }
+        
+        if (contactPersonField) {
+          contactPersonField.required = true;
+        }
+        
+        // Hide App Name field
+        if (appNameField) {
+          appNameField.closest('div').classList.add('hidden');
+          appNameField.required = false;
+        }
+        
+        // Hide Product Description field
+        if (productDescriptionField) {
+          productDescriptionField.closest('div').classList.add('hidden');
+          productDescriptionField.required = false;
+        }
+        
+        // Hide App Screenshots and App Icon sections for Order Menu System
+        const nonOrderMenuFields = document.querySelectorAll('.non-order-menu-fields');
+        nonOrderMenuFields.forEach(field => {
+          field.classList.add('hidden');
+          field.style.display = 'none';
+        });
+        
+        // Also hide restaurant fields for Order Menu System
+        const restaurantFields = document.getElementById('restaurant-fields');
+        const restaurantCuisineFields = document.getElementById('restaurant-cuisine-fields');
+        if (restaurantFields) restaurantFields.classList.add('hidden');
+        if (restaurantCuisineFields) restaurantCuisineFields.classList.add('hidden');
+        
+        // Show App Screenshots and App Icon sections for other products
+        const nonOrderMenuFieldsForOther = document.querySelectorAll('.non-order-menu-fields');
+        nonOrderMenuFieldsForOther.forEach(field => {
+          field.classList.remove('hidden');
+          field.style.display = 'block';
+        });
+        
+      } else {
+        console.log('📱 Showing non-restaurant fields for product:', item.id);
+        
+        // Hide Order Menu System fields for non-Order Menu System products
+        const orderMenuFields = document.getElementById('order-menu-fields');
+        if (orderMenuFields) {
+          orderMenuFields.classList.add('hidden');
+          orderMenuFields.style.display = 'none';
+          console.log('🚫 Order Menu System fields hidden for non-Order Menu System product');
+        }
+        
+        // Remove required from Order Menu System fields for non-Order Menu System products
+        const orderMenuRequiredFields = document.querySelectorAll('#order-menu-fields [required]');
+        orderMenuRequiredFields.forEach(field => {
+          field.required = false;
+        });
+        
+        // Ensure cuisine type is HIDDEN for non-restaurant products
+        if (restaurantCuisineFields) {
+          restaurantCuisineFields.classList.add('hidden');
+          restaurantCuisineFields.style.display = 'none';
+          console.log('🚫 Cuisine type field hidden for non-restaurant product');
+        }
+        
+        // Show image upload sections for non-Order Menu System products
+        const nonOrderMenuFieldsForNonOrder = document.querySelectorAll('.non-order-menu-fields');
+        nonOrderMenuFieldsForNonOrder.forEach(field => {
+          field.classList.remove('hidden');
+          field.style.display = 'block';
+        });
+        
+        // Show general fields for non-Order Menu System products
+        const projectNameField = document.querySelector('input[name="projectName"]');
+        const contactPersonField = document.querySelector('input[name="contactPerson"]');
+        const appNameField = document.querySelector('input[name="appName"]');
+        const productDescriptionField = document.querySelector('textarea[name="productDescription"]');
+        
+        if (projectNameField) {
+          projectNameField.closest('div').classList.remove('hidden');
+          projectNameField.required = true;
+        }
+        if (contactPersonField) {
+          contactPersonField.closest('div').classList.remove('hidden');
+          contactPersonField.required = true;
+        }
+        if (appNameField) {
+          appNameField.closest('div').classList.remove('hidden');
+          appNameField.required = true;
+        }
+        if (productDescriptionField) {
+          productDescriptionField.closest('div').classList.remove('hidden');
+          productDescriptionField.required = true;
+        }
+        
+        // Update upload labels based on product type
+        if (item.id === 'android-tv' || item.id === 'android-tv-app') {
+          console.log('📺 Showing TV app fields');
+        if (uploadLabel) uploadLabel.textContent = 'App Icon';
+        if (uploadText) uploadText.textContent = 'Upload app icon or drag and drop';
+        if (photosLabel) photosLabel.textContent = 'App Screenshots (Optional)';
+        if (photosText) photosText.textContent = 'Upload app screenshots or drag and drop';
+        } else if (item.id === 'mobile-streaming' || item.id === 'streaming-mobile-app') {
+          console.log('📱 Showing mobile app fields');
+          if (uploadLabel) uploadLabel.textContent = 'App Icon';
+          if (uploadText) uploadText.textContent = 'Upload app icon or drag and drop';
+          if (photosLabel) photosLabel.textContent = 'App Screenshots (Optional)';
+          if (photosText) photosText.textContent = 'Upload app screenshots or drag and drop';
+        } else {
+          // Default for other products
+        if (uploadLabel) uploadLabel.textContent = 'App Icon';
+        if (uploadText) uploadText.textContent = 'Upload app icon or drag and drop';
+        if (photosLabel) photosLabel.textContent = 'App Screenshots (Optional)';
+        if (photosText) photosText.textContent = 'Upload app screenshots or drag and drop';
+      }
+      }
+
+      // Make app name required for all products
+      const appNameInput = document.querySelector('input[name="appName"]');
+      if (appNameInput) appNameInput.required = true;
+    }
+
+    prefillRequirementsForm() {
+        const authManager = window.globalAuthManager || window.simpleAuthManager;
+        const currentUser = authManager?.getCurrentUser();
+      if (!currentUser) return;
+
+      // Pre-fill contact information
+      const emailInput = document.querySelector('input[name="email"]');
+      const phoneInput = document.querySelector('input[name="phone"]');
+      
+      if (emailInput) emailInput.value = currentUser.email || '';
+      if (phoneInput) phoneInput.value = currentUser.phone || '';
+
+      // Add file upload event listeners
+      this.setupFileUploads();
+      
+      // Remove auto-save listeners to prevent multiple database calls
+      // this.setupFormChangeListeners();
+    }
+
+    setupFileUploads() {
+      // Logo upload
+      const logoUpload = document.getElementById('logo-upload');
+      if (logoUpload) {
+        logoUpload.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            this.showUploadSuccess('logo-upload', file.name);
+            // Store logo file in cart item
+            if (this.items.length > 0) {
+              this.items[0].logo = file;
+              console.log('Logo stored:', file.name);
+            }
+          }
+        });
+      }
+
+      // Photos upload
+      const photosUpload = document.getElementById('menu-upload');
+      if (photosUpload) {
+        photosUpload.addEventListener('change', (e) => {
+          const files = Array.from(e.target.files);
+          if (files.length > 0) {
+            this.showUploadSuccess('photos-upload', `${files.length} files selected`);
+            // Store photos in cart item
+            if (this.items.length > 0) {
+              this.items[0].photos = files;
+              console.log('Photos stored:', files.map(f => f.name));
+            }
+          }
+        });
+      }
+
+      // Add drag and drop functionality
+      this.setupDragAndDrop();
+    }
+
+    setupFormChangeListeners() {
+      // Removed auto-save functionality to prevent duplicate database entries
+      // Form data will only be saved when user clicks "Submit & Review Details"
+      console.log('🚫 Auto-save disabled to prevent duplicate entries');
+    }
+
+
+
+    setupDragAndDrop() {
+      const logoSection = document.querySelector('#logo-upload-section .border-dashed');
+      const photosSection = document.querySelector('#photos-upload-section .border-dashed');
+
+      if (logoSection) {
+        logoSection.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          logoSection.classList.add('border-primary-400', 'bg-primary-50');
+        });
+
+        logoSection.addEventListener('dragleave', (e) => {
+          e.preventDefault();
+          logoSection.classList.remove('border-primary-400', 'bg-primary-50');
+        });
+
+        logoSection.addEventListener('drop', (e) => {
+          e.preventDefault();
+          logoSection.classList.remove('border-primary-400', 'bg-primary-50');
+          
+          const files = Array.from(e.dataTransfer.files);
+          if (files.length > 0) {
+            const logoFile = files[0];
+            document.getElementById('logo-upload').files = e.dataTransfer.files;
+            this.showUploadSuccess('logo-upload', logoFile.name);
+            if (this.items.length > 0) {
+              this.items[0].logo = logoFile;
+            }
+          }
+        });
+      }
+
+      if (photosSection) {
+        photosSection.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          photosSection.classList.add('border-primary-400', 'bg-primary-50');
+        });
+
+        photosSection.addEventListener('dragleave', (e) => {
+          e.preventDefault();
+          photosSection.classList.remove('border-primary-400', 'bg-primary-50');
+        });
+
+        photosSection.addEventListener('drop', (e) => {
+          e.preventDefault();
+          photosSection.classList.remove('border-primary-400', 'bg-primary-50');
+          
+          const files = Array.from(e.dataTransfer.files);
+          if (files.length > 0) {
+            document.getElementById('menu-upload').files = e.dataTransfer.files;
+            this.showUploadSuccess('photos-upload', `${files.length} files selected`);
+            if (this.items.length > 0) {
+              this.items[0].photos = files;
+            }
+          }
+        });
+      }
+    }
+
+    showUploadSuccess(uploadType, message) {
+      const statusElement = document.getElementById(uploadType === 'logo-upload' ? 'upload-status' : 'photos-status');
+      if (statusElement) {
+        statusElement.textContent = `✓ ${message}`;
+        statusElement.className = 'mt-3 text-sm font-medium text-green-600';
+        statusElement.classList.remove('hidden');
+        
+        // Hide success message after 3 seconds
+        setTimeout(() => {
+          statusElement.classList.add('hidden');
+        }, 3000);
+      }
+    }
+
+
+
+
+
+    backToCart() {
+      // Hide requirements form and show cart actions
+      const projectRequirements = document.getElementById('project-requirements');
+      const cartActions = document.getElementById('cart-actions');
+      
+      if (projectRequirements) projectRequirements.classList.add('hidden');
+      if (cartActions) cartActions.classList.remove('hidden');
+      
+      // Scroll to cart actions
+      cartActions?.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async saveCartToSupabase() {
+      try {
+        console.log('🔍 Starting saveCartToSupabase...');
+        
+        const authManager = window.globalAuthManager || window.simpleAuthManager;
+        console.log('🔍 Auth manager found:', !!authManager);
+        
+        const currentUser = authManager?.getCurrentUser();
+        console.log('🔍 Current user:', currentUser);
+        
+        if (!currentUser || this.items.length === 0) {
+          console.log('❌ No user or items found for Supabase save');
+          console.log('❌ User:', currentUser);
+          console.log('❌ Items length:', this.items.length);
+          return null;
+        }
+
+        const item = this.items[0];
+        console.log('🔍 Debug - Item being saved:', item);
+        console.log('🔍 Debug - Current user:', currentUser);
+        
+        // Check if Supabase is available
+        if (!supabase) {
+          console.error('❌ Supabase client not available');
+          return null;
+        }
+        
+        // Get form data from requirements form based on product type
+        const form = document.getElementById('requirements-form');
+        let formData = {};
+        const isOrderMenuSystem = item && (item.id === 'order-menu-system' || item.id === '5');
+        
+        if (form) {
+          if (isOrderMenuSystem) {
+            // Order Menu System specific form data - Updated to include all required fields
+            formData = {
+              // 1. Project Name
+              projectName: form.querySelector('[name="projectName"]')?.value || '',
+              
+              // 2. Contact Person
+              contactPerson: form.querySelector('[name="contactPerson"]')?.value || '',
+              
+            // 3. Restaurant Name
+            restaurantName: form.querySelector('[name="orderMenuRestaurantName"]')?.value || '',
+            
+            // 4. Owner Name
+            ownerName: form.querySelector('[name="orderMenuOwnerName"]')?.value || '',
+            
+            // 5. Professional Address
+            houseNumber: form.querySelector('[name="houseNumber"]')?.value || '',
+            addressLine1: form.querySelector('[name="addressLine1"]')?.value || '',
+            city: form.querySelector('[name="city"]')?.value || '',
+            state: form.querySelector('[name="state"]')?.value || '',
+            pincode: form.querySelector('[name="pincode"]')?.value || '',
+            country: form.querySelector('[name="country"]')?.value || 'India',
+              
+              // 9. Contact Information
+              // 9.1. Email
+              email: form.querySelector('[name="email"]')?.value || '',
+              // 9.2. Phone Number
+              phone: form.querySelector('[name="phone"]')?.value || '',
+              
+              // 8. Menu Items
+              menuItems: this.collectMenuItems(),
+              
+              // 12. Additional Requirements
+              additionalRequirements: form.querySelector('[name="additionalRequirements"]')?.value || '',
+              
+            };
+            
+            console.log('🍽️ Form data collected for Order Menu System:', formData);
+          } else {
+            // Standard form data for other products
+          formData = {
+            projectName: form.querySelector('[name="projectName"]')?.value || '',
+            contactPerson: form.querySelector('[name="contactPerson"]')?.value || '',
+            restaurantName: form.querySelector('[name="restaurantName"]')?.value || '',
+            cuisineType: form.querySelector('[name="cuisineType"]')?.value || form.querySelector('[name="emergencyCuisineType"]')?.value || '',
+            appName: form.querySelector('[name="appName"]')?.value || '',
+            email: form.querySelector('[name="email"]')?.value || '',
+            phone: form.querySelector('[name="phone"]')?.value || '',
+            additionalRequirements: form.querySelector('[name="additionalRequirements"]')?.value || ''
+          };
+          }
+        }
+
+        // Get color values
+
+        // Calculate total amount including features and tax
+        const basePrice = item.price;
+        const featuresTotal = item.features.reduce((sum, feature) => {
+          const featurePrices = {
+            responsive: 500,
+            seo: 300,
+            analytics: 200
+          };
+          return sum + (featurePrices[feature] || 0);
+        }, 0);
+        const subtotal = basePrice + featuresTotal;
+        const tax = Math.round(subtotal * 0.18); // 18% GST
+        const totalAmount = subtotal + tax;
+
+        // Handle file uploads with hash generation for duplicate detection
+        const restaurantLogoFile = document.querySelector('input[name="restaurantLogo"]')?.files?.[0];
+        const menuPhotosFiles = document.querySelector('input[name="menuPhotos"]')?.files;
+        
+        let restaurantLogoUrl = '';
+        let restaurantLogoFilename = '';
+        let restaurantLogoSize = 0;
+        let restaurantLogoType = '';
+        let restaurantLogoHash = '';
+        
+        let menuPhotosUrls = [];
+        let menuPhotosFilenames = [];
+        let menuPhotosSizes = [];
+        let menuPhotosTypes = [];
+        let menuPhotosHashes = [];
+        
+        // Generate hash for restaurant logo (for duplicate detection)
+        if (restaurantLogoFile) {
+          console.log('📸 Processing restaurant logo upload:', restaurantLogoFile.name);
+          restaurantLogoFilename = restaurantLogoFile.name;
+          restaurantLogoSize = restaurantLogoFile.size;
+          restaurantLogoType = restaurantLogoFile.type;
+          restaurantLogoUrl = `pending_upload_${Date.now()}_${restaurantLogoFile.name}`;
+          
+          // Generate hash for duplicate detection (simplified - in production use actual file hash)
+          restaurantLogoHash = `hash_${restaurantLogoFile.name}_${restaurantLogoFile.size}_${Date.now()}`;
+        }
+        
+        // Handle menu photos upload with hash generation
+        if (menuPhotosFiles && menuPhotosFiles.length > 0) {
+          console.log('📸 Processing menu photos upload:', menuPhotosFiles.length, 'files');
+          Array.from(menuPhotosFiles).forEach(file => {
+            menuPhotosFilenames.push(file.name);
+            menuPhotosSizes.push(file.size);
+            menuPhotosTypes.push(file.type);
+            menuPhotosUrls.push(`pending_upload_${Date.now()}_${file.name}`);
+            
+            // Generate hash for duplicate detection (simplified - in production use actual file hash)
+            menuPhotosHashes.push(`hash_${file.name}_${file.size}_${Date.now()}`);
+          });
+        }
+
+        // Prepare cart data for Supabase based on product type
+        let cartData;
+        
+        if (isOrderMenuSystem) {
+          // Order Menu System data structure - Updated to match new database schema
+          cartData = {
+            user_email: currentUser.email,
+            user_id: currentUser.id || null,
+            product_id: 'order-menu-system',
+            product_name: 'Order Menu System',
+            base_price: item.price,
+            total_amount: totalAmount,
+            
+            // 1. Project Name
+            project_name: formData.projectName || '',
+            
+            // 2. Contact Person
+            contact_person: formData.contactPerson || '',
+            
+            // 3. Restaurant Name
+            restaurant_name: formData.restaurantName || '',
+            
+            // 4. Owner Name
+            owner_name: formData.ownerName || '',
+            
+            // 5. App Icon (for non-Order Menu System products - empty for Order Menu System)
+            app_icon_url: null,
+            app_icon_filename: null,
+            app_icon_size: null,
+            app_icon_type: null,
+            
+            // 6. Professional Address
+            house_flat_number: formData.houseNumber || '',
+            address_line_1: formData.addressLine1 || '',
+            city: formData.city || '',
+            state: formData.state || '',
+            pincode: formData.pincode || '',
+            country: formData.country || 'India',
+            
+            // 7. Restaurant Logo
+            restaurant_logo_url: restaurantLogoUrl,
+            restaurant_logo_filename: restaurantLogoFilename,
+            restaurant_logo_size: restaurantLogoSize,
+            restaurant_logo_type: restaurantLogoType,
+            
+            // 8. Menu Photos
+            menu_photos_urls: menuPhotosUrls || [],
+            
+            // 9. Contact Information
+            // 9.1. Email
+            contact_email: formData.email || currentUser.email,
+            // 9.2. Phone Number
+            contact_phone: formData.phone || currentUser.phone || '',
+            
+            // 10. Pricing
+            base_package_cost: 999.00,
+            gst_amount: 180.00,
+            total_amount: 1179.00,
+            
+            // 10. App Screenshots (for non-Order Menu System products - empty for Order Menu System)
+            app_screenshots: [],
+            
+            
+            // 12. Additional Requirements
+            additional_requirements: formData.additionalRequirements || '',
+            
+            
+            cart_status: 'pending'
+          };
+        } else {
+          // Standard cart data for other products
+          cartData = {
+          user_email: currentUser.email,
+          user_id: currentUser.id || null,
+          product_id: item.id,
+          product_name: item.name,
+          product_description: item.description,
+          base_price: item.price,
+          total_amount: totalAmount,
+          custom_name: item.customName || '',
+          restaurant_name_customization: item.restaurantName || '',
+          selected_color: item.color || '#3B82F6',
+          selected_features: item.features || [],
+          project_name: formData.projectName || '',
+          contact_person: formData.contactPerson || '',
+          restaurant_name: formData.restaurantName || '',
+          cuisine_type: formData.cuisineType || '',
+          app_name: formData.appName || '',
+          product_description_custom: formData.productDescription || '',
+          contact_email: formData.email || currentUser.email,
+          contact_phone: formData.phone || currentUser.phone || '',
+          primary_color: primaryColor,
+          secondary_color: secondaryColor,
+          accent_color: accentColor,
+          text_color: textColor,
+          restaurant_logo_url: restaurantLogoUrl,
+          restaurant_logo_filename: restaurantLogoFilename,
+          restaurant_logo_size: restaurantLogoSize,
+          restaurant_logo_type: restaurantLogoType,
+          restaurant_logo_hash: restaurantLogoHash,
+          menu_photos_urls: menuPhotosUrls,
+          menu_photos_filenames: menuPhotosFilenames,
+          menu_photos_sizes: menuPhotosSizes,
+          menu_photos_types: menuPhotosTypes,
+          menu_photos_hashes: menuPhotosHashes,
+          additional_requirements: formData.additionalRequirements || '',
+            cart_status: 'pending',
+          is_checkout_initiated: false
+        };
+        }
+
+        console.log('🔍 Debug - Cart data being sent to Supabase:', cartData);
+        console.log('🔍 Debug - Form data collected:', formData);
+        console.log('🔍 Debug - Current user:', currentUser);
+
+        // Save to appropriate table based on product type
+        if (isOrderMenuSystem) {
+          // Save Order Menu System data to order_customizations table
+          console.log('🍽️ Saving Order Menu System data to order_customizations table...');
+          console.log('🔍 Cart data being inserted:', cartData);
+          
+          // Prepare data for insertion with fallbacks
+          const insertData = {
+            project_name: cartData.project_name || formData.projectName || 'Default Project',
+            restaurant_name: cartData.restaurant_name || formData.restaurantName || 'Default Restaurant',
+            owner_name: cartData.owner_name || formData.ownerName || 'Default Owner',
+            contact_person: cartData.contact_person || formData.contactPerson || 'Default Contact',
+            email: cartData.contact_email || formData.email || currentUser.email,
+            phone_number: cartData.contact_phone || formData.phone || '',
+            house_flat_number: cartData.house_flat_number || formData.houseNumber || '',
+            address_line_1: cartData.address_line_1 || formData.addressLine1 || '',
+            city: cartData.city || formData.city || '',
+            state: cartData.state || formData.state || '',
+            pincode: cartData.pincode || formData.pincode || '',
+            country: cartData.country || formData.country || 'India',
+            restaurant_logo_url: cartData.restaurant_logo_url || null,
+            menu_photos_urls: cartData.menu_photos_urls || [],
+            additional_requirements: cartData.additional_requirements || formData.additionalRequirements || '',
+            base_package_cost: cartData.base_package_cost || 999.00,
+            gst_amount: cartData.gst_amount || 180.00,
+            total_amount: cartData.total_amount || 1179.00,
+            status: 'completed' // Set status to completed when order is placed
+          };
+          
+          console.log('🔍 Debug - Final insert data:', insertData);
+          console.log('✅ Status being set to:', insertData.status);
+          
+          // Insert directly into the table
+          const { data: customizationData, error: customizationError } = await supabase
+            .from('order_customizations')
+            .insert(insertData)
+            .select();
+            
+          if (customizationError) {
+            console.error('❌ Error saving Order Menu System customization:', customizationError);
+            console.error('❌ Error details:', JSON.stringify(customizationError, null, 2));
+            console.error('❌ Cart data that failed:', JSON.stringify(cartData, null, 2));
+            console.error('❌ Insert data that failed:', JSON.stringify(insertData, null, 2));
+            return null;
+          }
+          
+          // Handle the insert response
+          if (customizationData && customizationData.length > 0) {
+            console.log('✅ Order customization saved successfully:', customizationData[0]);
+            console.log('✅ Status saved in database:', customizationData[0].status);
+            
+            // Verify status was saved correctly
+            if (customizationData[0].status !== 'completed') {
+              console.warn('⚠️ WARNING: Status was not saved as "completed". Actual status:', customizationData[0].status);
+              // Try to update it to completed
+              const { error: updateError } = await supabase
+                .from('order_customizations')
+                .update({ status: 'completed' })
+                .eq('id', customizationData[0].id);
+              
+              if (updateError) {
+                console.error('❌ Failed to update status to completed:', updateError);
+              } else {
+                console.log('✅ Status updated to completed after insert');
+              }
+            }
+            
+            // Update the cart data with the new ID
+            cartData.customization_id = customizationData[0].id;
+          } else {
+            console.error('❌ No data returned from insert operation');
+            return null;
+          }
+        } else {
+          // Save standard cart data to existing table
+          console.log('🔍 Testing Supabase connection for standard cart...');
+        const { data: testData, error: testError } = await supabase
+          .from('cart_customizations')
+          .select('*')
+          .limit(1);
+          
+        if (testError) {
+          console.error('❌ Supabase connection test failed:', testError);
+          return null;
+        }
+        
+        console.log('✅ Supabase connection test successful');
+
+        // Use the simple upsert function with unique constraint duplicate prevention
+        console.log('🚀 Attempting to save to Supabase using simple upsert function...');
+        
+        // Use the simple upsert function with all parameters
+        const { data: upsertResult, error: upsertError } = await supabase
+          .rpc('upsert_cart_customization', {
+            p_user_email: currentUser.email,
+            p_user_id: currentUser.id || null,
+            p_product_id: item.id,
+            p_product_name: item.name,
+            p_product_description: item.description,
+            p_base_price: item.price,
+            p_total_amount: totalAmount,
+            p_project_name: formData.projectName || '',
+            p_app_name: formData.appName || '',
+            p_contact_person: formData.contactPerson || '',
+            p_product_description_custom: formData.productDescription || '',
+            p_restaurant_name: formData.restaurantName || '',
+            p_cuisine_type: formData.cuisineType || '',
+            p_contact_email: formData.email || currentUser.email,
+            p_contact_phone: formData.phone || currentUser.phone || '',
+            p_restaurant_logo_url: restaurantLogoUrl,
+            p_restaurant_logo_filename: restaurantLogoFilename,
+            p_restaurant_logo_size: restaurantLogoSize,
+            p_restaurant_logo_type: restaurantLogoType,
+            p_restaurant_logo_hash: restaurantLogoHash,
+            p_menu_photos_urls: menuPhotosUrls,
+            p_menu_photos_filenames: menuPhotosFilenames,
+            p_menu_photos_sizes: menuPhotosSizes,
+            p_menu_photos_types: menuPhotosTypes,
+            p_menu_photos_hashes: menuPhotosHashes,
+            p_primary_color: primaryColor,
+            p_secondary_color: secondaryColor,
+            p_accent_color: accentColor,
+            p_text_color: textColor,
+            p_additional_requirements: formData.additionalRequirements || ''
+          });
+        
+        if (upsertError) {
+          console.error('❌ Upsert function failed, trying direct upsert:', upsertError);
+          
+          // Fallback to direct upsert
+          let { data, error } = await supabase
+            .from('cart_customizations')
+            .upsert([cartData], {
+              onConflict: 'user_email,product_id'
+            })
+            .select();
+
+          // If upsert fails, try insert as final fallback
+          if (error) {
+            console.warn('⚠️ Direct upsert failed, trying insert as fallback:', error);
+            const insertResult = await supabase
+              .from('cart_customizations')
+              .insert([cartData])
+              .select();
+            
+            if (insertResult.error) {
+              console.error('❌ Insert also failed:', insertResult.error);
+              error = insertResult.error;
+            } else {
+              console.log('✅ Insert successful as fallback');
+              data = insertResult.data;
+              error = null;
+            }
+          }
+          
+          // Use the fallback results
+          if (error) {
+            console.error('❌ All save methods failed:', error);
+            return null;
+          } else {
+            console.log('✅ Cart saved successfully via fallback method');
+            return data[0];
+          }
+        } else {
+          console.log('✅ Cart saved successfully via upsert function');
+          console.log('🔍 Upsert result:', upsertResult);
+          
+          // Get the saved cart data
+          const { data: savedCart, error: fetchError } = await supabase
+            .from('cart_customizations')
+            .select('*')
+            .eq('id', upsertResult)
+            .single();
+          
+          if (fetchError) {
+            console.error('❌ Failed to fetch saved cart:', fetchError);
+            return null;
+          }
+          
+          return savedCart;
+        }
+        } // Close the else block for standard cart data
+
+      } catch (error) {
+        console.error('❌ Error in saveCartToSupabase:', error);
+        console.error('❌ Error stack:', error.stack);
+        return null; // Return null instead of throwing
+      }
+    }
+
+    // Function to mark order as completed after payment
+    async markOrderAsCompleted(orderId) {
+      try {
+        console.log('💳 Marking order as completed:', orderId);
+        
+        const authManager = window.globalAuthManager || window.simpleAuthManager;
+        const currentUser = authManager?.getCurrentUser();
+        
+        if (!currentUser) {
+          console.error('❌ No user found for order completion');
+          return false;
+        }
+
+        const supabase = window.supabase?.createClient(
+          'https://lmrrdcaavwwletcjcpqv.supabase.co',
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ'
+        );
+
+        const { data, error } = await supabase
+          .from('cart_customizations')
+          .update({ 
+            cart_status: 'completed',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', orderId)
+          .eq('user_email', currentUser.email);
+
+        if (error) {
+          console.error('❌ Error marking order as completed:', error);
+          return false;
+        }
+
+        console.log('✅ Order marked as completed successfully');
+        return true;
+      } catch (error) {
+        console.error('❌ Error in markOrderAsCompleted:', error);
+        return false;
+      }
+    }
+
+    // Function to cancel an order
+    async cancelOrder(orderId) {
+      try {
+        console.log('❌ Cancelling order:', orderId);
+        
+        const authManager = window.globalAuthManager || window.simpleAuthManager;
+        const currentUser = authManager?.getCurrentUser();
+        
+        if (!currentUser) {
+          console.error('❌ No user found for order cancellation');
+          return false;
+        }
+
+        const supabase = window.supabase?.createClient(
+          'https://lmrrdcaavwwletcjcpqv.supabase.co',
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ'
+        );
+
+        const { data, error } = await supabase
+          .from('cart_customizations')
+          .update({ 
+            cart_status: 'cancelled',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', orderId)
+          .eq('user_email', currentUser.email);
+
+        if (error) {
+          console.error('❌ Error cancelling order:', error);
+          return false;
+        }
+
+        console.log('✅ Order cancelled successfully');
+        return true;
+      } catch (error) {
+        console.error('❌ Error in cancelOrder:', error);
+        return false;
+      }
+    }
+
+    calculateTotal() {
+      const subtotal = this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const featuresTotal = this.items.reduce((sum, item) => {
+        const featurePrices = {
+          responsive: 500,
+          seo: 300,
+          analytics: 200
+        };
+        return sum + item.features.reduce((fsum, feature) => fsum + (featurePrices[feature] || 0), 0);
+      }, 0);
+      const tax = (subtotal + featuresTotal) * 0.18;
+      return Math.round(subtotal + featuresTotal + tax);
+    }
+
+    declineOrder() {
+      if (confirm('Are you sure you want to decline this order? You will be redirected to products page.')) {
+        // Clear cart
+        this.items = [];
+        this.saveCart();
+        // Redirect to products page
+        window.location.href = '/products';
+      }
+    }
+
+    deleteItem() {
+      if (confirm('Are you sure you want to delete this item? You will be redirected to products page.')) {
+        // Clear cart
+        this.items = [];
+        this.saveCart();
+        // Redirect to products page
+        window.location.href = '/products';
+      }
+    }
+
+    switchPaymentMethod(method) {
+      const cardDetails = document.getElementById('card-details');
+      const upiDetails = document.getElementById('upi-details');
+      const netbankingDetails = document.getElementById('netbanking-details');
+
+      // Hide all payment forms
+      cardDetails?.classList.add('hidden');
+      upiDetails?.classList.add('hidden');
+      netbankingDetails?.classList.add('hidden');
+
+      // Show selected payment form
+      switch (method) {
+        case 'card':
+          cardDetails?.classList.remove('hidden');
+          break;
+        case 'upi':
+          upiDetails?.classList.remove('hidden');
+          break;
+        case 'netbanking':
+          netbankingDetails?.classList.remove('hidden');
+          break;
+      }
+    }
+
+
+
+    updateOrderReview() {
+      console.log('🔄 Updating order review with data:', this.requirements);
+      
+      try {
+        const item = this.items[0];
+        const isOrderMenuSystem = item && (item.id === 'order-menu-system' || item.id === '5');
+        
+        if (isOrderMenuSystem) {
+          // Show Order Menu System review section
+          const orderMenuInfoEl = document.getElementById('review-order-menu-info');
+          if (orderMenuInfoEl) orderMenuInfoEl.classList.remove('hidden');
+          
+          // Update Order Menu System specific review data
+          const restaurantNameEl = document.getElementById('review-restaurant-name');
+          const restaurantAddressEl = document.getElementById('review-restaurant-address');
+          const contactEmailEl = document.getElementById('review-contact-email');
+          const contactPhoneEl = document.getElementById('review-contact-phone');
+          
+          if (restaurantNameEl) restaurantNameEl.textContent = this.requirements.restaurantName || '-';
+          if (restaurantAddressEl) {
+            const address = [
+              this.requirements.houseNumber,
+              this.requirements.addressLine1,
+              this.requirements.city,
+              this.requirements.state,
+              this.requirements.pincode,
+              this.requirements.country
+            ].filter(Boolean).join(', ');
+            restaurantAddressEl.textContent = address || '-';
+          }
+          if (contactEmailEl) contactEmailEl.textContent = this.requirements.email || '-';
+          if (contactPhoneEl) contactPhoneEl.textContent = this.requirements.phone || '-';
+          
+        } else {
+          // Hide Order Menu System review section for other products
+          const orderMenuInfoEl = document.getElementById('review-order-menu-info');
+          if (orderMenuInfoEl) orderMenuInfoEl.classList.add('hidden');
+          // Update standard project summary for other products
+        const projectNameEl = document.getElementById('review-project-name');
+        const contactPersonEl = document.getElementById('review-contact-person');
+        const appNameEl = document.getElementById('review-app-name');
+        
+        if (projectNameEl) projectNameEl.textContent = this.requirements.projectName || '-';
+        if (contactPersonEl) contactPersonEl.textContent = this.requirements.contactPerson || '-';
+        if (appNameEl) appNameEl.textContent = this.requirements.appName || '-';
+        
+        // Show/hide restaurant info based on project type
+        const restaurantInfoEl = document.getElementById('review-restaurant-info');
+        const cuisineInfoEl = document.getElementById('review-cuisine-info');
+        const restaurantNameEl = document.getElementById('review-restaurant-name');
+        const cuisineTypeEl = document.getElementById('review-cuisine-type');
+        
+        if (item && (item.id === 'restaurant-menu' || item.id === 'restaurant-menu-system' || item.id === 'restaurant-website' || item.id === '1' || item.id === '4')) {
+          if (restaurantInfoEl) restaurantInfoEl.classList.remove('hidden');
+          if (cuisineInfoEl) cuisineInfoEl.classList.remove('hidden');
+          if (restaurantNameEl) restaurantNameEl.textContent = this.requirements.restaurantName || '-';
+          if (cuisineTypeEl) cuisineTypeEl.textContent = this.requirements.cuisineType || '-';
+      } else {
+          if (restaurantInfoEl) restaurantInfoEl.classList.add('hidden');
+          if (cuisineInfoEl) cuisineInfoEl.classList.add('hidden');
+          }
+      }
+
+      // Update colors
+
+        const primaryColorEl = document.getElementById('review-primary-color');
+        const secondaryColorEl = document.getElementById('review-secondary-color');
+        const accentColorEl = document.getElementById('review-accent-color');
+        const textColorEl = document.getElementById('review-text-color');
+
+        if (primaryColorEl) primaryColorEl.style.backgroundColor = primaryColor;
+        if (secondaryColorEl) secondaryColorEl.style.backgroundColor = secondaryColor;
+        if (accentColorEl) accentColorEl.style.backgroundColor = accentColor;
+        if (textColorEl) textColorEl.style.backgroundColor = textColor;
+
+      // Update logo and photos status
+        const logoFile = document.getElementById('logo-upload')?.files[0];
+        const photosFiles = document.getElementById('menu-upload')?.files;
+        
+        const logoStatusEl = document.getElementById('review-logo-status');
+        const photosStatusEl = document.getElementById('review-photos-status');
+        
+        if (logoStatusEl) {
+          logoStatusEl.textContent = logoFile ? `✓ ${logoFile.name}` : 'Not uploaded';
+        }
+        if (photosStatusEl) {
+          photosStatusEl.textContent = photosFiles && photosFiles.length > 0 ? `✓ ${photosFiles.length} photos selected` : 'Not uploaded';
+        }
+
+      // Update total
+         const totalEl = document.getElementById('review-total');
+         if (totalEl) {
+           const total = this.calculateTotal();
+           totalEl.textContent = `₹${total.toLocaleString()}`;
+         }
+
+         // Update final payment amount
+         const finalAmountEl = document.getElementById('final-amount');
+         if (finalAmountEl) {
+           const total = this.calculateTotal();
+           finalAmountEl.textContent = total.toLocaleString();
+         }
+
+         // Update contact information
+         const emailEl = document.getElementById('review-email');
+         const phoneEl = document.getElementById('review-phone');
+         
+         if (emailEl) emailEl.textContent = this.requirements.email || '-';
+         if (phoneEl) phoneEl.textContent = this.requirements.phone || '-';
+
+         // Update additional requirements
+         const additionalReqEl = document.getElementById('review-additional-requirements');
+         if (additionalReqEl) {
+           additionalReqEl.textContent = this.requirements.additionalRequirements || 'No additional requirements specified';
+         }
+
+         console.log('✅ Order review updated successfully');
+        
+      } catch (error) {
+        console.error('❌ Error updating order review:', error);
+      }
+    }
+
+    backToRequirements() {
+      const orderReview = document.getElementById('order-review');
+      const projectRequirements = document.getElementById('project-requirements');
+      
+      if (orderReview) orderReview.classList.add('hidden');
+      if (projectRequirements) projectRequirements.classList.remove('hidden');
+      
+      projectRequirements?.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async proceedToPayment() {
+      // Create order with status 'pending'
+      await this.createOrder();
+      
+      // Show payment section
+      this.showPaymentSection();
+    }
+
+    showPaymentSection() {
+      // Hide requirements form and show payment
+      const projectRequirements = document.getElementById('project-requirements');
+      const paymentSection = document.getElementById('payment-section');
+      
+      if (projectRequirements) projectRequirements.classList.add('hidden');
+      if (paymentSection) paymentSection.classList.remove('hidden');
+      
+      // Update payment summary
+      this.updatePaymentSummary();
+      
+      // Scroll to payment section
+      paymentSection?.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    updatePaymentSummary() {
+      try {
+        console.log('🔄 Updating payment summary...');
+        console.log('📝 Requirements data:', this.requirements);
+        
+        // Update project details
+        const projectNameEl = document.getElementById('payment-project-name');
+        const contactPersonEl = document.getElementById('payment-contact-person');
+        const appNameEl = document.getElementById('payment-app-name');
+        const emailEl = document.getElementById('payment-email');
+        const phoneEl = document.getElementById('payment-phone');
+        const totalAmountEl = document.getElementById('payment-total-amount');
+        
+        console.log('🔍 Payment elements found:', {
+          projectNameEl: !!projectNameEl,
+          contactPersonEl: !!contactPersonEl,
+          appNameEl: !!appNameEl,
+          emailEl: !!emailEl,
+          phoneEl: !!phoneEl,
+          totalAmountEl: !!totalAmountEl
+        });
+        
+        if (projectNameEl) {
+          projectNameEl.textContent = this.requirements.projectName || '-';
+          console.log('✅ Updated project name:', this.requirements.projectName);
+        }
+        if (contactPersonEl) {
+          contactPersonEl.textContent = this.requirements.contactPerson || '-';
+          console.log('✅ Updated contact person:', this.requirements.contactPerson);
+        }
+        if (appNameEl) {
+          appNameEl.textContent = this.requirements.appName || '-';
+          console.log('✅ Updated app name:', this.requirements.appName);
+        }
+        if (emailEl) {
+          emailEl.textContent = this.requirements.email || '-';
+          console.log('✅ Updated email:', this.requirements.email);
+        }
+        if (phoneEl) {
+          phoneEl.textContent = this.requirements.phone || '-';
+          console.log('✅ Updated phone:', this.requirements.phone);
+        }
+        
+        // Update total amount
+        if (totalAmountEl) {
+          const total = this.calculateTotal();
+          totalAmountEl.textContent = total.toLocaleString();
+          console.log('✅ Updated total amount:', total);
+        }
+        
+        // Also update the final payment button amount
+        const finalAmountEl = document.getElementById('final-amount');
+        if (finalAmountEl) {
+          const total = this.calculateTotal();
+          finalAmountEl.textContent = total.toLocaleString();
+          console.log('✅ Updated final payment amount:', total);
+        }
+        
+        console.log('✅ Payment summary updated successfully');
+      } catch (error) {
+        console.error('❌ Error updating payment summary:', error);
+      }
+    }
+
+    processFinalPayment() {
+      // Validate payment form
+      const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+      
+      if (!paymentMethod) {
+        alert('Please select a payment method');
+        return;
+      }
+
+      // Validate based on payment method
+      let isValid = true;
+      let message = '';
+
+      switch (paymentMethod) {
+        case 'card':
+          const cardNumber = document.querySelector('input[name="cardNumber"]').value;
+          const cardholderName = document.querySelector('input[name="cardholderName"]').value;
+          const expiryDate = document.querySelector('input[name="expiryDate"]').value;
+          const cvv = document.querySelector('input[name="cvv"]').value;
+          
+          if (!cardNumber || !cardholderName || !expiryDate || !cvv) {
+            isValid = false;
+            message = 'Please fill in all card details';
+          }
+          break;
+          
+        case 'upi':
+          const upiId = document.querySelector('input[name="upiId"]').value;
+          if (!upiId) {
+            isValid = false;
+            message = 'Please enter your UPI ID';
+          }
+          break;
+          
+        case 'netbanking':
+          const bank = document.querySelector('select[name="bank"]').value;
+          if (!bank) {
+            isValid = false;
+            message = 'Please select your bank';
+          }
+          break;
+      }
+
+      if (!isValid) {
+        alert(message);
+        return;
+      }
+
+      // Process payment (simulated)
+      this.simulatePayment();
+    }
+
+    simulatePayment() {
+      const finalPaymentBtn = document.getElementById('final-payment');
+      const originalText = finalPaymentBtn.innerHTML;
+      
+      // Show loading state
+      finalPaymentBtn.innerHTML = `
+        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Processing Payment...
+      `;
+      finalPaymentBtn.disabled = true;
+
+      // Simulate payment processing
+      setTimeout(() => {
+        // Save order to user's order history
+        this.saveOrderToHistory();
+        
+        // Update order status to confirmed when payment is successful
+        this.updateOrderStatusToConfirmed();
+        
+        // Clear cart
+        this.items = [];
+        this.saveCart();
+        
+        // Show success
+        finalPaymentBtn.innerHTML = `
+          <svg class="w-5 h-5 text-white inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          Payment Successful!
+        `;
+
+        // Redirect to orders page after 2 seconds
+        setTimeout(() => {
+          window.location.href = '/orders?order=success';
+        }, 2000);
+      }, 3000);
+    }
+
+    saveOrderToHistory() {
+      if (this.items.length === 0) return;
+
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      const currentUser = authManager?.getCurrentUser();
+      if (!currentUser) return;
+
+      const item = this.items[0];
+      const total = this.calculateTotal();
+
+      // Get color values from requirements form
+
+      // Create order for shared data store (admin panel visibility)
+      const orderData = {
+        userId: currentUser.email,
+        customerName: currentUser.fullName || 'User',
+        customerEmail: currentUser.email,
+        serviceName: item.name,
+        serviceType: 'web_development',
+        status: 'cart' as const, // Starts as cart, changes to pending when payment is initiated
+        paymentStatus: 'pending' as const, // Explicitly type as the literal 'pending'
+        amount: total,
+        currency: 'INR',
+        requirements: {
+          customName: item.customName || '',
+          logo: item.logo || null,
+          features: item.features || [],
+          description: item.description
+        }
+      };
+
+      // Save to shared data store for admin panel
+      try {
+        const sharedOrder = sharedDataStore.createOrder(orderData);
+        console.log('Order saved to shared store:', sharedOrder);
+        // Store the order ID for later status updates
+        this.currentSharedOrderId = sharedOrder.id;
+        
+        // Debug: Check if order was actually saved
+        const allOrders = sharedDataStore.getOrders();
+        console.log('All orders in shared store after creation:', allOrders);
+        console.log('Current shared order ID:', this.currentSharedOrderId);
+      } catch (error) {
+        console.error('Error saving to shared store:', error);
+      }
+
+      // Also save to user's local orders for backward compatibility
+      const order = {
+        orderId: `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        userId: currentUser.email,
+        projectName: item.name,
+        description: item.description,
+        total: total,
+        orderDate: new Date().toISOString(),
+        requirements: {
+          ...this.requirements,
+          primaryColor: primaryColor,
+          secondaryColor: secondaryColor,
+          accentColor: accentColor,
+          textColor: textColor
+        },
+        features: item.features || [],
+        logo: item.logo || null,
+        color: item.color || '#3B82F6',
+        customName: item.customName || ''
+      };
+
+      // Load existing orders
+      let userOrders = [];
+      const existingOrders = localStorage.getItem('user-orders');
+      if (existingOrders) {
+        userOrders = JSON.parse(existingOrders);
+      }
+
+      // Add new order
+      userOrders.push(order);
+
+      // Save back to localStorage
+      localStorage.setItem('user-orders', JSON.stringify(userOrders));
+
+      // Log for debugging
+      console.log('Order saved to user orders:', order);
+    }
+
+
+    async createOrder() {
+      if (this.items.length === 0) return;
+
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      const currentUser = authManager?.getCurrentUser();
+      if (!currentUser) return;
+
+      const item = this.items[0];
+      const total = this.calculateTotal();
+
+      // Get color values from requirements form
+
+      // Get form data based on product type
+      const form = document.getElementById('requirements-form');
+      let formData = {};
+      const isOrderMenuSystem = item && (item.id === 'order-menu-system' || item.id === '5');
+      
+              if (form) {
+        if (isOrderMenuSystem) {
+          // Order Menu System specific form data - Updated to include all required fields
+          formData = {
+            // 1. Project Name
+            projectName: form.querySelector('[name="projectName"]')?.value || '',
+            
+            // 2. Contact Person
+            contactPerson: form.querySelector('[name="contactPerson"]')?.value || '',
+            
+            // 3. Restaurant Name
+            restaurantName: form.querySelector('[name="orderMenuRestaurantName"]')?.value || '',
+            
+            // 4. Owner Name
+            ownerName: form.querySelector('[name="orderMenuOwnerName"]')?.value || '',
+            
+            // 6. Professional Address
+            houseNumber: form.querySelector('[name="houseNumber"]')?.value || '',
+            addressLine1: form.querySelector('[name="addressLine1"]')?.value || '',
+            city: form.querySelector('[name="city"]')?.value || '',
+            state: form.querySelector('[name="state"]')?.value || '',
+            pincode: form.querySelector('[name="pincode"]')?.value || '',
+            country: form.querySelector('[name="country"]')?.value || 'India',
+            
+            // 9. Contact Information
+            // 9.1. Email
+            email: form.querySelector('[name="email"]')?.value || '',
+            // 9.2. Phone Number
+            phone: form.querySelector('[name="phone"]')?.value || '',
+            
+            
+            // 12. Additional Requirements
+            additionalRequirements: form.querySelector('[name="additionalRequirements"]')?.value || ''
+          };
+        } else {
+          // Standard form data for other products
+          formData = {
+            projectName: form.querySelector('[name="projectName"]')?.value || '',
+            contactPerson: form.querySelector('[name="contactPerson"]')?.value || '',
+            restaurantName: form.querySelector('[name="restaurantName"]')?.value || '',
+            cuisineType: form.querySelector('[name="cuisineType"]')?.value || '',
+            appName: form.querySelector('[name="appName"]')?.value || '',
+            productDescription: form.querySelector('[name="productDescription"]')?.value || '',
+            email: form.querySelector('[name="email"]')?.value || '',
+            phone: form.querySelector('[name="phone"]')?.value || '',
+            additionalRequirements: form.querySelector('[name="additionalRequirements"]')?.value || ''
+          };
+        }
+        }
+
+      try {
+        // Save cart data to Supabase using the existing method
+        const supabaseResult = await this.saveCartToSupabase();
+        if (supabaseResult) {
+          console.log('✅ Cart customization saved to Supabase:', supabaseResult);
+          this.currentSharedOrderId = supabaseResult.id;
+        } else {
+          console.error('❌ Failed to save cart data to Supabase');
+        }
+
+        // Also save to shared data store for admin panel
+      const orderData = {
+        userId: currentUser.email,
+        customerName: currentUser.fullName || 'User',
+        customerEmail: currentUser.email,
+        serviceName: item.name,
+          serviceType: isOrderMenuSystem ? 'order_menu_system' : 'web_development',
+          status: 'pending' as const,
+          paymentStatus: 'pending' as const,
+        amount: total,
+        currency: 'INR',
+        requirements: {
+            ...formData,
+          primaryColor: primaryColor,
+          secondaryColor: secondaryColor,
+          accentColor: accentColor,
+          textColor: textColor,
+          customName: item.customName || '',
+          logo: item.logo || null,
+          features: item.features || [],
+          description: item.description
+        }
+      };
+
+        const sharedOrder = sharedDataStore.createOrder(orderData);
+        console.log('Order created in shared store:', sharedOrder);
+        
+        // Debug: Check if order was actually saved
+        const allOrders = sharedDataStore.getOrders();
+        console.log('All orders in shared store after creation:', allOrders);
+        console.log('Current shared order ID:', this.currentSharedOrderId);
+
+      } catch (error) {
+        console.error('Error creating order:', error);
+      }
+    }
+
+    updateOrderStatusToPending() {
+      if (this.currentSharedOrderId) {
+        try {
+          sharedDataStore.updateOrderStatus(this.currentSharedOrderId, 'pending', 'Payment initiated');
+          console.log('Order status updated to pending');
+        } catch (error) {
+          console.error('Error updating order status:', error);
+        }
+      }
+    }
+
+    updateOrderStatusToConfirmed() {
+      if (this.currentSharedOrderId) {
+        try {
+          sharedDataStore.updateOrderStatus(this.currentSharedOrderId, 'confirmed', 'Payment successful - Order confirmed');
+          console.log('Order status updated to confirmed');
+        } catch (error) {
+          console.error('Error updating order status:', error);
+        }
+      }
+    }
+
+    // Utility method for debouncing
+    debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+  }
+
+  // Menu item management functions for Order Menu System
+  function addMenuItem() {
+    const container = document.getElementById('menu-items-container');
+    const menuItemHtml = `
+      <div class="menu-item border border-gray-300 rounded-lg p-4 mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-white mb-2">Item Name</label>
+            <input type="text" name="menuItemName[]" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="e.g., Margherita Pizza">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-white mb-2">Price (₹)</label>
+            <input type="number" name="menuItemPrice[]" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="299">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-white mb-2">Quantity Available</label>
+            <input type="number" name="menuItemQuantity[]" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="50">
+          </div>
+        </div>
+        <button type="button" onclick="removeMenuItem(this)" class="mt-2 text-red-500 hover:text-red-700 text-sm font-medium">Remove Item</button>
+      </div>
+    `;
+    container.insertAdjacentHTML('beforeend', menuItemHtml);
+  }
+
+  function removeMenuItem(button) {
+    button.closest('.menu-item').remove();
+  }
+
+  // Make functions globally available
+  window.addMenuItem = addMenuItem;
+  window.removeMenuItem = removeMenuItem;
+
+  // Note: Cart initialization is handled in the first DOMContentLoaded listener above
+
+  // Global functions for payment integration
+  window.markOrderAsCompleted = async function(orderId) {
+    if (window.cart) {
+      return await window.cart.markOrderAsCompleted(orderId);
+    }
+    console.error('❌ Cart not initialized');
+    return false;
+  };
+
+  window.cancelOrder = async function(orderId) {
+    if (window.cart) {
+      return await window.cart.cancelOrder(orderId);
+    }
+    console.error('❌ Cart not initialized');
+    return false;
+  };
+
+  // Example payment success handler
+  window.handlePaymentSuccess = async function(orderId) {
+    console.log('💳 Payment successful for order:', orderId);
+    const success = await window.markOrderAsCompleted(orderId);
+    if (success) {
+      alert('✅ Payment successful! Your order has been completed.');
+      // Redirect to success page or show success message
+    } else {
+      alert('❌ Error updating order status. Please contact support.');
+    }
+  };
+
+  // Example payment failure handler
+  window.handlePaymentFailure = async function(orderId) {
+    console.log('❌ Payment failed for order:', orderId);
+    // Order remains in 'pending' status
+    alert('❌ Payment failed. Please try again or contact support.');
+  };
+
+  // Example order cancellation handler
+  window.handleOrderCancellation = async function(orderId) {
+    console.log('❌ Order cancelled:', orderId);
+    const success = await window.cancelOrder(orderId);
+    if (success) {
+      alert('❌ Order has been cancelled.');
+      // Redirect to home page or show cancellation message
+    } else {
+      alert('❌ Error cancelling order. Please contact support.');
+    }
+  };
+
+  // Function to clear cart when user changes
+  window.clearCartForNewUser = function() {
+    console.log('🧹 Clearing cart for new user');
+    if (window.cart) {
+      window.cart.items = [];
+      window.cart.requirements = {};
+      localStorage.removeItem('cart-items');
+      localStorage.removeItem('cart-requirements');
+      localStorage.removeItem('user-cart-data');
+      console.log('✅ Cart cleared for new user');
+    }
+  };
+
+  // Clear cart when user changes (for privacy)
+  window.clearCartOnUserChange = function() {
+    console.log('🧹 Clearing cart due to user change');
+    if (window.cart) {
+      window.cart.items = [];
+      window.cart.requirements = {};
+      localStorage.removeItem('cart-items');
+      localStorage.removeItem('cart-requirements');
+      localStorage.removeItem('user-cart-data');
+      console.log('✅ Cart cleared due to user change');
+    }
+  };
+
+  // Debug function to check cart state
+  window.debugCartState = function() {
+    console.log('🔍 Cart Debug State:');
+    console.log('- Cart instance:', !!window.cart);
+    console.log('- Cart items count:', window.cart ? window.cart.items.length : 0);
+    console.log('- Cart items:', window.cart ? window.cart.items : []);
+    console.log('- localStorage cart-items:', localStorage.getItem('cart-items'));
+    console.log('- localStorage cart-requirements:', localStorage.getItem('cart-requirements'));
+    console.log('- localStorage user-cart-data:', localStorage.getItem('user-cart-data'));
+    
+    const authManager = window.globalAuthManager || window.simpleAuthManager;
+    const currentUser = authManager?.getCurrentUser();
+    console.log('- Current user:', currentUser ? currentUser.email : 'Not logged in');
+    
+    if (window.cart && window.cart.items.length > 0) {
+      const firstItem = window.cart.items[0];
+      console.log('- First item email:', firstItem.email);
+      console.log('- First item name:', firstItem.name);
+    }
+  };
+
+  // Function to check if cart belongs to current user
+  window.validateCartOwnership = function() {
+    const authManager = window.globalAuthManager || window.simpleAuthManager;
+    const currentUser = authManager?.getCurrentUser();
+    
+    if (!currentUser) {
+      return true; // Anonymous user, localStorage is fine
+    }
+
+    // For authenticated users, only clear cart if it explicitly belongs to a different user
+    if (window.cart && window.cart.items.length > 0) {
+      const firstItem = window.cart.items[0];
+      
+      // Only clear if the cart item has an email that explicitly doesn't match current user
+      if (firstItem.email && firstItem.email !== currentUser.email) {
+        console.log('⚠️ Cart belongs to different user, clearing...');
+        window.clearCartForNewUser();
+        return false;
+      }
+      
+      // Don't clear cart items without email - they might be newly added items
+      // that haven't been saved to Supabase yet
+    }
+    return true;
+  };
+
+  // Pincode-based autocomplete functionality for cart
+  const cartPincodeData = {
+    '400001': { city: 'Mumbai', state: 'Maharashtra' },
+    '400002': { city: 'Mumbai', state: 'Maharashtra' },
+    '400003': { city: 'Mumbai', state: 'Maharashtra' },
+    '400004': { city: 'Mumbai', state: 'Maharashtra' },
+    '400005': { city: 'Mumbai', state: 'Maharashtra' },
+    '400006': { city: 'Mumbai', state: 'Maharashtra' },
+    '400007': { city: 'Mumbai', state: 'Maharashtra' },
+    '400008': { city: 'Mumbai', state: 'Maharashtra' },
+    '400009': { city: 'Mumbai', state: 'Maharashtra' },
+    '400010': { city: 'Mumbai', state: 'Maharashtra' },
+    '110001': { city: 'New Delhi', state: 'Delhi' },
+    '110002': { city: 'New Delhi', state: 'Delhi' },
+    '110003': { city: 'New Delhi', state: 'Delhi' },
+    '110004': { city: 'New Delhi', state: 'Delhi' },
+    '110005': { city: 'New Delhi', state: 'Delhi' },
+    '110006': { city: 'New Delhi', state: 'Delhi' },
+    '110007': { city: 'New Delhi', state: 'Delhi' },
+    '110008': { city: 'New Delhi', state: 'Delhi' },
+    '110009': { city: 'New Delhi', state: 'Delhi' },
+    '110010': { city: 'New Delhi', state: 'Delhi' },
+    '560001': { city: 'Bangalore', state: 'Karnataka' },
+    '560002': { city: 'Bangalore', state: 'Karnataka' },
+    '560003': { city: 'Bangalore', state: 'Karnataka' },
+    '560004': { city: 'Bangalore', state: 'Karnataka' },
+    '560005': { city: 'Bangalore', state: 'Karnataka' },
+    '560006': { city: 'Bangalore', state: 'Karnataka' },
+    '560007': { city: 'Bangalore', state: 'Karnataka' },
+    '560008': { city: 'Bangalore', state: 'Karnataka' },
+    '560009': { city: 'Bangalore', state: 'Karnataka' },
+    '560010': { city: 'Bangalore', state: 'Karnataka' },
+    '600001': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600002': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600003': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600004': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600005': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600006': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600007': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600008': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600009': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600010': { city: 'Chennai', state: 'Tamil Nadu' },
+    '700001': { city: 'Kolkata', state: 'West Bengal' },
+    '700002': { city: 'Kolkata', state: 'West Bengal' },
+    '700003': { city: 'Kolkata', state: 'West Bengal' },
+    '700004': { city: 'Kolkata', state: 'West Bengal' },
+    '700005': { city: 'Kolkata', state: 'West Bengal' },
+    '700006': { city: 'Kolkata', state: 'West Bengal' },
+    '700007': { city: 'Kolkata', state: 'West Bengal' },
+    '700008': { city: 'Kolkata', state: 'West Bengal' },
+    '700009': { city: 'Kolkata', state: 'West Bengal' },
+    '700010': { city: 'Kolkata', state: 'West Bengal' },
+    '380001': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380002': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380003': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380004': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380005': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380006': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380007': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380008': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380009': { city: 'Ahmedabad', state: 'Gujarat' },
+    '380010': { city: 'Ahmedabad', state: 'Gujarat' },
+    '411001': { city: 'Pune', state: 'Maharashtra' },
+    '411002': { city: 'Pune', state: 'Maharashtra' },
+    '411003': { city: 'Pune', state: 'Maharashtra' },
+    '411004': { city: 'Pune', state: 'Maharashtra' },
+    '411005': { city: 'Pune', state: 'Maharashtra' },
+    '411006': { city: 'Pune', state: 'Maharashtra' },
+    '411007': { city: 'Pune', state: 'Maharashtra' },
+    '411008': { city: 'Pune', state: 'Maharashtra' },
+    '411009': { city: 'Pune', state: 'Maharashtra' },
+    '411010': { city: 'Pune', state: 'Maharashtra' },
+    // More rural pincodes
+    '302001': { city: 'Jaipur', state: 'Rajasthan' },
+    '302002': { city: 'Jaipur', state: 'Rajasthan' },
+    '302003': { city: 'Jaipur', state: 'Rajasthan' },
+    '302004': { city: 'Jaipur', state: 'Rajasthan' },
+    '302005': { city: 'Jaipur', state: 'Rajasthan' },
+    '302006': { city: 'Jaipur', state: 'Rajasthan' },
+    '302007': { city: 'Jaipur', state: 'Rajasthan' },
+    '302008': { city: 'Jaipur', state: 'Rajasthan' },
+    '302009': { city: 'Jaipur', state: 'Rajasthan' },
+    '302010': { city: 'Jaipur', state: 'Rajasthan' },
+    '641001': { city: 'Coimbatore', state: 'Tamil Nadu' },
+    '641002': { city: 'Coimbatore', state: 'Tamil Nadu' },
+    '641003': { city: 'Coimbatore', state: 'Tamil Nadu' },
+    '641004': { city: 'Coimbatore', state: 'Tamil Nadu' },
+    '641005': { city: 'Coimbatore', state: 'Tamil Nadu' },
+    '625001': { city: 'Madurai', state: 'Tamil Nadu' },
+    '625002': { city: 'Madurai', state: 'Tamil Nadu' },
+    '625003': { city: 'Madurai', state: 'Tamil Nadu' },
+    '625004': { city: 'Madurai', state: 'Tamil Nadu' },
+    '625005': { city: 'Madurai', state: 'Tamil Nadu' },
+    '570001': { city: 'Mysore', state: 'Karnataka' },
+    '570002': { city: 'Mysore', state: 'Karnataka' },
+    '570003': { city: 'Mysore', state: 'Karnataka' },
+    '570004': { city: 'Mysore', state: 'Karnataka' },
+    '570005': { city: 'Mysore', state: 'Karnataka' },
+    '580001': { city: 'Hubli', state: 'Karnataka' },
+    '580002': { city: 'Hubli', state: 'Karnataka' },
+    '580003': { city: 'Hubli', state: 'Karnataka' },
+    '580004': { city: 'Hubli', state: 'Karnataka' },
+    '580005': { city: 'Hubli', state: 'Karnataka' },
+    '500001': { city: 'Hyderabad', state: 'Telangana' },
+    '500002': { city: 'Hyderabad', state: 'Telangana' },
+    '500003': { city: 'Hyderabad', state: 'Telangana' },
+    '500004': { city: 'Hyderabad', state: 'Telangana' },
+    '500005': { city: 'Hyderabad', state: 'Telangana' },
+    '500006': { city: 'Hyderabad', state: 'Telangana' },
+    '500007': { city: 'Hyderabad', state: 'Telangana' },
+    '500008': { city: 'Hyderabad', state: 'Telangana' },
+    '500009': { city: 'Hyderabad', state: 'Telangana' },
+    '500010': { city: 'Hyderabad', state: 'Telangana' },
+    // More common Indian pincodes
+    '110001': { city: 'Delhi', state: 'Delhi' },
+    '110002': { city: 'Delhi', state: 'Delhi' },
+    '110003': { city: 'Delhi', state: 'Delhi' },
+    '110004': { city: 'Delhi', state: 'Delhi' },
+    '110005': { city: 'Delhi', state: 'Delhi' },
+    '110006': { city: 'Delhi', state: 'Delhi' },
+    '110007': { city: 'Delhi', state: 'Delhi' },
+    '110008': { city: 'Delhi', state: 'Delhi' },
+    '110009': { city: 'Delhi', state: 'Delhi' },
+    '110010': { city: 'Delhi', state: 'Delhi' },
+    '560001': { city: 'Bangalore', state: 'Karnataka' },
+    '560002': { city: 'Bangalore', state: 'Karnataka' },
+    '560003': { city: 'Bangalore', state: 'Karnataka' },
+    '560004': { city: 'Bangalore', state: 'Karnataka' },
+    '560005': { city: 'Bangalore', state: 'Karnataka' },
+    '560006': { city: 'Bangalore', state: 'Karnataka' },
+    '560007': { city: 'Bangalore', state: 'Karnataka' },
+    '560008': { city: 'Bangalore', state: 'Karnataka' },
+    '560009': { city: 'Bangalore', state: 'Karnataka' },
+    '560010': { city: 'Bangalore', state: 'Karnataka' },
+    '600001': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600002': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600003': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600004': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600005': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600006': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600007': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600008': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600009': { city: 'Chennai', state: 'Tamil Nadu' },
+    '600010': { city: 'Chennai', state: 'Tamil Nadu' },
+    '700001': { city: 'Kolkata', state: 'West Bengal' },
+    '700002': { city: 'Kolkata', state: 'West Bengal' },
+    '700003': { city: 'Kolkata', state: 'West Bengal' },
+    '700004': { city: 'Kolkata', state: 'West Bengal' },
+    '700005': { city: 'Kolkata', state: 'West Bengal' },
+    '700006': { city: 'Kolkata', state: 'West Bengal' },
+    '700007': { city: 'Kolkata', state: 'West Bengal' },
+    '700008': { city: 'Kolkata', state: 'West Bengal' },
+    '700009': { city: 'Kolkata', state: 'West Bengal' },
+    '700010': { city: 'Kolkata', state: 'West Bengal' }
+  };
+
+  // Indian cities and states for autocomplete (including extensive rural cities)
+  const cartIndianCities = [
+    // Major Cities
+    'Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Kolkata', 'Hyderabad', 'Pune', 'Ahmedabad', 'Jaipur', 'Surat',
+    'Lucknow', 'Kanpur', 'Nagpur', 'Indore', 'Thane', 'Bhopal', 'Visakhapatnam', 'Pimpri-Chinchwad', 'Patna', 'Vadodara',
+    'Ghaziabad', 'Ludhiana', 'Agra', 'Nashik', 'Faridabad', 'Meerut', 'Rajkot', 'Kalyan-Dombivali', 'Vasai-Virar', 'Varanasi',
+    'Srinagar', 'Aurangabad', 'Navi Mumbai', 'Solapur', 'Vijayawada', 'Kolhapur', 'Amritsar', 'Sangli', 'Mira-Bhayandar',
+    
+    // Rajasthan - Extensive rural coverage
+    'Alwar', 'Bharatpur', 'Kota', 'Udaipur', 'Jodhpur', 'Bikaner', 'Ajmer', 'Pali', 'Sikar', 'Bhilwara',
+    'Kishangarh', 'Beawar', 'Hanumangarh', 'Ganganagar', 'Chittorgarh', 'Banswara', 'Dungarpur', 'Pratapgarh', 'Rajsamand',
+    'Baran', 'Jhalawar', 'Bundi', 'Sawai Madhopur', 'Karauli', 'Dholpur', 'Tonk', 'Dausa', 'Jhunjhunu', 'Churu',
+    'Nagaur', 'Jalore', 'Sirohi', 'Jaisalmer', 'Barmer', 'Jalor', 'Bharatpur', 'Karauli', 'Dholpur', 'Sawai Madhopur',
+    'Baran', 'Jhalawar', 'Bundi', 'Kota', 'Bundi', 'Sawai Madhopur', 'Karauli', 'Dholpur', 'Tonk', 'Dausa',
+    'Sikar', 'Jhunjhunu', 'Churu', 'Nagaur', 'Jalore', 'Sirohi', 'Jaisalmer', 'Barmer', 'Jalor', 'Pali',
+    'Rajsamand', 'Bhilwara', 'Kishangarh', 'Beawar', 'Hanumangarh', 'Ganganagar', 'Chittorgarh', 'Banswara', 'Dungarpur',
+    'Pratapgarh', 'Rajsamand', 'Baran', 'Jhalawar', 'Bundi', 'Sawai Madhopur', 'Karauli', 'Dholpur', 'Tonk', 'Dausa',
+    
+    // Maharashtra - Extensive rural coverage
+    'Kolhapur', 'Sangli', 'Satara', 'Pune', 'Nashik', 'Aurangabad', 'Jalgaon', 'Dhule', 'Nanded', 'Latur',
+    'Osmanabad', 'Beed', 'Jalna', 'Parbhani', 'Hingoli', 'Washim', 'Yavatmal', 'Amravati', 'Akola', 'Buldhana',
+    'Nandurbar', 'Ahmednagar', 'Solapur', 'Ratnagiri', 'Sindhudurg', 'Sangli', 'Satara', 'Kolhapur', 'Pune', 'Nashik',
+    'Aurangabad', 'Jalgaon', 'Dhule', 'Nanded', 'Latur', 'Osmanabad', 'Beed', 'Jalna', 'Parbhani', 'Hingoli',
+    'Washim', 'Yavatmal', 'Amravati', 'Akola', 'Buldhana', 'Nandurbar', 'Ahmednagar', 'Solapur', 'Ratnagiri', 'Sindhudurg',
+    'Chandrapur', 'Gadchiroli', 'Bhandara', 'Gondia', 'Wardha', 'Nagpur', 'Bhandara', 'Gondia', 'Wardha', 'Chandrapur',
+    'Gadchiroli', 'Bhandara', 'Gondia', 'Wardha', 'Nagpur', 'Bhandara', 'Gondia', 'Wardha', 'Chandrapur', 'Gadchiroli',
+    
+    // Karnataka - Extensive rural coverage
+    'Mysore', 'Hubli', 'Dharwad', 'Mangalore', 'Belgaum', 'Gulbarga', 'Davanagere', 'Bellary', 'Bijapur', 'Shimoga',
+    'Tumkur', 'Raichur', 'Bidar', 'Hospet', 'Gadag', 'Haveri', 'Bagalkot', 'Koppal', 'Chitradurga', 'Tumakuru',
+    'Chikmagalur', 'Hassan', 'Mandya', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore',
+    'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar',
+    'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu',
+    'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore', 'Chamarajanagar', 'Kodagu', 'Mysore',
+    
+    // Tamil Nadu - Extensive rural coverage
+    'Coimbatore', 'Madurai', 'Tiruchirappalli', 'Salem', 'Tirunelveli', 'Tiruppur', 'Erode', 'Vellore', 'Thoothukudi',
+    'Dindigul', 'Thanjavur', 'Ranipet', 'Sivakasi', 'Karur', 'Udhagamandalam', 'Hosur', 'Nagercoil', 'Kanchipuram',
+    'Cuddalore', 'Kumbakonam', 'Tiruvannamalai', 'Pollachi', 'Rajapalayam', 'Gudiyatham', 'Pudukkottai', 'Vaniyambadi',
+    'Ariyalur', 'Chengalpattu', 'Coimbatore', 'Cuddalore', 'Dharmapuri', 'Dindigul', 'Erode', 'Kallakurichi', 'Kanchipuram',
+    'Karur', 'Krishnagiri', 'Madurai', 'Mayiladuthurai', 'Nagapattinam', 'Namakkal', 'Nilgiris', 'Perambalur', 'Pudukkottai',
+    'Ramanathapuram', 'Ranipet', 'Salem', 'Sivaganga', 'Tenkasi', 'Thanjavur', 'Theni', 'Thoothukudi', 'Tiruchirappalli',
+    'Tirunelveli', 'Tirupathur', 'Tiruppur', 'Tiruvallur', 'Tiruvannamalai', 'Tiruvarur', 'Vellore', 'Viluppuram', 'Virudhunagar',
+    
+    // Uttar Pradesh - Extensive rural coverage
+    'Agra', 'Varanasi', 'Allahabad', 'Bareilly', 'Moradabad', 'Aligarh', 'Saharanpur', 'Noida', 'Firozabad', 'Banda',
+    'Etawah', 'Mirzapur', 'Mathura', 'Shahjahanpur', 'Rampur', 'Modinagar', 'Hapur', 'Etah', 'Mau', 'Ghaziabad',
+    'Sambhal', 'Amroha', 'Hardoi', 'Fatehpur', 'Raebareli', 'Orai', 'Sitapur', 'Bahraich', 'Gonda', 'Balrampur',
+    'Basti', 'Deoria', 'Gorakhpur', 'Kushinagar', 'Maharajganj', 'Siddharthnagar', 'Azamgarh', 'Ballia', 'Mau', 'Ghazipur',
+    'Chandauli', 'Jaunpur', 'Varanasi', 'Mirzapur', 'Sonbhadra', 'Banda', 'Chitrakoot', 'Hamirpur', 'Jalaun', 'Jhansi',
+    'Lalitpur', 'Mahoba', 'Agra', 'Aligarh', 'Etah', 'Firozabad', 'Hathras', 'Kasganj', 'Mathura', 'Mainpuri',
+    'Agra', 'Aligarh', 'Etah', 'Firozabad', 'Hathras', 'Kasganj', 'Mathura', 'Mainpuri', 'Agra', 'Aligarh',
+    
+    // Gujarat - Extensive rural coverage
+    'Surat', 'Vadodara', 'Rajkot', 'Bhavnagar', 'Junagadh', 'Gandhinagar', 'Nadiad', 'Morbi', 'Gandhidham', 'Bharuch',
+    'Veraval', 'Navsari', 'Bardoli', 'Palanpur', 'Godhra', 'Patan', 'Valsad', 'Anand', 'Mehsana', 'Surendranagar',
+    'Jamnagar', 'Porbandar', 'Ankleshwar', 'Vapi', 'Botad', 'Dahod', 'Narmada', 'Ahmedabad', 'Amreli', 'Anand',
+    'Banaskantha', 'Bharuch', 'Bhavnagar', 'Dahod', 'Dang', 'Gandhinagar', 'Jamnagar', 'Junagadh', 'Kheda', 'Kutch',
+    'Mehsana', 'Narmada', 'Navsari', 'Panchmahal', 'Patan', 'Porbandar', 'Rajkot', 'Sabarkantha', 'Surat', 'Surendranagar',
+    'Tapi', 'Vadodara', 'Valsad', 'Ahmedabad', 'Amreli', 'Anand', 'Banaskantha', 'Bharuch', 'Bhavnagar', 'Dahod',
+    
+    // Bihar - Rural coverage
+    'Patna', 'Gaya', 'Bhagalpur', 'Muzaffarpur', 'Darbhanga', 'Purnia', 'Arrah', 'Begusarai', 'Katihar', 'Munger',
+    'Chhapra', 'Bettiah', 'Saharsa', 'Sasaram', 'Hajipur', 'Dehri', 'Siwan', 'Motihari', 'Nawada', 'Bagaha',
+    'Buxar', 'Kishanganj', 'Sitamarhi', 'Madhubani', 'Samastipur', 'Vaishali', 'West Champaran', 'East Champaran', 'Sheikhpura', 'Lakhisarai',
+    
+    // West Bengal - Rural coverage
+    'Kolkata', 'Asansol', 'Siliguri', 'Durgapur', 'Bardhaman', 'Malda', 'Bahrampur', 'Habra', 'Kharagpur', 'Shantipur',
+    'Dankuni', 'Dhulian', 'Ranaghat', 'Haldia', 'Raiganj', 'Krishnanagar', 'Nabadwip', 'Medinipur', 'Jalpaiguri', 'Balurghat',
+    'Basirhat', 'Bankura', 'Chakdaha', 'Darjeeling', 'Kalimpong', 'Kalyani', 'Katwa', 'Kharagpur', 'Krishnanagar', 'Malda',
+    
+    // Madhya Pradesh - Rural coverage
+    'Bhopal', 'Indore', 'Gwalior', 'Jabalpur', 'Ujjain', 'Sagar', 'Dewas', 'Satna', 'Ratlam', 'Rewa',
+    'Murwara', 'Singrauli', 'Burhanpur', 'Khandwa', 'Chhindwara', 'Morena', 'Bhind', 'Guna', 'Shivpuri', 'Vidisha',
+    'Chhatarpur', 'Damoh', 'Panna', 'Tikamgarh', 'Niwari', 'Datia', 'Shivpuri', 'Guna', 'Ashoknagar', 'Guna',
+    
+    // Andhra Pradesh - Rural coverage
+    'Visakhapatnam', 'Vijayawada', 'Guntur', 'Nellore', 'Kurnool', 'Tirupati', 'Kadapa', 'Anantapur', 'Chittoor', 'Ongole',
+    'Eluru', 'Machilipatnam', 'Tenali', 'Proddatur', 'Chilakaluripet', 'Kadiri', 'Adoni', 'Nandyal', 'Kavali', 'Tadipatri',
+    'Srikakulam', 'Vizianagaram', 'Parvathipuram', 'Bobbili', 'Salur', 'Tekkali', 'Palasa', 'Sompeta', 'Ichchapuram', 'Narasannapeta',
+    
+    // Kerala - Rural coverage
+    'Thiruvananthapuram', 'Kochi', 'Kozhikode', 'Thrissur', 'Palakkad', 'Malappuram', 'Kannur', 'Kasaragod', 'Kollam', 'Alappuzha',
+    'Pathanamthitta', 'Kottayam', 'Idukki', 'Ernakulam', 'Thrissur', 'Palakkad', 'Malappuram', 'Kozhikode', 'Wayanad', 'Kannur',
+    'Kasaragod', 'Thiruvananthapuram', 'Kollam', 'Alappuzha', 'Pathanamthitta', 'Kottayam', 'Idukki', 'Ernakulam', 'Thrissur', 'Palakkad',
+    
+    // Punjab - Rural coverage
+    'Chandigarh', 'Ludhiana', 'Amritsar', 'Jalandhar', 'Patiala', 'Bathinda', 'Mohali', 'Firozpur', 'Batala', 'Pathankot',
+    'Moga', 'Abohar', 'Malerkotla', 'Khanna', 'Phagwara', 'Muktsar', 'Barnala', 'Rajpura', 'Fazilka', 'Kapurthala',
+    'Sangrur', 'Sunam', 'Nabha', 'Rampura', 'Gurdaspur', 'Tarn Taran', 'Fatehgarh Sahib', 'Muktsar', 'Faridkot', 'Moga',
+    
+    // Haryana - Rural coverage
+    'Chandigarh', 'Faridabad', 'Gurgaon', 'Panipat', 'Ambala', 'Yamunanagar', 'Rohtak', 'Hisar', 'Karnal', 'Sonipat',
+    'Panchkula', 'Bhiwani', 'Sirsa', 'Bahadurgarh', 'Jind', 'Kaithal', 'Rewari', 'Palwal', 'Narnaul', 'Hansi',
+    'Fatehabad', 'Tohana', 'Narwana', 'Mandi Dabwali', 'Safidon', 'Pehowa', 'Samalkha', 'Shahbad', 'Hodal', 'Sohna',
+    
+    // Odisha - Rural coverage
+    'Bhubaneswar', 'Cuttack', 'Rourkela', 'Berhampur', 'Sambalpur', 'Puri', 'Baleshwar', 'Bhadrak', 'Baripada', 'Balangir',
+    'Jharsuguda', 'Bargarh', 'Angul', 'Dhenkanal', 'Jajpur', 'Jagatsinghpur', 'Kendrapara', 'Khordha', 'Nayagarh', 'Puri',
+    'Sundargarh', 'Kandhamal', 'Boudh', 'Deogarh', 'Jharsuguda', 'Sambalpur', 'Subarnapur', 'Bargarh', 'Balangir', 'Nuapada',
+    
+    // Jharkhand - Rural coverage
+    'Ranchi', 'Jamshedpur', 'Dhanbad', 'Bokaro', 'Deoghar', 'Phusro', 'Hazaribagh', 'Giridih', 'Koderma', 'Ramgarh',
+    'Chatra', 'Garhwa', 'Koderma', 'Lohardaga', 'Pakur', 'Palamu', 'Sahibganj', 'Seraikela Kharsawan', 'Simdega', 'West Singhbhum',
+    'East Singhbhum', 'Dumka', 'Godda', 'Jamtara', 'Khunti', 'Latehar', 'Palamu', 'Sahibganj', 'Seraikela Kharsawan', 'Simdega',
+    
+    // Assam - Rural coverage
+    'Guwahati', 'Silchar', 'Dibrugarh', 'Jorhat', 'Nagaon', 'Tinsukia', 'Tezpur', 'Bongaigaon', 'Dhubri', 'Diphu',
+    'Goalpara', 'Hailakandi', 'Karimganj', 'Kokrajhar', 'Mangaldoi', 'Mariagaon', 'Nalbari', 'North Lakhimpur', 'Sibsagar', 'Tezpur',
+    'Tinsukia', 'Udalguri', 'Barpeta', 'Bongaigaon', 'Cachar', 'Chirang', 'Darrang', 'Dhemaji', 'Dhubri', 'Dibrugarh',
+    
+    // Chhattisgarh - Rural coverage
+    'Raipur', 'Bhilai', 'Bilaspur', 'Korba', 'Rajnandgaon', 'Durg', 'Raigarh', 'Jagdalpur', 'Ambikapur', 'Bhatapara',
+    'Bilaspur', 'Chirmiri', 'Dhamtari', 'Durg', 'Jagdalpur', 'Janjgir', 'Jashpur', 'Kabirdham', 'Kanker', 'Kondagaon',
+    'Korba', 'Koriya', 'Mahasamund', 'Mungeli', 'Narayanpur', 'Raigarh', 'Raipur', 'Rajnandgaon', 'Sukma', 'Surajpur',
+    
+    // Himachal Pradesh - Rural coverage
+    'Shimla', 'Dharamshala', 'Solan', 'Mandi', 'Palampur', 'Kullu', 'Chamba', 'Baddi', 'Nahan', 'Paonta Sahib',
+    'Una', 'Bilaspur', 'Hamirpur', 'Kangra', 'Kinnaur', 'Lahaul and Spiti', 'Mandi', 'Shimla', 'Sirmaur', 'Solan',
+    'Kullu', 'Chamba', 'Una', 'Bilaspur', 'Hamirpur', 'Kangra', 'Kinnaur', 'Lahaul and Spiti', 'Mandi', 'Shimla',
+    
+    // Uttarakhand - Rural coverage
+    'Dehradun', 'Haridwar', 'Roorkee', 'Kashipur', 'Rudrapur', 'Haldwani', 'Rishikesh', 'Kotdwar', 'Ramnagar', 'Pithoragarh',
+    'Almora', 'Nainital', 'Champawat', 'Bageshwar', 'Chamoli', 'Pauri Garhwal', 'Rudraprayag', 'Tehri Garhwal', 'Uttarkashi', 'Dehradun',
+    'Haridwar', 'Roorkee', 'Kashipur', 'Rudrapur', 'Haldwani', 'Rishikesh', 'Kotdwar', 'Ramnagar', 'Pithoragarh', 'Almora',
+    
+    // Goa - Rural coverage
+    'Panaji', 'Margao', 'Vasco da Gama', 'Mapusa', 'Ponda', 'Mormugao', 'Sanquelim', 'Bicholim', 'Curchorem', 'Cuncolim',
+    'Canacona', 'Pernem', 'Quepem', 'Sanguem', 'Satari', 'Tiswadi', 'Bardez', 'Bicholim', 'Canacona', 'Curchorem',
+    
+    // Union Territories
+    'Chandigarh', 'Delhi', 'Puducherry', 'Daman', 'Diu', 'Dadra and Nagar Haveli', 'Lakshadweep', 'Andaman and Nicobar Islands'
+  ];
+
+  const cartIndianStates = [
+    'Maharashtra', 'Delhi', 'Karnataka', 'Tamil Nadu', 'West Bengal', 'Telangana', 'Gujarat', 'Rajasthan', 'Uttar Pradesh',
+    'Madhya Pradesh', 'Andhra Pradesh', 'Bihar', 'Punjab', 'Haryana', 'Kerala', 'Odisha', 'Jharkhand', 'Assam', 'Chhattisgarh',
+    'Himachal Pradesh', 'Uttarakhand', 'Tripura', 'Meghalaya', 'Manipur', 'Nagaland', 'Goa', 'Arunachal Pradesh', 'Mizoram',
+    'Sikkim', 'Jammu and Kashmir', 'Ladakh'
+  ];
+
+  // Initialize cart autocomplete functionality
+  function initializeCartPincodeAutocomplete() {
+    const pincodeInput = document.getElementById('cart-pincode-input');
+    const cityInput = document.getElementById('cart-city-input');
+    const stateInput = document.getElementById('cart-state-input');
+    const citySuggestions = document.getElementById('cart-city-suggestions');
+    const stateSuggestions = document.getElementById('cart-state-suggestions');
+
+    if (pincodeInput && cityInput && stateInput) {
+      console.log('Initializing cart pincode autocomplete...');
+      
+      // Pincode-based autofill
+      pincodeInput.addEventListener('input', function() {
+        const pincode = this.value.trim();
+        console.log('Cart pincode entered:', pincode);
+        if (pincode.length === 6 && cartPincodeData[pincode]) {
+          console.log('Found cart pincode data:', cartPincodeData[pincode]);
+          cityInput.value = cartPincodeData[pincode].city;
+          stateInput.value = cartPincodeData[pincode].state;
+          // Set country to India when pincode is found
+          const countrySelect = document.getElementById('cart-country-select');
+          if (countrySelect) {
+            countrySelect.value = 'India';
+          }
+        }
+      });
+
+      // City autocomplete
+      cityInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        if (query.length > 0) {
+          const filtered = cartIndianCities.filter(city => 
+            city.toLowerCase().includes(query)
+          );
+          showCartSuggestions(citySuggestions, filtered, cityInput);
+        } else {
+          hideCartSuggestions(citySuggestions);
+        }
+      });
+
+      // State autocomplete
+      stateInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        if (query.length > 0) {
+          const filtered = cartIndianStates.filter(state => 
+            state.toLowerCase().includes(query)
+          );
+          showCartSuggestions(stateSuggestions, filtered, stateInput);
+        } else {
+          hideCartSuggestions(stateSuggestions);
+        }
+      });
+
+      // Hide suggestions when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!cityInput.contains(e.target) && !citySuggestions.contains(e.target)) {
+          hideCartSuggestions(citySuggestions);
+        }
+        if (!stateInput.contains(e.target) && !stateSuggestions.contains(e.target)) {
+          hideCartSuggestions(stateSuggestions);
+        }
+      });
+    }
+  }
+
+  // Initialize when DOM is loaded
+  document.addEventListener('DOMContentLoaded', function() {
+    initializeCartPincodeAutocomplete();
+    // Try again after a short delay
+    setTimeout(initializeCartPincodeAutocomplete, 500);
+    setTimeout(initializeCartPincodeAutocomplete, 1000);
+    setTimeout(initializeCartPincodeAutocomplete, 2000);
+  });
+  
+  // Also try to initialize when the form becomes visible (for dynamic forms)
+  setTimeout(initializeCartPincodeAutocomplete, 3000);
+  setTimeout(initializeCartPincodeAutocomplete, 5000);
+  
+  // Reinitialize when Order Menu System form is shown
+  function reinitializeCartPincodeAutocomplete() {
+    console.log('Reinitializing cart pincode autocomplete...');
+    initializeCartPincodeAutocomplete();
+  }
+  
+  // Make it globally available for form visibility changes
+  window.reinitializeCartPincodeAutocomplete = reinitializeCartPincodeAutocomplete;
+
+  function showCartSuggestions(container, suggestions, input) {
+    if (suggestions.length === 0) {
+      hideCartSuggestions(container);
+      return;
+    }
+
+    container.innerHTML = '';
+    suggestions.slice(0, 5).forEach(suggestion => {
+      const div = document.createElement('div');
+      div.className = 'px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200 text-gray-900';
+      div.textContent = suggestion;
+      div.addEventListener('click', function() {
+        input.value = suggestion;
+        hideCartSuggestions(container);
+      });
+      container.appendChild(div);
+    });
+
+    container.classList.remove('hidden');
+    container.style.position = 'absolute';
+    container.style.zIndex = '10';
+    container.style.width = input.offsetWidth + 'px';
+    container.style.top = (input.offsetTop + input.offsetHeight) + 'px';
+    container.style.left = input.offsetLeft + 'px';
+  }
+
+  function hideCartSuggestions(container) {
+    container.classList.add('hidden');
+  }
+</script>

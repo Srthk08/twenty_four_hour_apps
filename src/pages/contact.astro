@@ -1,0 +1,1497 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Contact Us - DevExpress">
+  <!-- Hero Section -->
+  <section class="bg-blue-600 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+      <div class="text-center">
+        <div class="flex justify-center mb-6">
+          <div class="w-20 h-20 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center">
+            <span class="text-white font-bold text-3xl">24</span>
+          </div>
+        </div>
+        <h1 class="text-4xl md:text-6xl font-bold mb-6 text-white">
+          Get in Touch
+        </h1>
+        <p class="text-xl md:text-2xl text-primary-100 max-w-3xl mx-auto">
+          Ready to start your project? Have questions? We'd love to hear from you. 
+          Get in touch and we'll respond within 24 hours.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Form Section -->
+  <section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+        <!-- Contact Form -->
+        <div class="order-2 lg:order-1">
+          <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-6" style="color: #111827 !important;">Send us a message</h2>
+          <form id="contact-form" class="space-y-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div>
+                <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">
+                  First Name
+                </label>
+                <input
+                  type="text"
+                  id="first_name"
+                  name="first_name"
+                  required
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                  placeholder="Your first name"
+                />
+              </div>
+              <div>
+                <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">
+                  Last Name
+                </label>
+                <input
+                  type="text"
+                  id="last_name"
+                  name="last_name"
+                  required
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                  placeholder="Your last name"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                Email Address
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                placeholder="your.email@example.com"
+              />
+            </div>
+
+            <div>
+              <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+                Phone Number (Optional)
+              </label>
+              <div class="flex">
+                <select
+                  id="phone_country_code"
+                  name="phone_country_code"
+                  class="px-4 py-3 border border-r-0 border-gray-300 rounded-l-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-gray-50"
+                >
+                  <option value="+91" selected>🇮🇳 +91</option>
+                  <option value="+1">🇺🇸 +1</option>
+                  <option value="+44">🇬🇧 +44</option>
+                  <option value="+61">🇦🇺 +61</option>
+                  <option value="+86">🇨🇳 +86</option>
+                  <option value="+81">🇯🇵 +81</option>
+                  <option value="+49">🇩🇪 +49</option>
+                  <option value="+33">🇫🇷 +33</option>
+                  <option value="+971">🇦🇪 +971</option>
+                  <option value="+966">🇸🇦 +966</option>
+                  <option value="other">Other</option>
+                </select>
+                <input
+                  type="text"
+                  id="phone_country_code_custom"
+                  name="phone_country_code_custom"
+                  class="hidden px-4 py-3 border border-r-0 border-gray-300 rounded-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-gray-50"
+                  placeholder="+XXX"
+                  maxlength="5"
+                  pattern="\+[0-9]{1,4}"
+                />
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  class="flex-1 px-4 py-3 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                  placeholder="9876543210"
+                  maxlength="10"
+                  pattern="[0-9]{10}"
+                />
+              </div>
+              <p id="phone-error" class="hidden mt-1 text-xs text-red-600">Please enter a valid 10-digit phone number</p>
+            </div>
+
+            <div>
+              <label for="company" class="block text-sm font-medium text-gray-700 mb-2">
+                Company Name (Optional)
+              </label>
+              <input
+                type="text"
+                id="company"
+                name="company"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                placeholder="Your company name"
+              />
+            </div>
+
+            <div>
+              <label for="project_type" class="block text-sm font-medium text-gray-700 mb-2">
+                Project Type
+              </label>
+              <select
+                id="project_type"
+                name="project_type"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+              >
+                <option value="" disabled selected>Select a project type</option>
+                <option value="order-menu-system">Order Menu System</option>
+                <option value="restaurant-menu" disabled>Restaurant Menu System</option>
+                <option value="android-tv" disabled>Android TV App</option>
+                <option value="streaming-app" disabled>Streaming Mobile App</option>
+                <option value="restaurant-website" disabled>Restaurant Website</option>
+                <option value="custom-app">Custom Application</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="message" class="block text-sm font-medium text-gray-700 mb-2">
+                Project Details
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                rows="6"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                placeholder="Tell us about your project, requirements, timeline, and any specific features you need..."
+              ></textarea>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                class="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 hover:text-white focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+              >
+                Send Message
+              </button>
+            </div>
+
+            <div id="success-message" class="hidden">
+              <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-green-800">Message sent successfully!</h3>
+                    <div class="mt-2 text-sm text-green-700">We'll get back to you within 24 hours.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="error-message" class="hidden">
+              <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">Error sending message</h3>
+                    <div class="mt-2 text-sm text-red-700" id="error-text">Please try again or contact us directly.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="order-1 lg:order-2">
+          <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-8" style="color: #111827 !important;">Contact Information</h2>
+          
+          <div class="space-y-8">
+            <!-- Email -->
+            <div class="flex items-start">
+              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 mr-4">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">Email</h3>
+                <p class="text-gray-700 text-base">hello@devexpress.com</p>
+                <p class="text-sm text-gray-500 mt-1">We typically respond within 24 hours</p>
+              </div>
+            </div>
+
+            <!-- Phone -->
+            <div class="flex items-start">
+              <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0 mr-4">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">Phone</h3>
+                <p class="text-gray-700 text-base">+1 (555) 123-4567</p>
+                <p class="text-sm text-gray-500 mt-1">Mon-Fri 9AM-6PM EST</p>
+              </div>
+            </div>
+
+            <!-- Office -->
+            <div class="flex items-start">
+              <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 mr-4">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">Office</h3>
+                <p class="text-gray-700 text-base">123 Innovation Drive</p>
+                <p class="text-gray-700 text-base">Tech City, TC 12345</p>
+                <p class="text-sm text-gray-500 mt-1">By appointment only</p>
+              </div>
+            </div>
+
+            <!-- Response Time -->
+            <div class="flex items-start">
+              <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0 mr-4">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">Response Time</h3>
+                <p class="text-gray-700 text-base">Within 24 hours</p>
+                <p class="text-sm text-gray-500 mt-1">We pride ourselves on quick responses</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ Link -->
+          <div class="mt-12 p-6 bg-gray-50 rounded-lg">
+            <h3 class="text-lg font-semibold text-gray-900 mb-3">Have questions?</h3>
+            <p class="text-gray-700 mb-4 text-sm lg:text-base">Check out our frequently asked questions for quick answers to common inquiries.</p>
+            <a href="/faq" class="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium">
+              View FAQ
+              <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-20 bg-blue-600 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
+        Ready to Start Your Project?
+      </h2>
+      <p class="text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
+        Don't wait weeks or months for your digital solution. Get started today and have your project delivered in just 24 hours.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/products" class="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-white hover:bg-gray-100 transition-colors">
+          View Our Products
+        </a>
+        <a href="/signup" class="inline-flex items-center px-8 py-3 border border-white text-base font-medium rounded-md text-white bg-transparent hover:bg-white hover:text-black transition-colors" style="color: white !important;" onmouseover="this.style.color='black'" onmouseout="this.style.color='white'">
+          Create Account
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const form = document.getElementById('contact-form') as HTMLFormElement;
+  const successMessage = document.getElementById('success-message');
+  const errorMessage = document.getElementById('error-message');
+  const errorText = document.getElementById('error-text');
+
+  // Personal field helpers
+  function getPersonalInputs() {
+    const firstNameInput = document.getElementById('first_name') as HTMLInputElement;
+    const lastNameInput = document.getElementById('last_name') as HTMLInputElement;
+    const emailInput = document.getElementById('email') as HTMLInputElement;
+    const phoneInput = document.getElementById('phone') as HTMLInputElement;
+    const companyInput = document.getElementById('company') as HTMLInputElement;
+    return { firstNameInput, lastNameInput, emailInput, phoneInput, companyInput };
+  }
+
+  function preventAutofill(el?: HTMLInputElement) {
+    if (!el) return;
+    el.setAttribute('autocomplete', 'off');
+    // Change the name temporarily to defeat saved autofill
+    el.setAttribute('data-orig-name', el.name || '');
+    el.name = `${el.id}_noautofill`;
+  }
+
+  function restoreName(el?: HTMLInputElement) {
+    if (!el) return;
+    const orig = el.getAttribute('data-orig-name');
+    if (orig) el.name = orig;
+  }
+
+  function clearAndDisablePersonalFields() {
+    const { firstNameInput, lastNameInput, emailInput, phoneInput, companyInput } = getPersonalInputs();
+    [firstNameInput, lastNameInput, emailInput, phoneInput, companyInput].forEach((el) => {
+      if (!el) return;
+      el.value = '';
+      el.disabled = true;
+      preventAutofill(el);
+    });
+    // Disable submit to prevent anonymous sends
+    const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement;
+    if (submitBtn) submitBtn.disabled = true;
+  }
+
+  function enablePersonalFields() {
+    const { firstNameInput, lastNameInput, emailInput, phoneInput, companyInput } = getPersonalInputs();
+    [firstNameInput, lastNameInput, emailInput, phoneInput, companyInput].forEach((el) => {
+      if (!el) return;
+      el.disabled = false;
+      restoreName(el);
+    });
+    
+    // Also enable project type and message fields
+    const projectTypeSelect = document.getElementById('project_type') as HTMLSelectElement;
+    const messageTextarea = document.getElementById('message') as HTMLTextAreaElement;
+    
+    if (projectTypeSelect) {
+      projectTypeSelect.disabled = false;
+    }
+    if (messageTextarea) {
+      messageTextarea.disabled = false;
+      messageTextarea.placeholder = 'Tell us about your project requirements...';
+    }
+    
+    const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement;
+    if (submitBtn) submitBtn.disabled = false;
+    
+    // Hide auth message when user logs in
+    const authMessage = document.getElementById('auth-message');
+    if (authMessage) {
+      authMessage.remove();
+    }
+  }
+
+  // Immediately clear/disable until auth confirms login
+  clearAndDisablePersonalFields();
+
+  // Re-enable on login
+  window.addEventListener('user-logged-in', () => {
+    enablePersonalFields();
+  });
+  // Ensure cleared on logout
+  window.addEventListener('user-logged-out', () => {
+    clearAndDisablePersonalFields();
+  });
+
+  // Force clear form on page load for non-authenticated users
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      
+      // CRITICAL: Also check sessionStorage to ensure no stale data
+      const sessionData = sessionStorage.getItem('simple-auth-session');
+      const hasValidSession = sessionData && sessionData !== 'null' && sessionData !== '{}';
+      
+      if (!authManager || !authManager.isUserLoggedIn() || !hasValidSession) {
+        console.log('🚫 User not authenticated - forcing form clear');
+        clearAndDisablePersonalFields();
+        window.clearForm();
+      }
+    }, 100);
+  });
+
+  // Get Supabase client from global window object
+  let supabase = null;
+
+  // Function to get Supabase client
+  const getSupabaseClient = () => {
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
+      return window.supabase;
+    }
+    return null;
+  };
+
+  // Initialize Supabase client
+  const initSupabase = () => {
+    const supabaseUrl = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+    
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
+      supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+      console.log('✅ Supabase client initialized directly');
+      return true;
+    } else if (window.supabase) {
+      supabase = window.supabase;
+      console.log('✅ Using existing Supabase client');
+      return true;
+    } else {
+      console.error('❌ Supabase library not available');
+      return false;
+    }
+  };
+
+  // Try to initialize Supabase
+  if (!initSupabase()) {
+    console.error('❌ Failed to initialize Supabase client');
+  } else {
+    console.log('✅ Supabase client ready:', !!supabase);
+  }
+
+  // Get URL parameters
+  function getUrlParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return {
+      product: urlParams.get('product'),
+      projectType: urlParams.get('project_type'),
+      projectDetails: urlParams.get('project_details'),
+      price: urlParams.get('price')
+    };
+  }
+
+  // Clear form fields
+  window.clearForm = function clearForm() {
+    console.log('🧹 Clearing contact form fields...');
+    
+    const firstNameInput = document.getElementById('first_name') as HTMLInputElement;
+    const lastNameInput = document.getElementById('last_name') as HTMLInputElement;
+    const emailInput = document.getElementById('email') as HTMLInputElement;
+    const phoneInput = document.getElementById('phone') as HTMLInputElement;
+    const companyInput = document.getElementById('company') as HTMLInputElement;
+    const projectTypeSelect = document.getElementById('project_type') as HTMLSelectElement;
+    const messageTextarea = document.getElementById('message') as HTMLTextAreaElement;
+    
+    // Clear all form fields
+    if (firstNameInput) {
+      firstNameInput.value = '';
+      firstNameInput.placeholder = 'Your first name';
+      // Trigger events to clear validation state
+      firstNameInput.dispatchEvent(new Event('input', { bubbles: true }));
+      firstNameInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    if (lastNameInput) {
+      lastNameInput.value = '';
+      lastNameInput.placeholder = 'Your last name';
+      lastNameInput.dispatchEvent(new Event('input', { bubbles: true }));
+      lastNameInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    if (emailInput) {
+      emailInput.value = '';
+      emailInput.placeholder = 'your.email@example.com';
+      emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+      emailInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    if (phoneInput) {
+      phoneInput.value = '';
+      phoneInput.placeholder = '+1 (555) 123-4567';
+      phoneInput.dispatchEvent(new Event('input', { bubbles: true }));
+      phoneInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    if (companyInput) {
+      companyInput.value = '';
+      companyInput.placeholder = 'Your company name';
+      companyInput.dispatchEvent(new Event('input', { bubbles: true }));
+      companyInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    if (projectTypeSelect) {
+      projectTypeSelect.value = '';
+      projectTypeSelect.selectedIndex = 0; // Reset to first option
+      projectTypeSelect.dispatchEvent(new Event('input', { bubbles: true }));
+      projectTypeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    if (messageTextarea) {
+      messageTextarea.value = '';
+      messageTextarea.placeholder = 'Tell us about your project...';
+      messageTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+      messageTextarea.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    
+    // Clear any error styling
+    const allInputs = document.querySelectorAll('input, select, textarea');
+    allInputs.forEach((input: any) => {
+      input.classList.remove('border-red-500');
+      input.classList.add('border-gray-300');
+    });
+    
+    console.log('✅ Contact form cleared');
+  };
+
+  // Function to refresh user data from session storage
+  function refreshUserData() {
+    try {
+      const sessionData = JSON.parse(sessionStorage.getItem('simple-auth-session') || '{}');
+      if (sessionData.user) {
+        console.log('🔄 Refreshed user data from session:', {
+          phone: sessionData.user.phone,
+          company_name: sessionData.user.company_name,
+          full_name: sessionData.user.full_name
+        });
+        return sessionData.user;
+      }
+    } catch (e) {
+      console.log('⚠️ Could not refresh user data from session');
+    }
+    return null;
+  }
+
+  // Simple form management - NO pre-filling without login
+  window.prefillForm = async function prefillForm() {
+    console.log('🔄 Checking authentication status...');
+    
+    // Check if user is logged in
+    const authManager = window.globalAuthManager || window.simpleAuthManager;
+    
+    // CRITICAL: Also check sessionStorage to ensure no stale data
+    const sessionData = sessionStorage.getItem('simple-auth-session');
+    const hasValidSession = sessionData && sessionData !== 'null' && sessionData !== '{}';
+    
+    const isLoggedIn = authManager && authManager.isUserLoggedIn() && hasValidSession;
+
+      if (isLoggedIn) {
+      console.log('✅ User is logged in - enabling form');
+        enablePersonalFields();
+      
+      // Only pre-fill if user is logged in AND we have valid session data
+        const currentUser = authManager.getCurrentUser();
+        
+        // Double-check: if currentUser is null or session is invalid, don't prefill
+        if (!currentUser || !hasValidSession) {
+          console.log('⚠️ User object is null or session invalid - clearing form');
+          clearAndDisablePersonalFields();
+          return;
+        }
+        
+        if (currentUser && currentUser.email) {
+        const firstNameInput = document.getElementById('first_name') as HTMLInputElement;
+        const lastNameInput = document.getElementById('last_name') as HTMLInputElement;
+        const emailInput = document.getElementById('email') as HTMLInputElement;
+        const phoneInput = document.getElementById('phone') as HTMLInputElement;
+        const companyInput = document.getElementById('company') as HTMLInputElement;
+        
+        // Pre-fill only if user data exists
+        if (currentUser.full_name) {
+          const names = currentUser.full_name.split(' ');
+          if (firstNameInput) firstNameInput.value = names[0] || '';
+          if (lastNameInput && names.length > 1) lastNameInput.value = names.slice(1).join(' ');
+        }
+        if (emailInput) emailInput.value = currentUser.email || '';
+        if (phoneInput && currentUser.phone) {
+          const phoneValue = currentUser.phone.toString();
+          const phoneCountryCodeSelect = document.getElementById('phone_country_code') as HTMLSelectElement;
+          
+          // Parse phone number to extract country code and number
+          if (phoneValue.startsWith('+91')) {
+            if (phoneCountryCodeSelect) {
+              phoneCountryCodeSelect.value = '+91';
+            }
+            phoneInput.value = phoneValue.substring(3).replace(/\D/g, '');
+          } else if (phoneValue.startsWith('+')) {
+            // Extract country code (first 1-4 digits after +)
+            const match = phoneValue.match(/^(\+\d{1,4})(\d+)$/);
+            if (match && phoneCountryCodeSelect) {
+              phoneCountryCodeSelect.value = match[1];
+              phoneInput.value = match[2];
+            } else {
+              phoneInput.value = phoneValue.replace(/\D/g, '');
+            }
+          } else {
+            phoneInput.value = phoneValue.replace(/\D/g, '');
+          }
+        }
+        if (companyInput && currentUser.company_name) companyInput.value = currentUser.company_name;
+        }
+      } else {
+      console.log('❌ User not logged in - clearing and disabling form');
+      clearAndDisablePersonalFields();
+      
+      // Show auth message
+      const form = document.getElementById('contact-form');
+      if (form) {
+        let messageDiv = document.getElementById('auth-message');
+        if (!messageDiv) {
+          messageDiv = document.createElement('div');
+          messageDiv.id = 'auth-message';
+          messageDiv.className = 'mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg';
+          form.insertBefore(messageDiv, form.firstChild);
+        }
+        messageDiv.innerHTML = `
+          <div class="flex items-center">
+            <svg class="w-5 h-5 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+              <p class="text-blue-800 font-medium">Authentication Required</p>
+              <p class="text-blue-700 text-sm">Please sign in to send us a message or view our products.</p>
+              <div class="mt-2">
+                <a href="/login" class="text-blue-600 hover:text-blue-800 font-medium text-sm mr-4">Sign In</a>
+                <a href="/signup" class="text-blue-600 hover:text-blue-800 font-medium text-sm">Create Account</a>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+  }
+
+  // Check if user is logged in
+  function isUserLoggedIn() {
+    const authManager = window.globalAuthManager || window.simpleAuthManager;
+    
+    // CRITICAL: Also check sessionStorage to ensure no stale data
+    const sessionData = sessionStorage.getItem('simple-auth-session');
+    const hasValidSession = sessionData && sessionData !== 'null' && sessionData !== '{}';
+    
+    const isLoggedIn = authManager && authManager.isUserLoggedIn() && hasValidSession;
+    
+    // If user is not logged in, ensure form is cleared and project fields are empty
+    if (!isLoggedIn) {
+      console.log('👤 User not logged in - clearing form and project details');
+      window.clearForm();
+      
+      // Specifically ensure project fields are empty for new users
+      const projectTypeSelect = document.getElementById('project_type') as HTMLSelectElement;
+      const messageTextarea = document.getElementById('message') as HTMLTextAreaElement;
+      
+      if (projectTypeSelect) {
+        projectTypeSelect.value = '';
+        projectTypeSelect.selectedIndex = 0;
+      }
+      if (messageTextarea) {
+        messageTextarea.value = '';
+        messageTextarea.placeholder = 'Tell us about your project...';
+      }
+    }
+    
+    return isLoggedIn;
+  }
+
+  // Force form validation to recognize pre-filled fields
+  function forceFormValidation() {
+    console.log('🔄 Forcing form validation...');
+    
+    const allInputs = document.querySelectorAll('input, select, textarea');
+    allInputs.forEach((input: any) => {
+      if (input.value && input.value.trim()) {
+        console.log(`🔍 Forcing validation for field: ${input.id} = "${input.value}"`);
+        
+        // Trigger all validation events
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        input.dispatchEvent(new Event('blur', { bubbles: true }));
+        
+        // Force the field to be recognized as valid
+        if (input.setCustomValidity) {
+          input.setCustomValidity('');
+        }
+      }
+    });
+    
+    console.log('✅ Form validation forced');
+  }
+
+  // Show signup alert for logged out users
+  function showLoginAlert() {
+    // Create custom modal instead of browser confirm
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    `;
+    
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    `;
+    
+    modalContent.innerHTML = `
+      <h3 style="margin-bottom: 20px; color: #333;">Authentication Required</h3>
+      <p style="margin-bottom: 30px; color: #666;">Please sign up or login to submit the contact form.</p>
+      <div style="display: flex; gap: 15px; justify-content: center;">
+        <button id="signup-btn" style="
+          background: #3B82F6;
+          color: white;
+          border: none;
+          padding: 12px 24px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 500;
+        ">Sign Up</button>
+        <button id="login-btn" style="
+          background: #6B7280;
+          color: white;
+          border: none;
+          padding: 12px 24px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 500;
+        ">Login</button>
+      </div>
+    `;
+    
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+    
+    // Add event listeners
+    document.getElementById('signup-btn').addEventListener('click', () => {
+      document.body.removeChild(modal);
+      window.location.href = '/signup';
+    });
+    
+    document.getElementById('login-btn').addEventListener('click', () => {
+      document.body.removeChild(modal);
+      window.location.href = '/login';
+    });
+    
+    // Close modal when clicking outside
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        document.body.removeChild(modal);
+      }
+    });
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Check if user is logged in before allowing form submission
+    if (!isUserLoggedIn()) {
+      showLoginAlert();
+      return;
+    }
+    
+    // IMPORTANT: Capture phone value EARLY before any form manipulation
+    const phoneInputElement = document.getElementById('phone') as HTMLInputElement;
+    const phoneCountryCodeSelect = document.getElementById('phone_country_code') as HTMLSelectElement;
+    const phoneCountryCodeCustomInput = document.getElementById('phone_country_code_custom') as HTMLInputElement;
+    
+    // Store phone values immediately to prevent loss
+    const capturedPhoneValue = phoneInputElement?.value?.trim() || '';
+    const capturedCountryCode = phoneCountryCodeSelect?.value || '+91';
+    const capturedCustomCountryCode = phoneCountryCodeCustomInput?.value?.trim() || '';
+    
+    console.log('🔒 Captured phone value early:', capturedPhoneValue);
+    console.log('🔒 Captured country code early:', capturedCountryCode);
+    console.log('🔒 Captured custom country code early:', capturedCustomCountryCode);
+    
+    // Force validation to recognize pre-filled fields before validation
+    forceFormValidation();
+    
+    // Get form data directly from FormData to ensure we have the actual values
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    
+    // Restore captured phone value if form data doesn't have it
+    if (capturedPhoneValue && !data.phone) {
+      data.phone = capturedPhoneValue;
+      console.log('📞 Restored phone value from early capture:', data.phone);
+    }
+    
+    console.log('📝 Form data collected for validation:', data);
+    console.log('📝 Phone input element value:', phoneInputElement?.value);
+    
+    // Validate phone number if provided
+    // Note: phoneInputElement, phoneCountryCodeSelect, and phoneCountryCodeCustomInput are already declared above
+    if (phoneInputElement && phoneInputElement.value.trim()) {
+      const phoneDigits = phoneInputElement.value.replace(/\D/g, '');
+      // Get country code from select or custom input (use captured values)
+      let countryCode = capturedCountryCode || phoneCountryCodeSelect?.value || '+91';
+      if (countryCode === 'other') {
+        countryCode = capturedCustomCountryCode || phoneCountryCodeCustomInput?.value?.trim() || '+91';
+      }
+      
+      if (countryCode === '+91' && phoneDigits.length !== 10) {
+        showError('Please enter a valid 10-digit phone number for India');
+        phoneInputElement?.focus();
+        return;
+      }
+    }
+
+    // Validate form fields manually to ensure pre-filled data is recognized
+    const requiredFields = [
+      { id: 'first_name', name: 'First Name', value: data.first_name },
+      { id: 'last_name', name: 'Last Name', value: data.last_name },
+      { id: 'email', name: 'Email', value: data.email },
+      { id: 'project_type', name: 'Project Type', value: data.project_type },
+      { id: 'message', name: 'Message', value: data.message }
+    ];
+    
+    let isValid = true;
+    const missingFields = [];
+    
+    // Check each required field
+    for (const field of requiredFields) {
+      const element = document.getElementById(field.id) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+      const fieldValue = field.value ? field.value.toString().trim() : '';
+      
+      console.log(`🔍 Validating ${field.name}: "${fieldValue}"`);
+      
+      if (!fieldValue) {
+        isValid = false;
+        missingFields.push(field.name);
+        
+        // Add visual indication for missing fields
+        if (element) {
+          element.classList.add('border-red-500');
+          element.classList.remove('border-gray-300');
+        }
+      } else {
+        // Remove error styling for filled fields
+        if (element) {
+          element.classList.remove('border-red-500');
+          element.classList.add('border-gray-300');
+        }
+      }
+    }
+    
+    // If validation fails, show error and return
+    if (!isValid) {
+      showError(`Please fill in all required fields: ${missingFields.join(', ')}`);
+      return;
+    }
+    
+    console.log('✅ All required fields are filled - proceeding with submission');
+    
+    // Hide previous messages
+    successMessage?.classList.add('hidden');
+    errorMessage?.classList.add('hidden');
+
+    // Show loading state
+    const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const originalText = submitButton.textContent;
+    submitButton.disabled = true;
+    submitButton.innerHTML = `
+      <svg class="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    `;
+
+    try {
+      // Ensure Supabase is available
+      if (!supabase) {
+        console.log('🔄 Supabase not available, trying to reinitialize...');
+        if (!initSupabase()) {
+          console.error('❌ Failed to initialize Supabase client');
+          throw new Error('Database connection not available. Please refresh the page and try again.');
+        }
+      }
+
+      // Verify Supabase client has the required methods
+      if (!supabase || typeof supabase.from !== 'function') {
+        console.error('❌ Supabase client is not properly initialized');
+        console.log('Supabase object:', supabase);
+        console.log('Available methods:', supabase ? Object.keys(supabase) : 'No supabase object');
+        throw new Error('Database connection not properly initialized. Please refresh the page and try again.');
+      }
+
+      console.log('✅ Supabase client verified and ready');
+
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+      
+      console.log('📝 Form data collected:', data);
+      
+      // Get current user (optional)
+      let user = null;
+      try {
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        user = currentUser;
+        console.log('👤 Current user:', user ? user.email : 'Not logged in');
+      } catch (authError) {
+        console.log('ℹ️ User not logged in, proceeding without authentication');
+      }
+      
+      // Use captured values from early capture (most reliable)
+      let phoneNumber = capturedPhoneValue || data.phone as string || '';
+      
+      // Get country code - use captured value first, then fallback to form data
+      let phoneCountryCode = capturedCountryCode || data.phone_country_code as string || '+91';
+      
+      // Use custom country code if "other" is selected
+      if (phoneCountryCode === 'other') {
+        phoneCountryCode = capturedCustomCountryCode || 
+                          phoneCountryCodeCustomInput?.value?.trim() || 
+                          (data.phone_country_code_custom as string)?.trim() || 
+                          '+91';
+      }
+      
+      // Ensure country code starts with +
+      if (phoneCountryCode && !phoneCountryCode.startsWith('+')) {
+        phoneCountryCode = '+' + phoneCountryCode.replace(/^\+/, '');
+      }
+      
+      // Final fallback: try to get from input elements if still empty
+      if (!phoneNumber && phoneInputElement) {
+        phoneNumber = phoneInputElement.value?.trim() || '';
+        console.log('📞 Phone from input element (final fallback):', phoneNumber);
+      }
+      
+      console.log('📞 Final phone number captured:', phoneNumber);
+      console.log('📞 Final country code:', phoneCountryCode);
+      console.log('📞 Phone input element exists:', !!phoneInputElement);
+      console.log('📞 Phone input element current value:', phoneInputElement?.value);
+      console.log('📞 Phone input element disabled:', phoneInputElement?.disabled);
+      
+      // Format phone number: remove all non-digits, then combine with country code
+      const phoneDigits = phoneNumber ? phoneNumber.replace(/\D/g, '') : '';
+      const formattedPhone = phoneDigits && phoneDigits.length > 0
+        ? `${phoneCountryCode}${phoneDigits}` 
+        : null;
+      
+      console.log('📞 Phone digits extracted:', phoneDigits, '(length:', phoneDigits.length, ')');
+      console.log('📞 Formatted phone:', formattedPhone);
+      console.log('📞 Will save phone as:', formattedPhone);
+      
+      // Warn if phone was provided but couldn't be captured
+      if (phoneInputElement && phoneInputElement.value && !formattedPhone) {
+        console.warn('⚠️ Phone input has value but formatted phone is null!', {
+          inputValue: phoneInputElement.value,
+          phoneDigits,
+          countryCode: phoneCountryCode
+        });
+      }
+
+      // Prepare data for Supabase
+      // The database table uses 'phone' field, not 'phone_number'
+      const contactData = {
+        first_name: data.first_name as string,
+        last_name: data.last_name as string,
+        email: data.email as string,
+        phone: formattedPhone, // Save to 'phone' field only (database schema uses 'phone')
+        company_name: data.company as string || null,
+        project_type: data.project_type as string,
+        project_details: data.message as string,
+        message: data.message as string,
+        user_id: user ? user.id : null // Include user_id if user is logged in
+      };
+      
+      console.log('📝 Sending contact data to Supabase:', contactData);
+      console.log('📝 Phone field in contactData:', contactData.phone);
+      
+      // Test Supabase connection first
+      console.log('🔍 Testing Supabase connection...');
+      const { data: testData, error: testError } = await supabase
+        .from('contact_submissions')
+        .select('id')
+        .limit(1);
+      
+      if (testError) {
+        console.error('❌ Supabase connection test failed:', testError);
+        throw new Error(`Database connection failed: ${testError.message}`);
+      }
+      
+      console.log('✅ Supabase connection test successful');
+      
+      // Save to Supabase
+      const { data: savedMessage, error } = await supabase
+        .from('contact_submissions')
+        .insert([contactData])
+        .select();
+      
+      if (error) {
+        console.error('❌ Error saving contact message:', error);
+        throw new Error(`Failed to save your message: ${error.message}`);
+      }
+      
+      console.log('✅ Contact message saved successfully:', savedMessage);
+      if (savedMessage && savedMessage.length > 0) {
+        console.log('📞 Phone number saved in database:', savedMessage[0].phone);
+        console.log('📞 Full saved contact data:', savedMessage[0]);
+      }
+      
+      // Show success message
+      successMessage?.classList.remove('hidden');
+      form.reset();
+      
+      // Re-prefill form if user is logged in
+      await prefillForm();
+      
+    } catch (error: any) {
+      console.error('Contact form error:', error);
+      
+      // Show error message
+      if (errorText) {
+        errorText.textContent = error.message || 'An error occurred while sending your message.';
+      }
+      errorMessage?.classList.remove('hidden');
+    } finally {
+      // Reset button
+      submitButton.disabled = false;
+      submitButton.innerHTML = originalText;
+    }
+  });
+
+  // Function to check user status (for debugging)
+  window.checkUserStatus = function() {
+    console.log('🔍 Checking user status...');
+    console.log('Global auth manager available:', !!window.globalAuthManager);
+    console.log('Simple auth manager available:', !!window.simpleAuthManager);
+    console.log('Supabase available:', !!window.supabase);
+    
+    if (window.globalAuthManager) {
+      console.log('User logged in (global):', window.globalAuthManager.isUserLoggedIn());
+      console.log('Current user (global):', window.globalAuthManager.getCurrentUser());
+    }
+    
+    if (window.simpleAuthManager) {
+      console.log('User logged in (simple):', window.simpleAuthManager.isUserLoggedIn());
+      console.log('Current user (simple):', window.simpleAuthManager.getCurrentUser());
+    }
+  };
+
+  // Function to reinitialize Supabase (for debugging)
+  window.reinitSupabase = function() {
+    console.log('🔄 Reinitializing Supabase...');
+    if (initSupabase()) {
+      console.log('✅ Supabase reinitialized successfully');
+      return true;
+    } else {
+      console.log('❌ Failed to reinitialize Supabase');
+      return false;
+    }
+  };
+
+  // Function to test Supabase connection (for debugging)
+  window.testSupabaseConnection = async function() {
+    if (!supabase) {
+      console.log('❌ Supabase not initialized');
+      return false;
+    }
+    
+    try {
+      const { data, error } = await supabase
+        .from('contact_submissions')
+        .select('id')
+        .limit(1);
+      
+      if (error) {
+        console.error('❌ Supabase test failed:', error);
+        return false;
+      } else {
+        console.log('✅ Supabase test successful:', data);
+        return true;
+      }
+    } catch (err) {
+      console.error('❌ Supabase test error:', err);
+      return false;
+    }
+  };
+
+  // Phone number validation for contact form
+  function setupContactPhoneValidation() {
+    const countryCodeSelect = document.getElementById('phone_country_code') as HTMLSelectElement;
+    const countryCodeCustom = document.getElementById('phone_country_code_custom') as HTMLInputElement;
+    const phoneInput = document.getElementById('phone') as HTMLInputElement;
+    const phoneError = document.getElementById('phone-error') as HTMLElement;
+
+    if (!countryCodeSelect || !phoneInput) return;
+
+    // Function to get the actual country code (from select or custom input)
+    function getCountryCode(): string {
+      if (countryCodeSelect.value === 'other' && countryCodeCustom) {
+        return countryCodeCustom.value.trim() || '+91';
+      }
+      return countryCodeSelect.value;
+    }
+
+    // Show/hide custom country code input
+    function toggleCustomCountryCode() {
+      if (countryCodeSelect.value === 'other') {
+        if (countryCodeCustom) {
+          countryCodeCustom.classList.remove('hidden');
+          countryCodeCustom.required = true;
+          countryCodeCustom.value = '+';
+        }
+      } else {
+        if (countryCodeCustom) {
+          countryCodeCustom.classList.add('hidden');
+          countryCodeCustom.required = false;
+          countryCodeCustom.value = '';
+        }
+      }
+    }
+
+    // Handle custom country code input - ensure it starts with +
+    if (countryCodeCustom) {
+      countryCodeCustom.addEventListener('input', function(e) {
+        let value = (e.target as HTMLInputElement).value;
+        if (!value.startsWith('+')) {
+          value = '+' + value.replace(/\+/g, '');
+        }
+        // Only allow + and numbers
+        value = value.replace(/[^+0-9]/g, '');
+        (e.target as HTMLInputElement).value = value;
+      });
+    }
+
+    // Country code to max digits mapping
+    const countryCodeLimits: { [key: string]: number } = {
+      '+91': 10, // India
+      '+1': 10,  // USA/Canada
+      '+44': 10, // UK
+      '+61': 9,  // Australia
+      '+86': 11, // China
+      '+81': 10, // Japan
+      '+49': 11, // Germany
+      '+33': 9,  // France
+      '+971': 9, // UAE
+      '+966': 9  // Saudi Arabia
+    };
+
+    function validatePhone() {
+      const countryCode = getCountryCode();
+      const phone = phoneInput.value.replace(/\D/g, ''); // Remove non-digits
+      const maxDigits = countryCodeLimits[countryCode] || 15; // Default to 15 for custom codes
+
+      // Update maxlength based on country code
+      phoneInput.maxLength = maxDigits;
+      phoneInput.pattern = `[0-9]{1,${maxDigits}}`;
+
+      // For India (+91), validate 10 digits
+      if (countryCode === '+91') {
+        if (phone.length > 0 && phone.length !== 10) {
+          phoneError?.classList.remove('hidden');
+          phoneError.textContent = 'Please enter a valid 10-digit phone number';
+          phoneInput.classList.add('border-red-500');
+          return false;
+        } else {
+          phoneError?.classList.add('hidden');
+          phoneInput.classList.remove('border-red-500');
+          return true;
+        }
+      } else {
+        // For other countries, validate based on their max digits
+        if (phone.length > 0 && phone.length > maxDigits) {
+          phoneError?.classList.remove('hidden');
+          phoneError.textContent = `Please enter a valid phone number (max ${maxDigits} digits)`;
+          phoneInput.classList.add('border-red-500');
+          return false;
+        } else if (phone.length > 0 && phone.length < 5) {
+          phoneError?.classList.remove('hidden');
+          phoneError.textContent = 'Please enter a valid phone number (at least 5 digits)';
+          phoneInput.classList.add('border-red-500');
+          return false;
+        } else {
+          phoneError?.classList.add('hidden');
+          phoneInput.classList.remove('border-red-500');
+          return true;
+        }
+      }
+    }
+
+    // Restrict input to numbers only
+    phoneInput.addEventListener('input', function(e) {
+      const value = (e.target as HTMLInputElement).value.replace(/\D/g, '');
+      const countryCode = getCountryCode();
+      const maxDigits = countryCodeLimits[countryCode] || 15;
+      (e.target as HTMLInputElement).value = value.slice(0, maxDigits);
+      validatePhone();
+    });
+
+    // Validate on country code change
+    countryCodeSelect.addEventListener('change', function() {
+      toggleCustomCountryCode();
+      phoneInput.value = '';
+      const countryCode = getCountryCode();
+      phoneInput.placeholder = countryCode === '+91' ? '9876543210' : 'Enter phone number';
+      validatePhone();
+    });
+
+    // Initialize custom country code visibility
+    toggleCustomCountryCode();
+
+    // Validate on blur
+    phoneInput.addEventListener('blur', validatePhone);
+    if (countryCodeCustom) {
+      countryCodeCustom.addEventListener('blur', validatePhone);
+    }
+  }
+
+  // Add input event listeners to show signup alert for logged out users
+  document.addEventListener('DOMContentLoaded', () => {
+    setupContactPhoneValidation();
+    
+    const formInputs = [
+      'first_name', 'last_name', 'email', 'phone', 'company', 'project_type', 'message'
+    ];
+    
+    formInputs.forEach(inputId => {
+      const input = document.getElementById(inputId) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+      if (input) {
+        input.addEventListener('focus', () => {
+          // Only show login alert if user is not logged in, don't clear form
+          if (!isUserLoggedIn()) {
+            showLoginAlert();
+          }
+        });
+        
+        input.addEventListener('click', () => {
+          // Only show login alert if user is not logged in, don't clear form
+          if (!isUserLoggedIn()) {
+            showLoginAlert();
+          }
+        });
+      }
+    });
+  });
+
+  // IMMEDIATELY clear form on page load - NO DELAYS
+  function forceClearForm() {
+    console.log('🚫 FORCE CLEARING FORM - NO USER DETAILS ALLOWED WITHOUT LOGIN');
+    
+    // Clear all form fields immediately
+    const firstNameInput = document.getElementById('first_name') as HTMLInputElement;
+    const lastNameInput = document.getElementById('last_name') as HTMLInputElement;
+    const emailInput = document.getElementById('email') as HTMLInputElement;
+    const phoneInput = document.getElementById('phone') as HTMLInputElement;
+    const companyInput = document.getElementById('company') as HTMLInputElement;
+    const projectTypeSelect = document.getElementById('project_type') as HTMLSelectElement;
+    const messageTextarea = document.getElementById('message') as HTMLTextAreaElement;
+    
+    // Clear all fields
+    if (firstNameInput) {
+      firstNameInput.value = '';
+      firstNameInput.disabled = true;
+    }
+    if (lastNameInput) {
+      lastNameInput.value = '';
+      lastNameInput.disabled = true;
+    }
+    if (emailInput) {
+      emailInput.value = '';
+      emailInput.disabled = true;
+    }
+    if (phoneInput) {
+      phoneInput.value = '';
+      phoneInput.disabled = true;
+    }
+    if (companyInput) {
+      companyInput.value = '';
+      companyInput.disabled = true;
+    }
+    if (projectTypeSelect) {
+      projectTypeSelect.value = '';
+      projectTypeSelect.disabled = true;
+    }
+    if (messageTextarea) {
+      messageTextarea.value = '';
+      messageTextarea.disabled = true;
+      messageTextarea.placeholder = 'Please sign in to send us a message.';
+    }
+    
+    // Disable submit button
+    const submitBtn = document.querySelector('button[type="submit"]') as HTMLButtonElement;
+    if (submitBtn) {
+      submitBtn.disabled = true;
+    }
+    
+    // Show auth message
+    const form = document.getElementById('contact-form');
+    if (form) {
+      let messageDiv = document.getElementById('auth-message');
+      if (!messageDiv) {
+        messageDiv = document.createElement('div');
+        messageDiv.id = 'auth-message';
+        messageDiv.className = 'mb-6 p-4 bg-red-50 border border-red-200 rounded-lg';
+        form.insertBefore(messageDiv, form.firstChild);
+      }
+      messageDiv.innerHTML = `
+        <div class="flex items-center">
+          <svg class="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+          <div>
+            <p class="text-red-800 font-medium">Authentication Required</p>
+            <p class="text-red-700 text-sm">You must be logged in to access this form and view our products.</p>
+            <div class="mt-2">
+              <a href="/login" class="text-red-600 hover:text-red-800 font-medium text-sm mr-4">Sign In</a>
+              <a href="/signup" class="text-red-600 hover:text-red-800 font-medium text-sm">Create Account</a>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // Check authentication when page loads
+  document.addEventListener('DOMContentLoaded', () => {
+    // Check auth status immediately
+    setTimeout(() => {
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      
+      // CRITICAL: Also check sessionStorage to ensure no stale data
+      const sessionData = sessionStorage.getItem('simple-auth-session');
+      const hasValidSession = sessionData && sessionData !== 'null' && sessionData !== '{}';
+      
+      if (authManager && authManager.isUserLoggedIn() && hasValidSession) {
+        console.log('✅ User is logged in - enabling form');
+        enablePersonalFields();
+        prefillForm();
+      } else {
+        console.log('❌ User not logged in - clearing form');
+        forceClearForm();
+      }
+    }, 100);
+  });
+
+  // Listen for logout events to clear the form
+  window.addEventListener('user-logged-out', () => {
+    console.log('👤 User logged out - FORCE CLEARING contact form');
+    // Immediately clear all storage to prevent any stale data
+    sessionStorage.removeItem('simple-auth-session');
+    localStorage.removeItem('simple-auth-user');
+    // Force clear the form
+    forceClearForm();
+    // Prevent any prefill attempts after logout - double check after a short delay
+    setTimeout(() => {
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      const sessionData = sessionStorage.getItem('simple-auth-session');
+      const hasValidSession = sessionData && sessionData !== 'null' && sessionData !== '{}';
+      if (!authManager || !authManager.isUserLoggedIn() || !hasValidSession) {
+        forceClearForm();
+      }
+    }, 100);
+  });
+
+  // Listen for login events to pre-fill the form
+  window.addEventListener('user-logged-in', () => {
+    console.log('👤 User logged in - pre-filling contact form');
+    setTimeout(() => {
+      prefillForm();
+    }, 100);
+  });
+
+  // Additional form clearing on window load to ensure form is always cleared
+  window.addEventListener('load', () => {
+    console.log('🔄 Window loaded - checking authentication status...');
+    
+    // Wait for auth manager to be available
+    const waitForAuthManagerOnLoad = () => {
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      if (authManager) {
+        console.log('✅ Auth manager found on window load, checking user status...');
+        
+        // CRITICAL: Also check sessionStorage to ensure no stale data
+        const sessionData = sessionStorage.getItem('simple-auth-session');
+        const hasValidSession = sessionData && sessionData !== 'null' && sessionData !== '{}';
+        
+        if (authManager.isUserLoggedIn() && hasValidSession) {
+          console.log('👤 User is logged in on window load - enabling form');
+          enablePersonalFields();
+          prefillForm();
+        } else {
+          console.log('👤 User not logged in on window load - clearing form');
+          forceClearForm();
+        }
+      } else {
+        console.log('⏳ Auth manager not ready on window load, retrying in 100ms...');
+        setTimeout(waitForAuthManagerOnLoad, 100);
+      }
+    };
+    
+    // Start checking for auth manager
+    setTimeout(waitForAuthManagerOnLoad, 100);
+  });
+
+  // Clear form on page visibility change (when user comes back to tab) - but only if user is not logged in
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      console.log('🔄 Page became visible - checking authentication');
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      
+      // CRITICAL: Also check sessionStorage to ensure no stale data
+      const sessionData = sessionStorage.getItem('simple-auth-session');
+      const hasValidSession = sessionData && sessionData !== 'null' && sessionData !== '{}';
+      
+      if (!authManager || !authManager.isUserLoggedIn() || !hasValidSession) {
+        console.log('👤 User not logged in - FORCE CLEARING form');
+        forceClearForm();
+      } else {
+        console.log('👤 User is logged in - keeping form data');
+      }
+    }
+  });
+</script>
+
+<style>
+  /* Ensure contact page text stays black and doesn't blink */
+  .contact-form-section h1,
+  .contact-form-section h2,
+  .contact-form-section h3,
+  .contact-form-section h4,
+  .contact-form-section h5,
+  .contact-form-section h6,
+  .contact-form-section p,
+  .contact-form-section span,
+  .contact-form-section div {
+    color: #111827 !important;
+  }
+  
+  /* Specifically target the contact form section */
+  section.bg-white h1,
+  section.bg-white h2,
+  section.bg-white h3,
+  section.bg-white h4,
+  section.bg-white h5,
+  section.bg-white h6,
+  section.bg-white p,
+  section.bg-white span,
+  section.bg-white div {
+    color: #111827 !important;
+  }
+  
+  /* Ensure all text in contact form section is black */
+  .py-20.bg-white h1,
+  .py-20.bg-white h2,
+  .py-20.bg-white h3,
+  .py-20.bg-white h4,
+  .py-20.bg-white h5,
+  .py-20.bg-white h6,
+  .py-20.bg-white p,
+  .py-20.bg-white span,
+  .py-20.bg-white div {
+    color: #111827 !important;
+  }
+  
+  /* Ensure CTA section text stays black */
+  .py-20.bg-blue-50 h1,
+  .py-20.bg-blue-50 h2,
+  .py-20.bg-blue-50 h3,
+  .py-20.bg-blue-50 h4,
+  .py-20.bg-blue-50 h5,
+  .py-20.bg-blue-50 h6,
+  .py-20.bg-blue-50 p,
+  .py-20.bg-blue-50 span,
+  .py-20.bg-blue-50 div {
+    color: #111827 !important;
+  }
+  
+  /* Specifically target the "Ready to Start Your Project?" text */
+  .bg-blue-50 h2 {
+    color: #111827 !important;
+  }
+</style>

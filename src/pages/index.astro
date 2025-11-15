@@ -1,0 +1,403 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getProducts } from '../lib/products-data';
+
+let products = [];
+try {
+  products = await getProducts();
+} catch (error) {
+  console.error('Error loading products:', error);
+  products = [];
+}
+---
+
+<Layout title="DevExpress - 24 Hour Development Company">
+  <!-- Ultra-Fast Loading Styles -->
+  <style>
+    /* Minimal product card hover - maximum speed */
+    .product-card:hover {
+      transform: translateY(-1px);
+    }
+    
+    /* Force immediate rendering - no delays */
+    .product-card {
+      opacity: 1 !important;
+      transform: none !important;
+      will-change: auto !important;
+    }
+    
+    /* Optimize images for fast loading */
+    .product-card img {
+      will-change: auto !important;
+      transform: translateZ(0) !important;
+      background-color: #f3f4f6;
+      min-height: 192px;
+    }
+    
+    /* Image loading state */
+    .product-card img:not([src]) {
+      background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+    }
+    
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
+  
+  <!-- Full Page White Background -->
+  <div class="min-h-screen bg-white">
+  <!-- Hero Section -->
+  <section class="relative bg-blue-600 text-white overflow-hidden">
+    <div class="absolute inset-0 bg-black opacity-20"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
+      <div class="text-center">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6 text-white" style="color: #ffffff !important;">
+          Your App Ready in
+          <span class="text-white" style="color: #ffffff !important;">
+            24 Hours
+          </span>
+        </h1>
+        <p class="text-xl md:text-2xl text-gray-200 mb-8 max-w-3xl mx-auto">
+          Professional restaurant systems, mobile apps, and websites delivered lightning-fast. 
+          No compromises on quality, just rapid results.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/products" class="bg-accent-500 hover:bg-accent-600 text-white px-8 py-4 rounded-lg text-lg font-semibold shadow-lg">
+            View Our Products
+          </a>
+          <a href="#how-it-works" class="border-2 border-white text-white hover:bg-white hover:text-primary-900 px-8 py-4 rounded-lg text-lg font-semibold how-it-works-btn">
+            How It Works
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Floating Elements -->
+    <div class="absolute top-20 left-10 w-20 h-20 bg-accent-500 rounded-full opacity-20"></div>
+    <div class="absolute bottom-20 right-10 w-16 h-16 bg-secondary-500 rounded-full opacity-20"></div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+        <div>
+          <div class="text-4xl font-bold text-primary-600 mb-2">500+</div>
+          <div class="text-black font-medium">Projects Delivered</div>
+        </div>
+        <div>
+          <div class="text-4xl font-bold text-primary-600 mb-2">24hrs</div>
+          <div class="text-black font-medium">Average Delivery</div>
+        </div>
+        <div>
+          <div class="text-4xl font-bold text-primary-600 mb-2">98%</div>
+          <div class="text-black font-medium">Client Satisfaction</div>
+        </div>
+        <div>
+          <div class="text-4xl font-bold text-primary-600 mb-2">24/7</div>
+          <div class="text-black font-medium">Support Available</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Products Section -->
+  <section class="py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-black mb-4">Our Products</h2>
+        <p class="text-xl text-black font-medium max-w-3xl mx-auto">
+          Choose from our range of professional digital solutions, all delivered within 24 hours
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {products.map((product, index) => (
+          <div class="product-card bg-white rounded-xl shadow-lg">
+            <div class="relative rounded-t-xl overflow-hidden" style="height: 192px;">
+              <img 
+                src={product.featured_image} 
+                alt={product.name} 
+                class="w-full h-full object-cover" 
+                loading="eager" 
+                decoding="async"
+                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDMwMCAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMTkyIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xNTAgODBMMTgwIDExMEgxMjBMMTUwIDgwWiIgZmlsbD0iIzlDQTNBRiIvPgo8Y2lyY2xlIGN4PSIxNTAiIGN5PSIxMjAiIHI9IjEwIiBmaWxsPSIjOUNBM0FGIi8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTUwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNkI3MjgwIj5JbWFnZSBVbmF2YWlsYWJsZTwvdGV4dD4KPC9zdmc+Cg=='"
+              />
+            </div>
+            <div class="p-6">
+              <h3 class="text-xl font-semibold text-black mb-2">{product.name}</h3>
+              <p class="text-black font-medium mb-4 text-sm">{product.short_description}</p>
+              <div class="flex items-center justify-between">
+                <span class="text-2xl font-bold text-primary-600">
+                  ₹{product.base_price.toLocaleString()}
+                </span>
+                <a href={`/products/${product.slug}`} class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                  View Details
+                </a>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="how-it-works" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-black mb-4">How It Works</h2>
+        <p class="text-xl text-black font-medium max-w-3xl mx-auto">
+          Our streamlined process ensures rapid delivery without compromising quality
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="text-center">
+          <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span class="text-2xl font-bold text-primary-600">1</span>
+          </div>
+          <h3 class="text-xl font-semibold text-black mb-4">Choose & Order</h3>
+          <p class="text-black font-medium">
+            Select your product, choose a plan, and provide your requirements. 
+            Our smart forms collect everything we need to get started.
+          </p>
+        </div>
+
+        <div class="text-center">
+          <div class="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span class="text-2xl font-bold text-secondary-600">2</span>
+          </div>
+          <h3 class="text-xl font-semibold text-black mb-4">We Build</h3>
+          <p class="text-black font-medium">
+            Our expert team immediately starts working on your project using 
+            proven templates and rapid development methodologies.
+          </p>
+        </div>
+
+        <div class="text-center">
+          <div class="w-16 h-16 bg-accent-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span class="text-2xl font-bold text-accent-600">3</span>
+          </div>
+          <h3 class="text-xl font-semibold text-black mb-4">Delivered</h3>
+          <p class="text-black font-medium">
+            Within 24 hours, receive your fully functional application with 
+            documentation and ongoing support included.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Choose Us Section -->
+  <section class="py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="text-3xl md:text-4xl font-bold text-black mb-6">
+            Why Choose DevExpress?
+          </h2>
+          <div class="space-y-6">
+            <div class="flex items-start space-x-4">
+              <div class="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-black mb-2">Lightning Fast Delivery</h3>
+                <p class="text-black font-medium">Our proven development process and pre-built components enable 24-hour delivery without quality compromise.</p>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-4">
+              <div class="w-8 h-8 bg-secondary-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <svg class="w-5 h-5 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-black mb-2">Professional Quality</h3>
+                <p class="text-black font-medium">Every project is built by experienced developers using industry best practices and modern technologies.</p>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-4">
+              <div class="w-8 h-8 bg-accent-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <svg class="w-5 h-5 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-black mb-2">Ongoing Support</h3>
+                <p class="text-black font-medium">Get 30 days of free support and maintenance, plus affordable long-term support options.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="relative">
+          <img src="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg" alt="Development team" class="rounded-lg shadow-xl" />
+          <div class="absolute -bottom-6 -left-6 bg-white p-6 rounded-lg shadow-lg">
+            <div class="text-2xl font-bold text-primary-600">24hrs</div>
+            <div class="text-sm text-black font-medium">Average Delivery</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-20 bg-blue-600 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl md:text-4xl font-bold mb-6">
+        Ready to Get Started?
+      </h2>
+      <p class="text-xl mb-8 max-w-2xl mx-auto opacity-90">
+        Join hundreds of satisfied clients who got their digital solutions delivered in just 24 hours.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/products" class="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 rounded-lg text-lg font-semibold transition-all transform hover:scale-105 shadow-lg">
+          Browse Products
+        </a>
+        <a href="/contact" class="contact-us-btn border-2 border-white text-white hover:bg-white hover:text-black px-8 py-4 rounded-lg text-lg font-semibold transition-all">
+          Contact Us
+        </a>
+      </div>
+    </div>
+  </section>
+  </div>
+</Layout>
+
+<style>
+
+  /* How It Works button text visibility */
+  .how-it-works-btn {
+    color: white !important;
+  }
+  
+  .how-it-works-btn:hover {
+    color: #111827 !important; /* Black text on hover */
+    background-color: white !important;
+  }
+  
+  .how-it-works-btn:focus {
+    color: #111827 !important; /* Black text on focus */
+    background-color: white !important;
+  }
+
+  /* Contact Us button text visibility - More specific selectors */
+  a.contact-us-btn {
+    color: white !important;
+  }
+  
+  a.contact-us-btn:hover {
+    color: #000000 !important; /* Black text on white background */
+    background-color: white !important;
+  }
+  
+  a.contact-us-btn:focus {
+    color: #000000 !important; /* Black text on focus */
+    background-color: white !important;
+  }
+  
+  /* Additional specificity for hover state */
+  .contact-us-btn:hover span,
+  .contact-us-btn:hover {
+    color: #000000 !important;
+  }
+</style>
+
+<script>
+  // Ensure Contact Us button text visibility
+  document.addEventListener('DOMContentLoaded', () => {
+    const contactButtons = document.querySelectorAll('.contact-us-btn');
+    contactButtons.forEach(button => {
+      button.addEventListener('mouseenter', function() {
+        this.style.color = '#000000';
+        this.style.backgroundColor = 'white';
+      });
+      button.addEventListener('mouseleave', function() {
+        this.style.color = 'white';
+        this.style.backgroundColor = 'transparent';
+      });
+    });
+  });
+
+  // Ensure How It Works button text visibility
+  document.addEventListener('DOMContentLoaded', () => {
+    const howItWorksBtn = document.querySelector('.how-it-works-btn');
+    if (howItWorksBtn) {
+      // Add hover event listeners to ensure text color changes
+      howItWorksBtn.addEventListener('mouseenter', () => {
+        howItWorksBtn.style.color = '#111827';
+        howItWorksBtn.style.backgroundColor = 'white';
+      });
+      
+      howItWorksBtn.addEventListener('mouseleave', () => {
+        howItWorksBtn.style.color = 'white';
+        howItWorksBtn.style.backgroundColor = 'transparent';
+      });
+    }
+  });
+  
+  // Check for password reset tokens and redirect immediately
+  (function() {
+    // Check URL hash for password reset tokens
+    const hash = window.location.hash || '';
+    if (hash.includes('access_token')) {
+      const hashParams = new URLSearchParams(hash.substring(1));
+      const type = hashParams.get('type');
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+      
+      // If this is a password reset (recovery) flow, redirect to reset-password page
+      if (type === 'recovery' && accessToken && refreshToken) {
+        console.log('Password reset tokens detected on home page, redirecting to reset-password');
+        window.location.href = `/reset-password${hash}`;
+        return;
+      }
+    }
+    
+    // Also check URL search params
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchType = urlParams.get('type');
+    const searchAccessToken = urlParams.get('access_token');
+    const searchRefreshToken = urlParams.get('refresh_token');
+    
+    if (searchType === 'recovery' && searchAccessToken && searchRefreshToken) {
+      console.log('Password reset tokens detected in search params, redirecting to reset-password');
+      window.location.href = `/reset-password?${window.location.search.substring(1)}`;
+      return;
+    }
+  })();
+
+  // Ultra-fast loading - minimal JavaScript
+  document.addEventListener('DOMContentLoaded', function() {
+    // Only handle anchor links - everything else loads immediately
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href').substring(1);
+        const target = document.getElementById(targetId);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+    
+    // Handle image loading errors
+    document.querySelectorAll('.product-card img').forEach(img => {
+      img.addEventListener('error', function() {
+        this.style.backgroundColor = '#f3f4f6';
+        this.style.display = 'flex';
+        this.style.alignItems = 'center';
+        this.style.justifyContent = 'center';
+        this.innerHTML = '<div style="text-align: center; color: #6b7280; font-size: 12px;">Image Unavailable</div>';
+      });
+    });
+  });
+</script>

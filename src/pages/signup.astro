@@ -1,0 +1,1223 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Sign Up - DevExpress">
+  <section class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+      <div class="flex justify-center">
+        <div class="w-12 h-12 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center">
+          <span class="text-white font-bold text-xl">24</span>
+        </div>
+      </div>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        Create your account
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-600">
+        Or{' '}
+        <a href="/login" class="font-medium text-primary-600 hover:text-primary-500 transition-colors">
+          sign in to your existing account
+        </a>
+      </p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+      <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <form id="signup-form" class="space-y-6">
+          <!-- Error Message -->
+          <div id="error-message" class="hidden p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div class="flex">
+              <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+              </svg>
+              <span id="error-text" class="text-red-800">An error occurred during account creation.</span>
+            </div>
+          </div>
+
+          <!-- Success Message -->
+          <div id="success-message" class="hidden p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div class="flex">
+              <svg class="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+              <span id="success-text" class="text-green-800">Account created successfully! Redirecting...</span>
+            </div>
+          </div>
+
+          <!-- Full Name -->
+          <div>
+            <label for="full_name" class="block text-sm font-medium text-gray-700">
+              Full Name *
+            </label>
+            <div class="mt-1">
+              <input
+                id="full_name"
+                name="full_name"
+                type="text"
+                required
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                placeholder="Enter your full name"
+              />
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700">
+              Email Address * <span class="text-gray-500 text-xs">(Gmail only)</span>
+            </label>
+            <div class="mt-1">
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                autocomplete="off"
+                pattern="[a-zA-Z0-9][a-zA-Z0-9._-]*@gmail\.com"
+                title="Please enter a valid Gmail address (username@gmail.com)"
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                placeholder="username@gmail.com"
+              />
+              <p class="mt-1 text-xs text-gray-500">Only Gmail addresses are accepted (e.g., username@gmail.com)</p>
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700">
+              Password *
+            </label>
+            <div class="mt-1">
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                minlength="6"
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                placeholder="Create a password (min 6 characters)"
+              />
+            </div>
+          </div>
+
+          <!-- Confirm Password -->
+          <div>
+            <label for="confirm_password" class="block text-sm font-medium text-gray-700">
+              Confirm Password *
+            </label>
+            <div class="mt-1">
+              <input
+                id="confirm_password"
+                name="confirm_password"
+                type="password"
+                required
+                minlength="6"
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                placeholder="Confirm your password"
+              />
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div>
+            <label for="phone" class="block text-sm font-medium text-gray-700">
+              Phone Number *
+            </label>
+            <div class="mt-1">
+              <div class="flex">
+                <select
+                  id="country_code"
+                  name="country_code"
+                  required
+                  class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                >
+                  <option value="+91" selected>🇮🇳 +91</option>
+                  <option value="+1">🇺🇸 +1</option>
+                  <option value="+44">🇬🇧 +44</option>
+                  <option value="+61">🇦🇺 +61</option>
+                  <option value="+86">🇨🇳 +86</option>
+                  <option value="+81">🇯🇵 +81</option>
+                  <option value="+49">🇩🇪 +49</option>
+                  <option value="+33">🇫🇷 +33</option>
+                  <option value="+971">🇦🇪 +971</option>
+                  <option value="+966">🇸🇦 +966</option>
+                  <option value="other">Other</option>
+                </select>
+                <input
+                  type="text"
+                  id="country_code_custom"
+                  name="country_code_custom"
+                  class="hidden inline-flex items-center px-2 w-20 border border-r-0 border-gray-300 rounded-none bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="+XXX"
+                  maxlength="5"
+                  pattern="\+[0-9]{1,4}"
+                />
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  required
+                  maxlength="10"
+                  pattern="[0-9]{10}"
+                  class="appearance-none block flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-r-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  placeholder="9876543210"
+                />
+              </div>
+              <div id="phone-error" class="hidden text-red-500 text-sm mt-1">Please enter a valid 10-digit phone number</div>
+            </div>
+          </div>
+
+          <!-- Company Name -->
+          <div>
+            <label for="company_name" class="block text-sm font-medium text-gray-700">
+              Company Name
+            </label>
+            <div class="mt-1">
+              <input
+                id="company_name"
+                name="company_name"
+                type="text"
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                placeholder="Your company name (optional)"
+              />
+            </div>
+          </div>
+
+          <!-- Admin Code (Hidden by default) -->
+          <div id="admin-code-section" class="hidden">
+            <label for="admin_code" class="block text-sm font-medium text-gray-700">
+              Admin Code
+            </label>
+            <div class="mt-1">
+              <input
+                id="admin_code"
+                name="admin_code"
+                type="text"
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                placeholder="Enter admin code (optional)"
+              />
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+            <button
+              type="submit"
+            id="signup-btn"
+            class="w-full bg-primary-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+            >
+              Create Account
+            </button>
+
+          <!-- Google Authentication -->
+          <div class="google-auth-section">
+            <div class="divider">
+              <span>or</span>
+            </div>
+            
+            <div class="google-auth-container">
+              <button id="google-signup-btn" class="google-btn signup">
+                <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                <span>Sign up with Google</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Login Link -->
+          <div class="text-center text-sm text-gray-600">
+            Already have an account?
+            <a href="/login" class="text-primary-600 hover:text-primary-500 font-medium transition-colors">
+              Sign in here
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .google-auth-section {
+    margin: 1.5rem 0;
+  }
+
+  .google-auth-container {
+    width: 100%;
+  }
+
+  .google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.5rem;
+    background: white;
+    color: #374151;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .google-btn:hover {
+    border-color: #d1d5db;
+    background: #f9fafb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .google-btn:active {
+    transform: translateY(0);
+  }
+
+  .google-btn.signup {
+    background: white;
+    border-color: #e5e7eb;
+    color: #374151;
+  }
+
+  .google-btn.signup:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .google-icon {
+    flex-shrink: 0;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin: 1rem 0;
+  }
+
+  .divider::before,
+  .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e5e7eb;
+  }
+
+  .divider span {
+    padding: 0 1rem;
+    background: white;
+  }
+
+  .auth-status {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    font-size: 0.875rem;
+  }
+
+  .auth-status.success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+  }
+
+  .auth-status.error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+  }
+
+  .auth-status.loading {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #93c5fd;
+  }
+
+  .hidden {
+    display: none;
+  }
+  
+  /* Prevent autofill styling */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: #374151 !important;
+    background-color: white !important;
+  }
+  
+  /* Ensure form fields start empty */
+  #email, #full_name, #password, #confirm_password, #phone, #company_name {
+    background-color: white !important;
+    color: #374151 !important;
+  }
+</style>
+
+<script>
+  import { supabase } from '../lib/supabase';
+
+  const form = document.getElementById('signup-form') as HTMLFormElement;
+  const errorMessage = document.getElementById('error-message');
+  const errorText = document.getElementById('error-text');
+  const successMessage = document.getElementById('success-message');
+  const successText = document.getElementById('success-text');
+  const googleSignupBtn = document.getElementById('google-signup-btn');
+  // Track whether the user explicitly started Google OAuth from this page
+  let oauthGoogleStarted = false;
+
+  // Show status message
+  function showStatus(message, type = 'info') {
+    // Errors go to the red box
+    if (type === 'error') {
+      if (errorText) errorText.textContent = message;
+      errorMessage?.classList.remove('hidden');
+      // Ensure error styles
+      if (errorMessage) {
+        errorMessage.className = 'p-4 bg-red-50 border border-red-200 rounded-lg';
+      }
+      return;
+    }
+
+    // Non-errors (info/loading/success) go to the green box
+    if (successText) successText.textContent = message;
+    successMessage?.classList.remove('hidden');
+    if (successMessage) {
+      // Force green styles for visibility
+      successMessage.className = 'p-4 bg-green-50 border border-green-200 rounded-lg';
+    }
+    // Hide error box if visible
+    errorMessage?.classList.add('hidden');
+  }
+
+  // Handle Google authentication
+  async function handleGoogleAuth() {
+    oauthGoogleStarted = true;
+    // Persist intent across redirects
+    sessionStorage.setItem('oauth-google', '1');
+    try {
+      showStatus('Connecting to Google...', 'loading');
+      
+      // Use the standard Supabase redirect URI
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
+        }
+      });
+
+      if (error) {
+        console.error('Google auth error:', error);
+        
+        // Provide specific error messages and solutions
+        let errorMessage = error.message;
+        if (error.message.includes('Provider not found') || error.message.includes('not configured')) {
+          errorMessage = 'Google provider not configured. Please contact administrator.';
+        } else if (error.message.includes('redirect_uri_mismatch') || error.message.includes('mismatch')) {
+          errorMessage = `Redirect URI mismatch. Please add this exact URI to Google Cloud Console: ${window.location.origin}/auth/callback`;
+          console.error('URI Mismatch Details:', {
+            currentOrigin: window.location.origin,
+            expectedRedirect: `${window.location.origin}/auth/callback`,
+            error: error.message,
+            fixInstructions: 'Add the exact URI above to Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client ID → Authorized redirect URIs'
+          });
+        } else if (error.message.includes('access_denied')) {
+          errorMessage = 'Access denied. Please try again.';
+        }
+        
+        showStatus(`Authentication failed: ${errorMessage}`, 'error');
+        return;
+      }
+
+      showStatus('Redirecting to Google...', 'loading');
+      
+    } catch (err) {
+      console.error('Google auth error:', err);
+      showStatus(`Authentication failed: ${err.message}`, 'error');
+    }
+  }
+
+  // Handle Google user data sync
+  async function syncGoogleUser(user) {
+    try {
+      const { data, error } = await supabase.rpc('sync_google_user', {
+        p_google_id: user.user_metadata.provider_id,
+        p_email: user.email,
+        p_name: user.user_metadata.full_name,
+        p_picture: user.user_metadata.avatar_url,
+        p_provider_id: user.user_metadata.provider_id
+      });
+
+      if (error) {
+        console.error('Sync error:', error);
+        return;
+      }
+
+      console.log('Google user synced:', data);
+      return data;
+    } catch (err) {
+      console.error('Sync error:', err);
+    }
+  }
+
+  // Event listener for Google sign-up button
+  googleSignupBtn?.addEventListener('click', handleGoogleAuth);
+
+  // Listen for auth state changes
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session?.user) {
+      const user = session.user;
+      
+      if (user.app_metadata.provider === 'google') {
+        // Only proceed if the flow was started via the Google button
+        const started = oauthGoogleStarted || sessionStorage.getItem('oauth-google') === '1';
+        if (!started) {
+          return;
+        }
+        // Clear the intent flag once handled
+        sessionStorage.removeItem('oauth-google');
+        showStatus('Syncing Google account...', 'loading');
+        await syncGoogleUser(user);
+        showStatus('Successfully signed up with Google!', 'success');
+        
+        // Add default role for Google signup (can be updated later)
+        const userWithRole = {
+          ...user,
+          role: 'customer' // Default role for Google signup
+        };
+        
+        // Store session for Google signup
+        sessionStorage.setItem('simple-auth-session', JSON.stringify({
+          user: userWithRole,
+          access_token: session?.access_token,
+          timestamp: Date.now()
+        }));
+        
+        // Dispatch login event
+        window.dispatchEvent(new CustomEvent('user-logged-in', { detail: userWithRole }));
+        
+        // Redirect to dashboard
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 1500);
+      }
+    }
+  });
+
+  // Function to check and fix missing profiles for existing users
+  async function fixMissingProfiles() {
+    try {
+      console.log('🔍 Checking for missing profiles...');
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.log('ℹ️ No user logged in');
+        return;
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError || !profile) {
+        console.log('⚠️ Profile missing for user, creating...');
+        
+        const { data: functionResult, error: functionError } = await supabase
+          .rpc('create_profile_for_existing_user', {
+            user_id: user.id,
+            user_email: user.email,
+            user_full_name: user.user_metadata?.full_name || '',
+            user_phone: user.user_metadata?.phone || '',
+            user_company_name: user.user_metadata?.company_name || '',
+            user_role: 'customer'
+          });
+
+        if (functionError) {
+          console.error('❌ Error creating missing profile:', functionError);
+        } else {
+          console.log('✅ Missing profile created:', functionResult);
+        }
+      } else {
+        console.log('✅ Profile exists:', profile);
+      }
+    } catch (error) {
+      console.error('❌ Error checking/fixing profiles:', error);
+    }
+  }
+
+  // Clear all form fields on page load to prevent pre-filling
+  document.addEventListener('DOMContentLoaded', function() {
+    // Check for missing profiles on page load
+    fixMissingProfiles();
+    const emailInput = document.getElementById('email') as HTMLInputElement;
+    const fullNameInput = document.getElementById('full_name') as HTMLInputElement;
+    const passwordInput = document.getElementById('password') as HTMLInputElement;
+    const confirmPasswordInput = document.getElementById('confirm_password') as HTMLInputElement;
+    const phoneInput = document.getElementById('phone') as HTMLInputElement;
+    const companyNameInput = document.getElementById('company_name') as HTMLInputElement;
+    const adminCodeSection = document.getElementById('admin-code-section');
+    const phoneError = document.getElementById('phone-error');
+    
+    // Clear all input fields
+    if (emailInput) emailInput.value = '';
+    if (fullNameInput) fullNameInput.value = '';
+    if (passwordInput) passwordInput.value = '';
+    if (confirmPasswordInput) confirmPasswordInput.value = '';
+    if (phoneInput) phoneInput.value = '';
+    if (companyNameInput) companyNameInput.value = '';
+    
+    // Phone number validation with country code
+    const countryCodeSelect = document.getElementById('country_code') as HTMLSelectElement;
+    const countryCodeCustom = document.getElementById('country_code_custom') as HTMLInputElement;
+    if (phoneInput && countryCodeSelect) {
+      // Function to get the actual country code (from select or custom input)
+      function getCountryCode(): string {
+        if (countryCodeSelect.value === 'other' && countryCodeCustom) {
+          return countryCodeCustom.value.trim() || '+91';
+        }
+        return countryCodeSelect.value;
+      }
+
+      // Show/hide custom country code input
+      function toggleCustomCountryCode() {
+        if (countryCodeSelect.value === 'other') {
+          if (countryCodeCustom) {
+            countryCodeCustom.classList.remove('hidden');
+            countryCodeCustom.required = true;
+            countryCodeCustom.value = '+';
+          }
+        } else {
+          if (countryCodeCustom) {
+            countryCodeCustom.classList.add('hidden');
+            countryCodeCustom.required = false;
+            countryCodeCustom.value = '';
+          }
+        }
+      }
+
+      // Handle custom country code input - ensure it starts with +
+      if (countryCodeCustom) {
+        countryCodeCustom.addEventListener('input', function(e) {
+          let value = (e.target as HTMLInputElement).value;
+          if (!value.startsWith('+')) {
+            value = '+' + value.replace(/\+/g, '');
+          }
+          // Only allow + and numbers
+          value = value.replace(/[^+0-9]/g, '');
+          (e.target as HTMLInputElement).value = value;
+        });
+      }
+
+      // Country code specific phone number digit requirements
+      const countryCodeLimits: { [key: string]: number } = {
+        '+91': 10,   // India - 10 digits
+        '+1': 10,    // US/Canada - 10 digits
+        '+44': 10,   // UK - 10 digits
+        '+61': 9,    // Australia - 9 digits
+        '+86': 11,   // China - 11 digits
+        '+81': 10,   // Japan - 10 digits
+        '+49': 11,   // Germany - 11 digits
+        '+33': 9,    // France - 9 digits
+        '+971': 9,   // UAE - 9 digits
+        '+966': 9    // Saudi Arabia - 9 digits
+      };
+
+      function validatePhone() {
+        const countryCode = getCountryCode();
+        const phone = phoneInput.value.replace(/\D/g, '');
+        const requiredDigits = countryCodeLimits[countryCode];
+        
+        // If country code has specific digit requirement, use it
+        // Otherwise, allow 5-15 digits for custom country codes
+        if (requiredDigits) {
+          // Update maxlength and pattern to exact digits required
+          phoneInput.maxLength = requiredDigits;
+          phoneInput.pattern = `[0-9]{${requiredDigits}}`;
+
+          // Validate exact digit count for this country
+          if (phone.length > 0 && phone.length !== requiredDigits) {
+            phoneError?.classList.remove('hidden');
+            phoneError.textContent = `Please enter a valid ${requiredDigits}-digit phone number for this country`;
+            phoneInput.classList.add('border-red-500');
+          } else if (phone.length === requiredDigits) {
+            phoneError?.classList.add('hidden');
+            phoneInput.classList.remove('border-red-500');
+          } else if (phone.length === 0) {
+            phoneError?.classList.add('hidden');
+            phoneInput.classList.remove('border-red-500');
+          }
+        } else {
+          // For custom country codes, allow 5-15 digits
+          const minDigits = 5;
+          const maxDigits = 15;
+          phoneInput.maxLength = maxDigits;
+          phoneInput.pattern = `[0-9]{${minDigits},${maxDigits}}`;
+
+          if (phone.length > 0 && phone.length < minDigits) {
+            phoneError?.classList.remove('hidden');
+            phoneError.textContent = `Please enter a valid phone number (at least ${minDigits} digits)`;
+            phoneInput.classList.add('border-red-500');
+          } else if (phone.length > maxDigits) {
+            phoneError?.classList.remove('hidden');
+            phoneError.textContent = `Please enter a valid phone number (max ${maxDigits} digits)`;
+            phoneInput.classList.add('border-red-500');
+          } else {
+            phoneError?.classList.add('hidden');
+            phoneInput.classList.remove('border-red-500');
+          }
+        }
+      }
+
+      phoneInput.addEventListener('input', function(e) {
+        const value = (e.target as HTMLInputElement).value.replace(/[^0-9]/g, '');
+        const countryCode = getCountryCode();
+        const maxDigits = countryCodeLimits[countryCode] || 15; // Use exact digits for known codes, 15 for custom
+        (e.target as HTMLInputElement).value = value.slice(0, maxDigits);
+        validatePhone();
+      });
+
+      countryCodeSelect.addEventListener('change', function() {
+        toggleCustomCountryCode();
+        phoneInput.value = '';
+        const countryCode = getCountryCode();
+        phoneInput.placeholder = countryCode === '+91' ? '9876543210' : 'Enter phone number';
+        validatePhone();
+      });
+
+      // Initialize custom country code visibility
+      toggleCustomCountryCode();
+
+      // Validate on blur
+      phoneInput.addEventListener('blur', validatePhone);
+      if (countryCodeCustom) {
+        countryCodeCustom.addEventListener('blur', validatePhone);
+      }
+    }
+    
+    // Check for admin signup URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const adminCode = urlParams.get('admin_code');
+    if (adminCode && adminCodeSection) {
+      adminCodeSection.classList.remove('hidden');
+      const adminCodeInput = document.getElementById('admin_code') as HTMLInputElement;
+      if (adminCodeInput) {
+        adminCodeInput.value = adminCode;
+      }
+    }
+    
+    // Prevent autofill by setting autocomplete attributes
+    if (emailInput) {
+      emailInput.setAttribute('autocomplete', 'off');
+      emailInput.setAttribute('data-lpignore', 'true');
+      
+      // Real-time Gmail validation
+      emailInput.addEventListener('blur', function() {
+        const emailValue = this.value.trim().toLowerCase();
+        if (emailValue) {
+          // Check if it's a Gmail address
+          if (!emailValue.endsWith('@gmail.com')) {
+            this.classList.add('border-red-500');
+            this.classList.remove('border-gray-300');
+          } else {
+            // Validate format
+            const emailRegex = /^[a-zA-Z0-9._-]+@gmail\.com$/;
+            if (!emailRegex.test(emailValue)) {
+              this.classList.add('border-red-500');
+              this.classList.remove('border-gray-300');
+            } else {
+              this.classList.remove('border-red-500');
+              this.classList.add('border-gray-300');
+            }
+          }
+        } else {
+          this.classList.remove('border-red-500');
+          this.classList.add('border-gray-300');
+        }
+      });
+      
+      // Remove error styling on input
+      emailInput.addEventListener('input', function() {
+        const emailValue = this.value.trim().toLowerCase();
+        if (emailValue && emailValue.endsWith('@gmail.com')) {
+          const emailRegex = /^[a-zA-Z0-9._-]+@gmail\.com$/;
+          if (emailRegex.test(emailValue)) {
+            this.classList.remove('border-red-500');
+            this.classList.add('border-gray-300');
+          }
+        }
+      });
+    }
+    if (passwordInput) {
+      passwordInput.setAttribute('autocomplete', 'new-password');
+    }
+    if (confirmPasswordInput) {
+      confirmPasswordInput.setAttribute('autocomplete', 'new-password');
+    }
+  });
+
+  // Check for query parameter messages
+  const urlParams = new URLSearchParams(window.location.search);
+  const message = urlParams.get('message');
+  const messageType = urlParams.get('type') || 'success';
+
+  if (message) {
+    if (messageType === 'error') {
+      if (errorText) {
+        errorText.textContent = message;
+      }
+      errorMessage?.classList.remove('hidden');
+    } else {
+      // Show success toast
+      if (typeof window.showToast === 'function') {
+        window.showToast(message, 'success');
+      }
+    }
+    
+    // Clear the URL parameters
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    console.log('=== FORM SUBMISSION STARTED ===');
+    
+    const formData = new FormData(form);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    const confirmPassword = formData.get('confirm_password') as string;
+    const fullName = formData.get('full_name') as string;
+    const phone = formData.get('phone') as string;
+    const companyName = formData.get('company_name') as string;
+    const adminCode = formData.get('admin_code') as string;
+
+    // Hide previous errors
+    errorMessage?.classList.add('hidden');
+
+    // ===== GMAIL VALIDATION - MUST RUN FIRST =====
+    // This validation MUST run and block submission if invalid
+    console.log('=== GMAIL VALIDATION START ===');
+    console.log('Raw email value:', email);
+    console.log('Email type:', typeof email);
+    
+    if (!email || !email.trim()) {
+      console.log('VALIDATION FAILED: Email is empty');
+      if (errorText) {
+        errorText.textContent = 'Email address is required.';
+      }
+      errorMessage?.classList.remove('hidden');
+      
+      const emailInput = document.getElementById('email') as HTMLInputElement;
+      if (emailInput) {
+        emailInput.classList.add('border-red-500');
+        emailInput.focus();
+      }
+      
+      // Re-enable submit button
+      const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
+      console.log('=== FORM SUBMISSION BLOCKED: Empty email ===');
+      return;
+    }
+
+    const emailTrimmed = email.trim();
+    const emailLower = emailTrimmed.toLowerCase();
+    
+    console.log('Email after trim and lowercase:', emailLower);
+    
+    // Check if email ends with @gmail.com
+    if (!emailLower.endsWith('@gmail.com')) {
+      console.log('VALIDATION FAILED: Email does not end with @gmail.com');
+      console.log('Email value:', emailLower);
+      if (errorText) {
+        errorText.textContent = 'Please use a Gmail address (username@gmail.com format).';
+      }
+      errorMessage?.classList.remove('hidden');
+      
+      // Highlight the email field
+      const emailInput = document.getElementById('email') as HTMLInputElement;
+      if (emailInput) {
+        emailInput.classList.add('border-red-500');
+        emailInput.focus();
+      }
+      
+      // Re-enable submit button
+      const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
+      console.log('=== FORM SUBMISSION BLOCKED: Not Gmail ===');
+      return;
+    }
+    
+    // Validate email format more strictly - username part must be valid
+    // Gmail username can contain: letters, numbers, dots, underscores, hyphens
+    // Must start with a letter or number
+    const emailRegex = /^[a-zA-Z0-9][a-zA-Z0-9._-]*@gmail\.com$/;
+    const regexTestResult = emailRegex.test(emailLower);
+    console.log('Testing email regex:', regexTestResult);
+    console.log('Email being tested:', emailLower);
+    if (!regexTestResult) {
+      console.log('VALIDATION FAILED: Invalid Gmail format');
+      console.log('Regex pattern:', emailRegex);
+      if (errorText) {
+        errorText.textContent = 'Invalid Gmail format. Please use username@gmail.com format (username must start with a letter or number and can contain letters, numbers, dots, underscores, and hyphens).';
+      }
+      errorMessage?.classList.remove('hidden');
+      
+      // Highlight the email field
+      const emailInput = document.getElementById('email') as HTMLInputElement;
+      if (emailInput) {
+        emailInput.classList.add('border-red-500');
+        emailInput.focus();
+      }
+      
+      // Re-enable submit button
+      const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
+      console.log('=== FORM SUBMISSION BLOCKED: Invalid format ===');
+      return;
+    }
+    
+    // Remove error styling if validation passes
+    const emailInput = document.getElementById('email') as HTMLInputElement;
+    if (emailInput) {
+      emailInput.classList.remove('border-red-500');
+    }
+    
+    // Use the trimmed email for the rest of the form
+    const validatedEmail = emailTrimmed;
+    console.log('=== GMAIL VALIDATION PASSED ===');
+    console.log('Validated email:', validatedEmail);
+    console.log('=== PROCEEDING WITH FORM SUBMISSION ===');
+
+    // Validate passwords match
+    if (password !== confirmPassword) {
+      if (errorText) {
+        errorText.textContent = 'Passwords do not match.';
+      }
+      errorMessage?.classList.remove('hidden');
+      return;
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      if (errorText) {
+        errorText.textContent = 'Password must be at least 6 characters long.';
+      }
+      errorMessage?.classList.remove('hidden');
+      return;
+    }
+
+    // Get country code (from select or custom input)
+    const countryCodeSelect = document.getElementById('country_code') as HTMLSelectElement;
+    const countryCodeCustom = document.getElementById('country_code_custom') as HTMLInputElement;
+    let countryCode = countryCodeSelect?.value || '+91';
+    if (countryCode === 'other' && countryCodeCustom) {
+      countryCode = countryCodeCustom.value.trim() || '+91';
+    }
+
+    // Validate phone number based on country code - use exact digit requirements
+    const phoneDigits = phone ? phone.replace(/\D/g, '') : '';
+    
+    // Country code specific phone number digit requirements
+    const countryCodeLimits: { [key: string]: number } = {
+      '+91': 10,   // India - 10 digits
+      '+1': 10,    // US/Canada - 10 digits
+      '+44': 10,   // UK - 10 digits
+      '+61': 9,    // Australia - 9 digits
+      '+86': 11,   // China - 11 digits
+      '+81': 10,   // Japan - 10 digits
+      '+49': 11,   // Germany - 11 digits
+      '+33': 9,    // France - 9 digits
+      '+971': 9,   // UAE - 9 digits
+      '+966': 9    // Saudi Arabia - 9 digits
+    };
+    
+    const requiredDigits = countryCodeLimits[countryCode];
+    
+    if (requiredDigits) {
+      // For known country codes, validate exact digit count
+      if (!phone || phoneDigits.length !== requiredDigits || !/^[0-9]+$/.test(phoneDigits)) {
+        if (errorText) {
+          errorText.textContent = `Please enter a valid ${requiredDigits}-digit phone number for this country.`;
+        }
+        errorMessage?.classList.remove('hidden');
+        return;
+      }
+    } else {
+      // For custom country codes, validate 5-15 digits
+      const minDigits = 5;
+      const maxDigits = 15;
+      if (!phone || phoneDigits.length < minDigits || phoneDigits.length > maxDigits || !/^[0-9]+$/.test(phoneDigits)) {
+        if (errorText) {
+          errorText.textContent = `Please enter a valid phone number (${minDigits}-${maxDigits} digits).`;
+        }
+        errorMessage?.classList.remove('hidden');
+        return;
+      }
+    }
+
+    // Show loading state - center icon and hide text
+    const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const originalText = submitButton.textContent;
+    submitButton.disabled = true;
+    submitButton.innerHTML = `
+      <svg class="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    `;
+
+    try {
+      console.log('Attempting to sign up with Supabase:', validatedEmail);
+      
+      // Final validation check before submitting - ensure it's still Gmail
+      const finalEmailCheck = validatedEmail.toLowerCase().trim();
+      console.log('Final email check before Supabase:', finalEmailCheck);
+      if (!finalEmailCheck.endsWith('@gmail.com')) {
+        console.error('CRITICAL: Email validation bypassed! Email:', finalEmailCheck);
+        if (errorText) {
+          errorText.textContent = 'Invalid email format. Only Gmail addresses are allowed.';
+        }
+        errorMessage?.classList.remove('hidden');
+        
+        // Re-enable submit button
+        const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.textContent = 'Create Account';
+        }
+        throw new Error('Invalid email format. Only Gmail addresses are allowed.');
+      }
+      
+      console.log('Final validation passed, proceeding to Supabase signup');
+      
+      // Sign up with Supabase directly
+      const { data, error } = await supabase.auth.signUp({
+        email: validatedEmail,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            phone: phone ? `${countryCode}${phone.replace(/\D/g, '')}` : '',
+            company_name: companyName,
+          }
+        }
+      });
+
+      if (error) {
+        console.error('Supabase signup error:', error);
+        throw error;
+      }
+
+      if (data.user) {
+        console.log('User created successfully:', data.user.email);
+        console.log('Session available:', !!data.session);
+        
+        // Determine user role based on admin code
+        let userRole = 'customer';
+        if (adminCode === 'ADMIN2024') {
+          userRole = 'admin';
+        }
+
+        // Create profile immediately - wait for it to complete
+        console.log('🔄 Creating user profile...');
+        
+        const profileData = {
+          id: data.user.id,
+          email: validatedEmail,
+          full_name: fullName || '',
+          phone: phone ? `${countryCode}${phone.replace(/\D/g, '')}` : '',
+          company_name: companyName || '',
+          role: userRole,
+          status: 'pending_verification',
+          username: fullName?.toLowerCase().replace(/\s+/g, '_') || validatedEmail.split('@')[0],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        // Hide error message if visible
+        errorMessage?.classList.add('hidden');
+        
+        // Try to create profile - wait for it to complete
+        let profileCreated = false;
+        try {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert(profileData);
+          
+          if (profileError) {
+            console.error('❌ Profile creation error:', profileError);
+            // Try fallback function if insert fails
+            try {
+              const { error: rpcError } = await supabase.rpc('create_profile_for_existing_user', {
+                user_id: data.user.id,
+                user_email: validatedEmail,
+                user_full_name: fullName || '',
+                user_phone: phone ? `${countryCode}${phone.replace(/\D/g, '')}` : '',
+                user_company_name: companyName || '',
+                user_role: userRole
+              });
+              
+              if (rpcError) {
+                console.error('Fallback profile creation also failed:', rpcError);
+                // Don't throw - allow user to proceed, profile can be created later
+              } else {
+                profileCreated = true;
+                console.log('✅ Profile created successfully via RPC');
+              }
+            } catch (rpcErr) {
+              console.error('RPC call failed:', rpcErr);
+              // Don't throw - allow user to proceed
+            }
+          } else {
+            profileCreated = true;
+            console.log('✅ Profile created successfully');
+          }
+        } catch (profileErr) {
+          console.error('Profile creation failed:', profileErr);
+          // Don't throw - allow user to proceed, profile can be created later
+        }
+        
+        // Always show success message and reset button - regardless of session
+        // Reset button first to get out of loading state
+        submitButton.disabled = false;
+        
+        // Store session and auto-login user immediately
+        if (data.session && data.session.access_token) {
+          // Create complete user profile data with all details
+          const completeUserProfile = {
+            ...data.user,
+            id: data.user.id,
+            email: email,
+            full_name: fullName || '',
+            phone: phone ? `${countryCode}${phone.replace(/\D/g, '')}` : '',
+            company_name: companyName || '',
+            role: userRole,
+            status: profileCreated ? 'active' : 'pending_verification',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          
+          // Store session immediately for instant login
+          sessionStorage.setItem('simple-auth-session', JSON.stringify({
+            user: completeUserProfile,
+            access_token: data.session.access_token,
+            timestamp: Date.now()
+          }));
+          
+          // Dispatch login event immediately
+          window.dispatchEvent(new CustomEvent('user-logged-in', { detail: completeUserProfile }));
+          
+          // Show success message - ensure it's visible
+          if (successText) {
+            successText.textContent = 'Account created and signed in successfully! Redirecting to dashboard...';
+          }
+          if (successMessage) {
+            successMessage.classList.remove('hidden');
+            successMessage.style.display = 'block';
+          }
+          
+          // Update button to show success state
+          submitButton.innerHTML = `
+            <svg class="w-5 h-5 text-white mr-2 inline" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            Success! Redirecting...
+          `;
+          
+          // Small delay to show success message, then redirect
+          setTimeout(() => {
+            window.location.href = '/dashboard';
+          }, 1200);
+        } else {
+          // User needs to verify email - show success message
+          console.log('No session - email confirmation required');
+          if (successText) {
+            successText.textContent = 'Account created successfully! Please check your email to verify your account.';
+          }
+          if (successMessage) {
+            successMessage.classList.remove('hidden');
+            successMessage.style.display = 'block';
+          }
+          
+          // Update button
+          submitButton.innerHTML = `
+            <svg class="w-5 h-5 text-white mr-2 inline" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            Account Created
+          `;
+          
+          // Redirect to login after delay
+          setTimeout(() => {
+            window.location.href = '/login?message=Please check your email to verify your account';
+          }, 2000);
+        }
+      } else {
+        throw new Error('Account creation failed');
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
+      
+      // Show error message
+      if (errorText) {
+        errorText.textContent = error.message || 'An error occurred during account creation.';
+      }
+      if (errorMessage) {
+        errorMessage.classList.remove('hidden');
+        errorMessage.style.display = 'block';
+      }
+      // Hide success message if error occurs
+      successMessage?.classList.add('hidden');
+      
+      // Reset button state on error
+      submitButton.disabled = false;
+      submitButton.textContent = originalText;
+    } finally {
+      // Ensure button is always reset, even if something unexpected happens
+      if (submitButton.disabled) {
+        submitButton.disabled = false;
+        if (submitButton.textContent === '' || submitButton.innerHTML.includes('animate-spin')) {
+          submitButton.textContent = originalText;
+        }
+      }
+    }
+  });
+
+  // Password confirmation validation
+  const passwordInput = document.getElementById('password') as HTMLInputElement;
+  const confirmPasswordInput = document.getElementById('confirm_password') as HTMLInputElement;
+
+  const validatePasswords = () => {
+    if (confirmPasswordInput.value && passwordInput.value !== confirmPasswordInput.value) {
+      confirmPasswordInput.setCustomValidity('Passwords do not match');
+    } else {
+      confirmPasswordInput.setCustomValidity('');
+    }
+  };
+
+  passwordInput?.addEventListener('input', validatePasswords);
+  confirmPasswordInput?.addEventListener('input', validatePasswords);
+</script>

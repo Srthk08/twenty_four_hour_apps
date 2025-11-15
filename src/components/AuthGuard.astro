@@ -1,0 +1,91 @@
+---
+export interface Props {
+  redirectTo?: string;
+}
+
+const { redirectTo = '/login' } = Astro.props;
+---
+
+<div id="auth-guard" data-redirect-to={redirectTo}>
+  <slot />
+</div>
+
+<script>
+  // AUTHGUARD USING GLOBAL AUTH MANAGER
+  
+  // Function to check authentication and redirect if needed
+  async function checkAuth() {
+    const authGuard = document.getElementById('auth-guard');
+    if (!authGuard) return;
+
+    const redirectTo = authGuard.dataset.redirectTo || '/login';
+    
+    try {
+      // Wait for global auth manager to be ready
+      let authManager = window.globalAuthManager || window.simpleAuthManager;
+      
+      if (!authManager) {
+        // Wait a bit and retry - more aggressive
+        setTimeout(checkAuth, 50);
+        return;
+      }
+      
+      // Check if user is authenticated
+      if (authManager.isUserLoggedIn()) {
+        console.log('✅ User is authenticated, allowing access');
+        return;
+      } else {
+        console.log('❌ User not authenticated, redirecting to:', redirectTo);
+        
+        // Check if we're already on the login page to prevent loops
+        if (window.location.pathname === '/login') {
+          console.log('Already on login page, not redirecting');
+          return;
+        }
+        
+        // Store the current page as redirect target after login
+        if (window.location.pathname !== '/login') {
+          sessionStorage.setItem('login-redirect-url', window.location.pathname + window.location.search);
+        }
+        
+        // Redirect to login page
+        window.location.href = redirectTo;
+        return;
+      }
+      
+    } catch (error) {
+      console.error('Error checking authentication:', error);
+      // On error, only redirect if not already on login page
+      if (window.location.pathname !== '/login') {
+        window.location.href = redirectTo;
+      }
+    }
+  }
+
+  // Check authentication when DOM is ready - IMMEDIATE CHECK
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      // Check immediately, then retry if needed
+      checkAuth();
+      setTimeout(checkAuth, 100);
+    });
+  } else {
+    // DOM already loaded, check immediately
+    checkAuth();
+    setTimeout(checkAuth, 100);
+  }
+
+  // Listen for auth state changes
+  window.addEventListener('user-logged-in', () => {
+    console.log('User logged in event received in AuthGuard');
+    // User is now authenticated, no need to redirect
+  });
+
+  window.addEventListener('user-logged-out', () => {
+    console.log('User logged out event received in AuthGuard');
+    // Check if we need to redirect
+    checkAuth();
+  });
+  
+  console.log('✅ AuthGuard initialized with global auth manager');
+</script>

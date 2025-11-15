@@ -1,0 +1,1655 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Toast from '../components/Toast.astro';
+import ProductDialog from '../components/ProductDialog.astro';
+
+export interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "DevExpress - 24 Hour Delivery" } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+
+    <!-- Favicon - Preload to prevent flickering -->
+    <link rel="preload" href="/favicon.svg" as="image" type="image/svg+xml" />
+    
+    <!-- Primary favicon - SVG for modern browsers -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2" />
+    
+    <!-- Fallback favicon - ICO for older browsers -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNSIgZmlsbD0iIzE0YjhhNiIvPgogIDxyZWN0IHg9IjgiIHk9IjgiIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgcng9IjIiIHJ5PSIyIiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSJub25lIi8+CiAgPHRleHQgeD0iMTYiIHk9IjIwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMTRiOGU2Ij4yNDwvdGV4dD4KPC9zdmc+Cg==" />
+    
+    <!-- Shortcut icon -->
+    <link rel="shortcut icon" href="/favicon.svg?v=2" />
+    
+    <!-- Apple touch icon -->
+    <link rel="apple-touch-icon" href="/favicon.svg?v=2" />
+    
+    <!-- Theme color -->
+    <meta name="theme-color" content="#14b8a6" />
+    
+    <!-- Additional meta tags to prevent default icons -->
+    <meta name="msapplication-TileColor" content="#14b8a6" />
+    <meta name="msapplication-config" content="none" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="DevExpress" />
+    
+    <!-- Prevent browser from showing default icons -->
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    
+    <!-- Persistent favicon to survive navigation -->
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNSIgZmlsbD0iIzE0YjhhNiIvPgogIDxyZWN0IHg9IjgiIHk9IjgiIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgcng9IjIiIHJ5PSIyIiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSJub25lIi8+CiAgPHRleHQgeD0iMTYiIHk9IjIwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMTRiOGU2Ij4yNDwvdGV4dD4KPC9zdmc+Cg==" />
+
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- CRITICAL: Prevent redirects on forgot-password and reset-password pages -->
+    <script is:inline>
+      // Run immediately to prevent redirects
+      (function() {
+        'use strict';
+        const path = window.location.pathname;
+        
+        // Forgot password page protection
+        if (path === '/forgot-password' || path === '/forgot-password/') {
+          let blocked = false;
+          const originalPushState = history.pushState;
+          const originalReplaceState = history.replaceState;
+          
+          history.pushState = function() {
+            const newPath = arguments[2];
+            if ((newPath === '/' || newPath === '/index.html') && !blocked) {
+              blocked = true;
+              console.log('Blocked redirect to home, staying on forgot-password');
+              return originalPushState.apply(history, [arguments[0], arguments[1], '/forgot-password']);
+            }
+            return originalPushState.apply(history, arguments);
+          };
+          
+          history.replaceState = function() {
+            const newPath = arguments[2];
+            if ((newPath === '/' || newPath === '/index.html') && !blocked) {
+              blocked = true;
+              return originalReplaceState.apply(history, [arguments[0], arguments[1], '/forgot-password']);
+            }
+            return originalReplaceState.apply(history, arguments);
+          };
+          
+          setInterval(function() {
+            const currentPath = window.location.pathname;
+            if ((currentPath === '/' || currentPath === '/index.html') && !blocked) {
+              blocked = true;
+              window.history.pushState(null, '', '/forgot-password');
+            }
+          }, 50);
+        }
+        
+        // Reset password page protection
+        if (path === '/reset-password' || path === '/reset-password/') {
+          const hash = window.location.hash;
+          const search = window.location.search;
+          let blocked = false;
+          let allowRedirect = false;
+          window.allowPasswordResetRedirect = function() { allowRedirect = true; };
+          
+          const originalPushState = history.pushState;
+          history.pushState = function() {
+            const newPath = arguments[2];
+            if ((newPath === '/' || newPath === '/index.html') && !allowRedirect && !blocked) {
+              blocked = true;
+              console.log('Blocked redirect to home, staying on reset-password');
+              return originalPushState.apply(history, [arguments[0], arguments[1], '/reset-password' + search + hash]);
+            }
+            return originalPushState.apply(history, arguments);
+          };
+          
+          setInterval(function() {
+            const currentPath = window.location.pathname;
+            if ((currentPath === '/' || currentPath === '/index.html') && !allowRedirect && !blocked) {
+              blocked = true;
+              window.history.pushState(null, '', '/reset-password' + search + hash);
+            }
+          }, 50);
+        }
+      })();
+    </script>
+
+    <!-- Tailwind CSS is integrated via Astro, no CDN needed -->
+    
+    <!-- Text-white override CSS inline -->
+    
+    <!-- Override Tailwind text-white class - but not for navbar -->
+    <style>
+      .text-white:not(header .text-white):not(section .text-white) {
+        --tw-text-opacity: 1 !important;
+        color: rgb(21 17 17) !important;
+      }
+      
+      /* Ensure navbar text stays white */
+      header .text-white {
+        --tw-text-opacity: 1 !important;
+        color: white !important;
+      }
+      
+      /* Ensure section text stays white */
+      section .text-white {
+        --tw-text-opacity: 1 !important;
+        color: white !important;
+      }
+      
+      /* Ensure hero section texts stay white and don't blink */
+      .bg-gradient-to-br h1,
+      .bg-gradient-to-br h2,
+      .bg-gradient-to-br h3,
+      .bg-gradient-to-br h4,
+      .bg-gradient-to-br h5,
+      .bg-gradient-to-br h6 {
+        color: white !important;
+      }
+      
+      /* Specifically target hero section headings */
+      .bg-gradient-to-br h1.text-white,
+      .bg-gradient-to-br h2.text-white,
+      .bg-gradient-to-br h3.text-white {
+        color: white !important;
+      }
+      
+      /* Ensure "Your App Ready in" and "About DevExpress" stay white */
+      h1:contains("Your App Ready in"),
+      h1:contains("About DevExpress"),
+      h1:contains("Our Products") {
+        color: white !important;
+      }
+      
+      /* Ensure all navbar content is white */
+      header {
+        color: white !important;
+        /* Prevent navbar fluctuation and sliding */
+        position: relative !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        top: auto !important;
+        left: auto !important;
+        z-index: 50 !important;
+        pointer-events: auto !important;
+        transition: none !important;
+        animation: none !important;
+        will-change: auto !important;
+        transform: none !important;
+      }
+      
+      header * {
+        color: white !important;
+      }
+      
+      /* Specific navbar elements */
+      header a,
+      header button,
+      header span,
+      header p,
+      header div {
+        color: white !important;
+      }
+      
+      /* Navbar navigation links */
+      header nav a {
+        color: white !important;
+      }
+      
+      /* User menu elements */
+      header #user-menu-button,
+      header #user-name,
+      header #user-avatar {
+        color: white !important;
+      }
+      
+      /* Ensure auth buttons are always visible during navigation */
+      header #auth-buttons {
+        display: flex !important;
+      }
+      
+      /* Hide user menu during navigation */
+      header #user-menu {
+        display: none !important;
+      }
+      
+      /* Show auth buttons consistently */
+      header #auth-buttons a {
+        color: white !important;
+      }
+      
+      /* Ensure all product images are the same size */
+      .product-card img,
+      .product-image,
+      .bg-white img[alt*="Restaurant Menu System"],
+      .bg-white img[alt*="Android TV App"],
+      .bg-white img[alt*="Streaming Mobile App"],
+      .bg-white img[alt*="Restaurant Website"],
+      .bg-white img[alt*="Order Menu System"] {
+        width: 100% !important;
+        height: 192px !important; /* h-48 = 192px */
+        max-height: 192px !important;
+        min-height: 192px !important;
+        object-fit: cover !important;
+        object-position: center !important;
+        display: block !important;
+      }
+      
+      /* Force image containers to be the same size */
+      .product-card .relative,
+      .bg-white .relative {
+        height: 192px !important;
+        overflow: hidden !important;
+      }
+      
+      /* Prevent navbar flicker during admin panel transitions - Ultra aggressive */
+      body.admin-panel-active header {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        position: absolute !important;
+        top: -9999px !important;
+        left: -9999px !important;
+        z-index: -9999 !important;
+        pointer-events: none !important;
+        transform: translateY(-100vh) !important;
+        transition: none !important;
+        animation: none !important;
+      }
+      
+      /* Hide navbar for menu operator panel - Ultra aggressive */
+      body.menu-operator-panel-active header:not(.menu-operator-header) {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        position: absolute !important;
+        top: -9999px !important;
+        left: -9999px !important;
+        z-index: -9999 !important;
+        pointer-events: none !important;
+        transform: translateY(-100vh) !important;
+        transition: none !important;
+        animation: none !important;
+      }
+      
+      /* Additional protection for any navbar elements */
+      body.admin-panel-active header * {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        pointer-events: none !important;
+      }
+      
+      /* Also target html element for extra protection */
+      html.admin-panel-active header {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        position: absolute !important;
+        top: -9999px !important;
+        left: -9999px !important;
+        z-index: -9999 !important;
+        pointer-events: none !important;
+        transform: translateY(-100vh) !important;
+        transition: none !important;
+        animation: none !important;
+      }
+      
+      /* Ensure navbar is visible on normal pages - More specific targeting */
+      body:not(.admin-panel-active) header {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        position: static !important;
+        top: auto !important;
+        left: auto !important;
+        z-index: 50 !important;
+        pointer-events: auto !important;
+        transform: none !important;
+        transition: opacity 0.2s ease, visibility 0.2s ease !important;
+        animation: none !important;
+      }
+      
+      html:not(.admin-panel-active) header {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        position: static !important;
+        top: auto !important;
+        left: auto !important;
+        z-index: 50 !important;
+        pointer-events: auto !important;
+        transform: none !important;
+        transition: opacity 0.2s ease, visibility 0.2s ease !important;
+        animation: none !important;
+      }
+      
+      /* Default navbar state - ensure it's always visible unless in admin */
+      header {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        position: static !important;
+        top: auto !important;
+        left: auto !important;
+        z-index: 50 !important;
+        pointer-events: auto !important;
+        transform: none !important;
+        transition: none !important;
+        animation: none !important;
+      }
+      
+      /* Prevent content shifting during navigation */
+      body {
+        overflow-x: hidden !important;
+      }
+      
+      /* Ensure smooth page transitions without content replacement */
+      main {
+        min-height: calc(100vh - 6rem) !important;
+        position: relative !important;
+      }
+      
+      /* Prevent layout shifts */
+      .page-content {
+        position: relative !important;
+        min-height: 100vh !important;
+      }
+      
+      /* Prevent content replacement during navigation */
+      * {
+        box-sizing: border-box !important;
+      }
+      
+      /* Ensure stable layout during transitions */
+      body, html {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+      }
+      
+      /* Prevent any content jumping */
+      main, section, div {
+        position: relative !important;
+      }
+      
+      /* Smooth page transitions without content replacement */
+      .page-transition {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+      }
+    </style>
+    
+    <!-- Force favicon to load immediately to prevent flickering -->
+    <script>
+      // Global favicon management to prevent hand icon during navigation
+      (function() {
+        let faviconLocked = false;
+        
+        function forceFavicon() {
+          if (faviconLocked) return;
+          faviconLocked = true;
+          
+          // Remove ALL existing favicon links
+          const existingFavicons = document.querySelectorAll('link[rel*="icon"], link[rel*="shortcut"], link[rel*="apple-touch"]');
+          existingFavicons.forEach(link => link.remove());
+          
+          // Create the correct favicon
+          const favicon = document.createElement('link');
+          favicon.rel = 'icon';
+          favicon.type = 'image/svg+xml';
+          favicon.href = '/favicon.svg';
+          document.head.appendChild(favicon);
+          
+          // Also set it as shortcut icon
+          const shortcutIcon = document.createElement('link');
+          shortcutIcon.rel = 'shortcut icon';
+          shortcutIcon.href = '/favicon.svg';
+          document.head.appendChild(shortcutIcon);
+          
+          // Apple touch icon
+          const appleIcon = document.createElement('link');
+          appleIcon.rel = 'apple-touch-icon';
+          appleIcon.href = '/favicon.svg';
+          document.head.appendChild(appleIcon);
+          
+          // Force the favicon to load by creating an image element
+          const img = new Image();
+          img.onload = function() {
+            console.log('✅ Favicon loaded successfully');
+            faviconLocked = false;
+          };
+          img.src = '/favicon.svg';
+          
+          // Also try to set it directly on the document
+          try {
+            document.querySelector('link[rel="icon"]').href = '/favicon.svg';
+          } catch(e) {
+            // Ignore if not found
+          }
+        }
+        
+        // Force favicon immediately
+        forceFavicon();
+        
+        // Force favicon on every page load
+        window.addEventListener('load', forceFavicon);
+        document.addEventListener('DOMContentLoaded', forceFavicon);
+        
+        // Force favicon before page unload (during navigation)
+        window.addEventListener('beforeunload', function() {
+          forceFavicon();
+        });
+        
+        // Force favicon on page visibility change
+        document.addEventListener('visibilitychange', function() {
+          if (!document.hidden) {
+            forceFavicon();
+          }
+        });
+        
+        // Force favicon on focus (when user returns to tab)
+        window.addEventListener('focus', forceFavicon);
+        
+        // Force favicon on every navigation event
+        window.addEventListener('popstate', forceFavicon);
+        
+        // Override any browser default icon behavior
+        document.addEventListener('DOMContentLoaded', function() {
+          // Remove any default browser icons
+          const defaultIcons = document.querySelectorAll('link[rel="icon"][href*="data:"]');
+          defaultIcons.forEach(icon => icon.remove());
+          
+          // Ensure our favicon is the only one
+          const ourFavicon = document.querySelector('link[rel="icon"][href="/favicon.svg"]');
+          if (!ourFavicon) {
+            forceFavicon();
+          }
+        });
+        
+        // Continuous monitoring to prevent hand icon
+        setInterval(function() {
+          const currentFavicon = document.querySelector('link[rel="icon"]');
+          if (!currentFavicon || !currentFavicon.href.includes('/favicon.svg')) {
+            console.log('🔄 Favicon lost, forcing reload...');
+            forceFavicon();
+          }
+        }, 100);
+        
+        // Intercept all link clicks to maintain favicon during navigation
+        document.addEventListener('click', function(e) {
+          const link = e.target.closest('a[href]');
+          if (link && !link.href.includes('#')) {
+            // Force favicon before navigation
+            forceFavicon();
+            
+            // Also set a temporary favicon during navigation
+            setTimeout(function() {
+              const tempFavicon = document.createElement('link');
+              tempFavicon.rel = 'icon';
+              tempFavicon.type = 'image/svg+xml';
+              tempFavicon.href = '/favicon.svg';
+              document.head.appendChild(tempFavicon);
+            }, 10);
+          }
+        });
+        
+        // Override browser's default favicon behavior during navigation
+        const originalPushState = history.pushState;
+        const originalReplaceState = history.replaceState;
+        
+        history.pushState = function() {
+          forceFavicon();
+          return originalPushState.apply(history, arguments);
+        };
+        
+        history.replaceState = function() {
+          forceFavicon();
+          return originalReplaceState.apply(history, arguments);
+        };
+        
+        console.log('✅ Favicon management system active - hand icon prevented during navigation');
+      })();
+      
+      // Register service worker for favicon persistence
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/favicon-sw.js')
+          .then(function(registration) {
+            console.log('✅ Favicon Service Worker registered:', registration.scope);
+          })
+          .catch(function(error) {
+            console.log('❌ Favicon Service Worker registration failed:', error);
+          });
+      }
+    </script>
+    
+    <!-- Immediate admin panel and menu operator detection and navbar hiding -->
+    <script>
+      // Check if we're in admin panel or menu operator panel immediately
+      (function() {
+        const pathname = window.location.pathname;
+        
+        // Check for admin panel
+        if (pathname.startsWith('/admin')) {
+          // Add admin panel classes immediately
+          document.documentElement.classList.add('admin-panel-active');
+          document.body.classList.add('admin-panel-active');
+          
+          // Hide navbar immediately
+          function hideNavbarImmediately() {
+            const header = document.querySelector('header:not(.menu-operator-header)');
+            if (header) {
+              header.style.display = 'none';
+              header.style.visibility = 'hidden';
+              header.style.opacity = '0';
+              header.style.height = '0';
+              header.style.maxHeight = '0';
+              header.style.overflow = 'hidden';
+              header.style.position = 'absolute';
+              header.style.top = '-9999px';
+              header.style.left = '-9999px';
+              header.style.zIndex = '-9999';
+              header.style.pointerEvents = 'none';
+              header.style.transform = 'translateY(-100vh)';
+              header.style.transition = 'none';
+              header.style.animation = 'none';
+            }
+          }
+          
+          // Try to hide immediately
+          hideNavbarImmediately();
+          
+          // Also try when DOM is ready
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', hideNavbarImmediately);
+          }
+          
+          // And try after short delays
+          setTimeout(hideNavbarImmediately, 0);
+          setTimeout(hideNavbarImmediately, 10);
+          setTimeout(hideNavbarImmediately, 50);
+        } 
+        // Check for menu operator panel
+        else if (pathname.startsWith('/menu-operator')) {
+          // Add menu operator panel classes immediately
+          document.documentElement.classList.add('menu-operator-panel-active');
+          document.body.classList.add('menu-operator-panel-active');
+          
+          // Hide main navbar immediately (but not menu operator header)
+          function hideMainNavbarImmediately() {
+            const mainHeader = document.querySelector('header:not(.menu-operator-header)');
+            if (mainHeader) {
+              mainHeader.style.display = 'none';
+              mainHeader.style.visibility = 'hidden';
+              mainHeader.style.opacity = '0';
+              mainHeader.style.height = '0';
+              mainHeader.style.maxHeight = '0';
+              mainHeader.style.overflow = 'hidden';
+              mainHeader.style.position = 'absolute';
+              mainHeader.style.top = '-9999px';
+              mainHeader.style.left = '-9999px';
+              mainHeader.style.zIndex = '-9999';
+              mainHeader.style.pointerEvents = 'none';
+              mainHeader.style.transform = 'translateY(-100vh)';
+              mainHeader.style.transition = 'none';
+              mainHeader.style.animation = 'none';
+            }
+          }
+          
+          // Try to hide immediately
+          hideMainNavbarImmediately();
+          
+          // Also try when DOM is ready
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', hideMainNavbarImmediately);
+          }
+          
+          // And try after short delays
+          setTimeout(hideMainNavbarImmediately, 0);
+          setTimeout(hideMainNavbarImmediately, 10);
+          setTimeout(hideMainNavbarImmediately, 50);
+        } else {
+          // Ensure we're NOT in admin or menu operator mode for normal pages
+          document.documentElement.classList.remove('admin-panel-active');
+          document.documentElement.classList.remove('menu-operator-panel-active');
+          document.body.classList.remove('admin-panel-active');
+          document.body.classList.remove('menu-operator-panel-active');
+          
+          // Ensure navbar is visible for normal pages (no style manipulation needed)
+          // The navbar should be visible by default in the HTML
+        }
+      })();
+    </script>
+    
+    <!-- JavaScript to force override any white text -->
+    <script>
+      function overrideWhiteText() {
+        // Find all elements with text-white class, but exclude navbar and sections
+        const whiteTextElements = document.querySelectorAll('.text-white:not(header .text-white):not(section .text-white)');
+        whiteTextElements.forEach(el => {
+          // Force the dark color
+          el.style.setProperty('--tw-text-opacity', '1', 'important');
+          el.style.setProperty('color', 'rgb(21 17 17)', 'important');
+        });
+        
+        // Ensure navbar text stays white
+        const navbarWhiteElements = document.querySelectorAll('header .text-white');
+        navbarWhiteElements.forEach(el => {
+          el.style.setProperty('--tw-text-opacity', '1', 'important');
+          el.style.setProperty('color', 'white', 'important');
+        });
+        
+        // Ensure section text stays white
+        const sectionWhiteElements = document.querySelectorAll('section .text-white');
+        sectionWhiteElements.forEach(el => {
+          el.style.setProperty('--tw-text-opacity', '1', 'important');
+          el.style.setProperty('color', 'white', 'important');
+        });
+      }
+      
+      // Run on page load
+      document.addEventListener('DOMContentLoaded', overrideWhiteText);
+      
+      // Run after any dynamic content changes
+      const observer = new MutationObserver(overrideWhiteText);
+      observer.observe(document.body, { childList: true, subtree: true });
+    </script>
+
+    <!-- Alpine.js for interactivity -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" onerror="
+      console.warn('⚠️ Alpine.js failed to load from jsdelivr, trying unpkg...');
+      const fallback = document.createElement('script');
+      fallback.defer = true;
+      fallback.src = 'https://unpkg.com/alpinejs@3.13.3/dist/cdn.min.js';
+      fallback.onerror = function() {
+        console.error('❌ Alpine.js failed to load from all CDN sources');
+      };
+      document.head.appendChild(fallback);
+    "></script>
+
+    <!-- EmailJS for email notifications -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+    <!-- Supabase Client -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+      // Initialize Supabase client
+      const supabaseUrl = 'https://lmrrdcaavwwletcjcpqv.supabase.co';
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
+      
+      // Wait for Supabase to load, then initialize
+      function initSupabase() {
+        if (typeof supabase !== 'undefined') {
+          window.supabase = supabase.createClient(supabaseUrl, supabaseKey);
+          console.log('✅ Supabase client initialized globally');
+        } else {
+          console.log('⏳ Supabase library not loaded yet, retrying...');
+          setTimeout(initSupabase, 100);
+        }
+      }
+      
+      // Start initialization
+      initSupabase();
+    </script>
+
+    <!-- Custom Tailwind Config -->
+    <script>
+      if (typeof tailwind !== 'undefined') {
+        tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: '#eff6ff',
+                100: '#dbeafe',
+                200: '#bfdbfe',
+                300: '#93c5fd',
+                400: '#60a5fa',
+                500: '#3b82f6',
+                600: '#2563eb',
+                700: '#1d4ed8',
+                800: '#1e40af',
+                900: '#1e3a8a',
+                950: '#172554',
+              },
+              secondary: {
+                50: '#faf5ff',
+                100: '#f3e8ff',
+                200: '#e9d5ff',
+                300: '#d8b4fe',
+                400: '#c084fc',
+                500: '#a855f7',
+                600: '#9333ea',
+                700: '#7c3aed',
+                800: '#6b21a8',
+                900: '#581c87',
+                950: '#3b0764',
+              },
+              accent: {
+                50: '#fefce8',
+                100: '#fef9c3',
+                200: '#fef08a',
+                300: '#fde047',
+                400: '#facc15',
+                500: '#eab308',
+                600: '#ca8a04',
+                700: '#a16207',
+                800: '#854d0e',
+                900: '#713f12',
+                950: '#422006',
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'system-ui', 'sans-serif'],
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.5s ease-in-out',
+              'slide-up': 'slideUp 0.3s ease-out',
+              'bounce-in': 'bounceIn 0.6s ease-out',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              slideUp: {
+                '0%': { transform: 'translateY(10px)', opacity: '0' },
+                '100%': { transform: 'translateY(0)', opacity: '1' },
+              },
+              bounceIn: {
+                '0%': { transform: 'scale(0.3)', opacity: '0' },
+                '50%': { transform: 'scale(1.05)' },
+                '70%': { transform: 'scale(0.9)' },
+                '100%': { transform: 'scale(1)', opacity: '1' },
+              },
+            },
+          },
+        },
+      };
+      }
+    </script>
+
+    <!-- Custom CSS -->
+    <style is:global>
+      /* Prevent color flashing during page transitions */
+      html {
+        background: #3b82f6 !important;
+        scroll-behavior: smooth;
+      }
+      
+      body {
+        background: #3b82f6 !important;
+        min-height: 100vh;
+      }
+      
+      /* Ensure all pages have consistent blue background */
+      main {
+        background: transparent !important;
+      }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5);
+      }
+
+      /* Focus styles */
+      *:focus {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
+      }
+
+      /* Button focus */
+      button:focus {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
+      }
+
+      /* Link focus */
+      a:focus {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
+      }
+
+      /* Input focus */
+      input:focus,
+      textarea:focus,
+      select:focus {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
+      }
+
+      /* Disable focus outline for mouse users */
+      *:focus:not(:focus-visible) {
+        outline: none;
+      }
+
+      /* Loading animation */
+      .loading-dots::after {
+        content: '';
+        animation: loading-dots 1.5s infinite;
+      }
+
+      @keyframes loading-dots {
+        0%, 20% { content: ''; }
+        40% { content: '.'; }
+        60% { content: '..'; }
+        80%, 100% { content: '...'; }
+      }
+
+      /* Single color text */
+      .gradient-text {
+        color: #3b82f6;
+      }
+
+      /* Glass effect */
+      .glass {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      /* Hover effects */
+      .hover-lift {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .hover-lift:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Card hover effects */
+      .card-hover {
+        transition: all 0.3s ease;
+      }
+
+      .card-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Button animations */
+      .btn-primary {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+      }
+
+      .btn-primary:hover::before {
+        left: 100%;
+      }
+
+      /* Form animations */
+      .form-input {
+        transition: all 0.3s ease;
+      }
+
+      .form-input:focus {
+        transform: scale(1.02);
+      }
+
+      /* Page transitions */
+      .page-transition {
+        animation: pageTransition 0.3s ease-out;
+      }
+
+      @keyframes pageTransition {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Prevent navbar fluctuation - Ultra aggressive */
+      header:not(.admin-hidden) {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: relative !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        top: auto !important;
+        left: auto !important;
+        z-index: 50 !important;
+        pointer-events: auto !important;
+        transition: none !important;
+        animation: none !important;
+        will-change: auto !important;
+        transform: none !important;
+        contain: none !important;
+      }
+      
+      /* Only hide navbar in admin panel */
+      .admin-panel-active header {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        position: absolute !important;
+        top: -9999px !important;
+        left: -9999px !important;
+        z-index: -9999 !important;
+        pointer-events: none !important;
+      }
+      
+      /* Hide navbar and footer in menu operator panel */
+      .menu-operator-panel-active header:not(.menu-operator-header),
+      .menu-operator-panel-active footer {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        position: absolute !important;
+        top: -9999px !important;
+        left: -9999px !important;
+        z-index: -9999 !important;
+        pointer-events: none !important;
+      }
+
+      /* Responsive utilities */
+      @media (max-width: 640px) {
+        .mobile-hidden {
+          display: none;
+        }
+      }
+
+      @media (min-width: 641px) {
+        .desktop-hidden {
+          display: none;
+        }
+      }
+
+      /* Print styles */
+      @media print {
+        .no-print {
+          display: none !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body class="h-full bg-blue-600 font-sans text-white antialiased">
+    <!-- Header -->
+    <Header />
+
+    <!-- Main Content -->
+    <main class="min-h-screen page-transition">
+      <slot />
+    </main>
+
+    <!-- Footer -->
+    <Footer />
+
+    <!-- Toast Notifications -->
+    <Toast />
+
+    <!-- Product Dialog Component -->
+    <ProductDialog />
+
+    <!-- Global Scripts -->
+    <script>
+      // Global utility functions
+      window.utils = {
+        // Format currency
+        formatCurrency: (amount, currency = 'INR') => {
+          return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: currency,
+          }).format(amount);
+        },
+
+        // Format date
+        formatDate: (date, options = {}) => {
+          const defaultOptions = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            ...options
+          };
+          return new Intl.DateTimeFormat('en-IN', defaultOptions).format(new Date(date));
+        },
+
+        // Debounce function
+        debounce: (func, wait) => {
+          let timeout;
+          return function executedFunction(...args) {
+            const later = () => {
+              clearTimeout(timeout);
+              func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+          };
+        },
+
+        // Throttle function
+        throttle: (func, limit) => {
+          let inThrottle;
+          return function() {
+            const args = arguments;
+            const context = this;
+            if (!inThrottle) {
+              func.apply(context, args);
+              inThrottle = true;
+              setTimeout(() => inThrottle = false, limit);
+            }
+          }
+        },
+
+        // Copy to clipboard
+        copyToClipboard: async (text) => {
+          try {
+            await navigator.clipboard.writeText(text);
+            return true;
+          } catch (err) {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+              document.execCommand('copy');
+              document.body.removeChild(textArea);
+              return true;
+            } catch (err) {
+              document.body.removeChild(textArea);
+              return false;
+            }
+          }
+        },
+
+        // Generate random ID
+        generateId: () => {
+          return Math.random().toString(36).substr(2, 9);
+        },
+
+        // Validate email
+        isValidEmail: (email) => {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          return emailRegex.test(email);
+        },
+
+        // Validate phone number (Indian format)
+        isValidPhone: (phone) => {
+          const phoneRegex = /^(\+91[\-\s]?)?[789]\d{9}$/;
+          return phoneRegex.test(phone);
+        },
+
+        // Scroll to element
+        scrollToElement: (elementId, offset = 0) => {
+          const element = document.getElementById(elementId);
+          if (element) {
+            const elementPosition = element.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - offset;
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'smooth'
+            });
+          }
+        },
+
+        // Show loading state
+        showLoading: (element) => {
+          if (element) {
+            element.disabled = true;
+            element.dataset.originalText = element.textContent;
+            element.innerHTML = `
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Loading...
+            `;
+          }
+        },
+
+        // Hide loading state
+        hideLoading: (element) => {
+          if (element && element.dataset.originalText) {
+            element.disabled = false;
+            element.textContent = element.dataset.originalText;
+            delete element.dataset.originalText;
+          }
+        }
+      };
+
+      // Global event listeners
+    // ...existing code...
+document.addEventListener('DOMContentLoaded', () => {
+  // Add loading states to opt-in forms only (use data-auto-loading="true")
+  document.querySelectorAll('form[data-auto-loading="true"]').forEach(form => {
+    form.addEventListener('submit', (e) => {
+      const submitButton = form.querySelector('button[type="submit"]');
+      if (submitButton) {
+        window.utils.showLoading(submitButton);
+      }
+    });
+  });
+
+
+        // Add smooth scrolling to anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+          anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href').substring(1);
+            window.utils.scrollToElement(targetId, 80);
+          });
+        });
+
+        // Add intersection observer for animations
+        const observerOptions = {
+          threshold: 0.1,
+          rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('animate-fade-in');
+            }
+          });
+        }, observerOptions);
+
+        // Observe elements with animation classes
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+          observer.observe(el);
+        });
+      });
+
+      // Handle page visibility changes
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          document.title = '👋 Come back soon! - DevExpress';
+        } else {
+          document.title = document.title.replace('👋 Come back soon! - ', '');
+        }
+      });
+
+      // Handle online/offline status
+      window.addEventListener('online', () => {
+        if (typeof window.showToast === 'function') {
+          window.showToast('You are back online!', 'success');
+        }
+      });
+
+      window.addEventListener('offline', () => {
+        if (typeof window.showToast === 'function') {
+          window.showToast('You are currently offline. Some features may not work.', 'warning');
+        }
+      });
+
+      // Initialize EmailJS for email notifications
+      if (typeof emailjs !== 'undefined') {
+        emailjs.init('YOUR_USER_ID'); // Replace with your actual EmailJS user ID
+        console.log('EmailJS initialized successfully');
+      } else {
+        console.log('EmailJS not available');
+      }
+    </script>
+
+    <!-- Global Authentication Manager - Loads on every page -->
+    <script>
+      // Global Authentication State Manager
+      // This prevents reloads while maintaining login state across ALL pages
+      
+      class GlobalAuthManager {
+        constructor() {
+          this.isAuthenticated = false;
+          this.currentUser = null;
+          this.isNavigating = false;
+          this.init();
+        }
+
+        init() {
+          // Check if user is already logged in
+          this.checkExistingSession();
+          
+          // Listen for login events
+          window.addEventListener('user-logged-in', (e) => {
+            this.handleLogin(e.detail);
+          });
+          
+          window.addEventListener('user-logged-out', () => {
+            this.handleLogout();
+          });
+
+          // Make it globally available
+          window.globalAuthManager = this;
+          window.simpleAuthManager = this; // For backward compatibility
+          
+          console.log('✅ Global Auth Manager initialized');
+        }
+
+        checkExistingSession() {
+          try {
+            // Check sessionStorage first (most recent)
+            const sessionData = sessionStorage.getItem('simple-auth-session');
+            if (sessionData) {
+              const session = JSON.parse(sessionData);
+              if (session.user && session.access_token) {
+                this.isAuthenticated = true;
+                this.currentUser = session.user;
+                console.log('✅ Existing session found:', this.currentUser.email);
+                this.updateGlobalUI();
+                return;
+              }
+            }
+
+            // Check localStorage as fallback
+            const storedUser = localStorage.getItem('simple-auth-user');
+            if (storedUser) {
+              const user = JSON.parse(storedUser);
+              if (user && user.email) {
+                this.isAuthenticated = true;
+                this.currentUser = user;
+                console.log('✅ Existing user found in localStorage:', this.currentUser.email);
+                this.updateGlobalUI();
+                return;
+              }
+            }
+
+            console.log('ℹ️ No existing session found');
+          } catch (error) {
+            console.error('Error checking existing session:', error);
+          }
+        }
+
+        handleLogin(userData) {
+          this.isAuthenticated = true;
+          this.currentUser = userData;
+          
+          // Store session in both sessionStorage and localStorage for persistence
+          const sessionData = {
+            user: userData,
+            access_token: 'simple-token-' + Date.now(),
+            timestamp: Date.now()
+          };
+          
+          sessionStorage.setItem('simple-auth-session', JSON.stringify(sessionData));
+          localStorage.setItem('simple-auth-user', JSON.stringify(userData));
+          
+          console.log('✅ User logged in globally:', userData.email);
+          this.updateGlobalUI();
+        }
+
+        handleLogout() {
+          this.isAuthenticated = false;
+          this.currentUser = null;
+          
+          // Clear session from both storages
+          sessionStorage.removeItem('simple-auth-session');
+          localStorage.removeItem('simple-auth-user');
+          
+          // Clear cart session flag so user gets fresh cart on next login
+          sessionStorage.removeItem('has-visited-cart');
+          
+          console.log('✅ User logged out globally');
+          this.updateGlobalUI();
+        }
+
+        updateGlobalUI() {
+          // Update header if it exists
+          this.updateHeader();
+          
+          // Update dashboard if it exists
+          this.updateDashboard();
+          
+          // Update any other components that need auth state
+          this.updateOtherComponents();
+        }
+
+        updateHeader() {
+          const authButtons = document.getElementById('auth-buttons');
+          const userMenu = document.getElementById('user-menu');
+          const mobileAuthButtons = document.getElementById('mobile-auth-buttons');
+          const mobileUserMenu = document.getElementById('mobile-user-menu');
+          const adminPanelLink = document.getElementById('admin-panel-link');
+          const mobileAdminPanelLink = document.getElementById('mobile-admin-panel-link');
+
+          // Always show auth buttons and hide user menu during navigation
+          if (authButtons) authButtons.classList.remove('hidden');
+          if (userMenu) userMenu.classList.add('hidden');
+          if (mobileAuthButtons) mobileAuthButtons.classList.remove('hidden');
+          if (mobileUserMenu) mobileUserMenu.classList.add('hidden');
+          
+          // Hide admin panel links during navigation
+          if (adminPanelLink) {
+            adminPanelLink.classList.add('hidden');
+          }
+          if (mobileAdminPanelLink) {
+            mobileAdminPanelLink.classList.add('hidden');
+          }
+
+          // Only show user menu if user is actually logged in (removed isNavigating check to prevent fluctuation)
+          if (this.isAuthenticated && this.currentUser) {
+            if (authButtons) authButtons.classList.add('hidden');
+            if (userMenu) userMenu.classList.remove('hidden');
+            if (mobileAuthButtons) mobileAuthButtons.classList.add('hidden');
+            if (mobileUserMenu) mobileUserMenu.classList.remove('hidden');
+
+            // Show admin panel links if user has admin role
+            const isAdmin = this.currentUser.role === 'admin' || this.currentUser.role === 'developer' || this.currentUser.role === 'support';
+            
+            if (adminPanelLink && isAdmin) {
+              adminPanelLink.classList.remove('hidden');
+            }
+            
+            if (mobileAdminPanelLink && isAdmin) {
+              mobileAdminPanelLink.classList.remove('hidden');
+            }
+
+            // Update user info
+            this.updateHeaderUserInfo();
+          }
+        }
+
+        updateHeaderUserInfo() {
+          // CRITICAL: Only update if user is properly authenticated
+          if (!this.isAuthenticated || !this.currentUser || !this.currentUser.email) {
+            console.log('❌ User not authenticated - clearing header info');
+            this.clearHeaderUserInfo();
+            return;
+          }
+
+          const userEmail = document.getElementById('user-email');
+          const userName = document.getElementById('user-name');
+          const userAvatar = document.getElementById('user-avatar');
+          const mobileUserEmail = document.getElementById('mobile-user-email');
+
+          if (userEmail) userEmail.textContent = this.currentUser.email || '';
+          if (userName) userName.textContent = this.currentUser.full_name || this.currentUser.email?.split('@')[0] || 'User';
+          if (userAvatar) userAvatar.textContent = (this.currentUser.full_name || this.currentUser.email || 'U').charAt(0).toUpperCase();
+          if (mobileUserEmail) mobileUserEmail.textContent = this.currentUser.email || '';
+        }
+
+        clearHeaderUserInfo() {
+          const userEmail = document.getElementById('user-email');
+          const userName = document.getElementById('user-name');
+          const userAvatar = document.getElementById('user-avatar');
+          const mobileUserEmail = document.getElementById('mobile-user-email');
+
+          if (userEmail) userEmail.textContent = '';
+          if (userName) userName.textContent = 'Guest';
+          if (userAvatar) userAvatar.textContent = 'G';
+          if (mobileUserEmail) mobileUserEmail.textContent = '';
+        }
+
+        updateDashboard() {
+          const userWelcome = document.getElementById('user-welcome');
+          const userFullName = document.getElementById('user-full-name');
+          const userEmailDashboard = document.getElementById('user-email');
+          const userPhone = document.getElementById('user-phone');
+          const userCompany = document.getElementById('user-company');
+
+          // CRITICAL: Only show user data if properly authenticated
+          if (this.isAuthenticated && this.currentUser && this.currentUser.email) {
+            // User is logged in, show real data
+            if (userWelcome) userWelcome.textContent = this.currentUser.full_name || this.currentUser.email?.split('@')[0] || 'User';
+            if (userFullName) userFullName.textContent = this.currentUser.full_name || 'Not set';
+            if (userEmailDashboard) userEmailDashboard.textContent = this.currentUser.email || 'Not set';
+            if (userPhone) userPhone.textContent = this.currentUser.phone || 'Not set';
+            if (userCompany) userCompany.textContent = this.currentUser.company_name || 'Not set';
+          } else {
+            // User is not logged in, show guest data
+            if (userWelcome) userWelcome.textContent = 'Guest';
+            if (userFullName) userFullName.textContent = 'Not logged in';
+            if (userEmailDashboard) userEmailDashboard.textContent = 'Not logged in';
+            if (userPhone) userPhone.textContent = 'Not logged in';
+            if (userCompany) userCompany.textContent = 'Not logged in';
+          }
+        }
+
+        updateOtherComponents() {
+          // Update cart, profile, tickets, etc. if they exist
+          // This will be called whenever auth state changes
+        }
+
+        getCurrentUser() {
+          return this.currentUser;
+        }
+
+        isUserLoggedIn() {
+          return this.isAuthenticated;
+        }
+
+        logout() {
+          this.handleLogout();
+          window.location.href = '/';
+        }
+
+        // Check if user needs to be redirected to login
+        requireAuth(redirectUrl = '/login') {
+          if (!this.isAuthenticated) {
+            console.log('🔒 Authentication required, redirecting to:', redirectUrl);
+            window.location.href = redirectUrl;
+            return false;
+          }
+          return true;
+        }
+
+        // Update user profile data
+        updateProfile(profileData) {
+          if (this.currentUser) {
+            this.currentUser = { ...this.currentUser, ...profileData };
+            
+            // Update both storages
+            const sessionData = sessionStorage.getItem('simple-auth-session');
+            if (sessionData) {
+              const session = JSON.parse(sessionData);
+              session.user = this.currentUser;
+              sessionStorage.setItem('simple-auth-session', JSON.stringify(session));
+            }
+            
+            localStorage.setItem('simple-auth-user', JSON.stringify(this.currentUser));
+            
+            console.log('✅ Profile updated in global auth manager:', this.currentUser);
+            this.updateGlobalUI();
+          }
+        }
+      }
+
+      // Global navbar visibility functions - simplified to prevent fluctuation
+      window.hideUserNavbar = function() {
+        // Only hide if in admin panel or menu operator panel
+        if (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/menu-operator')) {
+          const header = document.querySelector('header:not(.menu-operator-header)');
+          if (header) {
+            header.classList.add('admin-hidden');
+            console.log('✅ User navbar hidden for admin/menu operator panel');
+          }
+        }
+      };
+      
+      window.showUserNavbar = function() {
+        // Only show if not in admin panel or menu operator panel
+        if (!window.location.pathname.startsWith('/admin') && !window.location.pathname.startsWith('/menu-operator')) {
+          const header = document.querySelector('header:not(.menu-operator-header)');
+          if (header) {
+            header.classList.remove('admin-hidden');
+            // Remove any inline styles that might be hiding the navbar
+            header.removeAttribute('style');
+            console.log('✅ User navbar shown');
+          }
+        }
+      };
+      
+      // Check if we're in admin panel or menu operator panel and hide navbar accordingly
+      function checkAdminPanelNavbar() {
+        const pathname = window.location.pathname;
+        
+        if (pathname.startsWith('/admin')) {
+          document.body.classList.add('admin-panel-active');
+          window.hideUserNavbar();
+        } else if (pathname.startsWith('/menu-operator')) {
+          document.body.classList.add('menu-operator-panel-active');
+          document.documentElement.classList.add('menu-operator-panel-active');
+          window.hideUserNavbar();
+        } else {
+          // Only remove admin/menu operator classes and show navbar if we're NOT in admin/menu operator panel
+          document.body.classList.remove('admin-panel-active');
+          document.body.classList.remove('menu-operator-panel-active');
+          document.documentElement.classList.remove('admin-panel-active');
+          document.documentElement.classList.remove('menu-operator-panel-active');
+          window.showUserNavbar();
+        }
+      }
+
+      // Handle navigation events to prevent flicker
+      function handleNavigation() {
+        const pathname = window.location.pathname;
+        
+        // Remove any admin/menu operator classes when navigating away from admin/menu operator
+        if (!pathname.startsWith('/admin') && !pathname.startsWith('/menu-operator')) {
+          document.documentElement.classList.remove('admin-panel-active');
+          document.documentElement.classList.remove('menu-operator-panel-active');
+          document.body.classList.remove('admin-panel-active');
+          document.body.classList.remove('menu-operator-panel-active');
+          
+          // No need to manipulate header styles - it should be visible by default
+        }
+      }
+
+      // Initialize global auth manager when page loads
+      document.addEventListener('DOMContentLoaded', () => {
+        new GlobalAuthManager();
+        checkAdminPanelNavbar();
+        handleNavigation();
+      });
+      
+      // Handle navigation events
+      window.addEventListener('popstate', handleNavigation);
+      window.addEventListener('beforeunload', handleNavigation);
+      
+      // Track navigation state - simplified to prevent fluctuation
+      let isNavigating = false;
+      
+      // Set navigation state when links are clicked - but don't hide navbar
+      document.addEventListener('click', function(e) {
+        const link = e.target.closest('a[href]');
+        if (link && !link.href.includes('#')) {
+          // Don't set isNavigating to true to prevent navbar hiding
+          // isNavigating = true;
+          // Reset after a short delay
+          // setTimeout(() => {
+          //   isNavigating = false;
+          // }, 1000);
+        }
+      });
+      
+      // Set navigation state on page load
+      window.addEventListener('load', function() {
+        isNavigating = false;
+      });
+      
+      // Handle page transitions for smoother navigation
+      function handlePageTransition() {
+        const pathname = window.location.pathname;
+        
+        // Ensure navbar is always visible on non-admin and non-menu-operator pages
+        if (!pathname.startsWith('/admin') && !pathname.startsWith('/menu-operator')) {
+          const header = document.querySelector('header:not(.menu-operator-header)');
+          if (header) {
+            // Reset any admin/menu operator hiding styles immediately without delay
+            header.style.display = 'block';
+            header.style.visibility = 'visible';
+            header.style.opacity = '1';
+            header.style.height = 'auto';
+            header.style.maxHeight = 'none';
+            header.style.overflow = 'visible';
+            header.style.position = 'static';
+            header.style.top = 'auto';
+            header.style.left = 'auto';
+            header.style.zIndex = '50';
+            header.style.pointerEvents = 'auto';
+            header.style.transform = 'none';
+            header.style.transition = 'none';
+            header.style.animation = 'none';
+          }
+        }
+      }
+      
+      // Run on every page load
+      handlePageTransition();
+      
+      // Also run when DOM is ready
+      document.addEventListener('DOMContentLoaded', handlePageTransition);
+    </script>
+  </body>
+</html>

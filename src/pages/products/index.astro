@@ -1,0 +1,557 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getProducts } from '../../lib/products-data';
+
+// Only fetch products once and filter client-side for better performance
+const products = await getProducts();
+
+// Pre-process products for faster client-side filtering and remove duplicates
+const processedProducts = products
+  .map(product => ({
+    ...product,
+    category: product.category || 'other',
+    slug: product.slug || product.name.toLowerCase().replace(/\s+/g, '-')
+  }))
+  .filter((product, index, self) => 
+    // Remove duplicates based on id
+    index === self.findIndex(p => p.id === product.id)
+  );
+---
+
+<Layout title="Our Products - DevExpress" description="Explore our range of professional digital solutions delivered in 24 hours">
+    <!-- Simple Styles - Same as About and Contact pages -->
+    <style>
+      /* Simple product card hover - same as other pages */
+      .product-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+    
+    <!-- Full Page Blue and White Gradient Background -->
+    <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
+  <!-- Hero Section -->
+  <section class="bg-blue-600 text-white py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-4xl md:text-5xl font-bold mb-6 text-white" style="color: #ffffff !important;">Our Products</h1>
+      <p class="text-xl text-gray-200 max-w-3xl mx-auto">
+        Professional digital solutions crafted for your business needs. 
+        Choose from our proven products, all delivered within 24 hours.
+      </p>
+    </div>
+  </section>
+
+  <!-- Products Grid -->
+  <section class="py-16 bg-white">
+    <!-- Filter Section -->
+    <div class="filter-section py-8 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-wrap justify-center gap-4 mb-8">
+          <button class="filter-btn active px-6 py-2 rounded-full bg-white text-gray-700 hover:bg-gray-100 font-medium transition-all border border-gray-300" data-filter="all">
+            All Products
+          </button>
+          <button class="filter-btn px-6 py-2 rounded-full bg-white text-gray-700 hover:bg-gray-100 font-medium transition-all border border-gray-300" data-filter="restaurant">
+            Restaurant Menu
+          </button>
+          <button class="filter-btn px-6 py-2 rounded-full bg-white text-gray-700 hover:bg-gray-100 font-medium transition-all border border-gray-300" data-filter="order-menu-system">
+            Order Menu System
+          </button>
+          <button class="filter-btn px-6 py-2 rounded-full bg-white text-gray-700 hover:bg-gray-100 font-medium transition-all border border-gray-300" data-filter="mobile">
+            Mobile Apps
+          </button>
+          <button class="filter-btn px-6 py-2 rounded-full bg-white text-gray-700 hover:bg-gray-100 font-medium transition-all border border-gray-300" data-filter="tv">
+            TV Apps
+          </button>
+          <button class="filter-btn px-6 py-2 rounded-full bg-white text-gray-700 hover:bg-gray-100 font-medium transition-all border border-gray-300" data-filter="web">
+            Websites
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="products-grid">
+        {processedProducts.map((product, index) => {
+          const categoryLabels = {
+            'restaurant': 'Restaurant Menu',
+            'mobile': 'Mobile Apps',
+            'tv': 'TV Apps',
+            'web': 'Websites'
+          };
+          
+          const categoryColors = {
+            'restaurant': 'from-green-500 to-emerald-600',
+            'mobile': 'from-blue-500 to-indigo-600',
+            'tv': 'from-purple-500 to-violet-600',
+            'web': 'from-orange-500 to-red-600'
+          };
+          
+          // Get specific labels for products
+          const getProductLabel = (product) => {
+            if (product.slug === 'restaurant-website') return 'Restaurant Website';
+            if (product.slug === 'order-menu-system') return 'Order Menu System';
+            return categoryLabels[product.category] || 'Product';
+          };
+          
+          return (
+            <div class="product-card bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2" data-category={product.category} data-product-id={product.id} data-product-slug={product.slug} data-product-name={product.name}>
+              <div class="relative rounded-t-xl overflow-hidden" style="height: 192px;">
+                <img src={product.featured_image} alt={product.name} class="w-full h-full object-cover" />
+                <div class={`category-badge absolute top-4 left-4 px-3 py-1 rounded-full text-white text-sm font-medium bg-gradient-to-r ${categoryColors[product.category]}`}>
+                  {getProductLabel(product)}
+                </div>
+              </div>
+              
+              <div class="p-6">
+                <h3 class="text-xl font-bold text-black mb-2">{product.name}</h3>
+                <p class="text-black font-medium mb-4">{product.short_description}</p>
+                
+                <div class="mb-4">
+                  <div class="flex flex-wrap gap-2">
+                    {product.features.slice(0, 3).map((feature) => (
+                      <span class="px-2 py-1 bg-gray-100 text-black text-xs rounded-full font-medium">{feature}</span>
+                    ))}
+                  </div>
+                </div>
+
+                <div class="flex flex-col space-y-3">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <span class="text-sm text-black font-medium">Starting from</span>
+                      <div class="text-2xl font-bold text-primary-600">₹{product.base_price.toLocaleString()}</div>
+                    </div>
+                  </div>
+                  <div class="flex justify-center">
+                    <button 
+                      class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all transform hover:scale-105 shadow-lg hover:shadow-xl text-center product-view-btn"
+                      data-product-slug={product.slug}
+                      data-product-name={product.name}
+                    >
+                      View Details
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-16 bg-blue-600 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold mb-4">Need Something Custom?</h2>
+      <p class="text-xl mb-8 opacity-90">
+        Don't see exactly what you need? Contact us for a custom solution tailored to your requirements.
+      </p>
+      <a href="/contact?project_type=custom&project_details=I'm interested in a custom solution tailored to my specific requirements. Please provide more information about your custom development services." class="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-colors">
+        Get Custom Quote
+      </a>
+      <p class="text-xs text-gray-500 mt-2 text-center">
+        <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+        </svg>
+        Login required for quotes
+      </p>
+    </div>
+  </section>
+  </div>
+</Layout>
+
+<script>
+  // Product filtering with performance optimization
+  const filterButtons = document.querySelectorAll('.filter-btn');
+  const productCards = document.querySelectorAll('.product-card');
+  let colorsEnabled = true;
+  
+  filterButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // Remove active class from all buttons
+      filterButtons.forEach(btn => {
+        btn.classList.remove('active');
+        btn.classList.add('bg-white', 'text-gray-700', 'border');
+        // Remove any blue background classes
+        btn.classList.remove('bg-primary-600', 'bg-blue-600', 'text-white');
+        // Ensure proper text color for inactive buttons
+        btn.style.color = '#374151';
+        btn.style.backgroundColor = '#ffffff';
+        btn.style.background = '#ffffff';
+      });
+      
+      // Add active class to clicked button
+      button.classList.add('active');
+      // Ensure proper text color for active button (blue text on white background)
+      button.style.color = '#3b82f6';
+      button.style.backgroundColor = '#ffffff';
+      button.style.background = '#ffffff';
+      
+      // Get filter value
+      const filter = (button as HTMLElement).dataset.filter;
+      
+      // Filter products with optimized logic
+      productCards.forEach(card => {
+        const cardCategory = (card as HTMLElement).dataset.category;
+        const productSlug = (card as HTMLElement).dataset.productSlug;
+        let shouldShow = false;
+        
+        if (filter === 'all') {
+          shouldShow = true;
+        } else if (filter === 'web') {
+          // For websites filter, show only restaurant website (specific product)
+          shouldShow = productSlug === 'restaurant-website';
+        } else if (filter === 'restaurant') {
+          // For restaurant solutions filter, show only restaurant menu system (exclude restaurant website and order menu system)
+          shouldShow = cardCategory === filter && productSlug !== 'restaurant-website' && productSlug !== 'order-menu-system';
+        } else if (filter === 'order-menu-system') {
+          // For order menu system filter, show only the Order Menu System product
+          shouldShow = productSlug === 'order-menu-system';
+        } else {
+          shouldShow = cardCategory === filter;
+        }
+        
+        if (shouldShow) {
+          (card as HTMLElement).style.display = 'block';
+          card.classList.add('animate-fade-in');
+        } else {
+          (card as HTMLElement).style.display = 'none';
+        }
+      });
+    });
+  });
+
+
+
+
+
+  // Add animation classes with performance optimization
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate-fade-in');
+        // Stop observing once animated to improve performance
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    // Use root margin for better performance
+    rootMargin: '100px 0px',
+    threshold: 0.05
+  });
+
+  // Observe all product cards immediately for faster loading
+  document.querySelectorAll('.product-card').forEach(card => {
+    observer.observe(card);
+  });
+
+  // Add loading optimization
+  document.addEventListener('DOMContentLoaded', () => {
+    // Mark page as loaded for performance monitoring
+    document.body.classList.add('page-loaded');
+    
+    // Ensure filter buttons are always visible
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const filterSection = document.querySelector('.filter-section');
+    
+    if (filterSection) {
+      filterSection.style.display = 'block';
+      filterSection.style.visibility = 'visible';
+      filterSection.style.opacity = '1';
+    }
+    
+    filterButtons.forEach(button => {
+      button.style.display = 'inline-block';
+      button.style.visibility = 'visible';
+      button.style.opacity = '1';
+      
+      // Set proper initial text colors and ensure white backgrounds
+      if (button.classList.contains('active')) {
+        button.style.color = '#3b82f6';
+        button.style.backgroundColor = '#ffffff';
+        button.style.background = '#ffffff';
+      } else {
+        button.style.color = '#374151';
+        button.style.backgroundColor = '#ffffff';
+        button.style.background = '#ffffff';
+      }
+      
+      // Remove any blue background classes that might be present
+      button.classList.remove('bg-primary-600', 'bg-blue-600', 'text-white');
+    });
+    
+    // Preload critical resources
+    const criticalImages = document.querySelectorAll('.product-card img[loading="lazy"]');
+    if (criticalImages.length > 0) {
+      // Load first few images immediately
+      Array.from(criticalImages).slice(0, 3).forEach(img => {
+        img.loading = 'eager';
+      });
+    }
+  });
+
+  // Product click handler - ALL products require authentication
+  document.addEventListener('DOMContentLoaded', function() {
+    const productButtons = document.querySelectorAll('.product-view-btn');
+    
+    productButtons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const productSlug = this.getAttribute('data-product-slug');
+        const productName = this.getAttribute('data-product-name');
+        
+        console.log('Product clicked:', productSlug);
+        
+        // ALL products require authentication - no exceptions
+        // Authentication check is required for ALL products including order-menu-system
+        // First check admin status
+        const isAdmin = checkIfUserIsAdmin();
+        console.log('Is admin:', isAdmin);
+        
+        if (isAdmin) {
+          console.log('Admin user - allowing access');
+          window.location.href = `/products/${productSlug}`;
+          return;
+        }
+        
+        // Non-admin users - MUST be logged in to access any product
+        const authManager = window.globalAuthManager || window.simpleAuthManager;
+        const isLoggedIn = authManager && authManager.isUserLoggedIn();
+        
+        if (!isLoggedIn) {
+          // User not logged in - redirect to login page with smooth transition
+          // This is a security requirement - no product access without login
+          console.log('❌ User not logged in - authentication required, redirecting to login');
+          const loginUrl = `/login?redirect=/products/${productSlug}`;
+          
+          // Add smooth fade-out transition
+          document.body.style.transition = 'opacity 0.3s ease-out';
+          document.body.style.opacity = '0';
+          
+          setTimeout(() => {
+            window.location.href = loginUrl;
+          }, 200);
+          return;
+        }
+        
+        // Check if this is the Order Menu System product - it should work for all users
+        const isOrderMenuSystem = productSlug === 'order-menu-system';
+        
+        if (isOrderMenuSystem) {
+          // Order Menu System - allow access for all logged-in users
+          console.log('Order Menu System - allowing access for logged-in user');
+          window.location.href = `/products/${productSlug}`;
+          return;
+        }
+        
+        // Logged in but not admin - show dialog or redirect to contact (except for OMS)
+        console.log('Non-admin user - showing dialog');
+        if (window.showProductDialog) {
+          window.showProductDialog();
+        } else {
+          console.log('Dialog not available - redirecting to contact');
+          window.location.href = '/contact';
+        }
+      });
+    });
+  });
+
+  // Function to check if user is admin - deployment compatible
+  function checkIfUserIsAdmin() {
+    try {
+      // Check global auth manager first
+      if (window.globalAuthManager && window.globalAuthManager.isUserLoggedIn()) {
+        const currentUser = window.globalAuthManager.getCurrentUser();
+        if (currentUser && currentUser.role === 'admin') {
+          return true;
+        }
+      }
+      
+      // Check simple auth manager
+      if (window.simpleAuthManager && window.simpleAuthManager.isUserLoggedIn()) {
+        const currentUser = window.simpleAuthManager.getCurrentUser();
+        if (currentUser && currentUser.role === 'admin') {
+          return true;
+        }
+      }
+      
+      // Check session storage for admin role
+      const sessionData = sessionStorage.getItem('simple-auth-session');
+      if (sessionData) {
+        try {
+          const session = JSON.parse(sessionData);
+          if (session.user && session.user.role === 'admin') {
+            return true;
+          }
+        } catch (parseError) {
+          console.log('Session data parse error:', parseError);
+        }
+      }
+      
+      // Check localStorage as fallback
+      const localSessionData = localStorage.getItem('simple-auth-session');
+      if (localSessionData) {
+        try {
+          const session = JSON.parse(localSessionData);
+          if (session.user && session.user.role === 'admin') {
+            return true;
+          }
+        } catch (parseError) {
+          console.log('Local session data parse error:', parseError);
+        }
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      return false;
+    }
+  }
+</script>
+
+<style>
+  /* Performance optimizations */
+  .product-card {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    min-height: 400px;
+    contain: layout style paint;
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Optimize image loading */
+  .product-card img {
+    loading: lazy;
+    decoding: async;
+    width: 100%;
+    height: auto;
+  }
+  
+  /* Optimize grid layout */
+  #products-grid {
+    contain: layout;
+  }
+  
+  /* Optimize filter buttons */
+  .filter-btn {
+    contain: layout style;
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 10 !important;
+  }
+  
+  /* Filter button text visibility - Force white backgrounds */
+  .filter-btn {
+    color: #374151 !important; /* Dark gray text for inactive buttons */
+    background-color: #ffffff !important; /* White background for all buttons */
+    background: #ffffff !important; /* Force white background */
+    border: 1px solid #d1d5db !important; /* Gray border */
+  }
+  
+  .filter-btn:hover {
+    color: #111827 !important; /* Darker text on hover */
+    background-color: #f9fafb !important; /* Light gray background on hover */
+    background: #f9fafb !important; /* Force light gray background on hover */
+    border-color: #9ca3af !important; /* Darker border on hover */
+  }
+  
+  .filter-btn.active {
+    color: #3b82f6 !important; /* Blue text for active button */
+    background-color: #ffffff !important; /* White background for active button */
+    background: #ffffff !important; /* Force white background for active button */
+    border-color: #3b82f6 !important; /* Blue border for active button */
+  }
+  
+  .filter-btn.active:hover {
+    color: #2563eb !important; /* Darker blue text on active button hover */
+    background-color: #f9fafb !important; /* Light gray background on active button hover */
+    background: #f9fafb !important; /* Force light gray background on active button hover */
+    border-color: #2563eb !important; /* Darker blue border on active button hover */
+  }
+  
+  /* Override any Tailwind classes that might be causing blue backgrounds */
+  .filter-btn.bg-primary-600,
+  .filter-btn.bg-blue-600,
+  .filter-btn[class*="bg-primary"],
+  .filter-btn[class*="bg-blue"] {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+  }
+  
+  /* Ensure filter section has white background */
+  .filter-section {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+  }
+  
+  /* Ensure filter section is always visible */
+  .filter-section {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 5 !important;
+  }
+  
+  /* Ensure filter buttons are not hidden by any global styles */
+  .filter-btn:not(.hidden) {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Color filter styles */
+  .category-badge.no-color {
+    background: linear-gradient(to right, #6b7280, #9ca3af) !important;
+    color: #ffffff !important;
+  }
+  
+  .category-badge {
+    transition: all 0.3s ease;
+  }
+  
+
+  /* Code modal styles */
+  #code-modal {
+    backdrop-filter: blur(5px);
+  }
+
+  .bg-gray-900 pre {
+    font-family: 'Courier New', monospace;
+    line-height: 1.5;
+  }
+
+  .copy-code-btn {
+    transition: all 0.2s ease;
+  }
+</style>
+
+<script>
+  // Simple smooth scrolling - same as About and Contact pages
+  document.addEventListener('DOMContentLoaded', function() {
+    // Simple smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href').substring(1);
+        const target = document.getElementById(targetId);
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+  });
+</script>

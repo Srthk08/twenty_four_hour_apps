@@ -1,0 +1,2463 @@
+---
+import MenuOperatorAdminLayout from '../../layouts/MenuOperatorAdminLayout.astro';
+---
+
+<MenuOperatorAdminLayout title="Menu Operator Dashboard - Product Customizations">
+  <div class="max-w-7xl mx-auto">
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">Product Customizations Dashboard</h2>
+          <p class="text-gray-600">Manage all product customizations, track progress, and handle customer requests.</p>
+        </div>
+        <div class="flex space-x-3">
+          <button onclick="window.location.reload()" class="inline-flex items-center px-6 py-3 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Total Customizations Card -->
+      <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+        <div class="flex items-center">
+          <div class="p-2 bg-blue-100 rounded-lg">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+        </div>
+          <div class="ml-4">
+              <p class="text-sm font-medium text-blue-600">Total Customizations</p>
+              <p class="text-2xl font-bold text-blue-900" id="total-customizations">3</p>
+          </div>
+        </div>
+      </div>
+
+        <!-- Pending Customizations Card -->
+        <div class="bg-yellow-50 rounded-lg p-6 border border-yellow-200">
+        <div class="flex items-center">
+            <div class="p-2 bg-yellow-100 rounded-lg">
+              <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+          <div class="ml-4">
+              <p class="text-sm font-medium text-yellow-600">Pending</p>
+              <p class="text-2xl font-bold text-yellow-900" id="pending-customizations">1</p>
+              </div>
+            </div>
+          </div>
+          
+        <!-- In Progress Card -->
+        <div class="bg-orange-50 rounded-lg p-6 border border-orange-200">
+        <div class="flex items-center">
+            <div class="p-2 bg-orange-100 rounded-lg">
+              <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+            </svg>
+            </div>
+          <div class="ml-4">
+              <p class="text-sm font-medium text-orange-600">In Progress</p>
+              <p class="text-2xl font-bold text-orange-900" id="in-progress-customizations">1</p>
+          </div>
+        </div>
+      </div>
+
+        <!-- Completed Card -->
+        <div class="bg-green-50 rounded-lg p-6 border border-green-200">
+        <div class="flex items-center">
+            <div class="p-2 bg-green-100 rounded-lg">
+              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        </div>
+          <div class="ml-4">
+              <p class="text-sm font-medium text-green-600">Completed</p>
+              <p class="text-2xl font-bold text-green-900" id="completed-customizations">1</p>
+          </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Data Sections -->
+      <div class="mt-8 space-y-8">
+        
+        <!-- Product Customizations Section -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+            <h3 class="text-xl font-bold text-gray-900">Product Customizations</h3>
+          <div class="flex items-center space-x-2 w-full sm:w-auto sm:justify-end sm:ml-4 mt-3 sm:mt-0">
+              <div class="relative flex-1 min-w-0 sm:min-w-[16rem] sm:flex-none sm:w-64">
+                <input id="search-email" type="text" placeholder="Search by email..." class="w-full pr-9 pl-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+                <svg aria-hidden="true" class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"></path>
+                </svg>
+              </div>
+              <button id="refresh-customizations" class="shrink-0 text-gray-400 hover:text-gray-600 transition-colors" title="Refresh">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+              </button>
+          </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product & Project</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Details</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Info</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+              <tbody id="customizations-table-body" class="bg-white divide-y divide-gray-200">
+            <tr>
+              <td colspan="7" class="px-6 py-4 text-center text-gray-500">Loading customizations...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden file input for photo upload -->
+  <input type="file" id="photo-upload-input" accept="image/*" class="hidden" />
+
+  <!-- Product Browser Modal -->
+  <div id="product-browser-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-2xl font-bold text-gray-900">Browse Products</h3>
+            <button onclick="closeProductBrowser()" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="products-grid">
+            <!-- Products will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Product Customization Form Modal -->
+  <div id="customization-form-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-2xl font-bold text-gray-900">Product Customization Form</h3>
+            <button onclick="closeCustomizationForm()" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <div id="customization-form-content">
+            <!-- Customization form will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customization Details Modal -->
+  <div id="customization-details-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50 overflow-y-auto">
+    <div class="flex items-start justify-center min-h-screen p-2 sm:p-4 py-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full my-4 max-h-[calc(100vh-2rem)] flex flex-col">
+        <div class="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 flex-shrink-0">
+          <h3 class="text-xl sm:text-2xl font-bold text-gray-900">Order Customization Details</h3>
+          <button onclick="closeCustomizationDetails()" class="text-gray-400 hover:text-gray-600 flex-shrink-0 ml-4">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <div id="customization-details-content" class="p-4 sm:p-6 overflow-y-auto flex-1 min-h-0">
+          <!-- Details content will be injected here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Modal for Photos and Logo -->
+  <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-75 hidden z-[60] flex items-center justify-center p-4">
+    <div class="relative max-w-7xl w-full h-full flex items-center justify-center">
+      <button onclick="closeImageModal()" class="absolute top-4 right-4 z-20 text-white hover:text-gray-200 bg-white bg-opacity-20 hover:bg-opacity-30 backdrop-blur-sm rounded-full p-3 transition-all shadow-lg border-2 border-white border-opacity-30">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+      <img id="image-modal-img" src="" alt="Full size image" class="max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl" />
+    </div>
+  </div>
+
+<script>
+  import { supabase, supabaseUrl, supabaseAnonKey } from '../../lib/supabase';
+
+  // Supabase configuration (shared client with fallbacks)
+  console.log('🔧 Supabase configuration (shared client):');
+  console.log('- URL:', supabaseUrl);
+  console.log('- Key:', supabaseAnonKey ? 'Present' : 'Missing');
+
+  // Global variables
+  let currentUser = null;
+  let cachedSupabaseClient = null; // Cache Supabase client to avoid repeated waits
+  
+  // Wait for Supabase (returns already-initialized client) - with caching
+  async function waitForSupabase(maxRetries = 20, delay = 100) {
+    // Return cached client if available
+    if (cachedSupabaseClient) {
+      return cachedSupabaseClient;
+    }
+    
+    // First try to use window.supabase (client instance from Layout.astro)
+    for (let i = 0; i < maxRetries; i++) {
+      if (window.supabase && window.supabase.auth && typeof window.supabase.auth.getUser === 'function') {
+        cachedSupabaseClient = window.supabase;
+        return cachedSupabaseClient;
+      }
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+    // Fallback to imported supabase client
+    if (supabase && supabase.auth) {
+      cachedSupabaseClient = supabase;
+      return cachedSupabaseClient;
+    }
+    console.error('Supabase client not available after waiting');
+    return null;
+  }
+
+  // Initialize dashboard
+  document.addEventListener('DOMContentLoaded', async () => {
+    console.log('📄 DOM Content Loaded - Starting Menu Operator Dashboard initialization');
+    console.log('🔄 UPDATED: Product Customizations Dashboard Loading...');
+    
+    // Pre-load Supabase client in background for faster access later
+    waitForSupabase().then(client => {
+      if (client) {
+        console.log('✅ Supabase client pre-loaded and cached');
+      }
+    });
+    
+    // Setup event listeners immediately
+    setupEventListeners();
+    
+    // Load real data immediately
+    await loadRealData();
+  });
+  
+  // Additional fallback for window load
+  window.addEventListener('load', () => {
+    console.log('🔄 Window loaded - Ensuring dashboard is ready');
+    if (document.getElementById('customizations-table-body').innerHTML.includes('Loading')) {
+      loadRealData();
+    }
+  });
+
+  // Modal Functions
+
+  window.showProductBrowser = function() {
+    console.log('🔄 Showing product browser...');
+    const modal = document.getElementById('product-browser-modal');
+    const grid = document.getElementById('products-grid');
+    
+    // Load products
+    const products = getAvailableProducts();
+    grid.innerHTML = generateProductsHTML(products);
+    
+    // Lock body scroll
+    document.body.style.overflow = 'hidden';
+    modal.classList.remove('hidden');
+  };
+
+  window.closeProductBrowser = function() {
+    document.getElementById('product-browser-modal').classList.add('hidden');
+    // Unlock body scroll
+    document.body.style.overflow = '';
+  };
+
+  window.selectProduct = function(productId) {
+    console.log('🔄 Product selected:', productId);
+    closeProductBrowser();
+    showCustomizationForm(productId);
+  };
+
+  window.showCustomizationForm = function(productId) {
+    console.log('🔄 Showing customization form for product:', productId);
+    const modal = document.getElementById('customization-form-modal');
+    const content = document.getElementById('customization-form-content');
+    
+    // Get product details
+    const product = getProductById(productId);
+    content.innerHTML = generateCustomizationFormHTML(product);
+    
+    // Lock body scroll
+    document.body.style.overflow = 'hidden';
+    modal.classList.remove('hidden');
+  };
+
+  window.closeCustomizationForm = function() {
+    document.getElementById('customization-form-modal').classList.add('hidden');
+    // Unlock body scroll
+    document.body.style.overflow = '';
+  };
+
+  // Form submission handler
+  document.addEventListener('submit', function(e) {
+    if (e.target.id === 'customization-form') {
+      e.preventDefault();
+      handleCustomizationFormSubmit(e.target);
+    }
+  });
+
+  function handleCustomizationFormSubmit(form) {
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    
+    console.log('🔄 Submitting customization form:', data);
+    
+    // Add product information
+    const productId = form.dataset.productId || 'unknown';
+    const product = getProductById(productId);
+    
+    const customizationData = {
+      ...data,
+      product_name: product.name,
+      product_id: productId,
+      status: 'pending',
+      created_at: new Date().toISOString()
+    };
+    
+    // Here you would typically save to Supabase
+    console.log('📝 Customization data to save:', customizationData);
+    
+    // Show success message
+    alert('Customization request submitted successfully! We will contact you soon.');
+    
+    // Close the form
+    closeCustomizationForm();
+    
+    // Optionally refresh the dashboard
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  }
+
+  // Data Functions
+
+  function getAvailableProducts() {
+    return [
+      {
+        id: 'restaurant-menu-system',
+        name: 'Restaurant Menu System',
+        description: 'Digital menu system with QR code ordering',
+        price: 'Starting from $2,500',
+        image: '/images/restaurant-menu.jpg',
+        features: ['QR Code Ordering', 'Real-time Updates', 'Multi-language Support']
+      },
+      {
+        id: 'android-tv-app',
+        name: 'Android TV App',
+        description: 'Custom Android TV application for streaming',
+        price: 'Starting from $5,500',
+        image: '/images/android-tv.jpg',
+        features: ['Custom UI/UX', 'Content Management', 'Multi-platform Support']
+      },
+      {
+        id: 'restaurant-website',
+        name: 'Restaurant Website',
+        description: 'Professional website with online ordering',
+        price: 'Starting from $3,000',
+        image: '/images/restaurant-website.jpg',
+        features: ['Online Ordering', 'Menu Management', 'SEO Optimized']
+      },
+      {
+        id: 'streaming-mobile-app',
+        name: 'Streaming Mobile App',
+        description: 'Cross-platform mobile app for content streaming',
+        price: 'Starting from $4,500',
+        image: '/images/mobile-app.jpg',
+        features: ['iOS & Android', 'Live Streaming', 'User Management']
+      },
+      {
+        id: 'order-menu-system',
+        name: 'Order Menu System',
+        description: 'Complete ordering system for restaurants',
+        price: 'Starting from $3,500',
+        image: '/images/order-system.jpg',
+        features: ['Order Management', 'Payment Integration', 'Analytics']
+      },
+      {
+        id: 'e-commerce-platform',
+        name: 'E-commerce Platform',
+        description: 'Full-featured online store platform',
+        price: 'Starting from $6,000',
+        image: '/images/ecommerce.jpg',
+        features: ['Product Catalog', 'Payment Gateway', 'Inventory Management']
+      }
+    ];
+  }
+
+  function getProductById(productId) {
+    const products = getAvailableProducts();
+    return products.find(p => p.id === productId) || products[0];
+  }
+
+
+  function generateProductsHTML(products) {
+    return `
+      ${products.map(product => `
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+          <div class="p-6">
+            <div class="aspect-w-16 aspect-h-9 mb-4">
+              <div class="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center">
+                <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">${product.name}</h3>
+            <p class="text-gray-600 mb-4">${product.description}</p>
+            <div class="mb-4">
+              <p class="text-lg font-bold text-green-600">${product.price}</p>
+            </div>
+            <div class="mb-4">
+              <h4 class="text-sm font-medium text-gray-900 mb-2">Features:</h4>
+              <ul class="text-sm text-gray-600 space-y-1">
+                ${product.features.map(feature => `<li>• ${feature}</li>`).join('')}
+              </ul>
+            </div>
+            <button onclick="selectProduct('${product.id}')" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors">
+              Select Product
+            </button>
+          </div>
+        </div>
+      `).join('')}
+    `;
+  }
+
+  function generateCustomizationFormHTML(product) {
+    return `
+      <div class="space-y-6">
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <h4 class="text-lg font-semibold text-gray-900 mb-2">Selected Product: ${product.name}</h4>
+          <p class="text-gray-600">${product.description}</p>
+        </div>
+        
+        <form id="customization-form" data-product-id="${product.id}" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Customer Name *</label>
+              <input type="text" name="customer_name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
+              <input type="text" name="company_name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+              <input type="email" name="email" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+              <input type="tel" name="phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
+            <input type="text" name="project_name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Requirements *</label>
+            <textarea name="requirements" rows="4" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Describe your specific requirements..."></textarea>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Budget Range</label>
+            <select name="budget_range" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+              <option value="">Select Budget Range</option>
+              <option value="under-5k">Under $5,000</option>
+              <option value="5k-10k">$5,000 - $10,000</option>
+              <option value="10k-25k">$10,000 - $25,000</option>
+              <option value="25k-50k">$25,000 - $50,000</option>
+              <option value="over-50k">Over $50,000</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Timeline</label>
+            <select name="timeline" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+              <option value="">Select Timeline</option>
+              <option value="asap">ASAP</option>
+              <option value="1-month">1 Month</option>
+              <option value="2-3-months">2-3 Months</option>
+              <option value="3-6-months">3-6 Months</option>
+              <option value="6-months-plus">6+ Months</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
+            <textarea name="notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Any additional information..."></textarea>
+          </div>
+          
+          <div class="flex justify-end space-x-4">
+            <button type="button" onclick="closeCustomizationForm()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
+              Cancel
+            </button>
+            <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+              Submit Customization Request
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+  
+  // Load demo data immediately
+  function loadDemoDataImmediately() {
+    console.log('🔄 Loading demo data immediately...');
+    const demoCustomizations = getDemoProductCustomizations();
+    const demoPhotos = getDemoMenuPhotos();
+    
+    displayProductCustomizations(demoCustomizations);
+    displayMenuPhotos(demoPhotos);
+    updateStatistics(demoCustomizations, demoPhotos);
+    
+    console.log('✅ Demo data loaded - Customizations:', demoCustomizations.length, 'Photos:', demoPhotos.length);
+  }
+  
+  // Load real data from Supabase
+  async function loadRealData() {
+    try {
+      console.log('🔄 Loading real data from Supabase...');
+      
+      // Wait for Supabase with timeout
+      const supabaseClient = await waitForSupabase();
+      if (!supabaseClient) {
+        console.warn('⚠️ Supabase not ready, skipping real data load');
+        return;
+      }
+      
+      // Load user profile
+      await loadUserProfile();
+      
+      // Load customizations from order_customizations table
+      const customizations = await loadRealProductCustomizations(supabaseClient);
+      const photos = await loadRealMenuPhotos(supabaseClient);
+      
+      console.log('🔄 Real data fetched - Customizations:', customizations?.length || 0, 'Photos:', photos?.length || 0);
+      
+      // Cache full list for searching
+      window.__all_customizations = customizations || [];
+      displayProductCustomizations(window.__all_customizations);
+      displayMenuPhotos(photos || []);
+        updateStatistics(customizations || [], photos || []);
+      
+    } catch (error) {
+      console.warn('⚠️ Error loading real data:', error.message);
+      // Ensure UI advances from Loading... to empty state
+      displayProductCustomizations([]);
+      displayMenuPhotos([]);
+      updateStatistics([], []);
+    }
+  }
+  
+  // Load data and display immediately
+  async function loadDataAndDisplay() {
+    try {
+      console.log('🔄 Loading data from Supabase...');
+      
+      // Try to load real data first
+      const client = await waitForSupabase();
+      const customizations = await loadRealProductCustomizations(client);
+      const photos = await loadRealMenuPhotos(client);
+      
+      // If no real data, use demo data
+      if (!customizations || customizations.length === 0) {
+        console.log('⚠️ No real customizations found, using demo data');
+        const demoCustomizations = getDemoProductCustomizations();
+        displayProductCustomizations(demoCustomizations);
+        updateStatistics(demoCustomizations, photos || []);
+      } else {
+        displayProductCustomizations(customizations);
+        updateStatistics(customizations, photos || []);
+      }
+      
+      if (!photos || photos.length === 0) {
+        console.log('⚠️ No real photos found, using demo data');
+        const demoPhotos = getDemoMenuPhotos();
+        displayMenuPhotos(demoPhotos);
+      } else {
+      displayMenuPhotos(photos);
+      }
+      
+      console.log('✅ Data loaded and displayed');
+      
+    } catch (error) {
+      console.error('❌ Error loading real data, using demo data:', error);
+      
+      // Fallback to demo data
+      const demoCustomizations = getDemoProductCustomizations();
+      const demoPhotos = getDemoMenuPhotos();
+      
+      displayProductCustomizations(demoCustomizations);
+      displayMenuPhotos(demoPhotos);
+      updateStatistics(demoCustomizations, demoPhotos);
+      
+      console.log('✅ Demo data loaded and displayed');
+    }
+  }
+  
+  // Load real product customizations from Supabase (from order_customizations table)
+  async function loadRealProductCustomizations(supabaseClient = null) {
+    try {
+      console.log('🔄 Attempting to load from order_customizations table...');
+      
+      // Use provided client or wait for one
+      const client = supabaseClient || await waitForSupabase();
+      if (!client) {
+        console.error('❌ Supabase client not available');
+        throw new Error('Supabase not available');
+      }
+      
+      console.log('🔄 Supabase client status: Available');
+      console.log('🔄 Executing Supabase query (order_customizations)...');
+      let { data, error } = await client
+        .from('order_customizations')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      // REST fallback if RLS blocks or no rows but we expect data
+      if (error || !data) {
+        console.warn('⚠️ Supabase query error/empty, trying REST fallback:', error?.message);
+        data = await restSelect('order_customizations', client);
+      }
+      
+      console.log('🔄 Supabase query completed. Data:', data, 'Error:', error);
+      
+      if (error) {
+        console.error('❌ Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('✅ Loaded customizations from order_customizations:', data?.length || 0);
+      console.log('🔄 Sample data:', data?.[0] || 'No data');
+      return data || [];
+    } catch (error) {
+      console.error('❌ Error loading real product customizations from product_customizations:', error);
+      throw error;
+    }
+  }
+  
+  // Load real menu photos from Supabase
+  async function loadRealMenuPhotos(supabaseClient = null) {
+    try {
+      console.log('🔄 Attempting to load from menu_photos table...');
+      
+      // Use provided client or wait for one
+      const client = supabaseClient || await waitForSupabase();
+      if (!client) {
+        console.error('❌ Supabase client not available');
+        throw new Error('Supabase not available');
+      }
+      
+      // Derive photos from order_customizations.menu_photos_urls to avoid 404 REST calls
+      const { data, error } = await client
+        .from('order_customizations')
+        .select('id, created_at, menu_photos_urls')
+        .order('created_at', { ascending: false })
+        .limit(50);
+      
+      if (error) {
+        console.warn('⚠️ order_customizations select for photos failed:', error.message);
+        return [];
+      }
+
+      const photos = [];
+      (data || []).forEach(row => {
+        let items = row.menu_photos_urls;
+        console.log('🔍 Processing row:', row.id, 'menu_photos_urls type:', typeof items, 'value:', items);
+        
+        if (!items) {
+          console.log('⚠️ No menu_photos_urls for row:', row.id);
+          return;
+        }
+        
+        try {
+          if (typeof items === 'string') {
+            console.log('📝 Parsing JSON string for row:', row.id);
+            items = JSON.parse(items);
+          }
+        } catch (e) {
+          console.error('❌ Failed to parse JSON for row:', row.id, e);
+          items = [];
+        }
+        
+        console.log('🔍 Parsed items for row:', row.id, 'type:', typeof items, 'isArray:', Array.isArray(items), 'length:', Array.isArray(items) ? items.length : 'N/A');
+        
+        if (Array.isArray(items)) {
+          items.forEach((p, idx) => {
+            console.log(`🔍 Processing photo ${idx + 1} for row ${row.id}:`, p, 'type:', typeof p);
+            
+            // Handle both object format {url, filename, ...} and string format (just URL)
+            const photoUrl = typeof p === 'string' ? p : (p.url || p.publicUrl || null);
+            const photoFilename = typeof p === 'string' ? 'menu-photo' : (p.filename || 'menu-photo');
+            const photoPath = typeof p === 'object' ? (p.path || null) : null;
+            const photoSize = typeof p === 'object' ? (p.size || null) : null;
+            
+            console.log(`🔍 Extracted photo data: url=${photoUrl}, filename=${photoFilename}`);
+            
+            if (photoUrl) {
+              photos.push({
+                id: `${row.id}-${photoPath || photoFilename || Math.random().toString(36).slice(2)}`,
+                photo_url: photoUrl,
+                original_filename: photoFilename,
+                conversion_status: 'completed',
+                file_size: photoSize,
+                created_at: row.created_at
+              });
+              console.log(`✅ Added photo to array: ${photoUrl}`);
+            } else {
+              console.warn(`⚠️ Skipped photo (no URL):`, p);
+            }
+          });
+        } else {
+          console.warn('⚠️ menu_photos_urls is not an array for row:', row.id, 'type:', typeof items);
+        }
+      });
+
+      console.log('✅ Derived photos from order_customizations:', photos.length);
+      console.log('📸 Photos array:', photos);
+      return photos;
+    } catch (error) {
+      console.error('❌ Error loading real menu photos:', error);
+      throw error;
+    }
+  }
+
+  // Generic REST fallback using current session token
+  async function restSelect(table, supabaseClient = null) {
+    try {
+      const client = supabaseClient || await waitForSupabase();
+      if (!client || !client.auth) {
+        throw new Error('Supabase client not available');
+      }
+      const { data: sess } = await client.auth.getSession();
+      const token = sess?.session?.access_token || sess?.access_token || '';
+      const url = `${supabaseUrl}/rest/v1/${table}?select=*`;
+      const resp = await fetch(url, {
+        headers: {
+          'apikey': supabaseAnonKey,
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      });
+      if (!resp.ok) {
+        const txt = await resp.text();
+        console.warn('REST fallback failed:', resp.status, txt);
+        return [];
+      }
+      return await resp.json();
+    } catch (e) {
+      console.warn('REST fallback exception:', e);
+      return [];
+    }
+  }
+
+  // REST select by id helper
+  async function restSelectById(table, id, supabaseClient = null) {
+    try {
+      const client = supabaseClient || await waitForSupabase();
+      if (!client || !client.auth) {
+        throw new Error('Supabase client not available');
+      }
+      const { data: sess } = await client.auth.getSession();
+      const token = sess?.session?.access_token || sess?.access_token || '';
+      const url = `${supabaseUrl}/rest/v1/${table}?id=eq.${encodeURIComponent(id)}&select=*`;
+      const resp = await fetch(url, {
+        headers: {
+          'apikey': supabaseAnonKey,
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      });
+      if (!resp.ok) {
+        const txt = await resp.text();
+        console.warn('REST by id failed:', resp.status, txt);
+        return null;
+      }
+      const arr = await resp.json();
+      return Array.isArray(arr) && arr.length ? arr[0] : null;
+    } catch (e) {
+      console.warn('REST by id exception:', e);
+      return null;
+    }
+  }
+
+  // Utility: timeout wrapper
+  function withTimeout(promise, ms) {
+    return Promise.race([
+      promise,
+      new Promise(resolve => setTimeout(() => resolve(null), ms))
+    ]);
+  }
+  
+  // Display product customizations in table (mapped from order_customizations)
+  function displayProductCustomizations(customizations) {
+    console.log('🔄 Displaying customizations:', customizations?.length || 0);
+    const tbody = document.getElementById('customizations-table-body');
+    if (!tbody) {
+      console.error('❌ Table body not found! Looking for: customizations-table-body');
+      console.log('Available elements:', document.querySelectorAll('[id*="table"]'));
+      return;
+    }
+    
+    if (!customizations || customizations.length === 0) {
+      console.log('⚠️ No customizations to display - showing empty state');
+      tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">No product customizations found in database. <button onclick="loadRealData()" class="text-blue-600 hover:text-blue-800 underline">Refresh to try again</button></td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = customizations.map(customization => `
+      <tr class="hover:bg-gray-50">
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="text-sm font-medium text-gray-900">${customization.product_name || 'Order Menu System'}</div>
+          <div class="text-sm text-gray-500">${customization.project_name || customization.restaurant_name || 'No project name'}</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="text-sm text-gray-900">${customization.contact_person || customization.owner_name || 'Not specified'}</div>
+          <div class="text-sm text-gray-500">${customization.restaurant_name || customization.company_name || ''}</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="text-sm text-gray-900">${customization.email || 'No email'}</div>
+          <div class="text-sm text-gray-500">${customization.phone_number || customization.phone || 'No phone'}</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            (customization.status === 'completed' || customization.status === 'processed') ? 'bg-green-100 text-green-800' :
+            (customization.status === 'in_progress' || customization.status === 'processing') ? 'bg-yellow-100 text-yellow-800' :
+            (customization.status === 'pending' || customization.status === 'pending_payment' || customization.status === 'submitted') ? 'bg-blue-100 text-blue-800' :
+            'bg-gray-100 text-gray-800'
+          }">
+            ${customization.status || 'pending'}
+          </span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+          ₹${(customization.total_amount || customization.price || 0).toLocaleString('en-IN')}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          ${customization.created_at ? new Date(customization.created_at).toLocaleDateString() : 'Unknown'}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+          <button type="button" class="text-blue-600 hover:text-blue-900" onclick="viewCustomization('${customization.id}')">View</button>
+        </td>
+      </tr>
+    `).join('');
+    
+    console.log('✅ Customizations table updated with', customizations.length, 'items');
+  }
+  
+  // Display menu photos in table
+  function displayMenuPhotos(photos) {
+    const tbody = document.getElementById('photos-table-body');
+    if (!tbody) return;
+    
+    if (!photos || photos.length === 0) {
+      console.log('⚠️ No photos to display - showing empty state');
+      tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No photos found in database. <button onclick="loadRealData()" class="text-blue-600 hover:text-blue-800 underline">Refresh to try again</button></td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = photos.map(photo => `
+      <tr class="hover:bg-gray-50">
+        <td class="px-6 py-4 whitespace-nowrap">
+          ${photo.photo_url ? 
+            `<img src="${photo.photo_url}" alt="Menu photo" class="w-12 h-12 rounded object-cover">` : 
+            '<div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center"><svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>'
+          }
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="text-sm text-gray-900">${photo.original_filename || 'Unknown'}</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            photo.conversion_status === 'completed' ? 'bg-green-100 text-green-800' :
+            photo.conversion_status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
+            photo.conversion_status === 'failed' ? 'bg-red-100 text-red-800' :
+            'bg-gray-100 text-gray-800'
+          }">
+            ${photo.conversion_status || 'pending'}
+          </span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          ${photo.file_size ? (photo.file_size / 1024).toFixed(1) + ' KB' : 'Unknown size'}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          ${photo.created_at ? new Date(photo.created_at).toLocaleDateString() : 'Unknown'}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">-</td>
+          </tr>
+        `).join('');
+      }
+      
+      // Update statistics
+  function updateStatistics(customizations, photos) {
+    const totalCustomizations = document.getElementById('total-customizations');
+    const pendingCustomizations = document.getElementById('pending-customizations');
+    const inProgressCustomizations = document.getElementById('in-progress-customizations');
+    const completedCustomizations = document.getElementById('completed-customizations');
+    
+    if (totalCustomizations) totalCustomizations.textContent = customizations.length;
+    
+    if (pendingCustomizations) {
+      const pending = customizations.filter(c => c.status === 'pending' || c.status === 'new').length;
+      pendingCustomizations.textContent = pending;
+    }
+    
+    if (inProgressCustomizations) {
+      const inProgress = customizations.filter(c => c.status === 'in_progress' || c.status === 'processing').length;
+      inProgressCustomizations.textContent = inProgress;
+    }
+    
+    if (completedCustomizations) {
+      const completed = customizations.filter(c => c.status === 'completed' || c.status === 'processed').length;
+      completedCustomizations.textContent = completed;
+    }
+  }
+
+  // Demo product customizations data
+  function getDemoProductCustomizations() {
+    return [
+      {
+        id: 'demo-1',
+        product_name: 'Restaurant Menu System',
+        project_name: 'Bella Vista Digital Menu',
+        customer_name: 'Maria Rodriguez',
+        company_name: 'Bella Vista Restaurant',
+        email: 'maria@bellavista.com',
+        phone: '+1 (555) 123-4567',
+        requirements: 'QR code ordering system with real-time updates',
+        status: 'pending',
+        price: 25000,
+        created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'demo-2',
+        product_name: 'Android TV App',
+        project_name: 'Golden Dragon Streaming App',
+        customer_name: 'David Chen',
+        company_name: 'Golden Dragon Media',
+        email: 'david@goldendragon.com',
+        phone: '+1 (555) 987-6543',
+        requirements: 'Multi-language support and content management',
+        status: 'in_progress',
+        price: 55000,
+        created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'demo-3',
+        product_name: 'Restaurant Website',
+        project_name: 'Café Del Sol Website',
+        customer_name: 'Sophie Martin',
+        company_name: 'Café Del Sol',
+        email: 'sophie@cafedelsol.com',
+        phone: '+1 (555) 456-7890',
+        requirements: 'Online ordering integration with delivery partners',
+        status: 'completed',
+        price: 15000,
+        created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'demo-4',
+        product_name: 'Streaming Mobile App',
+        project_name: 'Pizza Palace Mobile App',
+        customer_name: 'Tony Romano',
+        company_name: 'Pizza Palace',
+        email: 'tony@pizzapalace.com',
+        phone: '+1 (555) 321-9876',
+        requirements: 'Real-time order tracking and push notifications',
+        status: 'pending',
+        price: 45000,
+        created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'demo-5',
+        product_name: 'Restaurant Menu System',
+        project_name: 'Sushi Master Digital Menu',
+        customer_name: 'Yuki Tanaka',
+        company_name: 'Sushi Master',
+        email: 'yuki@sushimaster.com',
+        phone: '+1 (555) 654-3210',
+        requirements: 'Customizable menu categories and seasonal updates',
+        status: 'in_progress',
+        price: 25000,
+        created_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString()
+      }
+    ];
+  }
+
+  // Demo menu photos data
+  function getDemoMenuPhotos() {
+    return [
+      {
+        id: 'photo-1',
+        original_filename: 'bella-vista-menu.jpg',
+        photo_url: 'https://via.placeholder.com/100x100/4F46E5/FFFFFF?text=BV',
+        conversion_status: 'completed',
+        created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        file_size: 2400000
+      },
+      {
+        id: 'photo-2',
+        original_filename: 'golden-dragon-menu.jpg',
+        photo_url: 'https://via.placeholder.com/100x100/DC2626/FFFFFF?text=GD',
+        conversion_status: 'processing',
+        created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        file_size: 1800000
+      },
+      {
+        id: 'photo-3',
+        original_filename: 'cafe-del-sol-menu.jpg',
+        photo_url: 'https://via.placeholder.com/100x100/059669/FFFFFF?text=CD',
+        conversion_status: 'completed',
+        created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        file_size: 3100000
+      }
+    ];
+  }
+
+  // Load user profile from Supabase
+  async function loadUserProfile() {
+    try {
+      // Wait for Supabase client to be ready
+      const supabaseClient = await waitForSupabase();
+      if (!supabaseClient || !supabaseClient.auth || typeof supabaseClient.auth.getUser !== 'function') {
+        console.error('Supabase client not available');
+        return;
+      }
+
+      // Get current user
+      const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+      if (userError || !user) {
+        console.error('Error getting user:', userError);
+        window.location.href = '/login';
+        return;
+      }
+
+      currentUser = user;
+      console.log('🔍 Loading profile for user:', user.email);
+      
+      // Get user profile with menu_operator role
+      const { data: profile, error: profileError } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .eq('role', 'menu_operator')
+        .single();
+
+      if (profileError) {
+        console.error('Error loading profile:', profileError);
+        
+        // Try fallback without role filter
+        const { data: fallbackProfile, error: fallbackError } = await supabaseClient
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (fallbackError) {
+          console.error('Error loading fallback profile:', fallbackError);
+          window.location.href = '/login';
+          return;
+        }
+
+        console.log('🔍 Fallback profile loaded:', fallbackProfile);
+        console.log('🔍 Role value from database:', JSON.stringify(fallbackProfile.role));
+
+        // Check if user has Menu Operator role (case-insensitive)
+        if (!fallbackProfile.role || fallbackProfile.role.toLowerCase().trim() !== 'menu_operator') {
+          console.log('User does not have menu_operator role. Role:', fallbackProfile.role);
+          // Redirect based on role
+          if (fallbackProfile.role === 'admin') {
+            window.location.href = '/admin';
+          } else {
+            window.location.href = '/dashboard';
+          }
+          return;
+        }
+
+        console.log('✅ User has menu_operator role, proceeding...');
+        return;
+      }
+
+      console.log('🔍 Profile loaded:', profile);
+      console.log('🔍 Role value from database:', JSON.stringify(profile.role));
+
+      // Check if user has Menu Operator role (case-insensitive)
+      if (!profile.role || profile.role.toLowerCase().trim() !== 'menu_operator') {
+        console.log('User does not have menu_operator role. Role:', profile.role);
+        // Redirect based on role
+        if (profile.role === 'admin') {
+          window.location.href = '/admin';
+        } else {
+          window.location.href = '/dashboard';
+        }
+        return;
+      }
+
+      console.log('✅ User has menu_operator role, proceeding...');
+
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+    }
+  }
+
+  // Setup event listeners
+  function setupEventListeners() {
+      // Refresh buttons
+      const refreshCustomizations = document.getElementById('refresh-customizations');
+      if (refreshCustomizations) {
+        refreshCustomizations.addEventListener('click', async () => {
+          console.log('🔄 Manual refresh of product customizations triggered');
+          await loadRealData();
+          // clear search on refresh
+          const input = document.getElementById('search-email');
+          if (input) input.value = '';
+        });
+      }
+      // Email search
+      const searchInput = document.getElementById('search-email');
+      if (searchInput) {
+        const runFilter = () => {
+          const q = (searchInput.value || '').toLowerCase().trim();
+          const all = window.__all_customizations || [];
+          if (!q) {
+            displayProductCustomizations(all);
+            updateStatistics(all, []);
+            return;
+          }
+          const filtered = all.filter(row => (row.email || '').toLowerCase().includes(q));
+          displayProductCustomizations(filtered);
+          updateStatistics(filtered, []);
+        };
+        searchInput.addEventListener('input', runFilter);
+        searchInput.addEventListener('change', runFilter);
+      }
+      
+      const refreshPhotos = document.getElementById('refresh-photos');
+      if (refreshPhotos) {
+        refreshPhotos.addEventListener('click', async () => {
+          console.log('🔄 Manual refresh of photos triggered');
+          await loadRealData();
+        });
+      }
+      
+      // Refresh button now uses onclick handler directly
+
+      // Buttons now use onclick handlers directly
+
+      // File upload
+      const photoUploadInput = document.getElementById('photo-upload-input');
+      if (photoUploadInput) {
+        photoUploadInput.addEventListener('change', handlePhotoUpload);
+      }
+  }
+
+    // Handle photo upload
+    async function handlePhotoUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      alert('File size must be less than 10MB');
+      return;
+    }
+
+    try {
+      // Upload to Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${currentUser.id}/${Date.now()}.${fileExt}`;
+      
+      const supabaseClient = await waitForSupabase();
+      if (!supabaseClient || !supabaseClient.storage) {
+        throw new Error('Supabase client not available');
+      }
+      const { data: uploadData, error: uploadError } = await supabaseClient.storage
+        .from('menu-photos')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabaseClient.storage
+        .from('menu-photos')
+        .getPublicUrl(fileName);
+
+      // Save to database
+      const { data: photoData, error: dbError } = await supabaseClient
+          .from('menu_photos')
+          .insert({
+            user_id: currentUser.id,
+            photo_url: publicUrl,
+            original_filename: file.name,
+            file_size: file.size,
+            mime_type: file.type,
+            conversion_status: 'pending'
+        });
+
+      if (dbError) {
+        throw dbError;
+      }
+
+        // Reload photos
+        const client3 = await waitForSupabase();
+        await loadRealMenuPhotos(client3);
+
+      // Reset file input
+      event.target.value = '';
+
+        alert('Photo uploaded successfully!');
+
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Error uploading file: ' + error.message);
+      }
+    }
+
+    // Global functions for table actions
+    window.viewCustomization = async function(customizationId) {
+      // Ensure modal opens immediately to avoid double-click confusion
+      const modal = document.getElementById('customization-details-modal');
+      // Lock body scroll
+      document.body.style.overflow = 'hidden';
+      modal?.classList.remove('hidden');
+      const container = document.getElementById('customization-details-content');
+      if (container) container.innerHTML = '<p class="text-gray-500">Loading details...</p>';
+      console.log('🔄 Loading product customization details for:', customizationId);
+      
+      try {
+        let customization = null;
+        
+        // FIRST: Try to get from cached customizations array (instant, no DB call)
+        if (window.__all_customizations && Array.isArray(window.__all_customizations)) {
+          customization = window.__all_customizations.find(c => c.id === customizationId);
+          if (customization) {
+            console.log('✅ Found customization in cache, using cached data');
+            // Render immediately with cached data
+            renderCustomizationDetails(customization, container, modal);
+            return; // Exit early - no DB call needed!
+          }
+        }
+        
+        // SECOND: If not in cache, fetch from database (with fast parallel queries)
+        console.log('📡 Customization not in cache, fetching from database...');
+        const client = cachedSupabaseClient || await waitForSupabase();
+        
+        // Run both queries in parallel with shorter timeout for faster response
+        const clientPromise = (async () => {
+          try {
+            if (!client) return null;
+            const res = await client
+              .from('order_customizations')
+              .select('*')
+              .eq('id', customizationId)
+              .single();
+            return res.data || null;
+          } catch {
+            return null;
+          }
+        })();
+        
+        const restPromise = restSelectById('order_customizations', customizationId, client);
+        
+        // Use Promise.race for faster response (first one wins)
+        customization = await Promise.race([
+          Promise.any([clientPromise, restPromise]),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 1500))
+        ]).catch(() => null);
+        
+        // If still no result, try one more time with REST
+        if (!customization) {
+          customization = await restSelectById('order_customizations', customizationId, client);
+        }
+
+        // If still no record, show empty state (don't leave loading)
+        if (!customization) {
+          console.warn('No customization found for id:', customizationId);
+          if (container) {
+            container.innerHTML = '<p class="text-gray-500">No details found for this customization.</p>';
+          }
+          return;
+        }
+
+        // Render into modal
+        renderCustomizationDetails(customization, container, modal);
+      } catch (error) {
+        console.error('Error viewing product customization details:', error);
+        const container = document.getElementById('customization-details-content');
+        if (container) {
+          container.innerHTML = '<p class="text-red-600">Error loading details. Please try again.</p>';
+        }
+      }
+    };
+    
+    // Extract rendering logic to separate function for reuse
+    function renderCustomizationDetails(customization, container, modal) {
+      if (container) {
+          // Normalize address parts
+          const house = customization.house_flat_number || customization.houseNumber || '';
+          const line1 = customization.address_line_1 || customization.addressLine1 || '';
+          const city = customization.city || '';
+          const state = customization.state || '';
+          const pincode = customization.pincode || '';
+          const country = customization.country || '';
+
+          // Robust restaurant name resolution
+          const restaurantName = (
+            customization.restaurant_name ||
+            customization.restaurantName ||
+            customization.restaurant ||
+            customization.restaurant_title ||
+            customization.project_name ||
+            ''
+          );
+
+          // Photos
+          let photos = customization.menu_photos_urls || [];
+          try {
+            if (typeof photos === 'string') photos = JSON.parse(photos);
+          } catch {}
+          const photosHTML = Array.isArray(photos) && photos.length
+            ? `<div id="photos-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3">${photos.map((p, idx) => {
+                // Handle both object format {url, filename} and string format (just URL)
+                const imgUrl = typeof p === 'string' ? p : (p.url || p.publicUrl || '');
+                const filename = typeof p === 'string' ? 'menu-photo' : ((p.filename || '').replace(/"/g, '&quot;'));
+                // Use data attribute to store URL safely
+                if (!imgUrl) return '';
+                return `
+                <div data-image-url="${imgUrl.replace(/"/g, '&quot;')}" class="image-view-trigger block cursor-pointer hover:opacity-80 transition-opacity">
+                  <img src="${imgUrl}" crossorigin="anonymous" alt="${filename || 'menu photo'}" class="w-20 h-20 object-cover rounded border"/>
+                  <p class="mt-1 text-xs text-gray-500 truncate">${filename}</p>
+                </div>
+              `;
+              }).filter(Boolean).join('')}</div>`
+            : '<p class="text-gray-500">No menu photos uploaded</p>';
+
+          const logoUrl = customization.restaurant_logo_url || '';
+          const logoHTML = customization.restaurant_logo_url
+            ? `<div data-image-url="${logoUrl.replace(/"/g, '&quot;')}" class="image-view-trigger inline-block cursor-pointer hover:opacity-80 transition-opacity">
+                <img src="${logoUrl}" alt="Logo" class="w-20 h-20 object-cover rounded border"/>
+              </div>`
+            : '<span class="text-gray-500">Not uploaded</span>';
+
+          container.innerHTML = `
+            <div class="space-y-8">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 class="text-sm font-medium text-gray-500 mb-1">Product</h4>
+                  <p class="text-gray-900">${customization.product_name || 'Order Menu System'}</p>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-500 mb-1">Status</h4>
+                  <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    (customization.status === 'completed' || customization.status === 'processed') ? 'bg-green-100 text-green-800' :
+                    (customization.status === 'in_progress' || customization.status === 'processing') ? 'bg-yellow-100 text-yellow-800' :
+                    (customization.status === 'pending' || customization.status === 'pending_payment' || customization.status === 'submitted') ? 'bg-blue-100 text-blue-800' :
+                    'bg-gray-100 text-gray-800'
+                  }">${customization.status || 'pending'}</div>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-500 mb-1">Project Name</h4>
+                  <p class="text-gray-900">${customization.project_name || 'Not provided'}</p>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-500 mb-1">Restaurant Name</h4>
+                  <p class="text-gray-900">${restaurantName || 'Not provided'}</p>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-500 mb-1">Amounts</h4>
+                  <p class="text-gray-900">Base: ₹${(customization.base_package_cost || 0).toLocaleString('en-IN')} · GST: ₹${(customization.gst_amount || 0).toLocaleString('en-IN')} · Total: ₹${(customization.total_amount || 0).toLocaleString('en-IN')}</p>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 class="text-sm font-medium text-gray-500 mb-1">Owner Name</h4>
+                  <p class="text-gray-900">${customization.owner_name || '-'}</p>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-500 mb-1">Contact Person</h4>
+                  <p class="text-gray-900">${customization.contact_person || customization.owner_name || 'Not provided'}</p>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-500 mb-1">Email</h4>
+                  <p class="text-gray-900">${customization.email || 'Not provided'}</p>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-500 mb-1">Phone</h4>
+                  <p class="text-gray-900">${customization.phone_number || customization.phone || 'Not provided'}</p>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-500 mb-1">Created</h4>
+                  <p class="text-gray-900">${new Date(customization.created_at).toLocaleString()}</p>
+                </div>
+              </div>
+              <div>
+                <h4 class="text-sm font-medium text-gray-500 mb-2">Address</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <p class="text-xs text-gray-500">House / Flat Number</p>
+                    <p class="text-gray-900">${house || '-'}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-500">Address Line 1</p>
+                    <p class="text-gray-900">${line1 || '-'}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-500">City</p>
+                    <p class="text-gray-900">${city || '-'}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-500">State</p>
+                    <p class="text-gray-900">${state || '-'}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-500">Pincode</p>
+                    <p class="text-gray-900">${pincode || '-'}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-500">Country</p>
+                    <p class="text-gray-900">${country || '-'}</p>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h4 class="text-sm font-medium text-gray-500 mb-2">Restaurant Logo</h4>
+                ${logoHTML}
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <h4 class="text-sm font-medium text-gray-500">Menu Photos</h4>
+                </div>
+                ${photosHTML}
+                
+                <!-- Manual Menu Conversion Form -->
+                <div class="mt-6 border-t pt-6">
+                  <div class="flex items-center justify-between mb-4">
+                    <h4 class="text-sm font-medium text-gray-500">Manual Menu Conversion</h4>
+                    <button type="button" onclick="addMenuRow()" class="px-3 py-1.5 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors">
+                      + Add Item
+                    </button>
+                  </div>
+                  
+                  <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
+                      <thead class="bg-gray-50">
+                        <tr>
+                          <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase w-16">SR.NO</th>
+                          <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase">CATEGORIES</th>
+                          <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase">NAME</th>
+                          <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase w-32">PRICE</th>
+                          <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase w-24">QUANTITY</th>
+                          <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase w-20">ACTION</th>
+                        </tr>
+                      </thead>
+                      <tbody id="menu-items-table-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Menu items will be added here dynamically -->
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <div class="mt-4 flex justify-end space-x-3">
+                    <button type="button" onclick="saveMenuItems('${customization.id}')" class="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors">
+                      Save Menu Items
+                    </button>
+                    <button type="button" onclick="clearMenuItems()" class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300 transition-colors">
+                      Clear All
+                    </button>
+                  </div>
+                  
+                  <div id="menu-save-status" class="mt-2 text-sm"></div>
+                </div>
+              </div>
+              <div>
+                <h4 class="text-sm font-medium text-gray-500 mb-1">Additional Requirements</h4>
+                <p class="text-gray-900 whitespace-pre-wrap break-words overflow-wrap-anywhere">${customization.additional_requirements || 'None'}</p>
+              </div>
+            </div>
+          `;
+        
+        // Ensure modal is visible
+        if (modal) {
+          modal.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+        }
+
+        // Attach event listeners to image triggers after rendering
+        setTimeout(() => {
+          const imageTriggers = container.querySelectorAll('.image-view-trigger');
+          imageTriggers.forEach(trigger => {
+            trigger.addEventListener('click', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              const imageUrl = this.getAttribute('data-image-url') || this.getAttribute('href');
+              if (imageUrl) {
+                openImageModal(imageUrl);
+              }
+            });
+          });
+          
+          // Load existing menu items if any
+          loadMenuItems(customization.id);
+        }, 100);
+      }
+    }
+
+    window.closeCustomizationDetails = function() {
+      const modal = document.getElementById('customization-details-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        // Unlock body scroll
+        document.body.style.overflow = '';
+      }
+    };
+
+    // Image Modal Functions
+    window.openImageModal = function(imageUrl) {
+      console.log('🖼️ Opening image modal for:', imageUrl);
+      const modal = document.getElementById('image-modal');
+      const img = document.getElementById('image-modal-img');
+      if (modal && img && imageUrl) {
+        img.src = imageUrl;
+        img.onerror = function() {
+          console.error('❌ Failed to load image:', imageUrl);
+          // Just close the modal without showing alert
+          closeImageModal();
+        };
+        // Lock body scroll
+        document.body.style.overflow = 'hidden';
+        modal.classList.remove('hidden');
+      } else {
+        console.error('❌ Image modal elements not found or invalid URL');
+      }
+    };
+
+    window.closeImageModal = function() {
+      const modal = document.getElementById('image-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        // Unlock body scroll
+        document.body.style.overflow = '';
+        // Clear image src to free memory
+        const img = document.getElementById('image-modal-img');
+        if (img) img.src = '';
+      }
+    };
+
+    // Close image modal on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        const imageModal = document.getElementById('image-modal');
+        if (imageModal && !imageModal.classList.contains('hidden')) {
+          closeImageModal();
+        }
+      }
+    });
+
+    // Close image modal when clicking on background
+    document.addEventListener('click', function(e) {
+      const imageModal = document.getElementById('image-modal');
+      if (imageModal && !imageModal.classList.contains('hidden')) {
+        // Close if clicking directly on the modal background
+        if (e.target === imageModal) {
+          closeImageModal();
+        }
+      }
+    });
+
+    // Manual Menu Conversion Functions
+    let menuRowCounter = 0;
+
+    window.addMenuRow = function() {
+      const tbody = document.getElementById('menu-items-table-body');
+      if (!tbody) return;
+      
+      menuRowCounter++;
+      const row = document.createElement('tr');
+      row.className = 'hover:bg-gray-50';
+      row.id = `menu-row-${menuRowCounter}`;
+      
+      row.innerHTML = `
+        <td class="px-3 py-2 text-sm text-gray-900">${menuRowCounter}</td>
+        <td class="px-3 py-2">
+          <input type="text" class="menu-category w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Appetizers" />
+        </td>
+        <td class="px-3 py-2">
+          <input type="text" class="menu-name w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Item name" />
+        </td>
+        <td class="px-3 py-2">
+          <input type="number" step="0.01" min="0" class="menu-price w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0.00" />
+        </td>
+        <td class="px-3 py-2">
+          <input type="number" min="0" class="menu-quantity w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0" />
+        </td>
+        <td class="px-3 py-2">
+          <button type="button" onclick="removeMenuRow('menu-row-${menuRowCounter}')" class="text-red-600 hover:text-red-800 text-sm">
+            Remove
+          </button>
+        </td>
+      `;
+      
+      tbody.appendChild(row);
+      updateMenuRowNumbers();
+    };
+
+    window.removeMenuRow = function(rowId) {
+      const row = document.getElementById(rowId);
+      if (row) {
+        row.remove();
+        updateMenuRowNumbers();
+      }
+    };
+
+    function updateMenuRowNumbers() {
+      const tbody = document.getElementById('menu-items-table-body');
+      if (!tbody) return;
+      
+      const rows = tbody.querySelectorAll('tr');
+      rows.forEach((row, index) => {
+        const srNoCell = row.querySelector('td:first-child');
+        if (srNoCell) {
+          srNoCell.textContent = index + 1;
+        }
+      });
+    }
+
+    window.clearMenuItems = function() {
+      const tbody = document.getElementById('menu-items-table-body');
+      if (tbody) {
+        tbody.innerHTML = '';
+        menuRowCounter = 0;
+      }
+      const statusDiv = document.getElementById('menu-save-status');
+      if (statusDiv) statusDiv.textContent = '';
+    };
+
+    window.saveMenuItems = async function(customizationId) {
+      const tbody = document.getElementById('menu-items-table-body');
+      const statusDiv = document.getElementById('menu-save-status');
+      
+      if (!tbody || !customizationId) {
+        if (statusDiv) statusDiv.innerHTML = '<span class="text-red-600">Error: Missing customization ID</span>';
+        return;
+      }
+
+      const rows = tbody.querySelectorAll('tr');
+      if (rows.length === 0) {
+        if (statusDiv) statusDiv.innerHTML = '<span class="text-yellow-600">No menu items to save. Add items first.</span>';
+        return;
+      }
+
+      const menuItems = [];
+      rows.forEach((row, index) => {
+        const category = row.querySelector('.menu-category')?.value?.trim() || '';
+        const name = row.querySelector('.menu-name')?.value?.trim() || '';
+        const price = parseFloat(row.querySelector('.menu-price')?.value) || 0;
+        const quantity = parseInt(row.querySelector('.menu-quantity')?.value) || 0;
+
+        if (name) { // Only add items with a name
+          menuItems.push({
+            sr_no: index + 1,
+            category: category,
+            name: name,
+            price: price,
+            quantity: quantity
+          });
+        }
+      });
+
+      if (menuItems.length === 0) {
+        if (statusDiv) statusDiv.innerHTML = '<span class="text-yellow-600">Please enter at least one menu item with a name.</span>';
+        return;
+      }
+
+      try {
+        if (statusDiv) statusDiv.innerHTML = '<span class="text-blue-600">Saving menu items...</span>';
+
+        const client = cachedSupabaseClient || await waitForSupabase();
+        if (!client) {
+          throw new Error('Supabase client not available');
+        }
+
+        // Save menu items as JSON in the order_customizations table
+        const { data, error } = await client
+          .from('order_customizations')
+          .update({
+            menu_items: JSON.stringify(menuItems),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', customizationId)
+          .select();
+
+        if (error) {
+          throw error;
+        }
+
+        if (statusDiv) {
+          statusDiv.innerHTML = `<span class="text-green-600">✓ Menu items saved successfully! (${menuItems.length} items)</span>`;
+        }
+        
+        console.log('Menu items saved:', menuItems);
+        
+        // Clear status message after 3 seconds
+        setTimeout(() => {
+          if (statusDiv) statusDiv.textContent = '';
+        }, 3000);
+
+      } catch (error) {
+        console.error('Error saving menu items:', error);
+        if (statusDiv) {
+          statusDiv.innerHTML = `<span class="text-red-600">Error saving menu items: ${error.message}</span>`;
+        }
+      }
+    };
+
+    // Load existing menu items when modal opens
+    function loadMenuItems(customizationId) {
+      if (!customizationId) return;
+      
+      const tbody = document.getElementById('menu-items-table-body');
+      if (!tbody) return;
+
+      // Clear existing rows
+      tbody.innerHTML = '';
+      menuRowCounter = 0;
+
+      // Try to load from cached customization data first
+      if (window.__all_customizations && Array.isArray(window.__all_customizations)) {
+        const customization = window.__all_customizations.find(c => c.id === customizationId);
+        if (customization && customization.menu_items) {
+          try {
+            const menuItems = typeof customization.menu_items === 'string' 
+              ? JSON.parse(customization.menu_items) 
+              : customization.menu_items;
+            
+            if (Array.isArray(menuItems) && menuItems.length > 0) {
+              menuItems.forEach((item, index) => {
+                menuRowCounter++;
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.id = `menu-row-${menuRowCounter}`;
+                
+                row.innerHTML = `
+                  <td class="px-3 py-2 text-sm text-gray-900">${item.sr_no || index + 1}</td>
+                  <td class="px-3 py-2">
+                    <input type="text" class="menu-category w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="${(item.category || '').replace(/"/g, '&quot;')}" placeholder="e.g., Appetizers" />
+                  </td>
+                  <td class="px-3 py-2">
+                    <input type="text" class="menu-name w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="${(item.name || '').replace(/"/g, '&quot;')}" placeholder="Item name" />
+                  </td>
+                  <td class="px-3 py-2">
+                    <input type="number" step="0.01" min="0" class="menu-price w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="${item.price || 0}" placeholder="0.00" />
+                  </td>
+                  <td class="px-3 py-2">
+                    <input type="number" min="0" class="menu-quantity w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="${item.quantity || 0}" placeholder="0" />
+                  </td>
+                  <td class="px-3 py-2">
+                    <button type="button" onclick="removeMenuRow('menu-row-${menuRowCounter}')" class="text-red-600 hover:text-red-800 text-sm">
+                      Remove
+                    </button>
+                  </td>
+                `;
+                
+                tbody.appendChild(row);
+              });
+              updateMenuRowNumbers();
+              return; // Exit early if loaded from cache
+            }
+          } catch (e) {
+            console.warn('Error parsing menu items from cache:', e);
+          }
+        }
+      }
+
+      // If not in cache, try to fetch from database
+      (async () => {
+        try {
+          const client = cachedSupabaseClient || await waitForSupabase();
+          if (!client) return;
+
+          const { data, error } = await client
+            .from('order_customizations')
+            .select('menu_items')
+            .eq('id', customizationId)
+            .single();
+
+          if (error || !data || !data.menu_items) {
+            return; // No menu items found
+          }
+
+          const menuItems = typeof data.menu_items === 'string' 
+            ? JSON.parse(data.menu_items) 
+            : data.menu_items;
+
+          if (Array.isArray(menuItems) && menuItems.length > 0) {
+            menuItems.forEach((item, index) => {
+              menuRowCounter++;
+              const row = document.createElement('tr');
+              row.className = 'hover:bg-gray-50';
+              row.id = `menu-row-${menuRowCounter}`;
+              
+              row.innerHTML = `
+                <td class="px-3 py-2 text-sm text-gray-900">${item.sr_no || index + 1}</td>
+                <td class="px-3 py-2">
+                  <input type="text" class="menu-category w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="${(item.category || '').replace(/"/g, '&quot;')}" placeholder="e.g., Appetizers" />
+                </td>
+                <td class="px-3 py-2">
+                  <input type="text" class="menu-name w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="${(item.name || '').replace(/"/g, '&quot;')}" placeholder="Item name" />
+                </td>
+                <td class="px-3 py-2">
+                  <input type="number" step="0.01" min="0" class="menu-price w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="${item.price || 0}" placeholder="0.00" />
+                </td>
+                <td class="px-3 py-2">
+                  <input type="number" min="0" class="menu-quantity w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="${item.quantity || 0}" placeholder="0" />
+                </td>
+                <td class="px-3 py-2">
+                  <button type="button" onclick="removeMenuRow('menu-row-${menuRowCounter}')" class="text-red-600 hover:text-red-800 text-sm">
+                    Remove
+                  </button>
+                </td>
+              `;
+              
+              tbody.appendChild(row);
+            });
+            updateMenuRowNumbers();
+          }
+        } catch (e) {
+          console.warn('Error loading menu items from database:', e);
+        }
+      })();
+    }
+
+    // AI CONVERSION FUNCTION COMMENTED OUT
+    // AI conversion using Tesseract.js (client-side OCR) with enhanced pre-processing + QR generation
+    /*
+    window.convertImagesToTextAI = async function() {
+      try {
+        // Check if modal is open
+        const modal = document.getElementById('customization-details-modal');
+        if (!modal || modal.classList.contains('hidden')) {
+          alert('Please open a customization details modal first to view photos.');
+          return;
+        }
+
+        const resultWrap = document.getElementById('ai-conversion-result');
+        const resultArea = document.getElementById('ai-conversion-text');
+        const status = document.getElementById('ai-conversion-status');
+        
+        // Show result area
+        if (resultWrap) resultWrap.classList.remove('hidden');
+        if (status) status.textContent = 'Converting images to text, please wait...';
+        if (resultArea) resultArea.textContent = '';
+        const actionBtns = document.getElementById('ai-action-buttons');
+        if (actionBtns) actionBtns.classList.add('hidden');
+        const qrWrap = document.getElementById('ai-qr');
+        const qrImg = document.getElementById('ai-qr-image');
+        const qrNote = document.getElementById('ai-qr-note');
+        if (qrWrap) qrWrap.classList.add('hidden');
+        if (qrImg) qrImg.removeAttribute('src');
+        if (qrNote) qrNote.textContent = '';
+
+        // Collect visible image URLs from the modal photos grid (search within modal)
+        const photosGrid = modal.querySelector('#photos-grid') || document.getElementById('photos-grid');
+        if (!photosGrid) {
+          if (resultArea) resultArea.textContent = 'No photos grid found. Please ensure the customization details modal is open.';
+          if (status) status.textContent = '';
+          return;
+        }
+
+        const imageEls = photosGrid.querySelectorAll('img');
+        const urls = Array.from(imageEls)
+          .map(img => {
+            // Get the actual image source, handling both direct src and href attributes
+            const src = img.src || img.getAttribute('src') || img.getAttribute('data-src');
+            // If image is inside an anchor, try to get href from parent
+            const parentLink = img.closest('a');
+            if (parentLink && parentLink.href && !src) {
+              return parentLink.href;
+            }
+            return src;
+          })
+          .filter(url => url && url !== 'undefined' && url !== 'null' && url.trim() !== '');
+
+        if (urls.length === 0) {
+          if (resultArea) resultArea.textContent = 'No photos available to convert. Make sure photos are loaded in the modal.';
+          if (status) status.textContent = '';
+          return;
+        }
+
+        console.log('Found', urls.length, 'images to convert:', urls);
+
+        // Lazy load Tesseract script if missing
+        if (!window.Tesseract) {
+          if (status) status.textContent = 'Loading OCR engine...';
+          await new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js';
+            s.onload = resolve;
+            s.onerror = reject;
+            document.head.appendChild(s);
+          });
+        }
+
+        // Check if Web Workers are supported
+        const workersSupported = typeof Worker !== 'undefined';
+        
+        // Try to create/reuse a persistent worker if supported
+        let useWorker = false;
+        if (workersSupported && !window.__tessWorker) {
+          if (status) status.textContent = 'Starting OCR worker...';
+          try {
+            // Try Tesseract.js v4 API with worker
+            if (window.Tesseract && window.Tesseract.createWorker && typeof window.Tesseract.createWorker === 'function') {
+              const worker = window.Tesseract.createWorker({
+                logger: m => { if (status) status.textContent = `${m.status}${m.progress ? ` ${(m.progress*100).toFixed(0)}%` : ''}`; },
+                workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/worker.min.js',
+                corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@4.0.2/tesseract-core.wasm.js',
+                langPath: 'https://tessdata.projectnaptha.com/4.0.0'
+              });
+              
+              // Tesseract.js v4 createWorker returns a promise
+              if (worker && typeof worker.then === 'function') {
+                const resolvedWorker = await worker;
+                if (resolvedWorker && typeof resolvedWorker.loadLanguage === 'function') {
+                  await resolvedWorker.loadLanguage('eng');
+                  await resolvedWorker.initialize('eng');
+                  window.__tessWorker = resolvedWorker;
+                  useWorker = true;
+                }
+              } else if (worker && typeof worker.load === 'function') {
+                await worker.load();
+                await worker.loadLanguage('eng');
+                await worker.initialize('eng');
+                window.__tessWorker = worker;
+                useWorker = true;
+              } else if (worker && typeof worker.loadLanguage === 'function') {
+                // Worker might already be initialized
+                await worker.loadLanguage('eng');
+                await worker.initialize('eng');
+                window.__tessWorker = worker;
+                useWorker = true;
+              }
+            }
+          } catch (workerError) {
+            console.warn('Failed to create Tesseract worker, will use recognize API instead:', workerError);
+            useWorker = false;
+          }
+        } else if (window.__tessWorker) {
+          useWorker = true;
+        }
+        
+        // If worker not available, we'll use Tesseract.recognize directly (no worker)
+        if (!useWorker && (!window.Tesseract || !window.Tesseract.recognize)) {
+          throw new Error('Tesseract.js not available. Please refresh the page.');
+        }
+
+        const sections = [];
+        let processed = 0;
+        for (let idx = 0; idx < urls.length; idx++) {
+          const url = urls[idx];
+          try {
+            // Bypass CORS by drawing to canvas
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.src = url;
+            await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
+            // Upscale to improve OCR (max dimension ~2000px)
+            const scale = Math.min(2000 / Math.max(img.naturalWidth, img.naturalHeight), 2.5);
+            const targetW = Math.max(1, Math.round(img.naturalWidth * (scale > 1 ? scale : 1)));
+            const targetH = Math.max(1, Math.round(img.naturalHeight * (scale > 1 ? scale : 1)));
+            const canvas = document.createElement('canvas');
+            canvas.width = targetW; canvas.height = targetH;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, targetW, targetH);
+
+            // Convert to grayscale and increase contrast
+            let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imgData.data;
+            for (let i = 0; i < data.length; i += 4) {
+              const r = data[i], g = data[i+1], b = data[i+2];
+              // luminance
+              let y = 0.299*r + 0.587*g + 0.114*b;
+              // contrast boost
+              y = (y - 128) * 1.25 + 128;
+              y = Math.max(0, Math.min(255, y));
+              data[i] = data[i+1] = data[i+2] = y;
+            }
+            ctx.putImageData(imgData, 0, 0);
+
+            // Simple unsharp mask: blur + high-pass + add
+            // 1) Create blurred version
+            const blurCanvas = document.createElement('canvas');
+            blurCanvas.width = canvas.width; blurCanvas.height = canvas.height;
+            const bctx = blurCanvas.getContext('2d');
+            bctx.filter = 'blur(1.5px)';
+            bctx.drawImage(canvas, 0, 0);
+
+            // 2) High-pass = original - blurred
+            const src = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const blr = bctx.getImageData(0, 0, blurCanvas.width, blurCanvas.height);
+            const out = ctx.createImageData(src.width, src.height);
+            for (let i = 0; i < src.data.length; i += 4) {
+              // amount factor
+              const amount = 1.0;
+              out.data[i]   = Math.min(255, Math.max(0, src.data[i]   + amount * (src.data[i]   - blr.data[i])));
+              out.data[i+1] = Math.min(255, Math.max(0, src.data[i+1] + amount * (src.data[i+1] - blr.data[i+1])));
+              out.data[i+2] = Math.min(255, Math.max(0, src.data[i+2] + amount * (src.data[i+2] - blr.data[i+2])));
+              out.data[i+3] = src.data[i+3];
+            }
+            ctx.putImageData(out, 0, 0);
+
+            let recognizedText = '';
+            try {
+              const dataUrl = canvas.toDataURL('image/png');
+              if (status) status.textContent = `Image ${idx + 1}: recognizing (preprocessed)...`;
+              
+              if (useWorker && window.__tessWorker) {
+                // Use worker if available
+                const { data: { text } } = await window.__tessWorker.recognize(dataUrl);
+                recognizedText = text || '';
+              } else {
+                // Fallback to direct recognize API (no worker)
+                const { data: { text } } = await window.Tesseract.recognize(dataUrl, 'eng');
+                recognizedText = text || '';
+              }
+            } catch (preprocessErr) {
+              // Canvas may be tainted due to CORS; fall back to original URL
+              console.warn('Preprocessed OCR failed, falling back to original URL:', preprocessErr);
+              try {
+                // Hint to avoid referrer issues
+                if (status) status.textContent = `Image ${idx + 1}: recognizing (original URL)...`;
+                
+                if (useWorker && window.__tessWorker) {
+                  const { data: { text } } = await window.__tessWorker.recognize(url);
+                  recognizedText = text || '';
+                } else {
+                  const { data: { text } } = await window.Tesseract.recognize(url, 'eng');
+                  recognizedText = text || '';
+                }
+              } catch (rawErr) {
+                console.warn('OCR failed on original URL, trying blob fallback:', rawErr);
+                try {
+                  const resp = await fetch(url, { mode: 'cors', credentials: 'omit' });
+                  const blob = await resp.blob();
+                  if (status) status.textContent = `Image ${idx + 1}: recognizing (blob)...`;
+                  
+                  if (useWorker && window.__tessWorker) {
+                    const { data: { text } } = await window.__tessWorker.recognize(blob);
+                    recognizedText = text || '';
+                  } else {
+                    const { data: { text } } = await window.Tesseract.recognize(blob, 'eng');
+                    recognizedText = text || '';
+                  }
+                } catch (blobErr) {
+                  console.warn('OCR failed on blob fallback:', blobErr);
+                  recognizedText = '';
+                }
+              }
+            }
+            const text = recognizedText;
+            if (text && text.trim()) {
+              // Normalize: split into lines, trim, remove empties, convert to bullet points
+              const lines = text
+                .replace(/\r\n/g, '\n')
+                .split('\n')
+                .map(l => l.trim())
+                .filter(l => l.length > 0);
+              const bullets = lines.map(l => `• ${l}`).join('\n');
+              sections.push(`Image ${idx + 1}\n${bullets}`);
+            }
+          } catch (imgErr) {
+            console.warn('OCR failed for image:', url, imgErr);
+          }
+          processed++;
+          if (status) status.textContent = `Processed ${processed}/${urls.length} image(s)`;
+        }
+
+        const combined = sections.length
+          ? sections.join('\n\n')
+          : '';
+
+        console.log('OCR completed. Sections:', sections.length, 'Combined text length:', combined.length);
+
+        // ALWAYS display results first, even if QR generation fails
+        if (resultArea) {
+          // Ensure visibility and correct formatting
+          resultArea.classList.remove('hidden');
+          resultArea.style.display = 'block';
+          resultArea.style.whiteSpace = 'pre-wrap';
+          const displayText = (combined && combined.trim())
+            ? combined
+            : 'No text detected. Try clearer photos or higher contrast images.';
+          resultArea.textContent = displayText;
+          console.log('Result displayed in area:', displayText.substring(0, 100) + '...');
+        }
+        
+        const actionBtns2 = document.getElementById('ai-action-buttons');
+        if (actionBtns2 && combined && combined.trim()) {
+          actionBtns2.classList.remove('hidden');
+        }
+        
+        // Scroll to result area to make it visible
+        if (resultArea) {
+          setTimeout(() => {
+            resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 100);
+        }
+
+        // Generate QR for the combined text (truncate if too long for QR) - this is optional
+        // Don't let QR generation failure affect the displayed results
+        if (combined && combined.trim()) {
+          try {
+            if (status) status.textContent = 'Generating QR...';
+            
+            // Re-get QR elements from the modal to ensure they exist (modal might be dynamically generated)
+            let qrWrapElement = modal.querySelector('#ai-qr') || document.getElementById('ai-qr');
+            let qrImgElement = modal.querySelector('#ai-qr-image') || document.getElementById('ai-qr-image');
+            const qrNoteElement = modal.querySelector('#ai-qr-note') || document.getElementById('ai-qr-note');
+            
+            if (!qrWrapElement || !qrImgElement) {
+              console.warn('QR elements not found in DOM, retrying...');
+              // Wait a bit and try again - modal might still be rendering
+              await new Promise(resolve => setTimeout(resolve, 200));
+              qrWrapElement = modal.querySelector('#ai-qr') || document.getElementById('ai-qr');
+              qrImgElement = modal.querySelector('#ai-qr-image') || document.getElementById('ai-qr-image');
+              if (!qrWrapElement || !qrImgElement) {
+                console.warn('QR elements still not found after retry');
+                if (status) status.textContent = 'Done (QR elements not found)';
+                return;
+              }
+            }
+            
+            // Clean text for QR code - remove website links, promotional content, and unwanted text
+            let cleanTextForQr = combined || '';
+            
+            // Remove website URLs (http://, https://, www.)
+            cleanTextForQr = cleanTextForQr.replace(/https?:\/\/[^\s]+/gi, '');
+            cleanTextForQr = cleanTextForQr.replace(/www\.[^\s]+/gi, '');
+            cleanTextForQr = cleanTextForQr.replace(/[^\s]+\.[a-z]{2,}(\/[^\s]*)?/gi, function(match) {
+              // Keep restaurant-related domains if they look like menu items, but remove obvious URLs
+              if (match.includes('menu') || match.includes('restaurant') || match.includes('food')) {
+                return match; // Might be part of menu item name
+              }
+              return ''; // Remove URL-like patterns
+            });
+            
+            // Remove promotional/portfolio text patterns
+            const promotionalPatterns = [
+              /arun\s+pattnaik/gi,
+              /ux\s+design\s+consultant/gi,
+              /portfolio/gi,
+              /design\s+consultant/gi,
+              /from\s+india/gi,
+              /consultant\s+from/gi,
+              /portfolio\s+website/gi,
+              /visit\s+my\s+website/gi,
+              /check\s+out\s+my\s+portfolio/gi
+            ];
+            
+            promotionalPatterns.forEach(pattern => {
+              cleanTextForQr = cleanTextForQr.replace(pattern, '');
+            });
+            
+            // Remove email addresses (except restaurant-looking emails)
+            cleanTextForQr = cleanTextForQr.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, function(email) {
+              // Keep emails that look like restaurant emails
+              if (email.includes('restaurant') || email.includes('menu') || email.includes('food') || 
+                  email.includes('cafe') || email.includes('dining') || email.includes('order')) {
+                return email;
+              }
+              // Remove promotional/portfolio emails
+              return '';
+            });
+            
+            // Remove social media patterns
+            cleanTextForQr = cleanTextForQr.replace(/@[a-zA-Z0-9_]+/g, ''); // Remove @mentions
+            cleanTextForQr = cleanTextForQr.replace(/facebook|instagram|twitter|linkedin|youtube/gi, '');
+            
+            // Keep "Image 1", "Image 2" labels and bullet points - user wants them
+            
+            // Normalize whitespace (keep bullet points and image labels)
+            cleanTextForQr = cleanTextForQr.replace(/\n{3,}/g, '\n\n');
+            
+            // Clean up: split into lines, trim each, filter empty lines
+            cleanTextForQr = cleanTextForQr
+              .split('\n')
+              .map(line => line.trim())
+              .filter(line => {
+                // Remove lines that are just promotional content
+                const lowerLine = line.toLowerCase();
+                return line.length > 0 && 
+                       !lowerLine.includes('portfolio') &&
+                       !lowerLine.includes('design consultant') &&
+                       !lowerLine.includes('ux design') &&
+                       !lowerLine.match(/^[a-z\s]+\s+from\s+[a-z]+$/i); // Remove "name from country" patterns
+              })
+              .join('\n')
+              .trim();
+            
+            // Limit to safe QR code size (1200 characters)
+            const textForQr = cleanTextForQr.slice(0, 1200);
+            
+            console.log('Cleaned QR text (removed URLs and promotional content):', textForQr.substring(0, 100) + '...');
+            
+            // Generate QR code using online API service (no library needed - avoids CORS/404 errors)
+            let dataUrlQR = null;
+            
+            try {
+              console.log('Generating QR code using online API service...');
+              // Use QR Server API (free, no API key required, no CORS issues)
+              const encodedText = encodeURIComponent(textForQr);
+              const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodedText}&margin=1&format=png`;
+              
+              // Fetch the QR code image
+              const response = await fetch(qrApiUrl, {
+                method: 'GET',
+                mode: 'cors',
+                cache: 'no-cache'
+              });
+              
+              if (response.ok) {
+                const blob = await response.blob();
+                dataUrlQR = await new Promise((resolve) => {
+                  const reader = new FileReader();
+                  reader.onloadend = () => resolve(reader.result);
+                  reader.onerror = () => resolve(null);
+                  reader.readAsDataURL(blob);
+                });
+                console.log('QR code generated successfully using QR Server API');
+              } else {
+                throw new Error('QR API returned error: ' + response.status);
+              }
+            } catch (apiErr) {
+              console.warn('QR Server API failed, trying alternative method:', apiErr);
+              
+              // Fallback: Use Google Charts API
+              try {
+                const encodedText2 = encodeURIComponent(textForQr);
+                const altApiUrl = `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodedText2}`;
+                
+                const response2 = await fetch(altApiUrl, {
+                  method: 'GET',
+                  mode: 'cors',
+                  cache: 'no-cache'
+                });
+                
+                if (response2.ok) {
+                  const blob2 = await response2.blob();
+                  dataUrlQR = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = () => resolve(null);
+                    reader.readAsDataURL(blob2);
+                  });
+                  console.log('QR code generated successfully using Google Charts API');
+                } else {
+                  throw new Error('Google Charts API returned error: ' + response2.status);
+                }
+              } catch (altErr) {
+                console.error('All QR generation methods failed:', altErr);
+                if (status) status.textContent = 'Done (QR generation failed)';
+                return;
+              }
+            }
+            
+            // Display the QR code
+            if (dataUrlQR) {
+              console.log('QR code generated successfully, data URL length:', dataUrlQR.length);
+              console.log('QR elements found:', {
+                qrWrapElement: !!qrWrapElement,
+                qrImgElement: !!qrImgElement,
+                qrNoteElement: !!qrNoteElement
+              });
+              
+              if (qrImgElement) {
+                qrImgElement.src = dataUrlQR;
+                qrImgElement.style.display = 'block';
+                qrImgElement.onload = () => {
+                  console.log('QR image loaded successfully');
+                  console.log('QR image dimensions:', qrImgElement.width, 'x', qrImgElement.height);
+                };
+                qrImgElement.onerror = (err) => {
+                  console.error('QR image failed to load:', err);
+                };
+              } else {
+                console.error('qrImgElement not found!');
+              }
+              
+              if (qrWrapElement) {
+                qrWrapElement.classList.remove('hidden');
+                qrWrapElement.style.display = 'block';
+                console.log('QR wrapper made visible');
+              } else {
+                console.error('qrWrapElement not found!');
+              }
+              
+              if (qrNoteElement) {
+                qrNoteElement.textContent = cleanTextForQr.length > textForQr.length
+                  ? 'Note: Text truncated to fit QR capacity.'
+                  : '';
+              }
+              
+              // Store for download handler
+              window.__lastAIQrDataUrl = dataUrlQR;
+              console.log('QR code generation and display completed successfully');
+              
+              // Force a reflow to ensure visibility
+              if (qrWrapElement) {
+                qrWrapElement.offsetHeight; // Trigger reflow
+              }
+            } else {
+              console.error('Failed to generate QR code using all methods');
+              if (status) status.textContent = 'Done (QR generation failed)';
+            }
+            
+            if (status) status.textContent = 'Done';
+          } catch (qrErr) {
+            console.error('QR generation failed (but text extraction succeeded):', qrErr);
+            console.error('QR error details:', qrErr.message, qrErr.stack);
+            if (status) status.textContent = 'Done (QR generation failed)';
+            // Don't throw - we already have the text results
+          }
+        } else {
+          if (status) status.textContent = 'Done';
+        }
+      } catch (e) {
+        console.error('AI conversion error:', e);
+        console.error('Error stack:', e.stack);
+        
+        // Only show error if we haven't already displayed results
+        const resultArea = document.getElementById('ai-conversion-text');
+        const status = document.getElementById('ai-conversion-status');
+        
+        // Check if result area already has content (successful extraction)
+        if (resultArea && (!resultArea.textContent || resultArea.textContent.trim() === '' || resultArea.textContent.includes('Error'))) {
+          resultArea.textContent = 'Error converting images: ' + (e.message || 'Unknown error. Please try again.');
+        } else if (resultArea && resultArea.textContent && !resultArea.textContent.includes('Error')) {
+          // Results were already displayed, just update status
+          console.log('Results were already displayed, error occurred during QR generation');
+          if (status) status.textContent = 'Error during QR generation (but text extracted successfully)';
+        } else {
+          // No results yet, show error
+          if (resultArea) resultArea.textContent = 'Error converting images. Please try again.';
+          if (status) status.textContent = '';
+        }
+      }
+    };
+    */
+
+    // AI CONVERSION HELPER FUNCTIONS COMMENTED OUT
+    // Download QR helper
+    /*
+    window.downloadAIQr = function() {
+      const dataUrl = window.__lastAIQrDataUrl;
+      if (!dataUrl) return;
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = 'menu-text-qr.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    };
+
+    window.copyAIText = function() {
+      const el = document.getElementById('ai-conversion-text');
+      if (!el) return;
+      const range = document.createRange();
+      range.selectNode(el);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      try { document.execCommand('copy'); } catch {}
+      sel.removeAllRanges();
+    };
+
+    window.clearAIText = function() {
+      const el = document.getElementById('ai-conversion-text');
+      const status = document.getElementById('ai-conversion-status');
+      if (el) el.textContent = '';
+      if (status) status.textContent = '';
+      const actionBtns = document.getElementById('ai-action-buttons');
+      if (actionBtns) actionBtns.classList.add('hidden');
+    };
+
+    window.clearAIQr = function() {
+      const qrWrap = document.getElementById('ai-qr');
+      const qrImg = document.getElementById('ai-qr-image');
+      const qrNote = document.getElementById('ai-qr-note');
+      if (qrWrap) {
+        qrWrap.classList.add('hidden');
+        qrWrap.style.display = 'none';
+      }
+      if (qrImg) {
+        qrImg.removeAttribute('src');
+        qrImg.style.display = 'none';
+      }
+      if (qrNote) qrNote.textContent = '';
+      // Clear the stored QR data URL
+      window.__lastAIQrDataUrl = null;
+      console.log('QR code cleared');
+    };
+    */
+
+    window.processCustomization = function(customizationId) {
+      console.log('Process product customization:', customizationId);
+      // Implement process functionality
+      alert('Processing customization: ' + customizationId);
+    };
+
+    window.viewPhoto = function(photoId) {
+      console.log('View photo:', photoId);
+      // Implement view functionality
+    };
+
+    window.downloadText = function(photoId) {
+      console.log('Download text for photo:', photoId);
+      // Implement download functionality
+    };
+    
+    // Initial load uses real data only
+    console.log('🔄 Script loaded - Loading real data...');
+    loadRealData();
+    
+</script>
+</MenuOperatorAdminLayout>

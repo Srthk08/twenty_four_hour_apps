@@ -1,0 +1,934 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getProductBySlug, getProducts, getProductPlans } from '../../lib/products-data';
+
+export async function getStaticPaths() {
+  const products = await getProducts();
+  
+  const paths = await Promise.all(products.map(async (product) => ({
+    params: { slug: product.slug },
+    props: { product, productPlans: await getProductPlans(product.id) }
+  })));
+  
+  return paths;
+}
+
+const { product, productPlans } = Astro.props;
+const { slug } = Astro.params;
+
+if (!product) {
+  return Astro.redirect('/products');
+}
+
+const categoryStyles = {
+  restaurant: {
+    gradient: 'from-blue-500 to-indigo-600',
+    bg: 'bg-blue-50',
+    text: 'text-blue-700',
+    icon: '🍽️'
+  },
+  mobile: {
+    gradient: 'from-blue-500 to-indigo-600',
+    bg: 'bg-blue-50',
+    text: 'text-blue-700',
+    icon: '📱'
+  },
+  tv: {
+    gradient: 'from-purple-500 to-violet-600',
+    bg: 'bg-purple-50',
+    text: 'text-purple-700',
+    icon: '📺'
+  },
+  web: {
+    gradient: 'from-orange-500 to-red-600',
+    bg: 'bg-orange-50',
+    text: 'text-orange-700',
+    icon: '🌐'
+  }
+};
+
+// Special styling for Restaurant Menu System
+const isRestaurantMenuSystem = product.slug === 'restaurant-menu-system';
+const restaurantMenuGradient = 'from-blue-600 via-blue-700 to-indigo-800';
+const restaurantMenuBg = 'bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100';
+
+// Special styling for Android TV App
+const isAndroidTVApp = product.slug === 'android-tv-app';
+const androidTVGradient = 'from-purple-600 via-purple-700 to-violet-800';
+const androidTVBg = 'bg-gradient-to-br from-purple-50 via-violet-50 to-purple-100';
+
+// Special styling for Streaming Mobile App
+const isStreamingMobileApp = product.slug === 'streaming-mobile-app';
+const streamingMobileGradient = 'from-pink-500 via-rose-600 to-pink-700';
+const streamingMobileBg = 'bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100';
+const streamingMobileBottomGradient = 'from-pink-600 via-rose-700 to-pink-800';
+
+// Special styling for Restaurant Website
+const isRestaurantWebsite = product.slug === 'restaurant-website';
+const restaurantWebsiteGradient = 'from-emerald-600 via-teal-700 to-cyan-800';
+const restaurantWebsiteBg = 'bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-100';
+const restaurantWebsiteBottomGradient = 'from-emerald-700 via-teal-800 to-cyan-900';
+
+// Special styling for Order Menu System
+const isOrderMenuSystem = product.slug === 'order-menu-system';
+const orderMenuSystemGradient = 'from-amber-600 via-orange-700 to-red-800';
+const orderMenuSystemBg = 'bg-gradient-to-br from-amber-50 via-orange-50 to-red-100';
+const orderMenuSystemBottomGradient = 'from-amber-700 via-orange-800 to-red-900';
+
+const style = categoryStyles[product.category];
+---
+
+<style>
+  /* Prevent text color flickering on page load */
+  .restaurant-menu-system-page {
+    color: #1e40af !important;
+  }
+  
+  .android-tv-app-page {
+    color: #7c3aed !important;
+  }
+  
+  .streaming-mobile-app-page {
+    color: #be185d !important;
+  }
+  
+  .restaurant-website-page {
+    color: #065f46 !important;
+  }
+  
+  .order-menu-system-page {
+    color: #92400e !important;
+  }
+  
+  /* Ensure text colors are applied immediately */
+  .restaurant-menu-system-page h1,
+  .restaurant-menu-system-page h2,
+  .restaurant-menu-system-page h3,
+  .restaurant-menu-system-page p,
+  .restaurant-menu-system-page span {
+    color: inherit !important;
+  }
+  
+  .android-tv-app-page h1,
+  .android-tv-app-page h2,
+  .android-tv-app-page h3,
+  .android-tv-app-page p,
+  .android-tv-app-page span {
+    color: inherit !important;
+  }
+  
+  .streaming-mobile-app-page h1,
+  .streaming-mobile-app-page h2,
+  .streaming-mobile-app-page h3,
+  .streaming-mobile-app-page p,
+  .streaming-mobile-app-page span {
+    color: inherit !important;
+  }
+  
+  .restaurant-website-page h1,
+  .restaurant-website-page h2,
+  .restaurant-website-page h3,
+  .restaurant-website-page p,
+  .restaurant-website-page span {
+    color: inherit !important;
+  }
+  
+  .order-menu-system-page h1,
+  .order-menu-system-page h2,
+  .order-menu-system-page h3,
+  .order-menu-system-page p,
+  .order-menu-system-page span {
+    color: inherit !important;
+  }
+</style>
+
+<Layout title={`${product.name} - DevExpress`} description={product.description}>
+    <!-- Immediate auth check script to prevent content flash -->
+    <script is:inline>
+      (function() {
+        // Hide content immediately - ALL products require authentication
+        const currentPath = window.location.pathname;
+        const productSlug = currentPath.split('/').pop();
+        
+        // ALL products require authentication - no exceptions
+        // Hide body content immediately to prevent flash - CRITICAL: Do this first
+        if (document.body) {
+          document.body.style.opacity = '0';
+          document.body.style.transition = 'opacity 0.3s ease-out';
+        }
+        
+        // Also hide html element to prevent any flash
+        if (document.documentElement) {
+          document.documentElement.style.opacity = '0';
+          document.documentElement.style.transition = 'opacity 0.3s ease-out';
+        }
+        
+        // Check auth status with retries
+        const checkAuth = () => {
+          const authManager = window.globalAuthManager || window.simpleAuthManager;
+          const sessionData = sessionStorage.getItem('simple-auth-session');
+          const hasValidSession = sessionData && sessionData !== 'null' && sessionData !== '{}';
+          
+          // Quick check: if we have session data, user might be logged in
+          // If no session data at all, redirect immediately without waiting
+          if (!sessionData || sessionData === 'null' || sessionData === '{}') {
+            // No session data - redirect immediately with smooth transition
+            if (document.body) {
+              document.body.style.transition = 'opacity 0.3s ease-out';
+              document.body.style.opacity = '0';
+            }
+            if (document.documentElement) {
+              document.documentElement.style.transition = 'opacity 0.3s ease-out';
+              document.documentElement.style.opacity = '0';
+            }
+            setTimeout(() => {
+              window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
+            }, 200);
+            return;
+          }
+          
+          // If auth manager not ready, retry (but limit retries to prevent long delays)
+          if (!authManager) {
+            // Only retry a few times, then redirect
+            if (typeof checkAuth.retryCount === 'undefined') {
+              checkAuth.retryCount = 0;
+            }
+            checkAuth.retryCount++;
+            
+            if (checkAuth.retryCount < 5) {
+              setTimeout(checkAuth, 50);
+            } else {
+              // Too many retries - redirect to login
+              if (document.body) {
+                document.body.style.transition = 'opacity 0.3s ease-out';
+                document.body.style.opacity = '0';
+              }
+              if (document.documentElement) {
+                document.documentElement.style.transition = 'opacity 0.3s ease-out';
+                document.documentElement.style.opacity = '0';
+              }
+              setTimeout(() => {
+                window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
+              }, 200);
+            }
+            return;
+          }
+          
+          const isLoggedIn = authManager.isUserLoggedIn() && hasValidSession;
+          
+          if (!isLoggedIn) {
+            // Redirect to login with smooth transition
+            if (document.body) {
+              document.body.style.transition = 'opacity 0.3s ease-out';
+              document.body.style.opacity = '0';
+            }
+            if (document.documentElement) {
+              document.documentElement.style.transition = 'opacity 0.3s ease-out';
+              document.documentElement.style.opacity = '0';
+            }
+            setTimeout(() => {
+              window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
+            }, 200);
+            return;
+          }
+          
+          // User is logged in - show content smoothly
+          if (document.body) {
+            document.body.style.transition = 'opacity 0.3s ease-in';
+            document.body.style.opacity = '1';
+          }
+          if (document.documentElement) {
+            document.documentElement.style.transition = 'opacity 0.3s ease-in';
+            document.documentElement.style.opacity = '1';
+          }
+        };
+        
+        // Start checking immediately
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', checkAuth);
+        } else {
+          checkAuth();
+        }
+        
+        // Also check when auth manager might be ready (with delays)
+        setTimeout(checkAuth, 50);
+        setTimeout(checkAuth, 150);
+      })();
+    </script>
+    
+    <!-- Full Page Gradient Background for Special Products -->
+    <div class={`${isRestaurantMenuSystem ? 'bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100 min-h-screen restaurant-menu-system-page' : ''} ${isAndroidTVApp ? 'bg-gradient-to-br from-purple-50 via-violet-50 to-purple-100 min-h-screen android-tv-app-page' : ''} ${isStreamingMobileApp ? 'bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100 min-h-screen streaming-mobile-app-page' : ''} ${isRestaurantWebsite ? 'bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-100 min-h-screen restaurant-website-page' : ''} ${isOrderMenuSystem ? 'bg-gradient-to-br from-amber-50 via-orange-50 to-red-100 min-h-screen order-menu-system-page' : ''}`} style="color: ${isRestaurantMenuSystem ? '#1e40af' : isAndroidTVApp ? '#7c3aed' : isStreamingMobileApp ? '#be185d' : isRestaurantWebsite ? '#065f46' : isOrderMenuSystem ? '#92400e' : 'inherit'};">
+  <!-- Hero Section -->
+  <section class={`bg-gradient-to-br ${isRestaurantMenuSystem ? restaurantMenuGradient : isAndroidTVApp ? androidTVGradient : isStreamingMobileApp ? streamingMobileGradient : isRestaurantWebsite ? restaurantWebsiteGradient : isOrderMenuSystem ? orderMenuSystemGradient : style.gradient} text-white py-20`}>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <div class="flex items-center space-x-2 mb-4">
+            <span class="text-2xl">{style.icon}</span>
+            <span class="text-lg opacity-90 capitalize">{product.category} Solution</span>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-bold mb-6">{product.name}</h1>
+          <p class="text-xl text-gray-100 mb-8">{product.description}</p>
+          <div class="flex items-center space-x-6">
+            <div class="text-center">
+              <div class="text-3xl font-bold">24hrs</div>
+              <div class="text-sm opacity-90">Delivery Time</div>
+            </div>
+            <div class="text-center">
+              <div class="text-3xl font-bold">100%</div>
+              <div class="text-sm opacity-90">Custom Built</div>
+            </div>
+            <div class="text-center">
+              <div class="text-3xl font-bold">30d</div>
+              <div class="text-sm opacity-90">Free Support</div>
+            </div>
+          </div>
+        </div>
+        <div class="relative">
+          <img src={product.featured_image} alt={product.name} class="rounded-lg shadow-2xl" />
+          <div class="absolute -bottom-6 -right-6 bg-white p-4 rounded-lg shadow-lg">
+            <div class="text-2xl font-bold text-gray-900">₹{product.base_price.toLocaleString()}</div>
+            <div class="text-sm text-gray-600">Starting Price</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class={`py-16 ${isRestaurantMenuSystem ? restaurantMenuBg : isAndroidTVApp ? androidTVBg : isStreamingMobileApp ? streamingMobileBg : isRestaurantWebsite ? restaurantWebsiteBg : isOrderMenuSystem ? orderMenuSystemBg : ''}`}>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class={`text-3xl font-bold text-center mb-12 ${isRestaurantMenuSystem ? 'text-blue-900' : isAndroidTVApp ? 'text-purple-900' : isStreamingMobileApp ? 'text-pink-800' : isRestaurantWebsite ? 'text-emerald-800' : isOrderMenuSystem ? 'text-amber-800' : 'text-gray-900'}`}>What's Included</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {product.features.map((feature, index) => (
+          <div class={`${isRestaurantMenuSystem ? 'bg-white/80 backdrop-blur-sm border border-blue-200' : isAndroidTVApp ? 'bg-white/80 backdrop-blur-sm border border-purple-200' : isStreamingMobileApp ? 'bg-white/80 backdrop-blur-sm border border-pink-200' : isRestaurantWebsite ? 'bg-white/80 backdrop-blur-sm border border-emerald-200' : isOrderMenuSystem ? 'bg-white/80 backdrop-blur-sm border border-amber-200' : style.bg} p-6 rounded-lg animate-fade-in shadow-lg`} style={`animation-delay: ${index * 0.1}s;`}>
+            <div class="flex items-center space-x-3">
+              <div class={`w-8 h-8 bg-gradient-to-r ${isRestaurantMenuSystem ? restaurantMenuGradient : isAndroidTVApp ? androidTVGradient : isStreamingMobileApp ? streamingMobileGradient : isRestaurantWebsite ? restaurantWebsiteGradient : isOrderMenuSystem ? orderMenuSystemGradient : style.gradient} rounded-full flex items-center justify-center`}>
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <span class={`font-medium ${isRestaurantMenuSystem ? 'text-blue-800' : isAndroidTVApp ? 'text-purple-800' : isStreamingMobileApp ? 'text-pink-800' : isRestaurantWebsite ? 'text-emerald-800' : isOrderMenuSystem ? 'text-amber-800' : style.text}`}>{feature}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Cuisine Type Section (Only for Restaurant Products) -->
+  {product.category === 'restaurant' && (
+    <section class={`py-16 ${isRestaurantMenuSystem ? 'bg-gradient-to-b from-blue-50 to-indigo-50' : ''}`}>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-bold text-gray-900 mb-4">Perfect for Any Cuisine</h2>
+          <p class="text-xl text-gray-600">Our restaurant solutions work beautifully for all types of cuisines</p>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div class={`${isRestaurantMenuSystem ? 'bg-white/80 backdrop-blur-sm border border-blue-200' : style.bg} p-4 rounded-lg text-center hover:shadow-md transition-shadow`}>
+            <div class="text-2xl mb-2">🍛</div>
+            <div class={`font-medium ${isRestaurantMenuSystem ? 'text-blue-800' : style.text} text-sm`}>Indian</div>
+          </div>
+          <div class={`${isRestaurantMenuSystem ? 'bg-white/80 backdrop-blur-sm border border-blue-200' : style.bg} p-4 rounded-lg text-center hover:shadow-md transition-shadow`}>
+            <div class="text-2xl mb-2">🥢</div>
+            <div class={`font-medium ${isRestaurantMenuSystem ? 'text-blue-800' : style.text} text-sm`}>Chinese</div>
+          </div>
+          <div class={`${isRestaurantMenuSystem ? 'bg-white/80 backdrop-blur-sm border border-blue-200' : style.bg} p-4 rounded-lg text-center hover:shadow-md transition-shadow`}>
+            <div class="text-2xl mb-2">🍝</div>
+            <div class={`font-medium ${isRestaurantMenuSystem ? 'text-blue-800' : style.text} text-sm`}>Italian</div>
+          </div>
+          <div class={`${isRestaurantMenuSystem ? 'bg-white/80 backdrop-blur-sm border border-blue-200' : style.bg} p-4 rounded-lg text-center hover:shadow-md transition-shadow`}>
+            <div class="text-2xl mb-2">🍣</div>
+            <div class={`font-medium ${isRestaurantMenuSystem ? 'text-blue-800' : style.text} text-sm`}>Japanese</div>
+          </div>
+          <div class={`${isRestaurantMenuSystem ? 'bg-white/80 backdrop-blur-sm border border-blue-200' : style.bg} p-4 rounded-lg text-center hover:shadow-md transition-shadow`}>
+            <div class="text-2xl mb-2">🌮</div>
+            <div class={`font-medium ${isRestaurantMenuSystem ? 'text-blue-800' : style.text} text-sm`}>Mexican</div>
+          </div>
+          <div class={`${isRestaurantMenuSystem ? 'bg-white/80 backdrop-blur-sm border border-blue-200' : style.bg} p-4 rounded-lg text-center hover:shadow-md transition-shadow`}>
+            <div class="text-2xl mb-2">🍕</div>
+            <div class={`font-medium ${isRestaurantMenuSystem ? 'text-blue-800' : style.text} text-sm`}>Pizza</div>
+          </div>
+        </div>
+        
+        <div class="mt-8 text-center">
+          <p class={`mb-4 ${isRestaurantMenuSystem ? 'text-gray-700' : 'text-gray-600'}`}>Don't see your cuisine type? No problem!</p>
+          <p class={`text-sm ${isRestaurantMenuSystem ? 'text-black font-medium' : 'text-white'}`}>We customize our solutions to perfectly match your restaurant's unique style and cuisine</p>
+        </div>
+      </div>
+    </section>
+  )}
+
+
+
+  <!-- Process Section -->
+  <section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class={`text-3xl font-bold mb-4 ${isRestaurantMenuSystem ? 'text-blue-900' : isAndroidTVApp ? 'text-purple-900' : isStreamingMobileApp ? 'text-pink-800' : isRestaurantWebsite ? 'text-emerald-800' : isOrderMenuSystem ? 'text-amber-800' : 'text-gray-900'}`}>Development Process</h2>
+        <p class={`text-xl ${isRestaurantMenuSystem ? 'text-blue-800' : isAndroidTVApp ? 'text-purple-800' : isStreamingMobileApp ? 'text-pink-700' : isRestaurantWebsite ? 'text-emerald-700' : isOrderMenuSystem ? 'text-amber-700' : 'text-gray-600'}`}>Here's how we deliver your {product.name.toLowerCase()} in 24 hours</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div class="text-center">
+          <div class={`w-16 h-16 bg-gradient-to-r ${isRestaurantMenuSystem ? restaurantMenuGradient : isAndroidTVApp ? androidTVGradient : isStreamingMobileApp ? streamingMobileGradient : isRestaurantWebsite ? restaurantWebsiteGradient : isOrderMenuSystem ? orderMenuSystemGradient : style.gradient} rounded-full flex items-center justify-center mx-auto mb-4`}>
+            <span class="text-white font-bold text-xl">1</span>
+          </div>
+          <h3 class={`text-lg font-semibold mb-2 ${isRestaurantMenuSystem ? 'text-blue-900' : isAndroidTVApp ? 'text-purple-900' : isStreamingMobileApp ? 'text-pink-800' : isRestaurantWebsite ? 'text-emerald-800' : isOrderMenuSystem ? 'text-amber-800' : 'text-gray-900'}`}>Requirements</h3>
+          <p class={`text-sm ${isRestaurantMenuSystem ? 'text-blue-800' : isAndroidTVApp ? 'text-purple-800' : isStreamingMobileApp ? 'text-pink-700' : isRestaurantWebsite ? 'text-emerald-700' : isOrderMenuSystem ? 'text-amber-700' : 'text-gray-600'}`}>You provide project details and requirements through our smart forms</p>
+        </div>
+
+        <div class="text-center">
+          <div class={`w-16 h-16 bg-gradient-to-r ${isRestaurantMenuSystem ? restaurantMenuGradient : isAndroidTVApp ? androidTVGradient : isStreamingMobileApp ? streamingMobileGradient : isRestaurantWebsite ? restaurantWebsiteGradient : isOrderMenuSystem ? orderMenuSystemGradient : style.gradient} rounded-full flex items-center justify-center mx-auto mb-4`}>
+            <span class="text-white font-bold text-xl">2</span>
+          </div>
+          <h3 class={`text-lg font-semibold mb-2 ${isRestaurantMenuSystem ? 'text-blue-900' : isAndroidTVApp ? 'text-purple-900' : isStreamingMobileApp ? 'text-pink-800' : isRestaurantWebsite ? 'text-emerald-800' : isOrderMenuSystem ? 'text-amber-800' : 'text-gray-900'}`}>Design</h3>
+          <p class={`text-sm ${isRestaurantMenuSystem ? 'text-blue-800' : isAndroidTVApp ? 'text-purple-800' : isStreamingMobileApp ? 'text-pink-700' : isRestaurantWebsite ? 'text-emerald-700' : isOrderMenuSystem ? 'text-amber-700' : 'text-gray-600'}`}>Our team creates custom designs based on your brand and preferences</p>
+        </div>
+
+        <div class="text-center">
+          <div class={`w-16 h-16 bg-gradient-to-r ${isRestaurantMenuSystem ? restaurantMenuGradient : isAndroidTVApp ? androidTVGradient : isStreamingMobileApp ? streamingMobileGradient : isRestaurantWebsite ? restaurantWebsiteGradient : isOrderMenuSystem ? orderMenuSystemGradient : style.gradient} rounded-full flex items-center justify-center mx-auto mb-4`}>
+            <span class="text-white font-bold text-xl">3</span>
+          </div>
+          <h3 class={`text-lg font-semibold mb-2 ${isRestaurantMenuSystem ? 'text-blue-900' : isAndroidTVApp ? 'text-purple-900' : isStreamingMobileApp ? 'text-pink-800' : isRestaurantWebsite ? 'text-emerald-800' : isOrderMenuSystem ? 'text-amber-800' : 'text-gray-900'}`}>Development</h3>
+          <p class={`text-sm ${isRestaurantMenuSystem ? 'text-blue-800' : isAndroidTVApp ? 'text-purple-800' : isStreamingMobileApp ? 'text-pink-700' : isRestaurantWebsite ? 'text-emerald-700' : isOrderMenuSystem ? 'text-amber-700' : 'text-gray-600'}`}>Rapid development using proven frameworks and best practices</p>
+        </div>
+
+        <div class="text-center">
+          <div class={`w-16 h-16 bg-gradient-to-r ${isRestaurantMenuSystem ? restaurantMenuGradient : isAndroidTVApp ? androidTVGradient : isStreamingMobileApp ? streamingMobileGradient : isRestaurantWebsite ? restaurantWebsiteGradient : isOrderMenuSystem ? orderMenuSystemGradient : style.gradient} rounded-full flex items-center justify-center mx-auto mb-4`}>
+            <span class="text-white font-bold text-xl">4</span>
+          </div>
+          <h3 class={`text-lg font-semibold mb-2 ${isRestaurantMenuSystem ? 'text-blue-900' : isAndroidTVApp ? 'text-purple-900' : isStreamingMobileApp ? 'text-pink-800' : isRestaurantWebsite ? 'text-emerald-800' : isOrderMenuSystem ? 'text-amber-800' : 'text-gray-900'}`}>Delivery</h3>
+          <p class={`text-sm ${isRestaurantMenuSystem ? 'text-blue-800' : isAndroidTVApp ? 'text-purple-800' : isStreamingMobileApp ? 'text-pink-700' : isRestaurantWebsite ? 'text-emerald-700' : isOrderMenuSystem ? 'text-amber-700' : 'text-gray-600'}`}>Complete solution delivered with documentation and support</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Single Price Section for Order Menu System -->
+  {product.slug === 'order-menu-system' && (
+    <section class="py-16">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h2 class="text-3xl font-bold text-amber-800 mb-8">Simple Pricing</h2>
+          <div class="bg-white/90 backdrop-blur-sm border border-amber-200 rounded-xl shadow-lg p-8 max-w-md mx-auto">
+            <div class="text-center">
+              <h3 class="text-2xl font-bold text-amber-800 mb-4">Order Menu System</h3>
+              <p class="text-amber-700 mb-6">Complete order management solution with all essential features</p>
+              <div class="text-4xl font-bold text-amber-600 mb-2">₹999</div>
+              <div class="text-sm text-amber-600 mb-8">One-time payment • Delivery in 1 day</div>
+              
+              <ul class="space-y-3 mb-8 text-left">
+                <li class="flex items-center">
+                  <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span class="text-gray-700">All essential OMS features</span>
+                </li>
+                <li class="flex items-center">
+                  <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span class="text-gray-700">Digital menu integration</span>
+                </li>
+                <li class="flex items-center">
+                  <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span class="text-gray-700">Real-time order tracking</span>
+                </li>
+                <li class="flex items-center">
+                  <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span class="text-gray-700">Payment processing</span>
+                </li>
+                <li class="flex items-center">
+                  <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span class="text-gray-700">Analytics dashboard</span>
+                </li>
+              </ul>
+              
+              <button 
+                onclick={`redirectToCart('${product.id}', 999)`}
+                class="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 px-6 rounded-lg font-medium transition-colors"
+              >
+                Get Started - ₹999
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Product Plans Section (Hidden for Order Menu System) -->
+  {product.slug !== 'order-menu-system' && (
+    <section class="py-16">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class={`text-3xl font-bold text-center mb-12 ${isRestaurantMenuSystem ? 'text-blue-900' : isAndroidTVApp ? 'text-purple-900' : isStreamingMobileApp ? 'text-pink-800' : isRestaurantWebsite ? 'text-emerald-800' : 'text-gray-900'}`}>Choose Your Plan</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {productPlans.map((plan) => (
+            <div class={`${isRestaurantMenuSystem ? 'bg-white/90 backdrop-blur-sm border border-blue-200' : isAndroidTVApp ? 'bg-white/90 backdrop-blur-sm border border-purple-200' : isStreamingMobileApp ? 'bg-white/90 backdrop-blur-sm border border-pink-200' : isRestaurantWebsite ? 'bg-white/90 backdrop-blur-sm border border-emerald-200' : 'bg-white'} rounded-xl shadow-lg p-8 ${plan.is_popular ? 'ring-2 ring-primary-500 relative' : ''}`}>
+              {plan.is_popular && (
+                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <span class="bg-primary-500 text-white px-4 py-2 rounded-full text-sm font-medium">Most Popular</span>
+                </div>
+              )}
+              
+              <div class="text-center mb-6">
+                <h3 class={`text-xl font-bold mb-2 ${isRestaurantMenuSystem ? 'text-blue-900' : isAndroidTVApp ? 'text-purple-900' : isStreamingMobileApp ? 'text-pink-800' : isRestaurantWebsite ? 'text-emerald-800' : 'text-gray-900'}`}>{plan.name}</h3>
+                <p class={`text-sm mb-4 ${isRestaurantMenuSystem ? 'text-blue-800' : isAndroidTVApp ? 'text-purple-800' : isStreamingMobileApp ? 'text-pink-700' : isRestaurantWebsite ? 'text-emerald-700' : 'text-gray-600'}`}>{plan.description}</p>
+                <div class="text-3xl font-bold text-primary-600">₹{plan.price.toLocaleString()}</div>
+                <div class={`text-sm ${isRestaurantMenuSystem ? 'text-blue-700' : isAndroidTVApp ? 'text-purple-700' : isStreamingMobileApp ? 'text-pink-700' : isRestaurantWebsite ? 'text-emerald-700' : 'text-gray-500'}`}>Delivery in {plan.delivery_days} day{plan.delivery_days > 1 ? 's' : ''}</div>
+              </div>
+              
+              <ul class="space-y-3 mb-8">
+                {plan.features.map((feature) => (
+                  <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-gray-700">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              
+              <button 
+                onclick={`redirectToCart('${product.id}', ${plan.price})`}
+                class={`w-full py-3 px-6 rounded-lg font-medium transition-all ${
+                  plan.is_popular 
+                    ? 'bg-primary-600 hover:bg-primary-700 text-white' 
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+                }`}
+              >
+                Choose {plan.name}
+              </button>
+              <p class="text-xs text-gray-500 mt-2 text-center">
+                <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+                Login required to select
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- FAQ Section -->
+  <section class={`py-16 ${isStreamingMobileApp ? streamingMobileBg : isRestaurantWebsite ? restaurantWebsiteBg : isOrderMenuSystem ? orderMenuSystemBg : ''}`}>
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class={`text-3xl font-bold text-center mb-12 ${isStreamingMobileApp ? 'text-pink-800' : isRestaurantWebsite ? 'text-emerald-800' : isOrderMenuSystem ? 'text-amber-800' : 'text-gray-900'}`}>Frequently Asked Questions</h2>
+      
+      <div class="space-y-6">
+        <div class="bg-white rounded-lg shadow-sm">
+          <button class="faq-button w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 transition-colors">
+            <span class="font-semibold text-gray-900">How can you deliver in just 24 hours?</span>
+            <svg class="w-5 h-5 text-gray-500 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="faq-content hidden px-6 pb-4">
+            <p class="text-gray-600">We use proven templates, pre-built components, and streamlined development processes. Our experienced team works around the clock to ensure rapid delivery without compromising quality.</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm">
+          <button class="faq-button w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 transition-colors">
+            <span class="font-semibold text-gray-900">What if I need revisions?</span>
+            <svg class="w-5 h-5 text-gray-500 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="faq-content hidden px-6 pb-4">
+            <p class="text-gray-600">All plans include 30 days of free support and minor revisions. Major changes can be handled through our revision packages at affordable rates.</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm">
+          <button class="faq-button w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 transition-colors">
+            <span class="font-semibold text-gray-900">Do you provide source code?</span>
+            <svg class="w-5 h-5 text-gray-500 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="faq-content hidden px-6 pb-4">
+            <p class="text-gray-600">Yes, you receive complete source code, documentation, and deployment instructions. You own the code and can modify it as needed.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class={`py-16 bg-gradient-to-r ${isStreamingMobileApp ? streamingMobileBottomGradient : isRestaurantWebsite ? restaurantWebsiteBottomGradient : isOrderMenuSystem ? orderMenuSystemBottomGradient : style.gradient} text-white`}>
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold mb-4">Ready to Get Started?</h2>
+      <p class="text-xl mb-8 opacity-90">
+        Join hundreds of satisfied clients who got their {product.name.toLowerCase()} delivered in just 24 hours.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <button 
+          id="add-to-cart-btn"
+          onclick={`redirectToCart('${product.id}', '${isOrderMenuSystem ? 999 : productPlans[0]?.price}')`}
+          class="bg-white text-gray-900 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-colors"
+        >
+          Add to Cart - ₹{isOrderMenuSystem ? '999' : productPlans[0]?.price.toLocaleString()}
+        </button>
+        <p class="text-xs text-white/70 mt-2 text-center">
+          <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+          Login required to add to cart
+        </p>
+        <a href={`/contact?product=${encodeURIComponent(product.name)}&project_type=${product.category}&project_details=${encodeURIComponent(`I'm interested in the ${product.name}. ${product.description}`)}&price=${isOrderMenuSystem ? 999 : productPlans[0]?.price || product.base_price}`} class="contact-us-btn border-2 border-white text-white hover:bg-white hover:text-black px-8 py-3 rounded-lg font-semibold transition-all">
+          Contact Us
+        </a>
+      </div>
+      
+      <!-- Login Prompt for Unauthenticated Users -->
+      <div id="login-prompt" class="hidden mt-6 p-4 bg-white bg-opacity-20 rounded-lg">
+        <p class="text-white mb-3">Please sign in to add items to your cart</p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <a href="/login?redirect=/products/${product.slug}" class="bg-white text-gray-900 hover:bg-gray-100 px-6 py-2 rounded-lg font-medium transition-colors">
+            Sign In
+          </a>
+          <a href="/signup?redirect=/products/${product.slug}" class="border border-white text-white hover:bg-white hover:text-black px-6 py-2 rounded-lg font-medium transition-all" style="color: white !important;" onmouseover="this.style.color='black'" onmouseout="this.style.color='white'">
+            Create Account
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+  </div> <!-- End of full page gradient background -->
+</Layout>
+
+<script>
+  // Declare global types
+  declare global {
+    interface Window {
+      addToCart: (productId: string, planId: string, planName: string) => Promise<void>;
+    }
+  }
+
+  // FAQ functionality
+  document.querySelectorAll('.faq-button').forEach(button => {
+    button.addEventListener('click', () => {
+      const content = button.nextElementSibling;
+      const icon = button.querySelector('svg');
+      
+      content.classList.toggle('hidden');
+      icon.classList.toggle('rotate-180');
+    });
+  });
+
+  // Redirect to cart functionality
+  window.redirectToCart = function(productId: string, price: number) {
+    console.log('🛒 redirectToCart called with:', { productId, price });
+    
+    // Check authentication using multiple methods for reliability
+    const authManager = window.globalAuthManager || window.simpleAuthManager;
+    const sessionData = sessionStorage.getItem('simple-auth-session');
+    const hasValidSession = sessionData && sessionData !== 'null' && sessionData !== '{}';
+    
+    // Check if user is authenticated using auth manager
+    const isLoggedInViaManager = authManager && authManager.isUserLoggedIn();
+    
+    // Check if user is authenticated via session storage
+    let isLoggedInViaSession = false;
+    if (hasValidSession) {
+      try {
+        const session = JSON.parse(sessionData);
+        isLoggedInViaSession = session && session.user && session.access_token;
+      } catch (e) {
+        console.log('Session parse error:', e);
+      }
+    }
+    
+    const isAuthenticated = isLoggedInViaManager || isLoggedInViaSession;
+    
+    console.log('🔍 Auth check:', {
+      authManager: !!authManager,
+      isLoggedInViaManager,
+      hasValidSession,
+      isLoggedInViaSession,
+      isAuthenticated
+    });
+    
+    if (isAuthenticated) {
+      // User is authenticated, redirect to dashboard with product info
+      console.log('✅ User authenticated, redirecting to dashboard');
+      const dashboardUrl = `/dashboard?product=${productId}&price=${price}`;
+      console.log('🔗 Redirecting to:', dashboardUrl);
+      window.location.href = dashboardUrl;
+    } else {
+      // User is not authenticated, redirect to login with return URL
+      console.log('❌ User not authenticated, redirecting to login');
+      const loginUrl = `/login?redirect=/dashboard?product=${productId}&price=${price}`;
+      console.log('🔗 Redirecting to:', loginUrl);
+      window.location.href = loginUrl;
+    }
+  };
+
+  // Check authentication status on page load
+  function checkAuthenticationStatus() {
+    console.log('Checking authentication status...');
+    
+    // Wait for global auth manager to be ready
+    const checkAuth = () => {
+      const authManager = window.globalAuthManager || window.simpleAuthManager;
+      
+      if (authManager) {
+        console.log('✅ Auth manager found, checking status...');
+        
+        if (authManager.isUserLoggedIn()) {
+          console.log('✅ User is authenticated, hiding login prompt');
+          
+          // User is authenticated, hide login prompt
+          const loginPrompt = document.getElementById('login-prompt');
+          if (loginPrompt) {
+            loginPrompt.classList.add('hidden');
+            console.log('Login prompt hidden');
+          }
+          
+          // Show authenticated user options
+          const addToCartBtn = document.getElementById('add-to-cart-btn');
+          if (addToCartBtn) {
+            addToCartBtn.classList.remove('hidden');
+            console.log('Add to cart button shown');
+          }
+        } else {
+          console.log('❌ User is not authenticated, showing login prompt');
+          
+          // User is not authenticated, show login prompt
+          const loginPrompt = document.getElementById('login-prompt');
+          if (loginPrompt) {
+            loginPrompt.classList.remove('hidden');
+            console.log('Login prompt shown');
+          }
+          
+          // Hide authenticated user options
+          const addToCartBtn = document.getElementById('add-to-cart-btn');
+          if (addToCartBtn) {
+            addToCartBtn.classList.add('hidden');
+            console.log('Add to cart button hidden');
+          }
+        }
+      } else {
+        // Auth manager not ready yet, retry after a short delay
+        console.log('⏳ Auth manager not ready, retrying...');
+        setTimeout(checkAuth, 100);
+      }
+    };
+    
+    checkAuth();
+  }
+
+  // Check authentication when page loads
+  document.addEventListener('DOMContentLoaded', checkAuthenticationStatus);
+
+  // Role-based access control for product pages
+  // This runs after the inline script, so we check if user is logged in
+  // IMPORTANT: ALL products require authentication - no exceptions
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get current product slug from URL
+    const currentPath = window.location.pathname;
+    const productSlug = currentPath.split('/').pop();
+    
+    console.log('Product page loaded:', productSlug);
+    
+    // ALL products require authentication - no bypasses
+    // Check if we're still on this page (not redirected)
+    if (window.location.pathname !== currentPath) {
+      return; // Already redirected
+    }
+    
+    // Check authentication and admin status (for all products)
+    const authManager = window.globalAuthManager || window.simpleAuthManager;
+    const sessionData = sessionStorage.getItem('simple-auth-session');
+    const hasValidSession = sessionData && sessionData !== 'null' && sessionData !== '{}';
+    
+    const isLoggedIn = authManager && authManager.isUserLoggedIn() && hasValidSession;
+    
+    if (!isLoggedIn) {
+      // User not logged in - redirect to login immediately
+      // This is a critical security check - no product access without login
+      console.log('❌ User not logged in - redirecting to login (authentication required)');
+      const loginUrl = `/login?redirect=${encodeURIComponent(currentPath)}`;
+      
+      // Smooth fade-out transition
+      if (document.body) {
+        document.body.style.transition = 'opacity 0.3s ease-out';
+        document.body.style.opacity = '0';
+      }
+      if (document.documentElement) {
+        document.documentElement.style.transition = 'opacity 0.3s ease-out';
+        document.documentElement.style.opacity = '0';
+      }
+      
+      setTimeout(() => {
+        window.location.href = loginUrl;
+      }, 200);
+      return;
+    }
+    
+    // User is logged in - check admin status
+    const isAdmin = checkIfUserIsAdmin();
+    console.log('Is admin:', isAdmin);
+    
+    if (!isAdmin) {
+      // Logged in but not admin - show dialog or redirect
+      console.log('Non-admin user - showing dialog');
+      // Show content for non-admin users (they'll see the dialog)
+      if (document.body) {
+        document.body.style.opacity = '1';
+      }
+      if (window.showProductDialog) {
+        window.showProductDialog();
+      } else {
+        console.log('Dialog not available - redirecting to contact');
+        window.location.href = '/contact';
+      }
+    } else {
+      // Admin user - show content without restrictions
+      console.log('Admin user - no restrictions');
+      if (document.body) {
+        document.body.style.opacity = '1';
+      }
+    }
+  });
+
+  // Function to check if user is admin - deployment compatible
+  function checkIfUserIsAdmin() {
+    try {
+      // Check global auth manager first
+      if (window.globalAuthManager && window.globalAuthManager.isUserLoggedIn()) {
+        const currentUser = window.globalAuthManager.getCurrentUser();
+        if (currentUser && currentUser.role === 'admin') {
+          return true;
+        }
+      }
+      
+      // Check simple auth manager
+      if (window.simpleAuthManager && window.simpleAuthManager.isUserLoggedIn()) {
+        const currentUser = window.simpleAuthManager.getCurrentUser();
+        if (currentUser && currentUser.role === 'admin') {
+          return true;
+        }
+      }
+      
+      // Check session storage for admin role
+      const sessionData = sessionStorage.getItem('simple-auth-session');
+      if (sessionData) {
+        try {
+          const session = JSON.parse(sessionData);
+          if (session.user && session.user.role === 'admin') {
+            return true;
+          }
+        } catch (parseError) {
+          console.log('Session data parse error:', parseError);
+        }
+      }
+      
+      // Check localStorage as fallback
+      const localSessionData = localStorage.getItem('simple-auth-session');
+      if (localSessionData) {
+        try {
+          const session = JSON.parse(localSessionData);
+          if (session.user && session.user.role === 'admin') {
+            return true;
+          }
+        } catch (parseError) {
+          console.log('Local session data parse error:', parseError);
+        }
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      return false;
+    }
+  }
+
+  // Listen for authentication state changes
+  window.addEventListener('user-logged-in', (e) => {
+    console.log('✅ User logged in event received, updating UI...');
+    checkAuthenticationStatus();
+  });
+
+  window.addEventListener('user-logged-out', () => {
+    console.log('❌ User logged out event received, updating UI...');
+    checkAuthenticationStatus();
+  });
+
+  // Animation on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate-fade-in');
+      }
+    });
+  });
+
+  document.querySelectorAll('.animate-fade-in').forEach(el => {
+    observer.observe(el);
+  });
+
+  // Ensure Contact Us button text visibility
+  document.addEventListener('DOMContentLoaded', () => {
+    const contactButtons = document.querySelectorAll('.contact-us-btn');
+    contactButtons.forEach(button => {
+      button.addEventListener('mouseenter', function() {
+        this.style.color = '#000000';
+        this.style.backgroundColor = 'white';
+      });
+      button.addEventListener('mouseleave', function() {
+        this.style.color = 'white';
+        this.style.backgroundColor = 'transparent';
+      });
+    });
+  });
+</script>
+
+<style>
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .rotate-180 {
+    transform: rotate(180deg);
+  }
+
+  /* Contact Us button text visibility - More specific selectors */
+  a.contact-us-btn {
+    color: white !important;
+  }
+  
+  a.contact-us-btn:hover {
+    color: #000000 !important; /* Black text on white background */
+    background-color: white !important;
+  }
+  
+  a.contact-us-btn:focus {
+    color: #000000 !important; /* Black text on focus */
+    background-color: white !important;
+  }
+  
+  /* Additional specificity for hover state */
+  .contact-us-btn:hover span,
+  .contact-us-btn:hover {
+    color: #000000 !important;
+  }
+</style>
