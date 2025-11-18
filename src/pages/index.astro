@@ -1,51 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { getProducts } from '../lib/products-data';
-
-let products = [];
-try {
-  products = await getProducts();
-} catch (error) {
-  console.error('Error loading products:', error);
-  products = [];
-}
 ---
 
 <Layout title="DevExpress - 24 Hour Development Company">
-  <!-- Ultra-Fast Loading Styles -->
-  <style>
-    /* Minimal product card hover - maximum speed */
-    .product-card:hover {
-      transform: translateY(-1px);
-    }
-    
-    /* Force immediate rendering - no delays */
-    .product-card {
-      opacity: 1 !important;
-      transform: none !important;
-      will-change: auto !important;
-    }
-    
-    /* Optimize images for fast loading */
-    .product-card img {
-      will-change: auto !important;
-      transform: translateZ(0) !important;
-      background-color: #f3f4f6;
-      min-height: 192px;
-    }
-    
-    /* Image loading state */
-    .product-card img:not([src]) {
-      background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
-      background-size: 200% 100%;
-      animation: loading 1.5s infinite;
-    }
-    
-    @keyframes loading {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-  </style>
   
   <!-- Full Page White Background -->
   <div class="min-h-screen bg-white">
@@ -100,47 +57,6 @@ try {
           <div class="text-4xl font-bold text-primary-600 mb-2">24/7</div>
           <div class="text-black font-medium">Support Available</div>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Products Section -->
-  <section class="py-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-16">
-        <h2 class="text-3xl md:text-4xl font-bold text-black mb-4">Our Products</h2>
-        <p class="text-xl text-black font-medium max-w-3xl mx-auto">
-          Choose from our range of professional digital solutions, all delivered within 24 hours
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        {products.map((product, index) => (
-          <div class="product-card bg-white rounded-xl shadow-lg">
-            <div class="relative rounded-t-xl overflow-hidden" style="height: 192px;">
-              <img 
-                src={product.featured_image} 
-                alt={product.name} 
-                class="w-full h-full object-cover" 
-                loading="eager" 
-                decoding="async"
-                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDMwMCAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMTkyIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xNTAgODBMMTgwIDExMEgxMjBMMTUwIDgwWiIgZmlsbD0iIzlDQTNBRiIvPgo8Y2lyY2xlIGN4PSIxNTAiIGN5PSIxMjAiIHI9IjEwIiBmaWxsPSIjOUNBM0FGIi8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTUwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNkI3MjgwIj5JbWFnZSBVbmF2YWlsYWJsZTwvdGV4dD4KPC9zdmc+Cg=='"
-              />
-            </div>
-            <div class="p-6">
-              <h3 class="text-xl font-semibold text-black mb-2">{product.name}</h3>
-              <p class="text-black font-medium mb-4 text-sm">{product.short_description}</p>
-              <div class="flex items-center justify-between">
-                <span class="text-2xl font-bold text-primary-600">
-                  ₹{product.base_price.toLocaleString()}
-                </span>
-                <a href={`/products/${product.slug}`} class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
-                  View Details
-                </a>
-              </div>
-            </div>
-          </div>
-        ))}
       </div>
     </div>
   </section>
@@ -389,15 +305,5 @@ try {
       });
     });
     
-    // Handle image loading errors
-    document.querySelectorAll('.product-card img').forEach(img => {
-      img.addEventListener('error', function() {
-        this.style.backgroundColor = '#f3f4f6';
-        this.style.display = 'flex';
-        this.style.alignItems = 'center';
-        this.style.justifyContent = 'center';
-        this.innerHTML = '<div style="text-align: center; color: #6b7280; font-size: 12px;">Image Unavailable</div>';
-      });
-    });
   });
 </script>

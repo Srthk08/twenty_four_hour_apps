@@ -90,17 +90,7 @@ import AuthGuard from '../components/AuthGuard.astro';
                     <option value="+33">🇫🇷 +33</option>
                     <option value="+971">🇦🇪 +971</option>
                     <option value="+966">🇸🇦 +966</option>
-                    <option value="other">Other</option>
                   </select>
-                  <input
-                    type="text"
-                    id="country_code_custom"
-                    name="country_code_custom"
-                    class="hidden px-3 py-2 sm:py-2.5 border border-r-0 border-gray-300 rounded-none shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm sm:text-base bg-gray-50"
-                    placeholder="+XXX"
-                    maxlength="5"
-                    pattern="\+[0-9]{1,4}"
-                  />
                   <input
                     type="tel"
                     id="phone"
@@ -359,27 +349,82 @@ import AuthGuard from '../components/AuthGuard.astro';
       
       // Parse phone number to extract country code and number
       if (phoneInput && userData.phone) {
-        const phoneValue = userData.phone.toString();
+        const phoneValue = userData.phone.toString().trim();
+        const countryCodeSelect = document.getElementById('country_code') as HTMLSelectElement;
+        
+        // List of known country codes from longest to shortest (to avoid partial matches)
+        const knownCountryCodes = ['+971', '+966', '+91', '+86', '+81', '+61', '+49', '+44', '+33', '+1'];
+        
         // Check if phone starts with country code
-        if (phoneValue.startsWith('+91')) {
-          const countryCodeSelect = document.getElementById('country_code') as HTMLSelectElement;
+        if (phoneValue.startsWith('+')) {
+          let foundMatch = false;
+          let extractedCountryCode = '';
+          let phoneNumber = '';
+          
           if (countryCodeSelect) {
-            countryCodeSelect.value = '+91';
-          }
-          phoneInput.value = phoneValue.substring(3).replace(/\D/g, '');
-        } else if (phoneValue.startsWith('+')) {
-          // Extract country code (first 1-4 digits after +)
-          const match = phoneValue.match(/^(\+\d{1,4})(\d+)$/);
-          if (match) {
-            const countryCodeSelect = document.getElementById('country_code') as HTMLSelectElement;
-            if (countryCodeSelect) {
-              countryCodeSelect.value = match[1];
+            // Get all available country code options from dropdown (longest first)
+            const availableCodes = Array.from(countryCodeSelect.options)
+              .map(opt => opt.value)
+              .sort((a, b) => b.length - a.length);
+            
+            // Try to match country code from dropdown options
+            for (const code of availableCodes) {
+              if (phoneValue.startsWith(code)) {
+                extractedCountryCode = code;
+                phoneNumber = phoneValue.substring(code.length);
+                foundMatch = true;
+                break;
+              }
             }
-            phoneInput.value = match[2];
+          }
+          
+          // If no match from dropdown, try known codes
+          if (!foundMatch) {
+            for (const code of knownCountryCodes) {
+              if (phoneValue.startsWith(code)) {
+                extractedCountryCode = code;
+                phoneNumber = phoneValue.substring(code.length);
+                foundMatch = true;
+                break;
+              }
+            }
+          }
+          
+          // Last resort: basic extraction if nothing matched
+          if (!foundMatch) {
+            const basicMatch = phoneValue.match(/^(\+\d{1,4})(\d+)$/);
+            if (basicMatch) {
+              extractedCountryCode = basicMatch[1];
+              phoneNumber = basicMatch[2];
+              foundMatch = true;
+            }
+          }
+          
+          if (foundMatch && extractedCountryCode && phoneNumber) {
+            // Check if the country code exists in the dropdown options
+            if (countryCodeSelect) {
+              const optionExists = Array.from(countryCodeSelect.options).some(
+                option => option.value === extractedCountryCode
+              );
+              
+              if (optionExists) {
+                // Country code exists in dropdown, select it
+                countryCodeSelect.value = extractedCountryCode;
+              } else {
+                // Country code doesn't exist in dropdown, default to +91
+                countryCodeSelect.value = '+91';
+              }
+            }
+            
+            // Set phone number - preserve all digits, only remove non-digits
+            phoneInput.value = phoneNumber.replace(/\D/g, '');
           } else {
+            // Could not parse properly, set as-is but try to extract digits
+            console.warn('Could not parse phone number:', phoneValue);
             phoneInput.value = phoneValue.replace(/\D/g, '');
           }
         } else {
+          // No country code prefix, just set the phone number (digits only)
           phoneInput.value = phoneValue.replace(/\D/g, '');
         }
       }
@@ -466,48 +511,14 @@ import AuthGuard from '../components/AuthGuard.astro';
   // Phone number validation based on country code
   function setupPhoneValidation() {
     const countryCodeSelect = document.getElementById('country_code') as HTMLSelectElement;
-    const countryCodeCustom = document.getElementById('country_code_custom') as HTMLInputElement;
     const phoneInput = document.getElementById('phone') as HTMLInputElement;
     const phoneError = document.getElementById('phone-error') as HTMLElement;
 
     if (!countryCodeSelect || !phoneInput) return;
 
-    // Function to get the actual country code (from select or custom input)
+    // Function to get the country code from select
     function getCountryCode(): string {
-      if (countryCodeSelect.value === 'other' && countryCodeCustom) {
-        return countryCodeCustom.value.trim() || '+91';
-      }
       return countryCodeSelect.value;
-    }
-
-    // Show/hide custom country code input
-    function toggleCustomCountryCode() {
-      if (countryCodeSelect.value === 'other') {
-        if (countryCodeCustom) {
-          countryCodeCustom.classList.remove('hidden');
-          countryCodeCustom.required = true;
-          countryCodeCustom.value = '+';
-        }
-      } else {
-        if (countryCodeCustom) {
-          countryCodeCustom.classList.add('hidden');
-          countryCodeCustom.required = false;
-          countryCodeCustom.value = '';
-        }
-      }
-    }
-
-    // Handle custom country code input - ensure it starts with +
-    if (countryCodeCustom) {
-      countryCodeCustom.addEventListener('input', function(e) {
-        let value = (e.target as HTMLInputElement).value;
-        if (!value.startsWith('+')) {
-          value = '+' + value.replace(/\+/g, '');
-        }
-        // Only allow + and numbers
-        value = value.replace(/[^+0-9]/g, '');
-        (e.target as HTMLInputElement).value = value;
-      });
     }
 
     // Country code to max digits mapping
@@ -527,7 +538,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     function validatePhone() {
       const countryCode = getCountryCode();
       const phone = phoneInput.value.replace(/\D/g, ''); // Remove non-digits
-      const maxDigits = countryCodeLimits[countryCode] || 15; // Default to 15 for custom codes
+      const maxDigits = countryCodeLimits[countryCode] || 10;
 
       // Update maxlength based on country code
       phoneInput.maxLength = maxDigits;
@@ -546,15 +557,10 @@ import AuthGuard from '../components/AuthGuard.astro';
           return true;
         }
       } else {
-        // For other countries, validate based on their max digits
-        if (phone.length > 0 && phone.length < 5) {
+        // For other countries, validate exact digit count
+        if (phone.length > 0 && phone.length !== maxDigits) {
           phoneError?.classList.remove('hidden');
-          phoneError.textContent = 'Please enter a valid phone number (at least 5 digits)';
-          phoneInput.classList.add('border-red-500');
-          return false;
-        } else if (phone.length > 0 && phone.length > maxDigits) {
-          phoneError?.classList.remove('hidden');
-          phoneError.textContent = `Please enter a valid phone number (max ${maxDigits} digits)`;
+          phoneError.textContent = `Please enter a valid ${maxDigits}-digit phone number`;
           phoneInput.classList.add('border-red-500');
           return false;
         } else {
@@ -565,32 +571,41 @@ import AuthGuard from '../components/AuthGuard.astro';
       }
     }
 
-    // Restrict input to numbers only
+    // Restrict input to numbers only - but don't change existing values automatically
+    let isUserTyping = false;
+    phoneInput.addEventListener('focus', function() {
+      isUserTyping = true;
+    });
+    phoneInput.addEventListener('blur', function() {
+      isUserTyping = false;
+    });
+    
     phoneInput.addEventListener('input', function(e) {
-      const value = (e.target as HTMLInputElement).value.replace(/\D/g, '');
-      const countryCode = getCountryCode();
-      const maxDigits = countryCodeLimits[countryCode] || 15;
-      (e.target as HTMLInputElement).value = value.slice(0, maxDigits);
-      validatePhone();
+      // Only restrict/format if user is actively typing, not when form is being populated
+      if (isUserTyping) {
+        // Strip all non-digits to ensure only numbers are entered
+        const value = (e.target as HTMLInputElement).value.replace(/\D/g, '');
+        const countryCode = getCountryCode();
+        const maxDigits = countryCodeLimits[countryCode] || 10;
+        
+        (e.target as HTMLInputElement).value = value.slice(0, maxDigits);
+        validatePhone();
+      }
     });
 
     // Validate on country code change
     countryCodeSelect.addEventListener('change', function() {
-      toggleCustomCountryCode();
-      phoneInput.value = '';
+      // Clear phone input when country code changes
+      if (isUserTyping || phoneInput === document.activeElement) {
+        phoneInput.value = '';
+      }
       const countryCode = getCountryCode();
       phoneInput.placeholder = countryCode === '+91' ? '9876543210' : 'Enter phone number';
       validatePhone();
     });
 
-    // Initialize custom country code visibility
-    toggleCustomCountryCode();
-
     // Validate on blur
     phoneInput.addEventListener('blur', validatePhone);
-    if (countryCodeCustom) {
-      countryCodeCustom.addEventListener('blur', validatePhone);
-    }
   }
 
   // Handle form submission - PERMANENT UPDATE TO SUPABASE
@@ -600,12 +615,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     
     const formData = new FormData(profileForm);
     const fullName = formData.get('full_name') as string;
-    let countryCode = formData.get('country_code') as string;
-    // Use custom country code if "other" is selected
-    if (countryCode === 'other') {
-      const customCode = formData.get('country_code_custom') as string;
-      countryCode = customCode?.trim() || '+91';
-    }
+    const countryCode = formData.get('country_code') as string || '+91';
     const phone = formData.get('phone') as string;
     const companyName = formData.get('company_name') as string;
 
@@ -676,26 +686,56 @@ import AuthGuard from '../components/AuthGuard.astro';
             console.log('✅ Profile updated in sessionStorage (instant)');
           }
         }
+        
+        // Also update localStorage for persistence
+        const userData = {
+          ...currentUser,
+          full_name: fullName.trim(),
+          phone: formattedPhone || undefined,
+          company_name: companyName.trim() || undefined
+        };
+        localStorage.setItem('simple-auth-user', JSON.stringify(userData));
+        console.log('✅ Profile updated in localStorage (instant)');
       } catch (localError) {
         console.warn('⚠️ SessionStorage update warning (non-critical):', localError);
       }
 
       // Update auth manager local state (synchronous, no database call)
-      if (authManager && typeof authManager.updateProfile === 'function') {
-        try {
-          // Check if updateProfile is async - if so, don't await it
-          const profileUpdate = authManager.updateProfile({
+      if (authManager) {
+        // Update the auth manager's current user data directly
+        if (authManager.currentUser) {
+          authManager.currentUser.full_name = fullName.trim();
+          authManager.currentUser.phone = formattedPhone || undefined;
+          authManager.currentUser.company_name = companyName.trim() || undefined;
+          console.log('✅ Auth manager currentUser updated');
+        }
+        
+        // Also trigger handleLogin to refresh the auth manager state
+        if (typeof authManager.handleLogin === 'function') {
+          const updatedUser = {
+            ...currentUser,
             full_name: fullName.trim(),
             phone: formattedPhone || undefined,
             company_name: companyName.trim() || undefined
-          });
-          // If it returns a promise, handle it in background
-          if (profileUpdate && typeof profileUpdate.then === 'function') {
-            profileUpdate.catch(err => console.warn('Background profile update warning:', err));
+          };
+          authManager.handleLogin(updatedUser);
+          console.log('✅ Auth manager state refreshed via handleLogin');
+        } else if (typeof authManager.updateProfile === 'function') {
+          try {
+            // Check if updateProfile is async - if so, don't await it
+            const profileUpdate = authManager.updateProfile({
+              full_name: fullName.trim(),
+              phone: formattedPhone || undefined,
+              company_name: companyName.trim() || undefined
+            });
+            // If it returns a promise, handle it in background
+            if (profileUpdate && typeof profileUpdate.then === 'function') {
+              profileUpdate.catch(err => console.warn('Background profile update warning:', err));
+            }
+            console.log('✅ Profile updated in auth manager (instant)');
+          } catch (localError) {
+            console.warn('⚠️ Auth manager update warning (non-critical):', localError);
           }
-          console.log('✅ Profile updated in auth manager (instant)');
-        } catch (localError) {
-          console.warn('⚠️ Auth manager update warning (non-critical):', localError);
         }
       }
 

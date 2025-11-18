@@ -293,6 +293,14 @@ const processedProducts = products
   document.addEventListener('DOMContentLoaded', function() {
     const productButtons = document.querySelectorAll('.product-view-btn');
     
+    // List of blocked/disabled products that show dialog instead of login
+    const blockedProducts = [
+      'restaurant-menu-system',
+      'android-tv-app',
+      'streaming-mobile-app',
+      'restaurant-website'
+    ];
+    
     productButtons.forEach(button => {
       button.addEventListener('click', function(e) {
         e.preventDefault();
@@ -301,6 +309,20 @@ const processedProducts = products
         const productName = this.getAttribute('data-product-name');
         
         console.log('Product clicked:', productSlug);
+        
+        // FIRST: Check if product is blocked/disabled - show dialog immediately without login
+        const isBlockedProduct = blockedProducts.includes(productSlug);
+        
+        if (isBlockedProduct) {
+          console.log('🚫 Blocked product detected - showing dialog without login requirement');
+          if (window.showProductDialog) {
+            window.showProductDialog();
+          } else {
+            console.log('Dialog not available - redirecting to contact');
+            window.location.href = '/contact';
+          }
+          return;
+        }
         
         // ALL products require authentication - no exceptions
         // Authentication check is required for ALL products including order-menu-system

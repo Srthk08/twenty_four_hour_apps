@@ -78,11 +78,11 @@ import Layout from '../layouts/Layout.astro';
               <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
                 Phone Number (Optional)
               </label>
-              <div class="flex">
+              <div class="flex flex-nowrap gap-0">
                 <select
                   id="phone_country_code"
                   name="phone_country_code"
-                  class="px-4 py-3 border border-r-0 border-gray-300 rounded-l-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-gray-50"
+                  class="flex-shrink-0 px-3 sm:px-4 py-3 border border-r-0 border-gray-300 rounded-l-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-gray-50 text-sm sm:text-base"
                 >
                   <option value="+91" selected>🇮🇳 +91</option>
                   <option value="+1">🇺🇸 +1</option>
@@ -94,22 +94,12 @@ import Layout from '../layouts/Layout.astro';
                   <option value="+33">🇫🇷 +33</option>
                   <option value="+971">🇦🇪 +971</option>
                   <option value="+966">🇸🇦 +966</option>
-                  <option value="other">Other</option>
                 </select>
-                <input
-                  type="text"
-                  id="phone_country_code_custom"
-                  name="phone_country_code_custom"
-                  class="hidden px-4 py-3 border border-r-0 border-gray-300 rounded-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-gray-50"
-                  placeholder="+XXX"
-                  maxlength="5"
-                  pattern="\+[0-9]{1,4}"
-                />
                 <input
                   type="tel"
                   id="phone"
                   name="phone"
-                  class="flex-1 px-4 py-3 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                  class="flex-1 min-w-0 px-3 sm:px-4 py-3 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors text-sm sm:text-base"
                   placeholder="9876543210"
                   maxlength="10"
                   pattern="[0-9]{10}"
@@ -786,16 +776,13 @@ import Layout from '../layouts/Layout.astro';
     // IMPORTANT: Capture phone value EARLY before any form manipulation
     const phoneInputElement = document.getElementById('phone') as HTMLInputElement;
     const phoneCountryCodeSelect = document.getElementById('phone_country_code') as HTMLSelectElement;
-    const phoneCountryCodeCustomInput = document.getElementById('phone_country_code_custom') as HTMLInputElement;
     
     // Store phone values immediately to prevent loss
     const capturedPhoneValue = phoneInputElement?.value?.trim() || '';
     const capturedCountryCode = phoneCountryCodeSelect?.value || '+91';
-    const capturedCustomCountryCode = phoneCountryCodeCustomInput?.value?.trim() || '';
     
     console.log('🔒 Captured phone value early:', capturedPhoneValue);
     console.log('🔒 Captured country code early:', capturedCountryCode);
-    console.log('🔒 Captured custom country code early:', capturedCustomCountryCode);
     
     // Force validation to recognize pre-filled fields before validation
     forceFormValidation();
@@ -814,14 +801,10 @@ import Layout from '../layouts/Layout.astro';
     console.log('📝 Phone input element value:', phoneInputElement?.value);
     
     // Validate phone number if provided
-    // Note: phoneInputElement, phoneCountryCodeSelect, and phoneCountryCodeCustomInput are already declared above
     if (phoneInputElement && phoneInputElement.value.trim()) {
       const phoneDigits = phoneInputElement.value.replace(/\D/g, '');
-      // Get country code from select or custom input (use captured values)
-      let countryCode = capturedCountryCode || phoneCountryCodeSelect?.value || '+91';
-      if (countryCode === 'other') {
-        countryCode = capturedCustomCountryCode || phoneCountryCodeCustomInput?.value?.trim() || '+91';
-      }
+      // Get country code from select (use captured values)
+      const countryCode = capturedCountryCode || phoneCountryCodeSelect?.value || '+91';
       
       if (countryCode === '+91' && phoneDigits.length !== 10) {
         showError('Please enter a valid 10-digit phone number for India');
@@ -930,14 +913,6 @@ import Layout from '../layouts/Layout.astro';
       
       // Get country code - use captured value first, then fallback to form data
       let phoneCountryCode = capturedCountryCode || data.phone_country_code as string || '+91';
-      
-      // Use custom country code if "other" is selected
-      if (phoneCountryCode === 'other') {
-        phoneCountryCode = capturedCustomCountryCode || 
-                          phoneCountryCodeCustomInput?.value?.trim() || 
-                          (data.phone_country_code_custom as string)?.trim() || 
-                          '+91';
-      }
       
       // Ensure country code starts with +
       if (phoneCountryCode && !phoneCountryCode.startsWith('+')) {
@@ -1104,48 +1079,14 @@ import Layout from '../layouts/Layout.astro';
   // Phone number validation for contact form
   function setupContactPhoneValidation() {
     const countryCodeSelect = document.getElementById('phone_country_code') as HTMLSelectElement;
-    const countryCodeCustom = document.getElementById('phone_country_code_custom') as HTMLInputElement;
     const phoneInput = document.getElementById('phone') as HTMLInputElement;
     const phoneError = document.getElementById('phone-error') as HTMLElement;
 
     if (!countryCodeSelect || !phoneInput) return;
 
-    // Function to get the actual country code (from select or custom input)
+    // Function to get the country code from select
     function getCountryCode(): string {
-      if (countryCodeSelect.value === 'other' && countryCodeCustom) {
-        return countryCodeCustom.value.trim() || '+91';
-      }
       return countryCodeSelect.value;
-    }
-
-    // Show/hide custom country code input
-    function toggleCustomCountryCode() {
-      if (countryCodeSelect.value === 'other') {
-        if (countryCodeCustom) {
-          countryCodeCustom.classList.remove('hidden');
-          countryCodeCustom.required = true;
-          countryCodeCustom.value = '+';
-        }
-      } else {
-        if (countryCodeCustom) {
-          countryCodeCustom.classList.add('hidden');
-          countryCodeCustom.required = false;
-          countryCodeCustom.value = '';
-        }
-      }
-    }
-
-    // Handle custom country code input - ensure it starts with +
-    if (countryCodeCustom) {
-      countryCodeCustom.addEventListener('input', function(e) {
-        let value = (e.target as HTMLInputElement).value;
-        if (!value.startsWith('+')) {
-          value = '+' + value.replace(/\+/g, '');
-        }
-        // Only allow + and numbers
-        value = value.replace(/[^+0-9]/g, '');
-        (e.target as HTMLInputElement).value = value;
-      });
     }
 
     // Country code to max digits mapping
@@ -1165,7 +1106,7 @@ import Layout from '../layouts/Layout.astro';
     function validatePhone() {
       const countryCode = getCountryCode();
       const phone = phoneInput.value.replace(/\D/g, ''); // Remove non-digits
-      const maxDigits = countryCodeLimits[countryCode] || 15; // Default to 15 for custom codes
+      const maxDigits = countryCodeLimits[countryCode] || 10;
 
       // Update maxlength based on country code
       phoneInput.maxLength = maxDigits;
@@ -1184,15 +1125,10 @@ import Layout from '../layouts/Layout.astro';
           return true;
         }
       } else {
-        // For other countries, validate based on their max digits
-        if (phone.length > 0 && phone.length > maxDigits) {
+        // For other countries, validate exact digit count
+        if (phone.length > 0 && phone.length !== maxDigits) {
           phoneError?.classList.remove('hidden');
-          phoneError.textContent = `Please enter a valid phone number (max ${maxDigits} digits)`;
-          phoneInput.classList.add('border-red-500');
-          return false;
-        } else if (phone.length > 0 && phone.length < 5) {
-          phoneError?.classList.remove('hidden');
-          phoneError.textContent = 'Please enter a valid phone number (at least 5 digits)';
+          phoneError.textContent = `Please enter a valid ${maxDigits}-digit phone number`;
           phoneInput.classList.add('border-red-500');
           return false;
         } else {
@@ -1205,30 +1141,26 @@ import Layout from '../layouts/Layout.astro';
 
     // Restrict input to numbers only
     phoneInput.addEventListener('input', function(e) {
+      // Strip all non-digits to ensure only numbers are entered
       const value = (e.target as HTMLInputElement).value.replace(/\D/g, '');
       const countryCode = getCountryCode();
-      const maxDigits = countryCodeLimits[countryCode] || 15;
+      const maxDigits = countryCodeLimits[countryCode] || 10;
+      
       (e.target as HTMLInputElement).value = value.slice(0, maxDigits);
       validatePhone();
     });
 
     // Validate on country code change
     countryCodeSelect.addEventListener('change', function() {
-      toggleCustomCountryCode();
+      // Clear phone input when country code changes
       phoneInput.value = '';
       const countryCode = getCountryCode();
       phoneInput.placeholder = countryCode === '+91' ? '9876543210' : 'Enter phone number';
       validatePhone();
     });
 
-    // Initialize custom country code visibility
-    toggleCustomCountryCode();
-
     // Validate on blur
     phoneInput.addEventListener('blur', validatePhone);
-    if (countryCodeCustom) {
-      countryCodeCustom.addEventListener('blur', validatePhone);
-    }
   }
 
   // Add input event listeners to show signup alert for logged out users
@@ -1493,5 +1425,30 @@ import Layout from '../layouts/Layout.astro';
   /* Specifically target the "Ready to Start Your Project?" text */
   .bg-blue-50 h2 {
     color: #111827 !important;
+  }
+  
+  /* Mobile responsive phone number field */
+  @media (max-width: 640px) {
+    /* Container for phone fields - prevent zoom on iOS */
+    #phone_country_code,
+    #phone {
+      font-size: 16px;
+    }
+    
+    /* Select dropdown - fixed width on mobile, stays on same line */
+    #phone_country_code {
+      flex-shrink: 0;
+      min-width: 110px;
+      max-width: 140px;
+      border-radius: 0.5rem 0 0 0.5rem;
+    }
+    
+    /* Phone number input - takes remaining space, stays on same line */
+    #phone {
+      flex: 1 1 auto;
+      min-width: 0;
+      border-left: 1px solid #d1d5db;
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
   }
 </style>

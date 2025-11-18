@@ -431,6 +431,21 @@ import Layout from '../layouts/Layout.astro';
             role: 'customer'
           };
 
+          // CRITICAL: Store session in BOTH sessionStorage AND localStorage immediately
+          // This ensures session persists across redirects in deployment
+          const initialSessionData = {
+            user: userData,
+            access_token: data.session?.access_token || 'simple-token-' + Date.now(),
+            timestamp: Date.now()
+          };
+          
+          // Store in both storages for deployment reliability
+          sessionStorage.setItem('simple-auth-session', JSON.stringify(initialSessionData));
+          localStorage.setItem('simple-auth-user', JSON.stringify(userData));
+          localStorage.setItem('simple-auth-session', JSON.stringify(initialSessionData));
+          
+          console.log('✅ Session stored in both sessionStorage and localStorage for deployment reliability');
+
           // Trigger login event immediately
           window.dispatchEvent(new CustomEvent('user-logged-in', {
             detail: userData
@@ -440,7 +455,14 @@ import Layout from '../layouts/Layout.astro';
 
           // Check for redirect parameter in URL
           const urlParams = new URLSearchParams(window.location.search);
-          const redirectParam = urlParams.get('redirect');
+          let redirectParam = urlParams.get('redirect');
+          
+          // If redirect is to OMS product page, redirect to dashboard instead
+          if (redirectParam && redirectParam.includes('/products/order-menu-system')) {
+            console.log('🔄 OMS product page redirect detected - changing to dashboard');
+            redirectParam = '/dashboard';
+          }
+          
           const defaultRedirectUrl = redirectParam || '/dashboard';
           
           console.log('🔍 Redirect parameter found:', redirectParam);
@@ -448,8 +470,13 @@ import Layout from '../layouts/Layout.astro';
           
           // Set a fallback redirect in case profile fetch takes too long
           const fallbackRedirect = setTimeout(() => {
-            console.log('⚠️ Fallback redirect triggered - going to:', defaultRedirectUrl);
-            window.location.href = defaultRedirectUrl;
+            // Ensure OMS redirects go to dashboard even in fallback
+            let fallbackUrl = defaultRedirectUrl;
+            if (fallbackUrl && fallbackUrl.includes('/products/order-menu-system')) {
+              fallbackUrl = '/dashboard';
+            }
+            console.log('⚠️ Fallback redirect triggered - going to:', fallbackUrl);
+            window.location.href = fallbackUrl;
           }, 3000);
 
           // Try to fetch user profile for role-based redirect (non-blocking)
@@ -468,10 +495,13 @@ import Layout from '../layouts/Layout.astro';
               console.log('🔍 Role value from database:', JSON.stringify(profileData.role));
               
               // Role-based redirect - ADMIN ROLE TAKES PRIORITY OVER STATUS
-              // But preserve redirect parameter for product selection
+              // But preserve redirect parameter for product selection (except OMS)
               if (profileData.role === 'admin' || profileData.role === 'developer' || profileData.role === 'support') {
-                // Only redirect to admin if no specific redirect was requested
-                if (!redirectParam || redirectParam === '/dashboard') {
+                // Check if redirect is to OMS product page - always go to dashboard
+                if (redirectParam && redirectParam.includes('/products/order-menu-system')) {
+                  redirectUrl = '/dashboard';
+                  console.log(`🎉 ADMIN USER - OMS detected, redirecting to dashboard: ${redirectUrl}`);
+                } else if (!redirectParam || redirectParam === '/dashboard') {
                   redirectUrl = '/admin';
                   console.log(`🎉 ADMIN USER DETECTED: ${profileData.full_name} (${profileData.role})`);
                   console.log(`🚀 Redirecting to admin panel: ${redirectUrl}`);
@@ -481,8 +511,11 @@ import Layout from '../layouts/Layout.astro';
                   console.log(`🎉 ADMIN USER - preserving redirect: ${redirectUrl}`);
                 }
               } else if (profileData.role && profileData.role.toLowerCase().trim() === 'menu_operator') {
-                // Only redirect to menu-operator if no specific redirect was requested
-                if (!redirectParam || redirectParam === '/dashboard') {
+                // Check if redirect is to OMS product page - always go to dashboard
+                if (redirectParam && redirectParam.includes('/products/order-menu-system')) {
+                  redirectUrl = '/dashboard';
+                  console.log(`🍽️ MENU OPERATOR - OMS detected, redirecting to dashboard: ${redirectUrl}`);
+                } else if (!redirectParam || redirectParam === '/dashboard') {
                   redirectUrl = '/menu-operator';
                   console.log(`🍽️ MENU OPERATOR DETECTED: ${profileData.full_name} (${profileData.role})`);
                   console.log(`🚀 Redirecting to menu operator dashboard: ${redirectUrl}`);
@@ -493,11 +526,15 @@ import Layout from '../layouts/Layout.astro';
                 }
               } else {
                 // For non-admin users, check status (if status field exists)
-                // But preserve redirect parameter if it contains product info
-                if (redirectParam && redirectParam.includes('product=')) {
-                  // Preserve product selection redirect
+                // But preserve redirect parameter if it contains product info (except OMS which goes to dashboard)
+                if (redirectParam && redirectParam.includes('product=') && !redirectParam.includes('order-menu-system')) {
+                  // Preserve product selection redirect (but not OMS)
                   redirectUrl = redirectParam;
                   console.log(`✅ Customer user - preserving product selection: ${redirectUrl}`);
+                } else if (redirectParam && redirectParam.includes('/products/order-menu-system')) {
+                  // OMS product page - always redirect to dashboard
+                  redirectUrl = '/dashboard';
+                  console.log(`✅ Customer user - OMS detected, redirecting to dashboard: ${redirectUrl}`);
                 } else if (profileData.status && profileData.status === 'pending_verification') {
                   redirectUrl = '/dashboard?message=Please check your email to verify your account.&type=warning';
                   console.log(`⚠️ Customer user with pending verification: ${profileData.full_name}`);
@@ -529,13 +566,19 @@ import Layout from '../layouts/Layout.astro';
               });
               
               // Update session storage with the role information
+              // CRITICAL: Store in BOTH sessionStorage AND localStorage for deployment reliability
               const updatedSessionData = {
                 user: userData,
-                access_token: data.session?.access_token,
+                access_token: data.session?.access_token || 'simple-token-' + Date.now(),
                 timestamp: Date.now()
               };
+              
+              // Store in both storages to ensure persistence in deployment
               sessionStorage.setItem('simple-auth-session', JSON.stringify(updatedSessionData));
-              console.log('✅ Updated session storage with role:', userData.role);
+              localStorage.setItem('simple-auth-user', JSON.stringify(userData));
+              localStorage.setItem('simple-auth-session', JSON.stringify(updatedSessionData));
+              
+              console.log('✅ Updated session storage with role in both storages:', userData.role);
               console.log('🔍 Full user data being stored:', JSON.stringify(userData, null, 2));
               
               // Trigger updated login event
@@ -544,20 +587,60 @@ import Layout from '../layouts/Layout.astro';
               }));
             }
             
-            // Clear fallback and redirect after successful login (reduced timeout)
+            // CRITICAL: Ensure session is fully persisted before redirect
+            // Wait a bit longer in deployment to ensure session is saved
             clearTimeout(fallbackRedirect);
+            
+            // Force a synchronous write to ensure session is persisted
+            if (typeof sessionStorage !== 'undefined') {
+              const finalSessionData = {
+                user: userData,
+                access_token: data.session?.access_token || 'simple-token-' + Date.now(),
+                timestamp: Date.now()
+              };
+              sessionStorage.setItem('simple-auth-session', JSON.stringify(finalSessionData));
+              localStorage.setItem('simple-auth-user', JSON.stringify(userData));
+              localStorage.setItem('simple-auth-session', JSON.stringify(finalSessionData));
+            }
+            
+            // Set flag to indicate login redirect is in progress (for AuthGuard)
+            sessionStorage.setItem('login-redirect-in-progress', 'true');
+            
+            // Wait longer before redirect to ensure session is fully persisted in deployment
             setTimeout(() => {
+              console.log('🚀 Redirecting to:', redirectUrl);
               window.location.href = redirectUrl;
-            }, 1000);
+            }, 1500);
             
           } catch (profileError) {
             console.warn('Could not fetch user profile, using redirect parameter:', profileError);
             
+            // CRITICAL: Ensure session is persisted even if profile fetch fails
+            const fallbackSessionData = {
+              user: userData,
+              access_token: data.session?.access_token || 'simple-token-' + Date.now(),
+              timestamp: Date.now()
+            };
+            sessionStorage.setItem('simple-auth-session', JSON.stringify(fallbackSessionData));
+            localStorage.setItem('simple-auth-user', JSON.stringify(userData));
+            localStorage.setItem('simple-auth-session', JSON.stringify(fallbackSessionData));
+            
             // Clear fallback and redirect to the redirect parameter or dashboard
+            // Ensure OMS redirects go to dashboard
+            let errorRedirectUrl = defaultRedirectUrl;
+            if (errorRedirectUrl && errorRedirectUrl.includes('/products/order-menu-system')) {
+              errorRedirectUrl = '/dashboard';
+            }
             clearTimeout(fallbackRedirect);
+            
+            // Set flag to indicate login redirect is in progress (for AuthGuard)
+            sessionStorage.setItem('login-redirect-in-progress', 'true');
+            
+            // Wait longer before redirect to ensure session is fully persisted in deployment
             setTimeout(() => {
-              window.location.href = defaultRedirectUrl;
-            }, 1000);
+              console.log('🚀 Redirecting to (fallback):', errorRedirectUrl);
+              window.location.href = errorRedirectUrl;
+            }, 1500);
           }
           
         } else {

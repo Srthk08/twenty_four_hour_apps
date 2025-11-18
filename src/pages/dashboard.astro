@@ -417,12 +417,13 @@ import AuthGuard from '../components/AuthGuard.astro';
                     <label class="block text-sm font-semibold text-gray-700 mb-2">
                       Phone Number <span class="text-red-500">*</span>
                     </label>
-                    <div class="flex">
+                    <div class="flex min-w-0 w-full">
                       <select
                         id="phone_country_code"
                         name="phone_country_code"
                         required
-                        class="px-4 py-3 border border-r-0 border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-gray-50 text-lg"
+                        class="px-3 sm:px-4 py-3 border border-r-0 border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-gray-50 text-sm sm:text-lg flex-shrink-0"
+                        style="min-width: 0; max-width: 140px;"
                       >
                         <option value="+91" selected>🇮🇳 +91</option>
                         <option value="+1">🇺🇸 +1</option>
@@ -434,18 +435,8 @@ import AuthGuard from '../components/AuthGuard.astro';
                         <option value="+33">🇫🇷 +33</option>
                         <option value="+971">🇦🇪 +971</option>
                         <option value="+966">🇸🇦 +966</option>
-                        <option value="other">Other</option>
                       </select>
-                      <input
-                        type="text"
-                        id="phone_country_code_custom"
-                        name="phone_country_code_custom"
-                        class="hidden px-4 py-3 border border-r-0 border-gray-300 rounded-none focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-gray-50 text-lg"
-                        placeholder="+XXX"
-                        maxlength="5"
-                        pattern="\+[0-9]{1,4}"
-                      />
-                      <input type="tel" name="phone" id="phone-input" class="flex-1 px-4 py-3 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg" placeholder="9876543210" required maxlength="10" pattern="[0-9]{10}" title="Please enter 10 digits">
+                      <input type="tel" name="phone" id="phone-input" class="flex-1 min-w-0 px-3 sm:px-4 py-3 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm sm:text-lg" placeholder="9876543210" required maxlength="10" pattern="[0-9]{10}" title="Please enter 10 digits">
                     </div>
                     <div id="phone-error" class="hidden text-red-500 text-sm mt-1">Please enter a valid 10-digit phone number</div>
                   </div>
@@ -1073,6 +1064,8 @@ import AuthGuard from '../components/AuthGuard.astro';
               if (window.reinitializePincodeAutocomplete) {
                 window.reinitializePincodeAutocomplete();
               }
+              // Auto-fill user details when form becomes visible
+              setTimeout(() => autofillUserDetails(), 200);
             }, 50);
     } else {
             // Show regular customization form
@@ -1266,44 +1259,10 @@ import AuthGuard from '../components/AuthGuard.astro';
     
     // Phone number validation with country code
     const phoneCountryCodeSelect = document.getElementById('phone_country_code') as HTMLSelectElement;
-    const phoneCountryCodeCustom = document.getElementById('phone_country_code_custom') as HTMLInputElement;
     if (phoneInput && phoneCountryCodeSelect) {
-      // Function to get the actual country code (from select or custom input)
+      // Function to get the country code from select
       function getCountryCode(): string {
-        if (phoneCountryCodeSelect.value === 'other' && phoneCountryCodeCustom) {
-          return phoneCountryCodeCustom.value.trim() || '+91';
-        }
         return phoneCountryCodeSelect.value;
-      }
-
-      // Show/hide custom country code input
-      function toggleCustomCountryCode() {
-        if (phoneCountryCodeSelect.value === 'other') {
-          if (phoneCountryCodeCustom) {
-            phoneCountryCodeCustom.classList.remove('hidden');
-            phoneCountryCodeCustom.required = true;
-            phoneCountryCodeCustom.value = '+';
-          }
-        } else {
-          if (phoneCountryCodeCustom) {
-            phoneCountryCodeCustom.classList.add('hidden');
-            phoneCountryCodeCustom.required = false;
-            phoneCountryCodeCustom.value = '';
-          }
-        }
-      }
-
-      // Handle custom country code input - ensure it starts with +
-      if (phoneCountryCodeCustom) {
-        phoneCountryCodeCustom.addEventListener('input', function(e) {
-          let value = (e.target as HTMLInputElement).value;
-          if (!value.startsWith('+')) {
-            value = '+' + value.replace(/\+/g, '');
-          }
-          // Only allow + and numbers
-          value = value.replace(/[^+0-9]/g, '');
-          (e.target as HTMLInputElement).value = value;
-        });
       }
 
       const countryCodeLimits: { [key: string]: number } = {
@@ -1314,7 +1273,7 @@ import AuthGuard from '../components/AuthGuard.astro';
       function validatePhone() {
         const countryCode = getCountryCode();
         const phone = phoneInput.value.replace(/\D/g, '');
-        const maxDigits = countryCodeLimits[countryCode] || 15; // Default to 15 for custom codes
+        const maxDigits = countryCodeLimits[countryCode] || 10;
 
         // Update maxlength and pattern
         phoneInput.maxLength = maxDigits;
@@ -1334,13 +1293,9 @@ import AuthGuard from '../components/AuthGuard.astro';
         } else {
           // For other countries
           const errorDiv = document.getElementById('phone-error');
-          if (phone.length > 0 && phone.length < 5) {
+          if (phone.length > 0 && phone.length !== maxDigits) {
             errorDiv?.classList.remove('hidden');
-            errorDiv.textContent = 'Please enter a valid phone number (at least 5 digits)';
-            phoneInput.classList.add('border-red-500');
-          } else if (phone.length > 0 && phone.length > maxDigits) {
-            errorDiv?.classList.remove('hidden');
-            errorDiv.textContent = `Please enter a valid phone number (max ${maxDigits} digits)`;
+            errorDiv.textContent = `Please enter a valid ${maxDigits}-digit phone number`;
             phoneInput.classList.add('border-red-500');
           } else {
             errorDiv?.classList.add('hidden');
@@ -1350,29 +1305,25 @@ import AuthGuard from '../components/AuthGuard.astro';
       }
 
       phoneInput.addEventListener('input', function(e) {
+        // Strip all non-digits to ensure only numbers are entered
         const value = (e.target as HTMLInputElement).value.replace(/[^0-9]/g, '');
         const countryCode = getCountryCode();
-        const maxDigits = countryCodeLimits[countryCode] || 15;
+        const maxDigits = countryCodeLimits[countryCode] || 10;
+        
         (e.target as HTMLInputElement).value = value.slice(0, maxDigits);
         validatePhone();
       });
 
       phoneCountryCodeSelect.addEventListener('change', function() {
-        toggleCustomCountryCode();
+        // Clear phone input when country code changes
         phoneInput.value = '';
         const countryCode = getCountryCode();
         phoneInput.placeholder = countryCode === '+91' ? '9876543210' : 'Enter phone number';
         validatePhone();
       });
 
-      // Initialize custom country code visibility
-      toggleCustomCountryCode();
-
       // Validate on blur
       phoneInput.addEventListener('blur', validatePhone);
-      if (phoneCountryCodeCustom) {
-        phoneCountryCodeCustom.addEventListener('blur', validatePhone);
-      }
     }
   }
   
@@ -2338,11 +2289,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         contactPerson: formDataObj.contactPerson,
         email: formDataObj.email,
         phone: (() => {
-          let countryCode = phoneCountryCodeSelect?.value || '+91';
-          const phoneCountryCodeCustom = document.getElementById('phone_country_code_custom') as HTMLInputElement;
-          if (countryCode === 'other' && phoneCountryCodeCustom) {
-            countryCode = phoneCountryCodeCustom.value.trim() || '+91';
-          }
+          const countryCode = phoneCountryCodeSelect?.value || '+91';
           return phoneCountryCodeSelect ? `${countryCode}${formDataObj.phone.replace(/\D/g, '')}` : formDataObj.phone;
         })(),
         additionalRequirements: formDataObj.additionalRequirements,
@@ -2404,11 +2351,7 @@ import AuthGuard from '../components/AuthGuard.astro';
             console.warn('⚠️ Logo upload skipped (RPC flow):', e);
           }
           const phoneCountryCodeSelect = document.getElementById('phone_country_code') as HTMLSelectElement;
-          const phoneCountryCodeCustom = document.getElementById('phone_country_code_custom') as HTMLInputElement;
-          let countryCode = phoneCountryCodeSelect?.value || '+91';
-          if (countryCode === 'other' && phoneCountryCodeCustom) {
-            countryCode = phoneCountryCodeCustom.value.trim() || '+91';
-          }
+          const countryCode = phoneCountryCodeSelect?.value || '+91';
           const formattedPhone = phoneCountryCodeSelect ? `${countryCode}${formDataObj.phone.replace(/\D/g, '')}` : formDataObj.phone;
           
           const { data: customizationData, error: customizationError } = await supabase.rpc('upsert_oms_customization', {
@@ -2931,11 +2874,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         contact_person: formDataObj.contactPerson || '',
         email: formDataObj.email || '',
         phone_number: (() => {
-          const phoneCountryCodeCustom = document.getElementById('phone_country_code_custom') as HTMLInputElement;
-          let countryCode = phoneCountryCodeSelect?.value || '+91';
-          if (countryCode === 'other' && phoneCountryCodeCustom) {
-            countryCode = phoneCountryCodeCustom.value.trim() || '+91';
-          }
+          const countryCode = phoneCountryCodeSelect?.value || '+91';
           return phoneCountryCodeSelect ? `${countryCode}${(formDataObj.phone || '').replace(/\D/g, '')}` : (formDataObj.phone || '');
         })(),
         house_flat_number: formDataObj.houseNumber || '',
@@ -3810,8 +3749,31 @@ import AuthGuard from '../components/AuthGuard.astro';
         return false;
       }
       
-      const currentUser = authManager.getCurrentUser();
+      // Get user from auth manager, but also check sessionStorage for latest updates
+      let currentUser = authManager.getCurrentUser();
       console.log('👤 Current user from auth manager:', currentUser);
+      
+      // Check sessionStorage for updated profile data (in case profile was just updated)
+      try {
+        const sessionData = sessionStorage.getItem('simple-auth-session');
+        if (sessionData) {
+          const session = JSON.parse(sessionData);
+          if (session.user && session.user.email) {
+            // Merge sessionStorage data with auth manager data (sessionStorage has latest)
+            currentUser = {
+              ...currentUser,
+              ...session.user,
+              // Prefer sessionStorage data for fields that might have been updated
+              full_name: session.user.full_name || currentUser?.full_name,
+              phone: session.user.phone || currentUser?.phone,
+              company_name: session.user.company_name || currentUser?.company_name
+            };
+            console.log('✅ Using updated user data from sessionStorage:', currentUser);
+          }
+        }
+      } catch (e) {
+        console.warn('⚠️ Could not read sessionStorage:', e);
+      }
       
       // Additional check: ensure we have valid user data
       if (!currentUser || !currentUser.email) {
@@ -3840,14 +3802,86 @@ import AuthGuard from '../components/AuthGuard.astro';
       
       const authPhone = currentUser ? (currentUser.phone || currentUser.phone_number || currentUser?.user_metadata?.phone || currentUser?.user_metadata?.phone_number) : null;
       if (authPhone) {
-        console.log('📱 Auto-filling phone:', authPhone);
-        const phoneFields = document.querySelectorAll('input[name="phone"], input[type="tel"]');
-        phoneFields.forEach(field => {
-          field.value = authPhone;
-          field.dispatchEvent(new Event('input', { bubbles: true }));
-          field.dispatchEvent(new Event('change', { bubbles: true }));
-          console.log('✅ Filled phone field:', field);
-        });
+        console.log('📱 Auto-filling phone from auth manager:', authPhone);
+        // Try multiple possible IDs for phone input
+        const phoneInput = document.getElementById('phone-input') as HTMLInputElement || 
+                          document.getElementById('phone') as HTMLInputElement ||
+                          document.querySelector('input[name="phone"]') as HTMLInputElement;
+        const phoneCountryCodeSelect = document.getElementById('phone_country_code') as HTMLSelectElement;
+        
+        if (phoneInput && phoneCountryCodeSelect) {
+          const phoneValue = authPhone.toString().trim();
+          console.log('📱 Processing phone value from auth:', phoneValue);
+          
+          // Parse phone number to extract country code and number
+          if (phoneValue.startsWith('+')) {
+            // Try to match country codes from longest to shortest
+            const knownCountryCodes = ['+971', '+966', '+91', '+86', '+81', '+61', '+49', '+44', '+33', '+1'];
+            let extractedCountryCode = '';
+            let phoneNumber = '';
+            
+            // First, try known country codes from longest to shortest
+            for (const code of knownCountryCodes) {
+              if (phoneValue.startsWith(code)) {
+                extractedCountryCode = code;
+                phoneNumber = phoneValue.substring(code.length).replace(/\D/g, '');
+                break;
+              }
+            }
+            
+            // If no match found, try regex pattern
+            if (!extractedCountryCode) {
+              const match = phoneValue.match(/^(\+\d{1,4})(\d+)$/);
+              if (match) {
+                extractedCountryCode = match[1];
+                phoneNumber = match[2];
+              }
+            }
+            
+            if (extractedCountryCode && phoneNumber) {
+              // Check if the country code exists in the dropdown options
+              const optionExists = Array.from(phoneCountryCodeSelect.options).some(
+                option => option.value === extractedCountryCode
+              );
+              
+              if (optionExists) {
+                // Country code exists in dropdown, select it
+                phoneCountryCodeSelect.value = extractedCountryCode;
+                phoneInput.value = phoneNumber;
+                console.log('✅ Filled phone from auth: country code =', extractedCountryCode, ', number =', phoneNumber);
+              } else {
+                // Country code doesn't exist in dropdown, default to +91 but keep the number
+                phoneCountryCodeSelect.value = '+91';
+                phoneInput.value = phoneNumber;
+                console.log('✅ Filled phone from auth with default country code +91, number =', phoneNumber);
+              }
+            } else {
+              // Couldn't parse, try to extract just digits
+              phoneInput.value = phoneValue.replace(/\D/g, '');
+              phoneCountryCodeSelect.value = '+91';
+              console.log('⚠️ Could not parse phone from auth, using all digits');
+            }
+          } else {
+            // No country code prefix, assume it's just the number
+            phoneInput.value = phoneValue.replace(/\D/g, '');
+            phoneCountryCodeSelect.value = '+91';
+            console.log('✅ Filled phone number from auth without country code');
+          }
+          
+          phoneInput.dispatchEvent(new Event('input', { bubbles: true }));
+          phoneInput.dispatchEvent(new Event('change', { bubbles: true }));
+          console.log('✅ Successfully filled phone from auth manager');
+        } else {
+          console.warn('⚠️ Phone input or country code select not found, using fallback');
+          // Fallback: if elements not found, use old method
+          const phoneFields = document.querySelectorAll('input[name="phone"], input[type="tel"]');
+          phoneFields.forEach(field => {
+            (field as HTMLInputElement).value = authPhone.toString().replace(/\D/g, '');
+            field.dispatchEvent(new Event('input', { bubbles: true }));
+            field.dispatchEvent(new Event('change', { bubbles: true }));
+            console.log('✅ Filled phone field (fallback):', field);
+          });
+        }
       }
       
       if (currentUser && currentUser.full_name) {
@@ -3868,10 +3902,10 @@ import AuthGuard from '../components/AuthGuard.astro';
         if (user) {
           console.log('🔍 Attempting to fetch user profile from Supabase...');
           
-          // Check if profiles table exists first
+          // Check if profiles table exists first - fetch all phone-related fields
           const { data: profile, error: profileError } = await supabase
             .from('profiles')
-            .select('email, phone, full_name')
+            .select('email, phone, phone_number, full_name, company_name')
             .eq('id', user.id)
             .single();
             
@@ -3883,6 +3917,8 @@ import AuthGuard from '../components/AuthGuard.astro';
           
           if (profile) {
             console.log('✅ Profile data found:', profile);
+            
+            // Fill email
             if (profile.email) {
               document.querySelectorAll('input[name="email"], input[type="email"]').forEach((field) => {
                 (field as HTMLInputElement).value = profile.email;
@@ -3890,14 +3926,96 @@ import AuthGuard from '../components/AuthGuard.astro';
                 field.dispatchEvent(new Event('change', { bubbles: true }));
               });
             }
+            
+            // Fill phone - try multiple field names and ensure we get the actual value
             const profilePhone = profile.phone || profile.phone_number;
+            console.log('📱 Profile phone value:', profilePhone);
+            
             if (profilePhone) {
-              document.querySelectorAll('input[name="phone"], input[type="tel"]').forEach((field) => {
-                (field as HTMLInputElement).value = profilePhone;
-                field.dispatchEvent(new Event('input', { bubbles: true }));
-                field.dispatchEvent(new Event('change', { bubbles: true }));
-              });
+              // Wait a bit to ensure form elements are ready
+              setTimeout(() => {
+                const phoneInput = document.getElementById('phone-input') as HTMLInputElement || 
+                                 document.getElementById('phone') as HTMLInputElement ||
+                                 document.querySelector('input[name="phone"]') as HTMLInputElement;
+                const phoneCountryCodeSelect = document.getElementById('phone_country_code') as HTMLSelectElement;
+                
+                if (phoneInput && phoneCountryCodeSelect) {
+                  const phoneValue = profilePhone.toString().trim();
+                  console.log('📱 Processing phone value:', phoneValue);
+                  
+                  // Parse phone number to extract country code and number
+                  if (phoneValue.startsWith('+')) {
+                    // Try to match country codes from longest to shortest
+                    const knownCountryCodes = ['+971', '+966', '+91', '+86', '+81', '+61', '+49', '+44', '+33', '+1'];
+                    let extractedCountryCode = '';
+                    let phoneNumber = '';
+                    
+                    // First, try known country codes from longest to shortest
+                    for (const code of knownCountryCodes) {
+                      if (phoneValue.startsWith(code)) {
+                        extractedCountryCode = code;
+                        phoneNumber = phoneValue.substring(code.length).replace(/\D/g, '');
+                        break;
+                      }
+                    }
+                    
+                    // If no match found, try regex pattern
+                    if (!extractedCountryCode) {
+                      const match = phoneValue.match(/^(\+\d{1,4})(\d+)$/);
+                      if (match) {
+                        extractedCountryCode = match[1];
+                        phoneNumber = match[2];
+                      }
+                    }
+                    
+                    if (extractedCountryCode && phoneNumber) {
+                      // Check if the country code exists in the dropdown options
+                      const optionExists = Array.from(phoneCountryCodeSelect.options).some(
+                        option => option.value === extractedCountryCode
+                      );
+                      
+                      if (optionExists) {
+                        // Country code exists in dropdown, select it
+                        phoneCountryCodeSelect.value = extractedCountryCode;
+                        phoneInput.value = phoneNumber;
+                        console.log('✅ Filled phone: country code =', extractedCountryCode, ', number =', phoneNumber);
+                      } else {
+                        // Country code doesn't exist in dropdown, default to +91 but keep the number
+                        phoneCountryCodeSelect.value = '+91';
+                        phoneInput.value = phoneNumber;
+                        console.log('✅ Filled phone with default country code +91, number =', phoneNumber);
+                      }
+                    } else {
+                      // Couldn't parse, try to extract just digits
+                      phoneInput.value = phoneValue.replace(/\D/g, '');
+                      phoneCountryCodeSelect.value = '+91';
+                      console.log('⚠️ Could not parse phone, using all digits');
+                    }
+                  } else {
+                    // No country code prefix, assume it's just the number
+                    phoneInput.value = phoneValue.replace(/\D/g, '');
+                    phoneCountryCodeSelect.value = '+91';
+                    console.log('✅ Filled phone number without country code');
+                  }
+                  
+                  phoneInput.dispatchEvent(new Event('input', { bubbles: true }));
+                  phoneInput.dispatchEvent(new Event('change', { bubbles: true }));
+                  console.log('✅ Successfully filled phone from profile');
+                } else {
+                  console.warn('⚠️ Phone input or country code select not found');
+                  // Fallback: if elements not found, use old method
+                  document.querySelectorAll('input[name="phone"], input[type="tel"]').forEach((field) => {
+                    (field as HTMLInputElement).value = profilePhone.toString().replace(/\D/g, '');
+                    field.dispatchEvent(new Event('input', { bubbles: true }));
+                    field.dispatchEvent(new Event('change', { bubbles: true }));
+                  });
+                }
+              }, 100);
+            } else {
+              console.log('⚠️ No phone number found in profile');
             }
+            
+            // Fill full name / contact person
             if (profile.full_name) {
               document.querySelectorAll('input[name="contactPerson"]').forEach((field) => {
                 (field as HTMLInputElement).value = profile.full_name;
@@ -5262,3 +5380,52 @@ Status: Submitted
     }
   }
 </script>
+
+<style>
+  /* Mobile responsive fixes for phone field in customization form */
+  @media (max-width: 640px) {
+    /* Ensure form container doesn't overflow */
+    #order-menu-customization-form {
+      overflow-x: hidden;
+      max-width: 100%;
+    }
+    
+    /* Phone field container - prevent overflow */
+    #order-menu-customization-form .flex.min-w-0 {
+      width: 100%;
+      min-width: 0;
+      overflow: hidden;
+    }
+    
+    /* Country code select - fixed width on mobile */
+    #phone_country_code {
+      flex: 0 0 auto;
+      min-width: 100px;
+      max-width: 140px;
+      width: auto;
+    }
+    
+    /* Custom country code input - fixed width on mobile */
+    #phone_country_code_custom:not(.hidden) {
+      flex: 0 0 auto;
+      min-width: 80px;
+      max-width: 100px;
+      width: auto;
+    }
+    
+    /* Phone input - takes remaining space */
+    #phone-input {
+      flex: 1 1 auto;
+      min-width: 0;
+      width: 0; /* Force flex to calculate width */
+    }
+    
+    /* Prevent text overflow in inputs */
+    #phone_country_code,
+    #phone_country_code_custom,
+    #phone-input {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+</style>

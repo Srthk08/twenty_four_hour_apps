@@ -138,7 +138,7 @@
       });
     }
 
-    // Handle footer product links with role-based access control
+    // Handle footer product links - Order Menu System redirects, others show dialog
     function handleFooterProductLinks() {
       const footerProductLinks = document.querySelectorAll('.footer-product-link');
       
@@ -148,74 +148,24 @@
           
           const productSlug = this.getAttribute('data-product-slug');
           
-          // Check if user is admin
-          const isAdmin = checkIfUserIsAdmin();
-          
-          // If user is admin, allow access to all products
-          if (isAdmin) {
-            window.location.href = `/products/${productSlug}`;
-            return;
-          }
-          
-          // ALL products require authentication - check if user is logged in
-          const authManager = window.globalAuthManager || window.simpleAuthManager;
-          const isLoggedIn = authManager && authManager.isUserLoggedIn();
-          
-          if (!isLoggedIn) {
-            // User not logged in - redirect to login
-            console.log('❌ User not logged in - authentication required, redirecting to login');
-            const loginUrl = `/login?redirect=/products/${productSlug}`;
-            window.location.href = loginUrl;
-            return;
-          }
-          
-          // Check if this is the Order Menu System product - it should work for all users
+          // Check if this is the Order Menu System - allow redirect
           const isOrderMenuSystem = productSlug === 'order-menu-system';
           
           if (isOrderMenuSystem) {
-            // Order Menu System - allow access for all logged-in users
-            console.log('Order Menu System - allowing access for logged-in user');
+            // Order Menu System - redirect to product page
             window.location.href = `/products/${productSlug}`;
             return;
           }
           
-          // User is logged in but not admin - show dialog (except for OMS)
+          // All other products - show under development dialog
           if (window.showProductDialog) {
             window.showProductDialog();
           } else {
-            window.location.href = '/contact';
+            // Fallback: create a simple alert if dialog is not available
+            alert('This product is currently under development and will be available in a few days. We\'re working hard to bring you the best experience possible.');
           }
         });
       });
-    }
-
-    // Function to check if user is admin
-    function checkIfUserIsAdmin() {
-      try {
-        // Check if user is logged in
-        if (window.simpleAuthManager && window.simpleAuthManager.isUserLoggedIn()) {
-          const currentUser = window.simpleAuthManager.getCurrentUser();
-          
-          // Check if user has admin role
-          if (currentUser && currentUser.role === 'admin') {
-            return true;
-          }
-        }
-        
-        // Check session storage for admin role
-        const sessionData = sessionStorage.getItem('simple-auth-session');
-        if (sessionData) {
-          const session = JSON.parse(sessionData);
-          if (session.user && session.user.role === 'admin') {
-            return true;
-          }
-        }
-        
-        return false;
-      } catch (error) {
-        console.error('Error checking admin status:', error);
-        return false;
-      }
     }
 
     // Initialize footer product links
@@ -235,6 +185,12 @@
         childList: true,
         subtree: true
       });
+    }
+    
+    // Update copyright year dynamically
+    const copyrightYearElement = document.getElementById('copyright-year');
+    if (copyrightYearElement) {
+      copyrightYearElement.textContent = new Date().getFullYear();
     }
   });
 </script>
@@ -300,7 +256,7 @@
     <!-- Bottom Bar -->
     <div class="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
       <p class="text-white text-sm" style="color: #ffffff !important;">
-        © 2024 DevExpress. All rights reserved.
+        © <span id="copyright-year">2024</span> DevExpress. All rights reserved.
       </p>
       <div class="flex space-x-6 mt-4 md:mt-0">
         <a href="/privacy" class="text-white hover:text-gray-300 text-sm transition-colors" style="color: #ffffff !important;">Privacy Policy</a>

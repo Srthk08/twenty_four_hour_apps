@@ -150,6 +150,46 @@ const style = categoryStyles[product.category];
         const currentPath = window.location.pathname;
         const productSlug = currentPath.split('/').pop();
         
+        // List of blocked/disabled products that show dialog instead of login
+        const blockedProducts = [
+          'restaurant-menu-system',
+          'android-tv-app',
+          'streaming-mobile-app',
+          'restaurant-website'
+        ];
+        
+        // Check if this is Order Menu System - accessible to all logged-in users
+        const isOrderMenuSystem = productSlug === 'order-menu-system';
+        
+        // FIRST: Check if product is blocked - if so, show page and dialog without auth check
+        const isBlockedProduct = blockedProducts.includes(productSlug);
+        
+        if (isBlockedProduct) {
+          console.log('🚫 Blocked product detected - showing page and dialog without login requirement');
+          // Show page content immediately
+          if (document.body) {
+            document.body.style.opacity = '1';
+          }
+          if (document.documentElement) {
+            document.documentElement.style.opacity = '1';
+          }
+          // Show dialog when DOM is ready
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+              if (window.showProductDialog) {
+                window.showProductDialog();
+              }
+            });
+          } else {
+            setTimeout(() => {
+              if (window.showProductDialog) {
+                window.showProductDialog();
+              }
+            }, 100);
+          }
+          return; // Exit early - no auth check needed
+        }
+        
         // ALL products require authentication - no exceptions
         // Hide body content immediately to prevent flash - CRITICAL: Do this first
         if (document.body) {
@@ -187,17 +227,60 @@ const style = categoryStyles[product.category];
             return;
           }
           
-          // If auth manager not ready, retry (but limit retries to prevent long delays)
+          // SPECIAL HANDLING FOR ORDER MENU SYSTEM: If we have session data, trust it
+          // This prevents redirect loops in production where auth manager might load slower
+          if (isOrderMenuSystem && hasValidSession) {
+            // Try to parse session to verify it's valid
+            try {
+              const session = JSON.parse(sessionData);
+              if (session && session.user && session.user.email) {
+                // Valid session data exists - allow access for OMS even if auth manager not ready
+                console.log('✅ Order Menu System - valid session found, allowing access');
+                if (document.body) {
+                  document.body.style.transition = 'opacity 0.3s ease-in';
+                  document.body.style.opacity = '1';
+                }
+                if (document.documentElement) {
+                  document.documentElement.style.transition = 'opacity 0.3s ease-in';
+                  document.documentElement.style.opacity = '1';
+                }
+                return;
+              }
+            } catch (e) {
+              // Invalid session data, continue with normal check
+              console.log('Session data parse error, continuing with auth manager check');
+            }
+          }
+          
+          // If auth manager not ready, retry (increase retries for production)
           if (!authManager) {
-            // Only retry a few times, then redirect
+            // Only retry, but increase retry count for production environments
             if (typeof checkAuth.retryCount === 'undefined') {
               checkAuth.retryCount = 0;
             }
             checkAuth.retryCount++;
             
-            if (checkAuth.retryCount < 5) {
-              setTimeout(checkAuth, 50);
+            // For Order Menu System, retry more times since we have session data
+            const maxRetries = isOrderMenuSystem && hasValidSession ? 20 : 10;
+            const retryDelay = checkAuth.retryCount < 10 ? 50 : 100;
+            
+            if (checkAuth.retryCount < maxRetries) {
+              setTimeout(checkAuth, retryDelay);
             } else {
+              // Too many retries - for OMS with valid session, allow access anyway
+              if (isOrderMenuSystem && hasValidSession) {
+                console.log('✅ Order Menu System - auth manager timeout but session valid, allowing access');
+                if (document.body) {
+                  document.body.style.transition = 'opacity 0.3s ease-in';
+                  document.body.style.opacity = '1';
+                }
+                if (document.documentElement) {
+                  document.documentElement.style.transition = 'opacity 0.3s ease-in';
+                  document.documentElement.style.opacity = '1';
+                }
+                return;
+              }
+              
               // Too many retries - redirect to login
               if (document.body) {
                 document.body.style.transition = 'opacity 0.3s ease-out';
@@ -232,7 +315,22 @@ const style = categoryStyles[product.category];
             return;
           }
           
-          // User is logged in - show content smoothly
+          // User is logged in - check if Order Menu System
+          if (isOrderMenuSystem) {
+            // Order Menu System - allow access for all logged-in users
+            console.log('✅ Order Menu System - allowing access for logged-in user');
+            if (document.body) {
+              document.body.style.transition = 'opacity 0.3s ease-in';
+              document.body.style.opacity = '1';
+            }
+            if (document.documentElement) {
+              document.documentElement.style.transition = 'opacity 0.3s ease-in';
+              document.documentElement.style.opacity = '1';
+            }
+            return;
+          }
+          
+          // User is logged in - show content smoothly (for other products)
           if (document.body) {
             document.body.style.transition = 'opacity 0.3s ease-in';
             document.body.style.opacity = '1';
@@ -250,9 +348,11 @@ const style = categoryStyles[product.category];
           checkAuth();
         }
         
-        // Also check when auth manager might be ready (with delays)
-        setTimeout(checkAuth, 50);
-        setTimeout(checkAuth, 150);
+        // Also check when auth manager might be ready (with delays - increased for production)
+        setTimeout(checkAuth, 100);
+        setTimeout(checkAuth, 300);
+        setTimeout(checkAuth, 500);
+        setTimeout(checkAuth, 1000);
       })();
     </script>
     
@@ -579,14 +679,16 @@ const style = categoryStyles[product.category];
           onclick={`redirectToCart('${product.id}', '${isOrderMenuSystem ? 999 : productPlans[0]?.price}')`}
           class="bg-white text-gray-900 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-colors"
         >
-          Add to Cart - ₹{isOrderMenuSystem ? '999' : productPlans[0]?.price.toLocaleString()}
+          {isOrderMenuSystem ? 'Order' : `Add to Cart - ₹${productPlans[0]?.price.toLocaleString()}`}
         </button>
-        <p class="text-xs text-white/70 mt-2 text-center">
-          <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-          </svg>
-          Login required to add to cart
-        </p>
+        {!isOrderMenuSystem && (
+          <p class="text-xs text-white/70 mt-2 text-center">
+            <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+            Login required to add to cart
+          </p>
+        )}
         <a href={`/contact?product=${encodeURIComponent(product.name)}&project_type=${product.category}&project_details=${encodeURIComponent(`I'm interested in the ${product.name}. ${product.description}`)}&price=${isOrderMenuSystem ? 999 : productPlans[0]?.price || product.base_price}`} class="contact-us-btn border-2 border-white text-white hover:bg-white hover:text-black px-8 py-3 rounded-lg font-semibold transition-all">
           Contact Us
         </a>
@@ -743,6 +845,30 @@ const style = categoryStyles[product.category];
     
     console.log('Product page loaded:', productSlug);
     
+    // List of blocked/disabled products that show dialog instead of login
+    const blockedProducts = [
+      'restaurant-menu-system',
+      'android-tv-app',
+      'streaming-mobile-app',
+      'restaurant-website'
+    ];
+    
+    // FIRST: Check if product is blocked - if so, show dialog and allow page view
+    const isBlockedProduct = blockedProducts.includes(productSlug);
+    
+    if (isBlockedProduct) {
+      console.log('🚫 Blocked product detected - showing dialog, allowing page view');
+      // Show page content
+      if (document.body) {
+        document.body.style.opacity = '1';
+      }
+      // Show dialog
+      if (window.showProductDialog) {
+        window.showProductDialog();
+      }
+      return; // Exit early - no auth check needed
+    }
+    
     // ALL products require authentication - no bypasses
     // Check if we're still on this page (not redirected)
     if (window.location.pathname !== currentPath) {
@@ -778,7 +904,22 @@ const style = categoryStyles[product.category];
       return;
     }
     
-    // User is logged in - check admin status
+    // Check if this is the Order Menu System - allow access for all logged-in users
+    const isOrderMenuSystem = productSlug === 'order-menu-system';
+    
+    if (isOrderMenuSystem) {
+      // Order Menu System - allow access for all logged-in users
+      console.log('✅ Order Menu System - allowing access for logged-in user');
+      if (document.body) {
+        document.body.style.opacity = '1';
+      }
+      if (document.documentElement) {
+        document.documentElement.style.opacity = '1';
+      }
+      return; // Exit early - no admin check needed
+    }
+    
+    // User is logged in - check admin status (for other products)
     const isAdmin = checkIfUserIsAdmin();
     console.log('Is admin:', isAdmin);
     

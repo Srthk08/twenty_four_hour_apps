@@ -13,48 +13,237 @@ const { redirectTo = '/login' } = Astro.props;
 <script>
   // AUTHGUARD USING GLOBAL AUTH MANAGER
   
+  // Function to check sessionStorage and localStorage directly
+  // CRITICAL: Check both storages for deployment reliability
+  function checkSessionStorage() {
+    try {
+      // First check sessionStorage (most recent)
+      const sessionData = sessionStorage.getItem('simple-auth-session');
+      if (sessionData && sessionData !== 'null' && sessionData !== '{}') {
+        try {
+          const session = JSON.parse(sessionData);
+          if (session && session.user && (session.access_token || session.user.email)) {
+            console.log('✅ Valid session found in sessionStorage:', session.user.email);
+            
+            // If auth manager exists but hasn't loaded the session yet, trigger it
+            const authManager = window.globalAuthManager || window.simpleAuthManager;
+            if (authManager && !authManager.isUserLoggedIn()) {
+              console.log('🔄 Auth manager exists but session not loaded, triggering load...');
+              // Trigger the auth manager to load the session
+              if (authManager.checkExistingSession) {
+                authManager.checkExistingSession();
+              } else if (authManager.handleLogin) {
+                authManager.handleLogin(session.user);
+              }
+            }
+            
+            return true;
+          }
+        } catch (parseError) {
+          console.log('SessionStorage parse error, checking localStorage:', parseError);
+        }
+      }
+      
+      // Check localStorage session data (deployment fallback)
+      const localSessionData = localStorage.getItem('simple-auth-session');
+      if (localSessionData && localSessionData !== 'null' && localSessionData !== '{}') {
+        try {
+          const session = JSON.parse(localSessionData);
+          if (session && session.user && (session.access_token || session.user.email)) {
+            console.log('✅ Valid session found in localStorage:', session.user.email);
+            
+            // Sync to sessionStorage for consistency
+            sessionStorage.setItem('simple-auth-session', localSessionData);
+            
+            // If auth manager exists but hasn't loaded the session yet, trigger it
+            const authManager = window.globalAuthManager || window.simpleAuthManager;
+            if (authManager && !authManager.isUserLoggedIn()) {
+              console.log('🔄 Auth manager exists but session not loaded, triggering load...');
+              if (authManager.checkExistingSession) {
+                authManager.checkExistingSession();
+              } else if (authManager.handleLogin) {
+                authManager.handleLogin(session.user);
+              }
+            }
+            
+            return true;
+          }
+        } catch (parseError) {
+          console.log('LocalStorage session parse error, checking user data:', parseError);
+        }
+      }
+      
+      // Also check localStorage user data as final fallback
+      const storedUser = localStorage.getItem('simple-auth-user');
+      if (storedUser && storedUser !== 'null' && storedUser !== '{}') {
+        try {
+          const user = JSON.parse(storedUser);
+          if (user && user.email) {
+            console.log('✅ Valid user found in localStorage:', user.email);
+            
+            // Create session data from user
+            const sessionData = {
+              user: user,
+              access_token: 'simple-token-' + Date.now(),
+              timestamp: Date.now()
+            };
+            sessionStorage.setItem('simple-auth-session', JSON.stringify(sessionData));
+            
+            // If auth manager exists but hasn't loaded the session yet, trigger it
+            const authManager = window.globalAuthManager || window.simpleAuthManager;
+            if (authManager && !authManager.isUserLoggedIn()) {
+              console.log('🔄 Auth manager exists but user not loaded, triggering load...');
+              if (authManager.handleLogin) {
+                authManager.handleLogin(user);
+              }
+            }
+            
+            return true;
+          }
+        } catch (parseError) {
+          console.log('LocalStorage user parse error:', parseError);
+        }
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error checking sessionStorage:', error);
+      return false;
+    }
+  }
+  
   // Function to check authentication and redirect if needed
-  async function checkAuth() {
+  async function checkAuth(attempt = 0) {
     const authGuard = document.getElementById('auth-guard');
     if (!authGuard) return;
 
     const redirectTo = authGuard.dataset.redirectTo || '/login';
+    const maxAttempts = 30; // Wait up to 3 seconds (30 * 100ms) - increased for deployment
+    
+    // Check if we're coming from signup redirect or login redirect
+    const isSignupRedirect = sessionStorage.getItem('signup-redirect-in-progress') === 'true';
+    const isLoginRedirect = sessionStorage.getItem('login-redirect-in-progress') === 'true';
+    const isRedirecting = isSignupRedirect || isLoginRedirect;
+    
+    if (isRedirecting) {
+      console.log('🔄 Redirect detected, giving extra time for session to load...');
+      // Clear the flag after a moment
+      setTimeout(() => {
+        sessionStorage.removeItem('signup-redirect-in-progress');
+        sessionStorage.removeItem('login-redirect-in-progress');
+      }, 3000);
+    }
     
     try {
+      // First, check sessionStorage and localStorage directly as a fallback
+      // CRITICAL: This is more reliable in deployment
+      const hasValidSession = checkSessionStorage();
+      
       // Wait for global auth manager to be ready
       let authManager = window.globalAuthManager || window.simpleAuthManager;
       
       if (!authManager) {
-        // Wait a bit and retry - more aggressive
-        setTimeout(checkAuth, 50);
+        // If we have a valid session in storage but no auth manager yet, wait a bit more
+        // Give extra time if coming from redirect (login/signup)
+        const maxWaitAttempts = isRedirecting ? maxAttempts * 2 : maxAttempts;
+        if (hasValidSession && attempt < maxWaitAttempts) {
+          console.log(`⏳ Auth manager not ready but session exists, waiting... (${attempt + 1}/${maxWaitAttempts})`);
+          setTimeout(() => checkAuth(attempt + 1), 100);
+          return;
+        } else if (hasValidSession) {
+          // We have a valid session even without auth manager, allow access
+          // CRITICAL: This prevents redirect loops in deployment
+          console.log('✅ Valid session found, allowing access even without auth manager');
+          return;
+        } else if (attempt < maxWaitAttempts) {
+          // No session and no auth manager, wait a bit more (longer if redirect)
+          setTimeout(() => checkAuth(attempt + 1), 100);
+          return;
+        } else {
+          // No session and no auth manager after max attempts, redirect
+          console.log('❌ No auth manager and no session after max attempts');
+          if (window.location.pathname !== '/login') {
+            sessionStorage.setItem('login-redirect-url', window.location.pathname + window.location.search);
+            window.location.href = redirectTo;
+          }
+          return;
+        }
+      }
+      
+      // Check if user is authenticated via auth manager
+      if (authManager.isUserLoggedIn()) {
+        console.log('✅ User is authenticated via auth manager, allowing access');
         return;
       }
       
-      // Check if user is authenticated
-      if (authManager.isUserLoggedIn()) {
-        console.log('✅ User is authenticated, allowing access');
-        return;
-      } else {
-        console.log('❌ User not authenticated, redirecting to:', redirectTo);
-        
-        // Check if we're already on the login page to prevent loops
-        if (window.location.pathname === '/login') {
-          console.log('Already on login page, not redirecting');
-          return;
+      // Auth manager exists but says user is not logged in
+      // Double-check sessionStorage and localStorage one more time
+      // CRITICAL: This is important for deployment where timing can be off
+      if (hasValidSession) {
+        console.log('⚠️ Auth manager says not logged in but session exists, forcing reload...');
+        // Force the auth manager to check again
+        if (authManager.checkExistingSession) {
+          authManager.checkExistingSession();
+        } else if (authManager.handleLogin) {
+          // Try to load session from storage
+          const sessionData = sessionStorage.getItem('simple-auth-session') || localStorage.getItem('simple-auth-session');
+          if (sessionData) {
+            try {
+              const session = JSON.parse(sessionData);
+              if (session && session.user) {
+                authManager.handleLogin(session.user);
+              }
+            } catch (e) {
+              console.log('Error parsing session for auth manager:', e);
+            }
+          }
         }
-        
-        // Store the current page as redirect target after login
-        if (window.location.pathname !== '/login') {
-          sessionStorage.setItem('login-redirect-url', window.location.pathname + window.location.search);
-        }
-        
-        // Redirect to login page
-        window.location.href = redirectTo;
+        // Give it more time to update in deployment, then check again
+        setTimeout(() => {
+          if (authManager.isUserLoggedIn()) {
+            console.log('✅ Auth manager updated, user is now authenticated');
+            return;
+          } else if (checkSessionStorage()) {
+            // CRITICAL: If session exists in storage, allow access even if auth manager hasn't updated
+            // This prevents redirect loops in deployment
+            console.log('✅ Session still valid in storage, allowing access');
+            return;
+          } else {
+            console.log('❌ Session invalid, redirecting to login');
+            if (window.location.pathname !== '/login') {
+              sessionStorage.setItem('login-redirect-url', window.location.pathname + window.location.search);
+              window.location.href = redirectTo;
+            }
+          }
+        }, 500); // Increased timeout for deployment
         return;
       }
+      
+      // No valid session found anywhere
+      console.log('❌ User not authenticated, redirecting to:', redirectTo);
+      
+      // Check if we're already on the login page to prevent loops
+      if (window.location.pathname === '/login') {
+        console.log('Already on login page, not redirecting');
+        return;
+      }
+      
+      // Store the current page as redirect target after login
+      if (window.location.pathname !== '/login') {
+        sessionStorage.setItem('login-redirect-url', window.location.pathname + window.location.search);
+      }
+      
+      // Redirect to login page
+      window.location.href = redirectTo;
+      return;
       
     } catch (error) {
       console.error('Error checking authentication:', error);
+      // On error, check sessionStorage as last resort
+      if (checkSessionStorage()) {
+        console.log('✅ Error occurred but valid session found, allowing access');
+        return;
+      }
       // On error, only redirect if not already on login page
       if (window.location.pathname !== '/login') {
         window.location.href = redirectTo;

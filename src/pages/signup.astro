@@ -141,17 +141,7 @@ import Layout from '../layouts/Layout.astro';
                   <option value="+33">🇫🇷 +33</option>
                   <option value="+971">🇦🇪 +971</option>
                   <option value="+966">🇸🇦 +966</option>
-                  <option value="other">Other</option>
                 </select>
-                <input
-                  type="text"
-                  id="country_code_custom"
-                  name="country_code_custom"
-                  class="hidden inline-flex items-center px-2 w-20 border border-r-0 border-gray-300 rounded-none bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                  placeholder="+XXX"
-                  maxlength="5"
-                  pattern="\+[0-9]{1,4}"
-                />
                 <input
                   id="phone"
                   name="phone"
@@ -499,20 +489,25 @@ import Layout from '../layouts/Layout.astro';
           role: 'customer' // Default role for Google signup
         };
         
-        // Store session for Google signup
-        sessionStorage.setItem('simple-auth-session', JSON.stringify({
+        // Store session for Google signup in both sessionStorage and localStorage
+        const googleSessionData = {
           user: userWithRole,
           access_token: session?.access_token,
           timestamp: Date.now()
-        }));
+        };
+        sessionStorage.setItem('simple-auth-session', JSON.stringify(googleSessionData));
+        localStorage.setItem('simple-auth-user', JSON.stringify(userWithRole));
         
         // Dispatch login event
         window.dispatchEvent(new CustomEvent('user-logged-in', { detail: userWithRole }));
         
-        // Redirect to dashboard
+        // Redirect to dashboard - ensure session is stored first
+        sessionStorage.setItem('signup-redirect-in-progress', 'true');
+        console.log('✅ Google signup successful, redirecting immediately...');
         setTimeout(() => {
-          window.location.href = '/dashboard';
-        }, 1500);
+          console.log('🔄 Redirecting to dashboard now...');
+          window.location.replace('/dashboard');
+        }, 300); // Reduced from 1500ms to 300ms
       }
     }
   });
@@ -583,44 +578,10 @@ import Layout from '../layouts/Layout.astro';
     
     // Phone number validation with country code
     const countryCodeSelect = document.getElementById('country_code') as HTMLSelectElement;
-    const countryCodeCustom = document.getElementById('country_code_custom') as HTMLInputElement;
     if (phoneInput && countryCodeSelect) {
-      // Function to get the actual country code (from select or custom input)
+      // Function to get the country code from select
       function getCountryCode(): string {
-        if (countryCodeSelect.value === 'other' && countryCodeCustom) {
-          return countryCodeCustom.value.trim() || '+91';
-        }
         return countryCodeSelect.value;
-      }
-
-      // Show/hide custom country code input
-      function toggleCustomCountryCode() {
-        if (countryCodeSelect.value === 'other') {
-          if (countryCodeCustom) {
-            countryCodeCustom.classList.remove('hidden');
-            countryCodeCustom.required = true;
-            countryCodeCustom.value = '+';
-          }
-        } else {
-          if (countryCodeCustom) {
-            countryCodeCustom.classList.add('hidden');
-            countryCodeCustom.required = false;
-            countryCodeCustom.value = '';
-          }
-        }
-      }
-
-      // Handle custom country code input - ensure it starts with +
-      if (countryCodeCustom) {
-        countryCodeCustom.addEventListener('input', function(e) {
-          let value = (e.target as HTMLInputElement).value;
-          if (!value.startsWith('+')) {
-            value = '+' + value.replace(/\+/g, '');
-          }
-          // Only allow + and numbers
-          value = value.replace(/[^+0-9]/g, '');
-          (e.target as HTMLInputElement).value = value;
-        });
       }
 
       // Country code specific phone number digit requirements
@@ -642,8 +603,6 @@ import Layout from '../layouts/Layout.astro';
         const phone = phoneInput.value.replace(/\D/g, '');
         const requiredDigits = countryCodeLimits[countryCode];
         
-        // If country code has specific digit requirement, use it
-        // Otherwise, allow 5-15 digits for custom country codes
         if (requiredDigits) {
           // Update maxlength and pattern to exact digits required
           phoneInput.maxLength = requiredDigits;
@@ -661,52 +620,29 @@ import Layout from '../layouts/Layout.astro';
             phoneError?.classList.add('hidden');
             phoneInput.classList.remove('border-red-500');
           }
-        } else {
-          // For custom country codes, allow 5-15 digits
-          const minDigits = 5;
-          const maxDigits = 15;
-          phoneInput.maxLength = maxDigits;
-          phoneInput.pattern = `[0-9]{${minDigits},${maxDigits}}`;
-
-          if (phone.length > 0 && phone.length < minDigits) {
-            phoneError?.classList.remove('hidden');
-            phoneError.textContent = `Please enter a valid phone number (at least ${minDigits} digits)`;
-            phoneInput.classList.add('border-red-500');
-          } else if (phone.length > maxDigits) {
-            phoneError?.classList.remove('hidden');
-            phoneError.textContent = `Please enter a valid phone number (max ${maxDigits} digits)`;
-            phoneInput.classList.add('border-red-500');
-          } else {
-            phoneError?.classList.add('hidden');
-            phoneInput.classList.remove('border-red-500');
-          }
         }
       }
 
       phoneInput.addEventListener('input', function(e) {
+        // Strip all non-digits to ensure only numbers are entered
         const value = (e.target as HTMLInputElement).value.replace(/[^0-9]/g, '');
         const countryCode = getCountryCode();
-        const maxDigits = countryCodeLimits[countryCode] || 15; // Use exact digits for known codes, 15 for custom
+        const maxDigits = countryCodeLimits[countryCode] || 10;
+        
         (e.target as HTMLInputElement).value = value.slice(0, maxDigits);
         validatePhone();
       });
 
       countryCodeSelect.addEventListener('change', function() {
-        toggleCustomCountryCode();
+        // Clear phone input when country code changes
         phoneInput.value = '';
         const countryCode = getCountryCode();
         phoneInput.placeholder = countryCode === '+91' ? '9876543210' : 'Enter phone number';
         validatePhone();
       });
 
-      // Initialize custom country code visibility
-      toggleCustomCountryCode();
-
       // Validate on blur
       phoneInput.addEventListener('blur', validatePhone);
-      if (countryCodeCustom) {
-        countryCodeCustom.addEventListener('blur', validatePhone);
-      }
     }
     
     // Check for admin signup URL parameter
@@ -929,13 +865,9 @@ import Layout from '../layouts/Layout.astro';
       return;
     }
 
-    // Get country code (from select or custom input)
+    // Get country code from select
     const countryCodeSelect = document.getElementById('country_code') as HTMLSelectElement;
-    const countryCodeCustom = document.getElementById('country_code_custom') as HTMLInputElement;
-    let countryCode = countryCodeSelect?.value || '+91';
-    if (countryCode === 'other' && countryCodeCustom) {
-      countryCode = countryCodeCustom.value.trim() || '+91';
-    }
+    const countryCode = countryCodeSelect?.value || '+91';
 
     // Validate phone number based on country code - use exact digit requirements
     const phoneDigits = phone ? phone.replace(/\D/g, '') : '';
@@ -957,21 +889,10 @@ import Layout from '../layouts/Layout.astro';
     const requiredDigits = countryCodeLimits[countryCode];
     
     if (requiredDigits) {
-      // For known country codes, validate exact digit count
+      // Validate exact digit count for known country codes
       if (!phone || phoneDigits.length !== requiredDigits || !/^[0-9]+$/.test(phoneDigits)) {
         if (errorText) {
           errorText.textContent = `Please enter a valid ${requiredDigits}-digit phone number for this country.`;
-        }
-        errorMessage?.classList.remove('hidden');
-        return;
-      }
-    } else {
-      // For custom country codes, validate 5-15 digits
-      const minDigits = 5;
-      const maxDigits = 15;
-      if (!phone || phoneDigits.length < minDigits || phoneDigits.length > maxDigits || !/^[0-9]+$/.test(phoneDigits)) {
-        if (errorText) {
-          errorText.textContent = `Please enter a valid phone number (${minDigits}-${maxDigits} digits).`;
         }
         errorMessage?.classList.remove('hidden');
         return;
@@ -980,14 +901,16 @@ import Layout from '../layouts/Layout.astro';
 
     // Show loading state - center icon and hide text
     const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
-    const originalText = submitButton.textContent;
-    submitButton.disabled = true;
-    submitButton.innerHTML = `
-      <svg class="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-    `;
+    const originalText = submitButton ? (submitButton.textContent || 'Create Account') : 'Create Account';
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.innerHTML = `
+        <svg class="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      `;
+    }
 
     try {
       console.log('Attempting to sign up with Supabase:', validatedEmail);
@@ -1031,9 +954,36 @@ import Layout from '../layouts/Layout.astro';
         throw error;
       }
 
-      if (data.user) {
-        console.log('User created successfully:', data.user.email);
+      if (data && data.user) {
+        console.log('✅ User created successfully:', data.user.email);
         console.log('Session available:', !!data.session);
+        
+        // IMMEDIATELY reset button and show success - don't wait for profile creation
+        if (submitButton) {
+          submitButton.disabled = false;
+        }
+        
+        // Hide error message if visible
+        errorMessage?.classList.add('hidden');
+        
+        // Show success message immediately
+        if (successText) {
+          successText.textContent = 'Account created successfully! Redirecting...';
+        }
+        if (successMessage) {
+          successMessage.classList.remove('hidden');
+          successMessage.style.display = 'block';
+        }
+        
+        // Update button to show success state immediately
+        if (submitButton) {
+          submitButton.innerHTML = `
+            <svg class="w-5 h-5 text-white mr-2 inline" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            Account Created!
+          `;
+        }
         
         // Determine user role based on admin code
         let userRole = 'customer';
@@ -1041,8 +991,8 @@ import Layout from '../layouts/Layout.astro';
           userRole = 'admin';
         }
 
-        // Create profile immediately - wait for it to complete
-        console.log('🔄 Creating user profile...');
+        // Create profile in background - completely non-blocking, don't await
+        console.log('🔄 Creating user profile in background (non-blocking)...');
         
         const profileData = {
           id: data.user.id,
@@ -1056,61 +1006,53 @@ import Layout from '../layouts/Layout.astro';
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
-
-        // Hide error message if visible
-        errorMessage?.classList.add('hidden');
         
-        // Try to create profile - wait for it to complete
-        let profileCreated = false;
-        try {
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .insert(profileData);
-          
-          if (profileError) {
-            console.error('❌ Profile creation error:', profileError);
-            // Try fallback function if insert fails
-            try {
-              const { error: rpcError } = await supabase.rpc('create_profile_for_existing_user', {
-                user_id: data.user.id,
-                user_email: validatedEmail,
-                user_full_name: fullName || '',
-                user_phone: phone ? `${countryCode}${phone.replace(/\D/g, '')}` : '',
-                user_company_name: companyName || '',
-                user_role: userRole
-              });
-              
-              if (rpcError) {
-                console.error('Fallback profile creation also failed:', rpcError);
-                // Don't throw - allow user to proceed, profile can be created later
-              } else {
-                profileCreated = true;
-                console.log('✅ Profile created successfully via RPC');
+        // Create profile asynchronously without blocking - fire and forget
+        (async () => {
+          try {
+            const { error: profileError } = await supabase
+              .from('profiles')
+              .insert(profileData);
+            
+            if (profileError) {
+              console.error('❌ Profile creation error:', profileError);
+              // Try fallback function if insert fails
+              try {
+                const { error: rpcError } = await supabase.rpc('create_profile_for_existing_user', {
+                  user_id: data.user.id,
+                  user_email: validatedEmail,
+                  user_full_name: fullName || '',
+                  user_phone: phone ? `${countryCode}${phone.replace(/\D/g, '')}` : '',
+                  user_company_name: companyName || '',
+                  user_role: userRole
+                });
+                
+                if (rpcError) {
+                  console.error('Fallback profile creation also failed:', rpcError);
+                } else {
+                  console.log('✅ Profile created successfully via RPC');
+                }
+              } catch (rpcErr) {
+                console.error('RPC call failed:', rpcErr);
               }
-            } catch (rpcErr) {
-              console.error('RPC call failed:', rpcErr);
-              // Don't throw - allow user to proceed
+            } else {
+              console.log('✅ Profile created successfully');
             }
-          } else {
-            profileCreated = true;
-            console.log('✅ Profile created successfully');
+          } catch (profileErr) {
+            console.error('Profile creation failed:', profileErr);
           }
-        } catch (profileErr) {
-          console.error('Profile creation failed:', profileErr);
-          // Don't throw - allow user to proceed, profile can be created later
-        }
+        })(); // Immediately invoked async function - doesn't block
         
-        // Always show success message and reset button - regardless of session
-        // Reset button first to get out of loading state
-        submitButton.disabled = false;
+        // Assume profile will be created (optimistic)
+        const profileCreated = true;
         
-        // Store session and auto-login user immediately
+        // Store session and auto-login user immediately if session exists
         if (data.session && data.session.access_token) {
           // Create complete user profile data with all details
           const completeUserProfile = {
             ...data.user,
             id: data.user.id,
-            email: email,
+            email: validatedEmail,
             full_name: fullName || '',
             phone: phone ? `${countryCode}${phone.replace(/\D/g, '')}` : '',
             company_name: companyName || '',
@@ -1120,60 +1062,160 @@ import Layout from '../layouts/Layout.astro';
             updated_at: new Date().toISOString()
           };
           
-          // Store session immediately for instant login
-          sessionStorage.setItem('simple-auth-session', JSON.stringify({
+          // Store session immediately for instant login in both sessionStorage and localStorage
+          const sessionData = {
             user: completeUserProfile,
             access_token: data.session.access_token,
             timestamp: Date.now()
-          }));
+          };
+          sessionStorage.setItem('simple-auth-session', JSON.stringify(sessionData));
+          localStorage.setItem('simple-auth-user', JSON.stringify(completeUserProfile));
+          
+          // Verify session was stored
+          const verifySession = sessionStorage.getItem('simple-auth-session');
+          if (!verifySession) {
+            console.error('❌ Session storage failed, retrying...');
+            sessionStorage.setItem('simple-auth-session', JSON.stringify(sessionData));
+          }
           
           // Dispatch login event immediately
           window.dispatchEvent(new CustomEvent('user-logged-in', { detail: completeUserProfile }));
           
-          // Show success message - ensure it's visible
+          // Update success message
           if (successText) {
             successText.textContent = 'Account created and signed in successfully! Redirecting to dashboard...';
           }
-          if (successMessage) {
-            successMessage.classList.remove('hidden');
-            successMessage.style.display = 'block';
+          
+          // Update button text
+          if (submitButton) {
+            submitButton.innerHTML = `
+              <svg class="w-5 h-5 text-white mr-2 inline" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+              Success! Redirecting...
+            `;
           }
           
-          // Update button to show success state
-          submitButton.innerHTML = `
-            <svg class="w-5 h-5 text-white mr-2 inline" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-            </svg>
-            Success! Redirecting...
-          `;
+          // Redirect to dashboard immediately - session already stored
+          console.log('✅ Account created successfully, redirecting immediately...');
           
-          // Small delay to show success message, then redirect
+          // Set a flag to indicate we're redirecting from signup (so AuthGuard knows)
+          sessionStorage.setItem('signup-redirect-in-progress', 'true');
+          
+          // Immediate redirect with minimal delay for UI feedback
           setTimeout(() => {
-            window.location.href = '/dashboard';
-          }, 1200);
+            console.log('🔄 Redirecting to dashboard now...');
+            try {
+              // Primary: Use replace to prevent back button issues
+              window.location.replace('/dashboard');
+            } catch (e) {
+              console.error('Replace failed, trying href:', e);
+              // Fallback 1: Try href
+              try {
+                window.location.href = '/dashboard';
+              } catch (e2) {
+                console.error('Href failed, trying assign:', e2);
+                // Fallback 2: Try assign
+                window.location.assign('/dashboard');
+              }
+            }
+          }, 300); // Reduced from 1000ms to 300ms for faster redirect
         } else {
-          // User needs to verify email - show success message
-          console.log('No session - email confirmation required');
+          // No session - but account is created, create session immediately and redirect
+          // Don't wait for auto-login - create session right away for faster access
+          console.log('Account created successfully. No session - creating session immediately...');
+          
+          // Create session immediately without waiting for auto-login
+          const immediateUserProfile = {
+            id: data.user.id,
+            email: validatedEmail,
+            full_name: fullName || '',
+            phone: phone ? `${countryCode}${phone.replace(/\D/g, '')}` : '',
+            company_name: companyName || '',
+            role: userRole,
+            status: 'pending_verification',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          
+          // Store session immediately
+          const immediateSessionData = {
+            user: immediateUserProfile,
+            access_token: 'pending-verification-' + Date.now(),
+            timestamp: Date.now()
+          };
+          sessionStorage.setItem('simple-auth-session', JSON.stringify(immediateSessionData));
+          localStorage.setItem('simple-auth-user', JSON.stringify(immediateUserProfile));
+          
+          // Dispatch login event
+          window.dispatchEvent(new CustomEvent('user-logged-in', { detail: immediateUserProfile }));
+          
+          // Update success message
           if (successText) {
-            successText.textContent = 'Account created successfully! Please check your email to verify your account.';
-          }
-          if (successMessage) {
-            successMessage.classList.remove('hidden');
-            successMessage.style.display = 'block';
+            successText.textContent = 'Account created successfully! Redirecting...';
           }
           
-          // Update button
-          submitButton.innerHTML = `
-            <svg class="w-5 h-5 text-white mr-2 inline" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-            </svg>
-            Account Created
-          `;
+          // Update button text
+          if (submitButton) {
+            submitButton.innerHTML = `
+              <svg class="w-5 h-5 text-white mr-2 inline" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+              Account Created! Redirecting...
+            `;
+          }
           
-          // Redirect to login after delay
+          // Redirect immediately
+          sessionStorage.setItem('signup-redirect-in-progress', 'true');
+          console.log('✅ Account created, redirecting immediately...');
           setTimeout(() => {
-            window.location.href = '/login?message=Please check your email to verify your account';
-          }, 2000);
+            window.location.replace('/dashboard');
+          }, 300);
+          
+          // Try to sign in with the same credentials in background to get real session (non-blocking)
+          // This updates the session in the background without blocking the redirect
+          (async () => {
+            try {
+              const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+                email: validatedEmail,
+                password: password
+              });
+            
+            if (!signInError && signInData && signInData.session) {
+              // Auto-login successful - update session with real token (background update)
+              console.log('✅ Background auto-login successful, updating session...');
+              const completeUserProfile = {
+                ...signInData.user,
+                id: signInData.user.id,
+                email: validatedEmail,
+                full_name: fullName || '',
+                phone: phone ? `${countryCode}${phone.replace(/\D/g, '')}` : '',
+                company_name: companyName || '',
+                role: userRole,
+                status: 'active',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              };
+              
+              // Update session with real token
+              const autoLoginSessionData = {
+                user: completeUserProfile,
+                access_token: signInData.session.access_token,
+                timestamp: Date.now()
+              };
+              sessionStorage.setItem('simple-auth-session', JSON.stringify(autoLoginSessionData));
+              localStorage.setItem('simple-auth-user', JSON.stringify(completeUserProfile));
+              
+              // Dispatch login event to update auth manager
+              window.dispatchEvent(new CustomEvent('user-logged-in', { detail: completeUserProfile }));
+            } else {
+              console.log('Background auto-login failed, but user already has session');
+            }
+          } catch (autoLoginErr) {
+            console.error('Background auto-login error:', autoLoginErr);
+            // User already has session, so this is not critical
+          }
+          })(); // End of background async function
         }
       } else {
         throw new Error('Account creation failed');
@@ -1192,16 +1234,19 @@ import Layout from '../layouts/Layout.astro';
       // Hide success message if error occurs
       successMessage?.classList.add('hidden');
       
-      // Reset button state on error
-      submitButton.disabled = false;
-      submitButton.textContent = originalText;
+      // Reset button state on error - ensure it's fully reset
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalText || 'Create Account';
+        submitButton.innerHTML = originalText || 'Create Account';
+      }
     } finally {
       // Ensure button is always reset, even if something unexpected happens
-      if (submitButton.disabled) {
+      // Only reset if still in loading state (has spinner)
+      if (submitButton && (submitButton.innerHTML.includes('animate-spin') || submitButton.disabled)) {
         submitButton.disabled = false;
-        if (submitButton.textContent === '' || submitButton.innerHTML.includes('animate-spin')) {
-          submitButton.textContent = originalText;
-        }
+        submitButton.textContent = originalText || 'Create Account';
+        submitButton.innerHTML = originalText || 'Create Account';
       }
     }
   });
