@@ -726,6 +726,46 @@ import AuthGuard from '../components/AuthGuard.astro';
 </Layout>
 
 <script>
+  // Global error handler to catch unhandled promise rejections and ensure button resets
+  window.addEventListener('unhandledrejection', (event) => {
+    console.error('❌❌❌ UNHANDLED PROMISE REJECTION ❌❌❌');
+    console.error('❌ Error:', event.reason);
+    console.error('❌ Promise:', event.promise);
+    
+    // If this is related to form submission, reset the save button
+    if (event.reason && typeof event.reason === 'object' && 'message' in event.reason) {
+      const errorMessage = event.reason.message || '';
+      if (errorMessage.includes('save') || errorMessage.includes('database') || errorMessage.includes('insert')) {
+        console.log('🔄 Detected save-related error, resetting save button...');
+        const saveButton = document.getElementById('save-and-pay');
+        if (saveButton) {
+          saveButton.disabled = false;
+          saveButton.textContent = 'Save and Make Payment';
+          console.log('✅ Save button reset via global error handler');
+        }
+      }
+    }
+    
+    // Prevent default browser error handling (we're handling it)
+    event.preventDefault();
+  });
+  
+  // Global error handler for general errors
+  window.addEventListener('error', (event) => {
+    console.error('❌❌❌ GLOBAL ERROR ❌❌❌');
+    console.error('❌ Error:', event.error);
+    console.error('❌ Message:', event.message);
+    console.error('❌ Source:', event.filename, ':', event.lineno);
+    
+    // Reset save button if it's stuck
+    const saveButton = document.getElementById('save-and-pay');
+    if (saveButton && saveButton.disabled) {
+      console.log('🔄 Resetting stuck save button due to global error...');
+      saveButton.disabled = false;
+      saveButton.textContent = 'Save and Make Payment';
+    }
+  });
+
   // Import the FIXED database helper
   import { saveCustomizationForm } from '../lib/customization-db.js';
 
@@ -2910,37 +2950,80 @@ import AuthGuard from '../components/AuthGuard.astro';
       console.log('📤 Saving to database...');
       
       let savedData, saveError;
+      let timeoutId: NodeJS.Timeout | null = null;
       try {
-        // Fast database insert with 10 second timeout
+        // Fast database insert with 15 second timeout (increased from 10)
         const insertPromise = supabase
           .from('order_customizations')
           .insert(insertData)
           .select();
         
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Database insert timed out after 10 seconds')), 10000);
+        // Create a proper timeout promise that rejects
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          timeoutId = setTimeout(() => {
+            reject(new Error('Database insert timed out after 15 seconds'));
+          }, 15000);
         });
         
-        const result = await Promise.race([insertPromise, timeoutPromise]) as any;
+        // Race the insert against the timeout
+        const result = await Promise.race([insertPromise, timeoutPromise]);
         
-        savedData = result.data;
-        saveError = result.error;
+        // Clear timeout if operation completed
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
+        }
+        
+        // Check if result has error property (Supabase response format)
+        if (result && typeof result === 'object') {
+          if ('error' in result) {
+            savedData = (result as any).data;
+            saveError = (result as any).error;
+          } else if ('data' in result) {
+            // Standard Supabase response format
+            savedData = (result as any).data;
+            saveError = (result as any).error || null;
+          } else {
+            // Result might be the data directly
+            savedData = result;
+            saveError = null;
+          }
+        } else {
+          savedData = result;
+          saveError = null;
+        }
         
         const dbInsertElapsed = Math.round((Date.now() - dbInsertStartTime) / 1000);
         console.log(`✅ Database insert completed in ${dbInsertElapsed} seconds`);
+        console.log('✅ Insert result:', { savedData, saveError });
       } catch (dbError: any) {
-        console.error('❌ Database insert exception:', dbError.message);
+        // Clear timeout on error
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
+        }
+        console.error('❌ Database insert exception:', dbError);
+        console.error('❌ Error message:', dbError?.message);
+        console.error('❌ Error stack:', dbError?.stack);
         
         // Check if it's a timeout error
-        if (dbError.message && dbError.message.includes('timed out')) {
+        if (dbError?.message && dbError.message.includes('timed out')) {
           saveError = {
             message: 'Database operation timed out. Please check your internet connection and try again.',
             code: 'TIMEOUT',
-            details: 'The database insert took longer than 10 seconds to complete.',
+            details: 'The database insert took longer than 15 seconds to complete.',
             hint: 'This may be due to network issues or database overload. Please try again.'
           };
+        } else if (dbError?.error) {
+          // If error is wrapped in an error object
+          saveError = dbError.error;
         } else {
-          saveError = dbError;
+          saveError = {
+            message: dbError?.message || 'Unknown database error occurred',
+            code: dbError?.code || 'UNKNOWN',
+            details: dbError?.details || '',
+            hint: dbError?.hint || 'Please try again or contact support.'
+          };
         }
         savedData = null;
         
@@ -2948,6 +3031,7 @@ import AuthGuard from '../components/AuthGuard.astro';
       }
       if (saveError) {
         console.error('❌ Error saving:', saveError.message || saveError.code || 'Unknown error');
+        console.error('❌ Full error object:', saveError);
         
         // Create detailed error message
         let errorMessage = saveError.message || saveError.hint || 'Failed to save your order.';
@@ -2977,35 +3061,38 @@ import AuthGuard from '../components/AuthGuard.astro';
         const errorDiv = document.getElementById('validation-errors');
         if (errorDiv) {
           errorDiv.classList.remove('hidden');
+          const safeErrorMessage = errorMessage.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+          const safeErrorDetails = errorDetails.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+          const safeErrorCode = (saveError.code || 'Unknown').replace(/"/g, '&quot;');
           errorDiv.innerHTML = `
             <div class="bg-red-50 border border-red-200 rounded-lg p-4">
               <h4 class="text-red-800 font-semibold mb-2">❌ Error Saving Order</h4>
-              <p class="text-red-700 font-medium">${errorMessage}</p>
-              ${errorDetails ? `<p class="text-red-600 text-sm mt-2">${errorDetails}</p>` : ''}
-              <p class="text-red-600 text-sm mt-2">Error Code: ${saveError.code || 'Unknown'}</p>
+              <p class="text-red-700 font-medium">${safeErrorMessage}</p>
+              ${safeErrorDetails ? `<p class="text-red-600 text-sm mt-2">${safeErrorDetails}</p>` : ''}
+              <p class="text-red-600 text-sm mt-2">Error Code: ${safeErrorCode}</p>
               <p class="text-red-600 text-sm mt-2">If this problem persists, please contact support with the error code above.</p>
-              <button onclick="console.log('Error details:', ${JSON.stringify(saveError).replace(/"/g, '&quot;')});" class="mt-2 text-xs text-red-600 underline">View technical details in console</button>
             </div>
           `;
         }
         
-        // Also show alert for immediate feedback
-        alert(`❌ Error saving order:\n\n${errorMessage}\n\n${errorDetails || 'Please check the console for more details.'}`);
-        
-        // Throw error to be caught by button handler
+        // Throw error to be caught by button handler - this ensures button resets
         throw new Error(errorMessage);
       }
 
-      if (!savedData || savedData.length === 0) {
+      if (!savedData || (Array.isArray(savedData) && savedData.length === 0)) {
         console.error('❌❌❌ No data returned from insert operation ❌❌❌');
         console.error('❌ savedData:', savedData);
-        console.error('❌ savedData length:', savedData ? savedData.length : 'null/undefined');
+        console.error('❌ savedData type:', typeof savedData);
+        console.error('❌ savedData is array:', Array.isArray(savedData));
+        console.error('❌ savedData length:', savedData ? (Array.isArray(savedData) ? savedData.length : 'not an array') : 'null/undefined');
         throw new Error('Error saving your order. No data was returned from database. Please try again.');
       }
 
-      console.log('✅ Order saved successfully! ID:', savedData[0]?.id);
+      // Handle both array and single object responses
+      const savedRecord = Array.isArray(savedData) ? savedData[0] : savedData;
+      console.log('✅ Order saved successfully! ID:', savedRecord?.id);
 
-      const savedRecordId = savedData[0]?.id;
+      const savedRecordId = savedRecord?.id;
       
       // Show success message immediately (files will upload in background)
       const successDiv = document.getElementById('validation-errors');
@@ -5064,38 +5151,47 @@ Status: Submitted
           console.error('❌❌❌ SAVE BUTTON ERROR ❌❌❌');
           console.error('🕐 Error occurred at:', new Date().toISOString());
           console.error('❌ Error object:', err);
-          console.error('❌ Error message:', err.message);
-          console.error('❌ Error stack:', err.stack);
+          console.error('❌ Error message:', err?.message || 'Unknown error');
+          console.error('❌ Error stack:', err?.stack);
           
           // Show error message to user
-          const errorMessage = err.message || 'An error occurred while saving. Please try again.';
+          const errorMessage = err?.message || 'An error occurred while saving. Please try again.';
           const errorDiv = document.getElementById('validation-errors');
           if (errorDiv) {
             errorDiv.classList.remove('hidden');
+            const safeErrorMessage = errorMessage.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
             errorDiv.innerHTML = `
               <div class="bg-red-50 border border-red-200 rounded-lg p-4">
                 <h4 class="text-red-800 font-semibold mb-2">❌ Error Saving Order</h4>
-                <p class="text-red-700">${errorMessage}</p>
+                <p class="text-red-700">${safeErrorMessage}</p>
                 <p class="text-red-600 text-sm mt-2">Please check the console for more details and try again.</p>
               </div>
             `;
           }
-          // Always show alert for immediate feedback
-          alert(`❌ Error: ${errorMessage}\n\nPlease check the console and try again.`);
         } finally {
           console.log('🔄 Resetting isSaving flag to false');
           isSaving = false;
           // Ensure button is always reset, even if there was an error
           try {
-            targetButton.disabled = false;
-            targetButton.innerHTML = originalButtonText;
-            console.log('✅ Button state reset successfully');
-          } catch (resetError) {
-            console.error('❌ Error resetting button state:', resetError);
-            // Force reset as fallback
             if (targetButton) {
               targetButton.disabled = false;
-              targetButton.textContent = 'Save and Pay';
+              targetButton.innerHTML = originalButtonText;
+              console.log('✅ Button state reset successfully');
+            } else {
+              console.error('❌ Target button not found during reset');
+            }
+          } catch (resetError) {
+            console.error('❌ Error resetting button state:', resetError);
+            // Force reset as fallback - try multiple methods
+            try {
+              const fallbackBtn = document.getElementById('save-and-pay');
+              if (fallbackBtn) {
+                fallbackBtn.disabled = false;
+                fallbackBtn.textContent = 'Save and Make Payment';
+                console.log('✅ Button reset via fallback method');
+              }
+            } catch (fallbackError) {
+              console.error('❌ Fallback reset also failed:', fallbackError);
             }
           }
         }
@@ -5194,30 +5290,53 @@ Status: Submitted
             
             // Clear logo and menu photos fields
             clearFormFileFields();
-          } catch (err) {
+          } catch (err: any) {
             // Clear timeout warning on error
             if (fallbackTimeoutWarning) clearTimeout(fallbackTimeoutWarning);
             
             console.error('❌❌❌ FALLBACK SAVE BUTTON ERROR ❌❌❌');
             console.error('🕐 Fallback error occurred at:', new Date().toISOString());
             console.error('❌ Error object:', err);
-            console.error('❌ Error message:', err.message);
-            console.error('❌ Error stack:', err.stack);
-            alert(`❌ An error occurred while saving: ${err.message || 'Unknown error'}. Please check the console for details.`);
+            console.error('❌ Error message:', err?.message || 'Unknown error');
+            console.error('❌ Error stack:', err?.stack);
+            
+            // Show error in UI
+            const errorDiv = document.getElementById('validation-errors');
+            if (errorDiv) {
+              errorDiv.classList.remove('hidden');
+              const safeErrorMessage = (err?.message || 'Unknown error').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+              errorDiv.innerHTML = `
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <h4 class="text-red-800 font-semibold mb-2">❌ Error Saving Order</h4>
+                  <p class="text-red-700">${safeErrorMessage}</p>
+                  <p class="text-red-600 text-sm mt-2">Please check the console for more details and try again.</p>
+                </div>
+              `;
+            }
           } finally {
             console.log('🔄 Resetting fallback isSaving flag to false');
             isSaving = false;
             // Ensure button is always reset, even if there was an error
             try {
-              fallbackBtn.disabled = false;
-              fallbackBtn.innerHTML = originalButtonText;
-              console.log('✅ Fallback button state reset successfully');
+              if (fallbackBtn) {
+                fallbackBtn.disabled = false;
+                fallbackBtn.innerHTML = originalButtonText;
+                console.log('✅ Fallback button state reset successfully');
+              } else {
+                console.error('❌ Fallback button not found during reset');
+              }
             } catch (resetError) {
               console.error('❌ Error resetting fallback button state:', resetError);
               // Force reset as fallback
-              if (fallbackBtn) {
-                fallbackBtn.disabled = false;
-                fallbackBtn.textContent = 'Save and Pay';
+              try {
+                const fallbackBtn2 = document.getElementById('save-and-pay');
+                if (fallbackBtn2) {
+                  fallbackBtn2.disabled = false;
+                  fallbackBtn2.textContent = 'Save and Make Payment';
+                  console.log('✅ Fallback button reset via alternative method');
+                }
+              } catch (fallbackError2) {
+                console.error('❌ Alternative fallback reset also failed:', fallbackError2);
               }
             }
           }

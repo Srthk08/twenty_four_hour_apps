@@ -13,6 +13,23 @@ import AuthGuard from '../components/AuthGuard.astro';
           <p class="text-gray-600 mt-2">View your order history and track your projects</p>
         </div>
 
+        <!-- Orders Summary -->
+        <div id="orders-summary" class="hidden bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-8">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex-1">
+              <h2 class="text-lg font-semibold text-gray-900 mb-2">All Your Orders</h2>
+              <p class="text-sm text-gray-600">
+                <span id="total-orders-count" class="font-bold text-primary-600">0</span> 
+                <span id="orders-summary-text">orders found</span>
+              </p>
+            </div>
+            <div class="text-right">
+              <p class="text-sm text-gray-500">Total Amount</p>
+              <p class="text-2xl font-bold text-primary-600" id="total-orders-amount">₹0</p>
+            </div>
+          </div>
+        </div>
+
         <!-- Recent Order Summary (replaces activity) -->
         <div id="recent-order-summary" class="hidden bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-8">
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -109,90 +126,9 @@ import AuthGuard from '../components/AuthGuard.astro';
                   </div>
                 </div>
 
-                <!-- Order Details -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <h4 class="text-lg font-semibold text-gray-800 mb-3">Project Details</h4>
-                    <div class="space-y-2">
-                      <div class="flex justify-between">
-                        <span class="text-gray-600">Project Name:</span>
-                        <span class="font-medium order-custom-name">-</span>
-                      </div>
-                      <div class="flex justify-between">
-                        <span class="text-gray-600">Contact Person:</span>
-                        <span class="font-medium order-contact-person">-</span>
-                      </div>
-                      <div class="flex justify-between">
-                        <span class="text-gray-600">Restaurant Name:</span>
-                        <span class="font-medium order-restaurant-name">-</span>
-                      </div>
-                      <div class="flex justify-between">
-                        <span class="text-gray-600">Cuisine Type:</span>
-                        <span class="font-medium order-cuisine-type">-</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 class="text-lg font-semibold text-gray-800 mb-3">Contact Information</h4>
-                    <div class="space-y-2">
-                      <div class="flex justify-between">
-                        <span class="text-gray-600">Email:</span>
-                        <span class="font-medium order-email">-</span>
-                      </div>
-                      <div class="flex justify-between">
-                        <span class="text-gray-600">Phone:</span>
-                        <span class="font-medium order-phone">-</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Customization Details -->
-                <div class="mb-6">
-                  <h4 class="text-lg font-semibold text-gray-800 mb-3">Customization</h4>
-                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="bg-gray-50 rounded-lg p-4">
-                      <h5 class="font-medium text-gray-700 mb-2">Selected Colors</h5>
-                      <div class="flex space-x-2">
-                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 order-primary-color" style="background-color: #3B82F6;"></div>
-                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 order-secondary-color" style="background-color: #A5CF6;"></div>
-                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 order-accent-color" style="background-color: #F59E0B;"></div>
-                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 order-text-color" style="background-color: #1F2937;"></div>
-                      </div>
-                    </div>
-                    
-                    <div class="bg-gray-50 rounded-lg p-4">
-                      <h5 class="font-medium text-gray-700 mb-2">Additional Features</h5>
-                      <div class="space-y-1 order-features">
-                        <span class="text-sm text-gray-600">No features selected</span>
-                      </div>
-                    </div>
-                    
-                    <div class="bg-gray-50 rounded-lg p-4">
-                      <h5 class="font-medium text-gray-700 mb-2">Logo Uploaded</h5>
-                      <div class="order-logo-status text-sm text-gray-600">No logo</div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Additional Requirements -->
-                <div class="mb-6">
-                  <h4 class="text-lg font-semibold text-gray-800 mb-3">Additional Requirements</h4>
-                  <div class="bg-gray-50 rounded-lg p-4">
-                    <p class="text-gray-700 order-additional-requirements">No additional requirements specified</p>
-                  </div>
-                </div>
-
-                <!-- Order Status -->
-                <div class="border-t border-gray-200 pt-6 order-status-section">
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                      <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                      <span class="text-green-700 font-medium">Order Completed</span>
-                    </div>
-                    <div class="text-sm text-gray-500">Order ID: <span class="order-id">-</span></div>
-                  </div>
+                <!-- View Order Button -->
+                <div class="border-t border-gray-200 pt-6">
+                  <button type="button" class="order-view-btn w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 rounded-md bg-primary-600 text-white hover:bg-primary-700 transition-colors text-sm sm:text-base">View Order</button>
                 </div>
               </div>
             </div>
@@ -239,7 +175,6 @@ import AuthGuard from '../components/AuthGuard.astro';
                       <h4 class="text-xs sm:text-sm font-semibold text-gray-800 mb-2">Restaurant</h4>
                       <div class="text-xs sm:text-sm text-gray-700 space-y-1 break-words">
                         <div>Name: <span id="order-modal-restaurant" class="break-words">-</span></div>
-                        <div>Cuisine: <span id="order-modal-cuisine" class="break-words">-</span></div>
                       </div>
                     </div>
                   </div>
@@ -306,18 +241,30 @@ import AuthGuard from '../components/AuthGuard.astro';
         if (!currentUser) return;
       }
 
-      // Normalize to a plain email string for downstream queries/filters
-      const userEmail = currentUser?.email || null;
+      // Normalize to a plain email string for downstream queries/filters (lowercase for consistent matching)
+      const userEmail = (currentUser?.email || null)?.toLowerCase().trim();
       if (!userEmail) {
         console.log('No user email available – cannot load orders');
         return;
       }
       
-      // Load project requirements as orders
+      console.log('📧 Loading orders for user email:', userEmail);
+      
+      // Load project requirements as orders (filter by email if available)
       if (projectRequirements) {
         try {
           const projectOrders = JSON.parse(projectRequirements);
-          projectOrders.forEach(order => {
+          const filteredProjectOrders = projectOrders.filter(order => {
+            // If order has email/userId, filter by it; otherwise include all (for backward compatibility)
+            if (order.email || order.userId || order.contactEmail) {
+              const orderEmail = (order.email || order.userId || order.contactEmail)?.toLowerCase().trim();
+              return orderEmail === userEmail;
+            }
+            // If no email field, include it (might be old format)
+            return true;
+          });
+          console.log(`📦 Loading ${filteredProjectOrders.length} project orders from localStorage (filtered from ${projectOrders.length} total)`);
+          filteredProjectOrders.forEach(order => {
             this.orders.push({
               ...order,
               orderId: `PROJ-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -334,11 +281,21 @@ import AuthGuard from '../components/AuthGuard.astro';
         }
       }
       
-      // Load order menu requirements as orders
+      // Load order menu requirements as orders (filter by email if available)
       if (orderMenuRequirements) {
         try {
           const orderMenuOrders = JSON.parse(orderMenuRequirements);
-          orderMenuOrders.forEach(order => {
+          const filteredMenuOrders = orderMenuOrders.filter(order => {
+            // If order has email/userId, filter by it; otherwise include all (for backward compatibility)
+            if (order.email || order.userId || order.contactEmail) {
+              const orderEmail = (order.email || order.userId || order.contactEmail)?.toLowerCase().trim();
+              return orderEmail === userEmail;
+            }
+            // If no email field, include it (might be old format)
+            return true;
+          });
+          console.log(`📦 Loading ${filteredMenuOrders.length} menu orders from localStorage (filtered from ${orderMenuOrders.length} total)`);
+          filteredMenuOrders.forEach(order => {
             this.orders.push({
               ...order,
               orderId: `MENU-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -355,11 +312,15 @@ import AuthGuard from '../components/AuthGuard.astro';
         }
       }
       
-      // Load user orders (if any)
+      // Load user orders (if any) - filter by email (case-insensitive)
       if (userOrders) {
         try {
           const userOrdersData = JSON.parse(userOrders);
-          const filteredOrders = userOrdersData.filter(order => order.userId === userEmail);
+          const filteredOrders = userOrdersData.filter(order => {
+            const orderUserId = (order.userId || order.email || order.userEmail)?.toLowerCase().trim();
+            return orderUserId === userEmail;
+          });
+          console.log(`📦 Loading ${filteredOrders.length} user orders from localStorage (filtered from ${userOrdersData.length} total)`);
           this.orders.push(...filteredOrders);
         } catch (error) {
           console.error('Error parsing user orders:', error);
@@ -376,14 +337,24 @@ import AuthGuard from '../components/AuthGuard.astro';
       // Sort newest first
       this.orders.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
       
-      console.log('✅ Total orders loaded:', this.orders.length);
+      console.log('✅✅✅ TOTAL ORDERS LOADED:', this.orders.length);
       console.log('📋 Order IDs:', this.orders.map(o => o.orderId));
       console.log('📋 Order details:', this.orders.map(o => ({
         id: o.orderId,
         project: o.projectName,
         status: o.status,
-        date: o.orderDate
+        date: o.orderDate,
+        total: o.total
       })));
+      
+      // Log breakdown by source for debugging
+      const ordersBySource = {
+        localStorage: this.orders.filter(o => o.orderId?.startsWith('PROJ-') || o.orderId?.startsWith('MENU-')).length,
+        supabase_order_customizations: this.orders.filter(o => o.orderId && !o.orderId.startsWith('PROJ-') && !o.orderId.startsWith('MENU-') && !o.orderId.startsWith('CART-') && !o.orderId.startsWith('CF-')).length,
+        supabase_cart_customizations: this.orders.filter(o => o.orderId?.startsWith('CART-')).length,
+        supabase_customization_forms: this.orders.filter(o => o.orderId?.startsWith('CF-')).length
+      };
+      console.log('📊 Orders breakdown by source:', ordersBySource);
     }
 
     async loadSupabaseOrders(userEmail) {
@@ -398,11 +369,11 @@ import AuthGuard from '../components/AuthGuard.astro';
         let customizationsError = null;
         const seenIds = new Set(); // Track IDs to avoid duplicates
         
-        // Try with 'email' field
+        // Try with 'email' field (case-insensitive matching)
         const { data: customizationsEmail, error: errorEmail } = await supabase
           .from('order_customizations')
           .select('*')
-          .eq('email', userEmail)
+          .ilike('email', userEmail) // Use ilike for case-insensitive matching
           .order('created_at', { ascending: false });
         
         if (!errorEmail && customizationsEmail && customizationsEmail.length > 0) {
@@ -417,11 +388,11 @@ import AuthGuard from '../components/AuthGuard.astro';
           console.log('⚠️ Error querying with "email" field:', errorEmail.message);
         }
         
-        // Also try with 'user_email' field and combine results
+        // Also try with 'user_email' field and combine results (case-insensitive)
         const { data: customizationsUserEmail, error: errorUserEmail } = await supabase
           .from('order_customizations')
           .select('*')
-          .eq('user_email', userEmail)
+          .ilike('user_email', userEmail) // Use ilike for case-insensitive matching
           .order('created_at', { ascending: false });
         
         if (!errorUserEmail && customizationsUserEmail && customizationsUserEmail.length > 0) {
@@ -485,11 +456,11 @@ import AuthGuard from '../components/AuthGuard.astro';
           });
         });
 
-        // Fetch cart_customizations (all orders, not just completed)
+        // Fetch cart_customizations (all orders, not just completed) - case-insensitive
         const { data: carts, error: cartsError } = await supabase
           .from('cart_customizations')
           .select('*')
-          .eq('user_email', userEmail)
+          .ilike('user_email', userEmail) // Use ilike for case-insensitive matching
           .in('cart_status', ['completed', 'pending', 'confirmed', 'in_progress', 'cancelled'])
           .order('updated_at', { ascending: false });
         
@@ -500,6 +471,14 @@ import AuthGuard from '../components/AuthGuard.astro';
         
         console.log('📦 Processing', (carts || []).length, 'cart_customizations...');
         (carts || []).forEach((cart, index) => {
+          // Check for duplicates using the cart ID
+          const cartId = cart.id || `CART-${Date.now()}-${index}`;
+          if (seenIds.has(cartId)) {
+            console.log(`  Skipping duplicate cart: ${cartId}`);
+            return;
+          }
+          seenIds.add(cartId);
+          
           console.log(`  Cart ${index + 1}:`, {
             id: cart.id,
             project_name: cart.project_name,
@@ -522,7 +501,7 @@ import AuthGuard from '../components/AuthGuard.astro';
           }
           
           this.orders.push({
-            orderId: cart.id || `CART-${Date.now()}`,
+            orderId: cartId,
             orderDate: cart.updated_at || cart.created_at || new Date().toISOString(),
             total: Number(cart.total_amount) || 0,
             projectName: cart.project_name || 'Custom Project',
@@ -543,6 +522,70 @@ import AuthGuard from '../components/AuthGuard.astro';
             }
           });
         });
+
+        // Fetch customization_forms (for other 4 products: restaurant-website, streaming-mobile-app, android-tv-app, restaurant-menu-system) - case-insensitive
+        const { data: customForms, error: customFormsError } = await supabase
+          .from('customization_forms')
+          .select('*')
+          .ilike('contact_email', userEmail) // Use ilike for case-insensitive matching
+          .order('created_at', { ascending: false });
+        
+        if (customFormsError) {
+          console.warn('⚠️ Error loading customization_forms:', customFormsError);
+          // Don't throw - continue with other orders
+        } else {
+          console.log('📦 Processing', (customForms || []).length, 'customization_forms...');
+          (customForms || []).forEach((form, index) => {
+            // Check for duplicates using the form ID
+            const formId = form.id || `CF-${Date.now()}-${index}`;
+            if (seenIds.has(formId)) {
+              console.log(`  Skipping duplicate customization form: ${formId}`);
+              return;
+            }
+            seenIds.add(formId);
+            
+            console.log(`  Custom Form ${index + 1}:`, {
+              id: form.id,
+              project_name: form.project_name,
+              product_name: form.product_name,
+              contact_email: form.contact_email,
+              status: form.status
+            });
+            
+            // Extract price from product_price field (might be string like "₹1,000")
+            let totalPrice = 0;
+            if (form.product_price) {
+              const priceMatch = String(form.product_price).match(/₹?([\d,]+)/);
+              if (priceMatch) {
+                totalPrice = parseInt(priceMatch[1].replace(/,/g, ''));
+              }
+            }
+            
+            this.orders.push({
+              orderId: formId,
+              orderDate: form.created_at || new Date().toISOString(),
+              total: totalPrice,
+              projectName: form.product_name || form.project_name || 'Custom Project',
+              description: form.product_description || 'Professional digital solution',
+              status: form.status || 'pending',
+              requirements: {
+                projectName: form.project_name,
+                contactPerson: form.contact_person,
+                restaurantName: form.restaurant_name,
+                cuisineType: form.cuisine_type,
+                email: form.contact_email,
+                phone: form.contact_phone,
+                additionalRequirements: form.additional_requirements,
+                primaryColor: form.primary_color,
+                secondaryColor: form.secondary_color,
+                accentColor: form.accent_color,
+                textColor: form.text_color,
+                appName: form.app_name,
+                productType: form.product_type
+              }
+            });
+          });
+        }
       } catch (error) {
         console.error('Error loading Supabase orders:', error);
         throw error;
@@ -563,26 +606,59 @@ import AuthGuard from '../components/AuthGuard.astro';
       const emptyOrders = document.getElementById('empty-orders');
       const ordersList = document.getElementById('orders-list');
 
-      console.log('Rendering orders. Orders count:', this.orders.length);
+      console.log('🎨 Rendering orders. Total orders count:', this.orders.length);
+      console.log('🎨 Orders to render:', this.orders.map(o => ({ id: o.orderId, name: o.projectName })));
 
       // Hide loading immediately and show appropriate state
       loadingOrders?.classList.add('hidden');
 
       if (this.orders.length === 0) {
-        console.log('No orders found, showing empty state');
+        console.log('❌ No orders found, showing empty state');
         emptyOrders?.classList.remove('hidden');
         ordersList?.classList.add('hidden');
-        // Hide recent activity when there are no orders
+        // Hide summaries when there are no orders
+        const ordersSummary = document.getElementById('orders-summary');
+        ordersSummary?.classList.add('hidden');
         const recentActivity = document.getElementById('recent-activity');
         recentActivity?.classList.add('hidden');
         return;
       }
 
-      console.log('Orders found, showing orders list');
+      console.log('✅ Orders found, showing orders list');
+      console.log('✅ Removing hidden class from orders-list');
       emptyOrders?.classList.add('hidden');
       ordersList?.classList.remove('hidden');
+      
+      // Force show the orders list (in case CSS is hiding it)
+      if (ordersList) {
+        // Remove hidden class and ensure it's visible
+        ordersList.classList.remove('hidden');
+        ordersList.style.display = 'block';
+        ordersList.style.visibility = 'visible';
+        ordersList.style.opacity = '1';
+        console.log('✅ Orders list container is now visible');
+        console.log('✅ Orders list classes:', ordersList.className);
+        console.log('✅ Orders list display style:', ordersList.style.display);
+      }
 
+      console.log('✅ Calling renderOrdersList() to render all orders...');
       this.renderOrdersList();
+
+      // Verify orders were rendered (exclude the template itself)
+      const renderedOrders = ordersList?.querySelectorAll('[id^="order-"]:not(#order-template)');
+      const renderedCount = renderedOrders?.length || 0;
+      console.log('✅✅✅ RENDERED ORDERS COUNT:', renderedCount);
+      console.log('✅✅✅ Expected orders count:', this.orders.length);
+      console.log('✅✅✅ Total children in container:', ordersList?.children.length || 0);
+      
+      if (renderedCount !== this.orders.length) {
+        console.error('❌❌❌ MISMATCH: Expected', this.orders.length, 'orders but only', renderedCount, 'were rendered!');
+      } else {
+        console.log('✅✅✅ SUCCESS: All', renderedCount, 'orders rendered correctly!');
+      }
+
+      // Update orders summary
+      this.renderOrdersSummary();
 
       // Update recent summary visibility/content
       this.renderRecentSummary();
@@ -590,23 +666,82 @@ import AuthGuard from '../components/AuthGuard.astro';
 
     renderOrdersList() {
       const ordersListContainer = document.getElementById('orders-list');
-      if (!ordersListContainer) return;
+      if (!ordersListContainer) {
+        console.error('❌ orders-list container not found!');
+        return;
+      }
 
-      ordersListContainer.innerHTML = '';
-      
-      this.orders.forEach((order, index) => {
-        const orderElement = this.createOrderElement(order, index);
-        ordersListContainer.appendChild(orderElement);
-      });
+      // Get the template BEFORE clearing innerHTML
+      let template = document.getElementById('order-template');
+      if (!template) {
+        console.error('❌ Order template not found before clearing!');
+        // Try to wait a bit and retry (in case of timing issues)
+        setTimeout(() => {
+          template = document.getElementById('order-template');
+          if (!template) {
+            console.error('❌ Order template still not found after retry!');
+            return;
+          }
+          // Retry rendering with the found template
+          this.renderOrdersListWithTemplate(template, ordersListContainer);
+        }, 100);
+        return;
+      }
+
+      this.renderOrdersListWithTemplate(template, ordersListContainer);
     }
 
-    createOrderElement(order, index) {
-      const template = document.getElementById('order-template');
-      if (!template) return document.createElement('div');
+    renderOrdersListWithTemplate(template, ordersListContainer) {
+      if (!template || !ordersListContainer) {
+        console.error('❌ Template or container not available!');
+        return;
+      }
+
+      console.log('🧹 Clearing orders list container (preserving template)...');
+      
+      // Clear only the rendered orders, not the template
+      const existingOrders = ordersListContainer.querySelectorAll('[id^="order-"]:not(#order-template)');
+      existingOrders.forEach(order => order.remove());
+      
+      console.log('📝 Rendering', this.orders.length, 'orders...');
+      this.orders.forEach((order, index) => {
+        console.log(`  📦 Rendering order ${index + 1}/${this.orders.length}:`, order.orderId, '-', order.projectName);
+        const orderElement = this.createOrderElement(order, index, template);
+        if (orderElement) {
+          ordersListContainer.appendChild(orderElement);
+          console.log(`  ✅ Order ${index + 1} appended successfully`);
+        } else {
+          console.error(`  ❌ Failed to create element for order ${index + 1}`);
+        }
+      });
+      
+      console.log('✅✅✅ Finished rendering all orders. Container now has', ordersListContainer.children.length, 'children');
+    }
+
+    createOrderElement(order, index, template) {
+      // Use the passed template reference, or try to find it if not provided
+      if (!template) {
+        template = document.getElementById('order-template');
+        if (!template) {
+          console.error('❌ Order template not found when creating order element!');
+          console.error('❌ Attempted to create order:', index, order.orderId);
+          return null;
+        }
+      }
 
       const clone = template.cloneNode(true);
       clone.classList.remove('hidden');
       clone.id = `order-${index}`;
+      
+      // Ensure the cloned element is visible
+      clone.style.display = 'block';
+      clone.style.visibility = 'visible';
+      clone.style.opacity = '1';
+      
+      return this.populateOrderElement(clone, order);
+    }
+    
+    populateOrderElement(clone, order) {
 
       // Set order details
       clone.querySelector('.order-project-name').textContent = order.projectName || 'Custom Project';
@@ -615,52 +750,8 @@ import AuthGuard from '../components/AuthGuard.astro';
       clone.querySelector('.order-date').textContent = this.formatDate(order.orderDate);
       clone.querySelector('.order-id').textContent = order.orderId || `ORD-${Date.now()}`;
 
-      // Set project details
-      clone.querySelector('.order-custom-name').textContent = order.requirements?.projectName || '-';
-      clone.querySelector('.order-contact-person').textContent = order.requirements?.contactPerson || '-';
-      clone.querySelector('.order-restaurant-name').textContent = order.requirements?.restaurantName || '-';
-      clone.querySelector('.order-cuisine-type').textContent = order.requirements?.cuisineType || '-';
-
-      // Set contact information
-      clone.querySelector('.order-email').textContent = order.requirements?.email || '-';
-      clone.querySelector('.order-phone').textContent = order.requirements?.phone || '-';
-
-      // Set colors
-      if (order.requirements?.primaryColor) {
-        clone.querySelector('.order-primary-color').style.backgroundColor = order.requirements.primaryColor;
-      }
-      if (order.requirements?.secondaryColor) {
-        clone.querySelector('.order-secondary-color').style.backgroundColor = order.requirements.secondaryColor;
-      }
-      if (order.requirements?.accentColor) {
-        clone.querySelector('.order-accent-color').style.backgroundColor = order.requirements.accentColor;
-      }
-      if (order.requirements?.textColor) {
-        clone.querySelector('.order-text-color').style.backgroundColor = order.requirements.textColor;
-      }
-
-      // Set features
-      const featuresContainer = clone.querySelector('.order-features');
-      if (order.features && order.features.length > 0) {
-        featuresContainer.innerHTML = order.features.map(feature => 
-          `<span class="inline-block bg-primary-100 text-primary-800 text-xs px-2 py-1 rounded-full mr-2 mb-1">${feature}</span>`
-        ).join('');
-      }
-
-      // Set logo status
-      const logoStatus = clone.querySelector('.order-logo-status');
-      if (order.logo) {
-        logoStatus.innerHTML = '<span class="text-green-600">✓ Logo uploaded</span>';
-      }
-
-      // Set additional requirements
-      const additionalReq = clone.querySelector('.order-additional-requirements');
-      if (order.requirements?.additionalRequirements) {
-        additionalReq.textContent = order.requirements.additionalRequirements;
-      }
-
       // Update order status badge
-      const statusBadge = clone.querySelector('.order-status-badge') || clone.querySelector('span.bg-green-100');
+      const statusBadge = clone.querySelector('.order-status-badge');
       if (statusBadge) {
         const statusText = (order.status || 'pending').charAt(0).toUpperCase() + (order.status || 'pending').slice(1).replace('_', ' ');
         const statusIcon = order.status === 'completed' ? '✓ ' : order.status === 'cancelled' ? '✗ ' : order.status === 'in_progress' ? '⟳ ' : '';
@@ -668,37 +759,12 @@ import AuthGuard from '../components/AuthGuard.astro';
         statusBadge.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ' + this.getStatusColor(order.status);
       }
 
-      // Update order status section at bottom
-      const orderStatusSection = clone.querySelector('.order-status-section');
-      if (orderStatusSection) {
-        const statusDot = orderStatusSection.querySelector('.w-3.h-3');
-        const statusText = orderStatusSection.querySelector('span.text-green-700');
-        if (statusDot && statusText) {
-          // Update dot color
-          const dotColors = {
-            'pending': 'bg-yellow-500',
-            'confirmed': 'bg-blue-500',
-            'in_progress': 'bg-purple-500',
-            'processing': 'bg-purple-500',
-            'completed': 'bg-green-500',
-            'cancelled': 'bg-red-500'
-          };
-          const statusLower = (order.status || 'pending').toLowerCase();
-          statusDot.className = 'w-3 h-3 ' + (dotColors[statusLower] || 'bg-gray-500') + ' rounded-full';
-          
-          // Update text
-          const textColors = {
-            'pending': 'text-yellow-700',
-            'confirmed': 'text-blue-700',
-            'in_progress': 'text-purple-700',
-            'processing': 'text-purple-700',
-            'completed': 'text-green-700',
-            'cancelled': 'text-red-700'
-          };
-          const statusDisplayText = (order.status || 'pending').charAt(0).toUpperCase() + (order.status || 'pending').slice(1).replace('_', ' ');
-          statusText.textContent = 'Order ' + statusDisplayText;
-          statusText.className = (textColors[statusLower] || 'text-gray-700') + ' font-medium';
-        }
+      // Add click handler for View Order button
+      const viewBtn = clone.querySelector('.order-view-btn');
+      if (viewBtn) {
+        viewBtn.onclick = () => {
+          this.showOrderDetails(order);
+        };
       }
 
       return clone;
@@ -728,6 +794,34 @@ import AuthGuard from '../components/AuthGuard.astro';
         'cancelled': 'bg-red-100 text-red-800'
       };
       return colors[statusLower] || 'bg-gray-100 text-gray-800';
+    }
+
+    // Render the Orders Summary showing all orders
+    renderOrdersSummary() {
+      const summary = document.getElementById('orders-summary');
+      const countEl = document.getElementById('total-orders-count');
+      const summaryTextEl = document.getElementById('orders-summary-text');
+      const amountEl = document.getElementById('total-orders-amount');
+      
+      if (!summary || !countEl || !summaryTextEl || !amountEl) return;
+
+      const totalOrders = this.orders.length;
+      const totalAmount = this.orders.reduce((sum, order) => sum + (Number(order.total) || 0), 0);
+
+      if (totalOrders === 0) {
+        summary.classList.add('hidden');
+        return;
+      }
+
+      summary.classList.remove('hidden');
+      countEl.textContent = totalOrders;
+      summaryTextEl.textContent = totalOrders === 1 ? 'order found' : 'orders found';
+      amountEl.textContent = `₹${totalAmount.toLocaleString('en-IN')}`;
+      
+      console.log('📊 Orders Summary:', {
+        totalOrders: totalOrders,
+        totalAmount: totalAmount
+      });
     }
 
     // Render the Recent Order Summary based on the newest order (any status)
@@ -781,7 +875,6 @@ import AuthGuard from '../components/AuthGuard.astro';
       byId('order-modal-email').textContent = req.email || '-';
       byId('order-modal-phone').textContent = req.phone || '-';
       byId('order-modal-restaurant').textContent = req.restaurantName || '-';
-      byId('order-modal-cuisine').textContent = req.cuisineType || '-';
       byId('order-modal-additional').textContent = req.additionalRequirements || '—';
 
       // Lock body scroll
