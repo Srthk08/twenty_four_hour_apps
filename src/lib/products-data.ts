@@ -1,4 +1,6 @@
-// Simple products data for build
+// Products data with Supabase integration and fallback to mock data
+import { supabase, getProducts as getSupabaseProducts, getProductBySlug as getSupabaseProductBySlug } from './supabase';
+
 export interface Product {
   id: string;
   name: string;
@@ -16,7 +18,7 @@ export interface Product {
   updated_at: string;
 }
 
-// Mock products data - Original products from database
+// Mock products data - Fallback when Supabase is unavailable
 const mockProducts: Product[] = [
   {
     id: '1',
@@ -100,74 +102,194 @@ const mockProducts: Product[] = [
   }
 ];
 
+/**
+ * Get products from Supabase, fallback to mock data if Supabase fails
+ * This ensures the site works even if Supabase is unavailable
+ */
 export const getProducts = async (): Promise<Product[]> => {
-  return mockProducts;
+  try {
+    // Try to fetch from Supabase first
+    const supabaseProducts = await getSupabaseProducts();
+    
+    // If we got products from Supabase, use them
+    if (supabaseProducts && supabaseProducts.length > 0) {
+      console.log(`✅ Loaded ${supabaseProducts.length} products from Supabase`);
+      return supabaseProducts;
+    }
+    
+    // If Supabase returned empty array, fallback to mock data
+    console.log('⚠️ No products in Supabase, using fallback mock data');
+    return mockProducts;
+  } catch (error) {
+    // If Supabase fails, use mock data to maintain site functionality
+    console.error('❌ Error fetching from Supabase, using fallback mock data:', error);
+    return mockProducts;
+  }
 };
 
+/**
+ * Get product by slug from Supabase, fallback to mock data if not found
+ */
 export const getProductBySlug = async (slug: string): Promise<Product | null> => {
-  return mockProducts.find(product => product.slug === slug) || null;
+  try {
+    // Try to fetch from Supabase first
+    const supabaseProduct = await getSupabaseProductBySlug(slug);
+    
+    if (supabaseProduct) {
+      return supabaseProduct as Product;
+    }
+    
+    // Fallback to mock data
+    return mockProducts.find(product => product.slug === slug) || null;
+  } catch (error) {
+    // If Supabase fails, use mock data
+    console.error('Error fetching product from Supabase, using fallback:', error);
+    return mockProducts.find(product => product.slug === slug) || null;
+  }
 };
 
-export const getProductsByCategory = (category: string): Product[] => {
-  return mockProducts.filter(product => product.category === category);
+/**
+ * Get products by category
+ */
+export const getProductsByCategory = async (category: string): Promise<Product[]> => {
+  const products = await getProducts();
+  return products.filter(product => product.category === category);
 };
 
+/**
+ * Get product plans from Supabase, fallback to default plans if not found
+ */
 export const getProductPlans = async (productId: string) => {
-  // For Order Menu System (id '5'), return a single common plan priced at 999
-  if (productId === '5') {
+  try {
+    // Import getProductPlans from supabase
+    const { getProductPlans: getSupabasePlans } = await import('./supabase');
+    
+    // Try to fetch from Supabase first
+    const supabasePlans = await getSupabasePlans(productId);
+    
+    // If we got plans from Supabase, use them
+    if (supabasePlans && supabasePlans.length > 0) {
+      return supabasePlans;
+    }
+    
+    // Fallback to default plans if Supabase has none
+    // For Order Menu System (id '5'), return a single common plan priced at 999
+    if (productId === '5') {
+      return [
+        {
+          id: 'oms-999',
+          product_id: productId,
+          name: 'Common Plan',
+          description: 'Standard Order Menu System plan',
+          price: 999,
+          features: ['All essential OMS features'],
+          delivery_days: 1,
+          is_popular: true,
+          sort_order: 1,
+          created_at: new Date().toISOString()
+        }
+      ];
+    }
+
+    // Default plans for other products
     return [
       {
-        id: 'oms-999',
+        id: '1',
         product_id: productId,
-        name: 'Common Plan',
-        description: 'Standard Order Menu System plan',
-        price: 999,
-        features: ['All essential OMS features'],
+        name: 'Basic Plan',
+        description: 'Essential features for small businesses',
+        price: 15000,
+        features: ['Basic Features', 'Email Support'],
+        delivery_days: 1,
+        is_popular: false,
+        sort_order: 1,
+        created_at: new Date().toISOString()
+      },
+      {
+        id: '2',
+        product_id: productId,
+        name: 'Pro Plan',
+        description: 'Advanced features for growing businesses',
+        price: 25000,
+        features: ['All Basic Features', 'Advanced Features', 'Priority Support'],
         delivery_days: 1,
         is_popular: true,
+        sort_order: 2,
+        created_at: new Date().toISOString()
+      },
+      {
+        id: '3',
+        product_id: productId,
+        name: 'Enterprise Plan',
+        description: 'Complete solution for large enterprises',
+        price: 50000,
+        features: ['All Pro Features', 'Custom Development', '24/7 Support', 'Dedicated Manager'],
+        delivery_days: 2,
+        is_popular: false,
+        sort_order: 3,
+        created_at: new Date().toISOString()
+      }
+    ];
+  } catch (error) {
+    // If Supabase fails, use default plans
+    console.error('Error fetching product plans from Supabase, using fallback:', error);
+    
+    // For Order Menu System (id '5'), return a single common plan priced at 999
+    if (productId === '5') {
+      return [
+        {
+          id: 'oms-999',
+          product_id: productId,
+          name: 'Common Plan',
+          description: 'Standard Order Menu System plan',
+          price: 999,
+          features: ['All essential OMS features'],
+          delivery_days: 1,
+          is_popular: true,
+          sort_order: 1,
+          created_at: new Date().toISOString()
+        }
+      ];
+    }
+
+    // Default plans for other products
+    return [
+      {
+        id: '1',
+        product_id: productId,
+        name: 'Basic Plan',
+        description: 'Essential features for small businesses',
+        price: 15000,
+        features: ['Basic Features', 'Email Support'],
+        delivery_days: 1,
+        is_popular: false,
         sort_order: 1,
+        created_at: new Date().toISOString()
+      },
+      {
+        id: '2',
+        product_id: productId,
+        name: 'Pro Plan',
+        description: 'Advanced features for growing businesses',
+        price: 25000,
+        features: ['All Basic Features', 'Advanced Features', 'Priority Support'],
+        delivery_days: 1,
+        is_popular: true,
+        sort_order: 2,
+        created_at: new Date().toISOString()
+      },
+      {
+        id: '3',
+        product_id: productId,
+        name: 'Enterprise Plan',
+        description: 'Complete solution for large enterprises',
+        price: 50000,
+        features: ['All Pro Features', 'Custom Development', '24/7 Support', 'Dedicated Manager'],
+        delivery_days: 2,
+        is_popular: false,
+        sort_order: 3,
         created_at: new Date().toISOString()
       }
     ];
   }
-
-  // Default plans for other products
-  return [
-    {
-      id: '1',
-      product_id: productId,
-      name: 'Basic Plan',
-      description: 'Essential features for small businesses',
-      price: 15000,
-      features: ['Basic Features', 'Email Support'],
-      delivery_days: 1,
-      is_popular: false,
-      sort_order: 1,
-      created_at: new Date().toISOString()
-    },
-    {
-      id: '2',
-      product_id: productId,
-      name: 'Pro Plan',
-      description: 'Advanced features for growing businesses',
-      price: 25000,
-      features: ['All Basic Features', 'Advanced Features', 'Priority Support'],
-      delivery_days: 1,
-      is_popular: true,
-      sort_order: 2,
-      created_at: new Date().toISOString()
-    },
-    {
-      id: '3',
-      product_id: productId,
-      name: 'Enterprise Plan',
-      description: 'Complete solution for large enterprises',
-      price: 50000,
-      features: ['All Pro Features', 'Custom Development', '24/7 Support', 'Dedicated Manager'],
-      delivery_days: 2,
-      is_popular: false,
-      sort_order: 3,
-      created_at: new Date().toISOString()
-    }
-  ];
 };

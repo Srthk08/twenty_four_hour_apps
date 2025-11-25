@@ -758,6 +758,181 @@ export const getUserProfile = async (userId: string) => {
   }
 };
 
+// ============================================
+// PRODUCT MANAGEMENT FUNCTIONS
+// ============================================
+
+/**
+ * Get product plans from Supabase
+ */
+export const getProductPlans = async (productId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('product_plans')
+      .select('*')
+      .eq('product_id', productId)
+      .order('sort_order');
+
+    if (error) {
+      console.error('Error fetching product plans:', error);
+      return [];
+    }
+    return data || [];
+  } catch (error) {
+    console.error('Error in getProductPlans:', error);
+    return [];
+  }
+};
+
+/**
+ * Create a new product in Supabase
+ */
+export const createProduct = async (product: Partial<Product>) => {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .insert({
+        name: product.name,
+        slug: product.slug,
+        description: product.description,
+        short_description: product.short_description,
+        category: product.category,
+        base_price: product.base_price,
+        featured_image: product.featured_image,
+        gallery: product.gallery || [],
+        features: product.features || [],
+        is_active: product.is_active !== undefined ? product.is_active : true,
+        sort_order: product.sort_order || 0,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating product:', error);
+      throw error;
+    }
+    return data;
+  } catch (error) {
+    console.error('Error in createProduct:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update an existing product in Supabase
+ */
+export const updateProduct = async (productId: string, updates: Partial<Product>) => {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', productId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating product:', error);
+      throw error;
+    }
+    return data;
+  } catch (error) {
+    console.error('Error in updateProduct:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a product from Supabase (soft delete by setting is_active to false)
+ * Or hard delete if forceDelete is true
+ */
+export const deleteProduct = async (productId: string, forceDelete: boolean = false) => {
+  try {
+    if (forceDelete) {
+      // Hard delete - completely remove from database
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', productId);
+
+      if (error) {
+        console.error('Error deleting product:', error);
+        throw error;
+      }
+      return { success: true, message: 'Product deleted permanently' };
+    } else {
+      // Soft delete - set is_active to false
+      const { data, error } = await supabase
+        .from('products')
+        .update({ is_active: false, updated_at: new Date().toISOString() })
+        .eq('id', productId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error deactivating product:', error);
+        throw error;
+      }
+      return { success: true, message: 'Product deactivated', data };
+    }
+  } catch (error) {
+    console.error('Error in deleteProduct:', error);
+    throw error;
+  }
+};
+
+/**
+ * Restore a deactivated product (set is_active to true)
+ */
+export const restoreProduct = async (productId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .update({ is_active: true, updated_at: new Date().toISOString() })
+      .eq('id', productId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error restoring product:', error);
+      throw error;
+    }
+    return data;
+  } catch (error) {
+    console.error('Error in restoreProduct:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get all products including inactive ones (for admin)
+ */
+export const getAllProducts = async (includeInactive: boolean = false) => {
+  try {
+    let query = supabase
+      .from('products')
+      .select('*')
+      .order('sort_order');
+
+    if (!includeInactive) {
+      query = query.eq('is_active', true);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching all products:', error);
+      return [];
+    }
+    return data as Product[];
+  } catch (error) {
+    console.error('Error in getAllProducts:', error);
+    return [];
+  }
+};
+
 export const updateUserProfile = async (updates: any) => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
