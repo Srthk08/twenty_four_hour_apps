@@ -728,9 +728,9 @@ import AuthGuard from '../components/AuthGuard.astro';
 <script>
   // Global error handler to catch unhandled promise rejections and ensure button resets
   window.addEventListener('unhandledrejection', (event) => {
-    console.error('❌❌❌ UNHANDLED PROMISE REJECTION ❌❌❌');
-    console.error('❌ Error:', event.reason);
-    console.error('❌ Promise:', event.promise);
+    console.error(' UNHANDLED PROMISE REJECTION ');
+    console.error(' Error:', event.reason);
+    console.error(' Promise:', event.promise);
     
     // If this is related to form submission, reset the save button
     if (event.reason && typeof event.reason === 'object' && 'message' in event.reason) {
@@ -741,7 +741,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         if (saveButton) {
           saveButton.disabled = false;
           saveButton.textContent = 'Save and Make Payment';
-          console.log('✅ Save button reset via global error handler');
+          console.log(' Save button reset via global error handler');
         }
       }
     }
@@ -752,10 +752,10 @@ import AuthGuard from '../components/AuthGuard.astro';
   
   // Global error handler for general errors
   window.addEventListener('error', (event) => {
-    console.error('❌❌❌ GLOBAL ERROR ❌❌❌');
-    console.error('❌ Error:', event.error);
-    console.error('❌ Message:', event.message);
-    console.error('❌ Source:', event.filename, ':', event.lineno);
+    console.error(' GLOBAL ERROR ');
+    console.error(' Error:', event.error);
+    console.error(' Message:', event.message);
+    console.error(' Source:', event.filename, ':', event.lineno);
     
     // Reset save button if it's stuck
     const saveButton = document.getElementById('save-and-pay');
@@ -852,9 +852,9 @@ import AuthGuard from '../components/AuthGuard.astro';
         menuPhotos = [];
       }
       
-      console.log('✅ Form file fields cleared successfully');
+      console.log(' Form file fields cleared successfully');
     } catch (error) {
-      console.error('❌ Error clearing form file fields:', error);
+      console.error(' Error clearing form file fields:', error);
     }
   }
   
@@ -863,7 +863,7 @@ import AuthGuard from '../components/AuthGuard.astro';
   // Function to fetch user profile from Supabase
   async function fetchUserProfile(userId) {
     try {
-      console.log('🔍 Fetching user profile from Supabase for user:', userId);
+      console.log(' Fetching user profile from Supabase for user:', userId);
       const { supabase } = await import('../lib/supabase');
       
       const { data, error } = await supabase
@@ -877,7 +877,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         return null;
       }
 
-      console.log('✅ User profile fetched from Supabase:', data);
+      console.log(' User profile fetched from Supabase:', data);
       return data;
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
@@ -892,7 +892,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     // CRITICAL: Check if user is actually logged in first
     const authManager = window.globalAuthManager || window.simpleAuthManager;
     if (!authManager || !authManager.isUserLoggedIn()) {
-      console.log('❌ User not logged in - showing generic welcome message');
+      console.log(' User not logged in - showing generic welcome message');
       
       // Update welcome message to generic text
       const userWelcome = document.getElementById('user-welcome');
@@ -901,7 +901,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         console.log('👋 Welcome message updated to: Guest');
       }
       
-      console.log('✅ Dashboard updated for guest user');
+      console.log(' Dashboard updated for guest user');
       return;
     }
     
@@ -914,7 +914,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     if (currentUser && currentUser.email) {
       userData = currentUser;
       source = 'auth-manager';
-      console.log(`✅ Found authenticated user data:`, userData.email);
+      console.log(` Found authenticated user data:`, userData.email);
     }
     
     // If still no data, try to get from storage (but only if user is logged in)
@@ -934,7 +934,7 @@ import AuthGuard from '../components/AuthGuard.astro';
             userData = sourceInfo.path ? parsed[sourceInfo.path] : parsed;
             if (userData && userData.email) {
               source = sourceInfo.key;
-              console.log(`✅ Found user data in ${sourceInfo.key}:`, userData.email);
+              console.log(` Found user data in ${sourceInfo.key}:`, userData.email);
               break;
             }
           }
@@ -946,7 +946,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     
     // If still no data, show generic message (don't create mock data)
     if (!userData) {
-      console.log('❌ No authenticated user data found');
+      console.log(' No authenticated user data found');
       
       // Update welcome message to generic text
       const userWelcome = document.getElementById('user-welcome');
@@ -955,7 +955,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         console.log('👋 Welcome message updated to: Guest');
       }
       
-      console.log('✅ Dashboard updated for guest user');
+      console.log(' Dashboard updated for guest user');
       return;
     }
     
@@ -980,7 +980,7 @@ import AuthGuard from '../components/AuthGuard.astro';
               ...profileData,
               email: userData.email || profileData.email
             };
-            console.log('✅ Enhanced user data with profile:', userData);
+            console.log(' Enhanced user data with profile:', userData);
           }
         } catch (error) {
           console.log('Error fetching profile data:', error);
@@ -993,7 +993,7 @@ import AuthGuard from '../components/AuthGuard.astro';
       userData.company_name = userData.company_name || userData.companyName || 'Not set';
       // Don't create fake email - only use real authenticated email
       if (!userData.email) {
-        console.log('❌ No email found in authenticated user data');
+        console.log(' No email found in authenticated user data');
         return;
       }
       
@@ -1010,7 +1010,7 @@ import AuthGuard from '../components/AuthGuard.astro';
       console.log('👋 Welcome message updated to:', displayName);
     }
     
-    console.log(`✅ Dashboard updated successfully from ${source}`);
+    console.log(` Dashboard updated successfully from ${source}`);
     
     // Force update welcome message
     setTimeout(() => {
@@ -1030,10 +1030,10 @@ import AuthGuard from '../components/AuthGuard.astro';
     const productId = urlParams.get('product');
     const price = urlParams.get('price');
     
-    console.log('🔍 Checking for product selection:', { productId, price });
+    console.log(' Checking for product selection:', { productId, price });
     
     if (productId && price) {
-      console.log('✅ Product selected, showing customization form');
+      console.log(' Product selected, showing customization form');
       
       // Get product details from actual products data (matching products-data.ts)
       const products = [
@@ -1421,7 +1421,7 @@ import AuthGuard from '../components/AuthGuard.astro';
   }
   
   function validateFormFields() {
-    console.log('🔍 validateFormFields() called');
+    console.log(' validateFormFields() called');
     
     const pincodeInput = document.getElementById('pincode-input');
     const cityInput = document.getElementById('city-input');
@@ -1444,7 +1444,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     const addressLine1 = orderMenuForm.querySelector('input[name="addressLine1"]');
     const country = orderMenuForm.querySelector('select[name="country"]');
     
-    console.log('🔍 Form fields found:');
+    console.log(' Form fields found:');
     console.log('  - projectName:', projectName ? projectName.value : 'not found');
     console.log('  - restaurantName:', restaurantName ? restaurantName.value : 'not found');
     console.log('  - ownerName:', ownerName ? ownerName.value : 'not found');
@@ -1467,7 +1467,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     
     // Validate required text fields
     if (!projectName || !projectName.value.trim()) {
-      console.log('🔍 Project Name validation failed:');
+      console.log(' Project Name validation failed:');
       console.log('  - projectName element:', projectName);
       console.log('  - projectName.value:', projectName ? projectName.value : 'element not found');
       emptyFields.push('Project Name');
@@ -1477,7 +1477,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     }
     
     if (!restaurantName || !restaurantName.value.trim()) {
-      console.log('🔍 Restaurant Name validation failed:');
+      console.log(' Restaurant Name validation failed:');
       console.log('  - restaurantName element:', restaurantName);
       console.log('  - restaurantName.value:', restaurantName ? restaurantName.value : 'element not found');
       emptyFields.push('Restaurant Name');
@@ -1541,7 +1541,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     
     // Validate city - allow any non-empty text
     if (cityInput && (!cityInput.value || !cityInput.value.trim())) {
-      console.log('🔍 City validation failed:');
+      console.log(' City validation failed:');
       console.log('  - cityInput.value:', cityInput.value);
       
       const errorDiv = document.getElementById('city-error');
@@ -1617,7 +1617,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     
     // Show validation errors with popup
     if (!isValid) {
-      console.log('❌ Form validation failed with errors:', errorMessages);
+      console.log(' Form validation failed with errors:', errorMessages);
       showValidationPopup(emptyFields, errorMessages);
       
       // Scroll to top of form to show errors
@@ -1626,10 +1626,10 @@ import AuthGuard from '../components/AuthGuard.astro';
         form.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     } else {
-      console.log('✅ Form validation passed - all required fields are filled');
+      console.log(' Form validation passed - all required fields are filled');
     }
     
-    console.log('🔍 validateFormFields() returning:', isValid);
+    console.log(' validateFormFields() returning:', isValid);
     return isValid;
   }
 
@@ -1720,8 +1720,8 @@ import AuthGuard from '../components/AuthGuard.astro';
     const closeBtn = document.getElementById('close-order-menu-form');
     const cancelBtn = document.getElementById('cancel-order-menu');
     
-    console.log('🔍 Close button found:', closeBtn);
-    console.log('🔍 Cancel button found:', cancelBtn);
+    console.log(' Close button found:', closeBtn);
+    console.log(' Cancel button found:', cancelBtn);
     const logoUpload = document.getElementById('order-menu-logo-upload');
     const logoUploadArea = document.getElementById('order-menu-logo-upload-area');
     const logoPreview = document.getElementById('order-menu-logo-preview');
@@ -2215,7 +2215,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         // CRITICAL: Check if user is logged in before allowing form submission
         const authManager = window.globalAuthManager || window.simpleAuthManager;
         if (!authManager || !authManager.isUserLoggedIn()) {
-          alert('❌ Please log in to submit this form. You must be authenticated to place an order.');
+          alert(' Please log in to submit this form. You must be authenticated to place an order.');
           return;
         }
       
@@ -2302,7 +2302,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         return;
       }
       
-      console.log('📝 Order Menu requirements saved:', formDataObj);
+      console.log(' Order Menu requirements saved:', formDataObj);
       
       // Clear all error messages
       const errorDivs = ['validation-errors', 'menu-photos-error', 'phone-validation-error', 'address-validation-error', 'email-validation-error', 'file-size-error', 'warning-message', 'popup-message', 'error-message'];
@@ -2340,14 +2340,14 @@ import AuthGuard from '../components/AuthGuard.astro';
       
       try {
         // Save Order Menu System to Supabase OMS table
-        console.log('💾 Saving OMS data to Supabase...');
+        console.log(' Saving OMS data to Supabase...');
         
         // Get Supabase client
         const { supabase } = await import('../lib/supabase');
         
         // Check if Supabase is available
         if (!supabase) {
-          console.error('❌ Supabase not available, saving locally only');
+          console.error(' Supabase not available, saving locally only');
           const existingRequirements = JSON.parse(localStorage.getItem('order-menu-requirements') || '[]');
           existingRequirements.push(orderMenuRequirements);
           localStorage.setItem('order-menu-requirements', JSON.stringify(existingRequirements));
@@ -2384,11 +2384,11 @@ import AuthGuard from '../components/AuthGuard.astro';
                 rpcLogoFilename = rpcLogoFile.name;
                 rpcLogoSize = rpcLogoFile.size;
               } else {
-                console.error('❌ Logo upload error (RPC flow):', uploadError);
+                console.error(' Logo upload error (RPC flow):', uploadError);
               }
             }
           } catch (e) {
-            console.warn('⚠️ Logo upload skipped (RPC flow):', e);
+            console.warn(' Logo upload skipped (RPC flow):', e);
           }
           const phoneCountryCodeSelect = document.getElementById('phone_country_code') as HTMLSelectElement;
           const countryCode = phoneCountryCodeSelect?.value || '+91';
@@ -2418,7 +2418,7 @@ import AuthGuard from '../components/AuthGuard.astro';
           });
           
           if (customizationError) {
-            console.error('❌ Error saving to Supabase:', customizationError);
+            console.error(' Error saving to Supabase:', customizationError);
             // Fallback to localStorage
             const existingRequirements = JSON.parse(localStorage.getItem('order-menu-requirements') || '[]');
             existingRequirements.push(orderMenuRequirements);
@@ -2447,10 +2447,10 @@ import AuthGuard from '../components/AuthGuard.astro';
               const warningDiv = document.getElementById('warning-message');
               if (warningDiv) {
                 warningDiv.classList.remove('hidden');
-                warningDiv.textContent = `⚠️ ${duplicateMessage}`;
+                warningDiv.textContent = ` ${duplicateMessage}`;
               }
             } else {
-              console.log('✅ OMS data saved to Supabase with ID:', result.data_id);
+              console.log(' OMS data saved to Supabase with ID:', result.data_id);
               // Show success message inline instead of alert
               const successDiv = document.getElementById('success-message');
               if (successDiv) {
@@ -2464,7 +2464,7 @@ import AuthGuard from '../components/AuthGuard.astro';
               }, 500);
             }
           } else {
-            console.error('❌ No data returned from OMS function');
+            console.error(' No data returned from OMS function');
             // Fallback to localStorage
             const existingRequirements = JSON.parse(localStorage.getItem('order-menu-requirements') || '[]');
             existingRequirements.push(orderMenuRequirements);
@@ -2664,7 +2664,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     
     // Add direct event listeners as backup
     if (closeBtn) {
-      console.log('✅ Adding direct event listener to close button');
+      console.log(' Adding direct event listener to close button');
       closeBtn.addEventListener('click', (e) => {
         console.log('Close button clicked via direct listener!');
         e.preventDefault();
@@ -2675,11 +2675,11 @@ import AuthGuard from '../components/AuthGuard.astro';
         showNoActivityMessage();
       });
     } else {
-      console.log('❌ Close button not found for direct event listener');
+      console.log(' Close button not found for direct event listener');
     }
     
     if (cancelBtn) {
-      console.log('✅ Adding direct event listener to cancel button');
+      console.log(' Adding direct event listener to cancel button');
       cancelBtn.addEventListener('click', (e) => {
         console.log('Cancel button clicked via direct listener!');
         e.preventDefault();
@@ -2690,7 +2690,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         showNoActivityMessage();
       });
     } else {
-      console.log('❌ Cancel button not found for direct event listener');
+      console.log(' Cancel button not found for direct event listener');
     }
     } else {
       console.error('Form not found - cannot add event listener');
@@ -2712,10 +2712,10 @@ import AuthGuard from '../components/AuthGuard.astro';
         e.stopPropagation();
         
         // Run validation before submission
-        console.log('🔍 Running validation before form submit event...');
+        console.log(' Running validation before form submit event...');
         const formValidationResult = validateFormFields();
         if (!formValidationResult) {
-          console.log('❌ Validation failed, preventing form submission');
+          console.log(' Validation failed, preventing form submission');
           return;
         }
         
@@ -2734,29 +2734,29 @@ import AuthGuard from '../components/AuthGuard.astro';
     
     const form = document.getElementById('order-menu-form');
     if (!form) {
-      console.error('❌❌❌ Order menu form not found ❌❌❌');
+      console.error(' Order menu form not found ');
       throw new Error('Form not found. Please refresh the page and try again.');
     }
-    console.log('✅ Form found:', form);
+    console.log(' Form found:', form);
 
     // CRITICAL: Check if user is logged in before allowing form submission
     const authManager = window.globalAuthManager || window.simpleAuthManager;
-    console.log('🔍 Auth manager check:', {
+    console.log(' Auth manager check:', {
       globalAuthManager: !!window.globalAuthManager,
       simpleAuthManager: !!window.simpleAuthManager,
       authManager: !!authManager
     });
     
     if (!authManager) {
-      console.error('❌❌❌ No auth manager found ❌❌❌');
+      console.error(' No auth manager found ');
       throw new Error('Please log in to submit this form. You must be authenticated to place an order.');
     }
     
     const isLoggedIn = authManager.isUserLoggedIn();
-    console.log('🔍 User logged in:', isLoggedIn);
+    console.log(' User logged in:', isLoggedIn);
     
     if (!isLoggedIn) {
-      console.error('❌❌❌ User not logged in ❌❌❌');
+      console.error(' User not logged in ');
       throw new Error('Please log in to submit this form. You must be authenticated to place an order.');
     }
     
@@ -2764,12 +2764,12 @@ import AuthGuard from '../components/AuthGuard.astro';
     console.log('👤 Current user:', currentUser);
 
     // VALIDATION: Check all required fields before proceeding
-    console.log('🔍 Running comprehensive validation before submission...');
+    console.log(' Running comprehensive validation before submission...');
     const formValidationResult = validateFormFields();
-    console.log('🔍 Form validation result:', formValidationResult);
+    console.log(' Form validation result:', formValidationResult);
     
     if (!formValidationResult) {
-      console.log('❌ Form validation failed - required fields missing');
+      console.log(' Form validation failed - required fields missing');
       throw new Error('Form validation failed. Please fill in all required fields.');
     }
     
@@ -2778,7 +2778,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     const hasMenuPhotosAtSubmit = (cachedMenuPhotos && cachedMenuPhotos.length > 0) || (menuPhotosInputAtSubmit && menuPhotosInputAtSubmit.files && menuPhotosInputAtSubmit.files.length > 0);
     
     if (!hasMenuPhotosAtSubmit) {
-      console.log('❌ Menu photos validation failed - no photos uploaded');
+      console.log(' Menu photos validation failed - no photos uploaded');
       const errorDiv = document.getElementById('menu-photos-error');
       if (errorDiv) {
         errorDiv.classList.remove('hidden');
@@ -2799,10 +2799,10 @@ import AuthGuard from '../components/AuthGuard.astro';
       throw new Error('Please upload at least one menu photo. This field is required for Order Menu System.');
     }
     
-    console.log('✅ All validations passed, proceeding with form submission');
+    console.log(' All validations passed, proceeding with form submission');
     
     // IMMEDIATE CHECK: Are files cached?
-    console.log('🔍 IMMEDIATE FILE CHECK:');
+    console.log(' IMMEDIATE FILE CHECK:');
     console.log('📸 Cached menu photos count:', cachedMenuPhotos.length);
     console.log('🏷️ Cached logo file:', cachedLogoFile ? 'Yes' : 'No');
     
@@ -2822,7 +2822,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     const formData = new FormData(form);
     const formDataObj = Object.fromEntries(formData);
     
-    console.log('📝 Form data collected:', formDataObj);
+    console.log(' Form data collected:', formDataObj);
     
     // Get phone country code select element
     const phoneCountryCodeSelect = document.getElementById('phone_country_code') as HTMLSelectElement;
@@ -2840,7 +2840,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         const supabaseModule = await Promise.race([importPromise, timeoutPromise]) as any;
         supabase = supabaseModule.supabase;
       } catch (importError: any) {
-        console.error('❌ Supabase import error:', importError.message);
+        console.error(' Supabase import error:', importError.message);
         throw new Error('Failed to load database connection. Please refresh the page and try again.');
       }
       
@@ -2863,7 +2863,7 @@ import AuthGuard from '../components/AuthGuard.astro';
           userId = user?.id || null;
         }
       } catch (userError) {
-        console.warn('⚠️ Could not get user ID:', userError);
+        console.warn(' Could not get user ID:', userError);
       }
       
       // Upload logo FIRST (before database insert) to get URL immediately
@@ -2895,13 +2895,13 @@ import AuthGuard from '../components/AuthGuard.astro';
             
             if (urlData?.publicUrl) {
               restaurantLogoUrl = urlData.publicUrl;
-              console.log('✅ Logo uploaded successfully:', restaurantLogoUrl);
+              console.log(' Logo uploaded successfully:', restaurantLogoUrl);
             }
           } else {
-            console.error('❌ Logo upload error:', uploadError);
+            console.error(' Logo upload error:', uploadError);
           }
         } catch (logoErr) {
-          console.error('❌ Logo upload exception:', logoErr);
+          console.error(' Logo upload exception:', logoErr);
           // Continue without logo - don't block save
         }
       }
@@ -2943,75 +2943,109 @@ import AuthGuard from '../components/AuthGuard.astro';
       console.log('🕐 Timestamp added - Created at:', now);
 
       // Minimal logging for speed
-      console.log('💾 Saving order customization data...');
+      console.log(' Saving order customization data...');
 
       // Save to database IMMEDIATELY (skip connection test to save time)
       const dbInsertStartTime = Date.now();
       console.log('📤 Saving to database...');
       
       let savedData, saveError;
-      let timeoutId: NodeJS.Timeout | null = null;
-      try {
-        // Fast database insert with 15 second timeout (increased from 10)
-        const insertPromise = supabase
-          .from('order_customizations')
-          .insert(insertData)
-          .select();
+      
+      // Retry function with exponential backoff
+      const insertWithRetry = async (maxRetries = 2, retryDelay = 1000): Promise<any> => {
+        let currentTimeoutId: ReturnType<typeof setTimeout> | null = null;
         
-        // Create a proper timeout promise that rejects
-        const timeoutPromise = new Promise<never>((_, reject) => {
-          timeoutId = setTimeout(() => {
-            reject(new Error('Database insert timed out after 15 seconds'));
-          }, 15000);
-        });
-        
-        // Race the insert against the timeout
-        const result = await Promise.race([insertPromise, timeoutPromise]);
-        
-        // Clear timeout if operation completed
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-          timeoutId = null;
-        }
-        
-        // Check if result has error property (Supabase response format)
-        if (result && typeof result === 'object') {
-          if ('error' in result) {
-            savedData = (result as any).data;
-            saveError = (result as any).error;
-          } else if ('data' in result) {
-            // Standard Supabase response format
-            savedData = (result as any).data;
-            saveError = (result as any).error || null;
-          } else {
-            // Result might be the data directly
-            savedData = result;
-            saveError = null;
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+          try {
+            if (attempt > 0) {
+              console.log(` Retrying database insert (attempt ${attempt + 1}/${maxRetries + 1})...`);
+              await new Promise(resolve => setTimeout(resolve, retryDelay * attempt));
+            }
+            
+            // Create timeout promise that properly rejects
+            const timeoutPromise = new Promise<never>((_, reject) => {
+              currentTimeoutId = setTimeout(() => {
+                reject(new Error('Database insert timed out after 30 seconds'));
+              }, 30000); // Increased to 30 seconds for better reliability
+            });
+            
+            // Create the insert promise
+            const insertPromise = supabase
+              .from('order_customizations')
+              .insert(insertData)
+              .select();
+            
+            // Race the insert against the timeout
+            const result = await Promise.race([insertPromise, timeoutPromise]);
+            
+            // Clear timeout if operation completed
+            if (currentTimeoutId) {
+              clearTimeout(currentTimeoutId);
+              currentTimeoutId = null;
+            }
+            
+            // Properly handle Supabase response format { data, error }
+            if (result && typeof result === 'object' && 'data' in result) {
+              const supabaseResult = result as { data: any; error: any };
+              if (supabaseResult.error) {
+                // If it's a retryable error, throw to retry
+                if (attempt < maxRetries && (
+                  supabaseResult.error.code === 'PGRST301' || // Connection error
+                  supabaseResult.error.message?.includes('timeout') ||
+                  supabaseResult.error.message?.includes('network')
+                )) {
+                  throw supabaseResult.error;
+                }
+                return { data: null, error: supabaseResult.error };
+              }
+              return { data: supabaseResult.data, error: null };
+            }
+            
+            // Fallback for unexpected response format
+            return { data: result, error: null };
+          } catch (dbError: any) {
+            // Clear timeout on error
+            if (currentTimeoutId) {
+              clearTimeout(currentTimeoutId);
+              currentTimeoutId = null;
+            }
+            
+            // If it's the last attempt or not a retryable error, return the error
+            if (attempt === maxRetries || (
+              dbError?.message && 
+              !dbError.message.includes('timeout') && 
+              !dbError.message.includes('network')
+            )) {
+              return { data: null, error: dbError };
+            }
+            
+            // Otherwise, continue to next retry
+            console.warn(` Database insert attempt ${attempt + 1} failed, will retry...`, dbError?.message);
           }
-        } else {
-          savedData = result;
-          saveError = null;
         }
+        
+        return { data: null, error: new Error('All retry attempts failed') };
+      };
+      
+      try {
+        const result = await insertWithRetry();
+        savedData = result.data;
+        saveError = result.error;
         
         const dbInsertElapsed = Math.round((Date.now() - dbInsertStartTime) / 1000);
-        console.log(`✅ Database insert completed in ${dbInsertElapsed} seconds`);
-        console.log('✅ Insert result:', { savedData, saveError });
+        console.log(` Database insert completed in ${dbInsertElapsed} seconds`);
+        console.log(' Insert result:', { savedData, saveError });
       } catch (dbError: any) {
-        // Clear timeout on error
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-          timeoutId = null;
-        }
-        console.error('❌ Database insert exception:', dbError);
-        console.error('❌ Error message:', dbError?.message);
-        console.error('❌ Error stack:', dbError?.stack);
+        console.error(' Database insert exception:', dbError);
+        console.error(' Error message:', dbError?.message);
+        console.error(' Error stack:', dbError?.stack);
         
         // Check if it's a timeout error
         if (dbError?.message && dbError.message.includes('timed out')) {
           saveError = {
             message: 'Database operation timed out. Please check your internet connection and try again.',
             code: 'TIMEOUT',
-            details: 'The database insert took longer than 15 seconds to complete.',
+            details: 'The database insert took longer than 30 seconds to complete.',
             hint: 'This may be due to network issues or database overload. Please try again.'
           };
         } else if (dbError?.error) {
@@ -3030,8 +3064,8 @@ import AuthGuard from '../components/AuthGuard.astro';
         // Don't throw here - let the error handling below deal with it
       }
       if (saveError) {
-        console.error('❌ Error saving:', saveError.message || saveError.code || 'Unknown error');
-        console.error('❌ Full error object:', saveError);
+        console.error(' Error saving:', saveError.message || saveError.code || 'Unknown error');
+        console.error(' Full error object:', saveError);
         
         // Create detailed error message
         let errorMessage = saveError.message || saveError.hint || 'Failed to save your order.';
@@ -3066,7 +3100,7 @@ import AuthGuard from '../components/AuthGuard.astro';
           const safeErrorCode = (saveError.code || 'Unknown').replace(/"/g, '&quot;');
           errorDiv.innerHTML = `
             <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-              <h4 class="text-red-800 font-semibold mb-2">❌ Error Saving Order</h4>
+              <h4 class="text-red-800 font-semibold mb-2"> Error Saving Order</h4>
               <p class="text-red-700 font-medium">${safeErrorMessage}</p>
               ${safeErrorDetails ? `<p class="text-red-600 text-sm mt-2">${safeErrorDetails}</p>` : ''}
               <p class="text-red-600 text-sm mt-2">Error Code: ${safeErrorCode}</p>
@@ -3080,17 +3114,17 @@ import AuthGuard from '../components/AuthGuard.astro';
       }
 
       if (!savedData || (Array.isArray(savedData) && savedData.length === 0)) {
-        console.error('❌❌❌ No data returned from insert operation ❌❌❌');
-        console.error('❌ savedData:', savedData);
-        console.error('❌ savedData type:', typeof savedData);
-        console.error('❌ savedData is array:', Array.isArray(savedData));
-        console.error('❌ savedData length:', savedData ? (Array.isArray(savedData) ? savedData.length : 'not an array') : 'null/undefined');
+        console.error(' No data returned from insert operation ');
+        console.error(' savedData:', savedData);
+        console.error(' savedData type:', typeof savedData);
+        console.error(' savedData is array:', Array.isArray(savedData));
+        console.error(' savedData length:', savedData ? (Array.isArray(savedData) ? savedData.length : 'not an array') : 'null/undefined');
         throw new Error('Error saving your order. No data was returned from database. Please try again.');
       }
 
       // Handle both array and single object responses
       const savedRecord = Array.isArray(savedData) ? savedData[0] : savedData;
-      console.log('✅ Order saved successfully! ID:', savedRecord?.id);
+      console.log(' Order saved successfully! ID:', savedRecord?.id);
 
       const savedRecordId = savedRecord?.id;
       
@@ -3100,7 +3134,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         successDiv.classList.remove('hidden');
         successDiv.innerHTML = `
           <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-            <h4 class="text-green-800 font-semibold mb-2">✅ Order Submitted Successfully!</h4>
+            <h4 class="text-green-800 font-semibold mb-2"> Order Submitted Successfully!</h4>
             <p class="text-green-700">Your order has been saved. Files are uploading in the background...</p>
           </div>
         `;
@@ -3135,7 +3169,7 @@ import AuthGuard from '../components/AuthGuard.astro';
                   });
                 
                 if (uploadError) {
-                  console.error(`❌ Upload error for photo ${i + 1}:`, uploadError);
+                  console.error(` Upload error for photo ${i + 1}:`, uploadError);
                   return null;
                 }
                 
@@ -3154,14 +3188,14 @@ import AuthGuard from '../components/AuthGuard.astro';
                 }
                 return null;
               } catch (fileErr) {
-                console.error(`❌ Exception uploading photo ${i + 1}:`, fileErr);
+                console.error(` Exception uploading photo ${i + 1}:`, fileErr);
                 return null;
               }
             });
             
             const uploadResults = await Promise.all(uploadPromises);
             menuPhotosUrls = uploadResults.filter(result => result !== null);
-            console.log(`✅ ${menuPhotosUrls.length} menu photos uploaded successfully`);
+            console.log(` ${menuPhotosUrls.length} menu photos uploaded successfully`);
           }
           
           // Logo is already uploaded and saved with initial insert, so we only need to update menu photos
@@ -3184,17 +3218,17 @@ import AuthGuard from '../components/AuthGuard.astro';
               .eq('id', savedRecordId);
             
             if (updateError) {
-              console.error('❌ Error updating record with file URLs:', updateError);
+              console.error(' Error updating record with file URLs:', updateError);
             } else {
-              console.log('✅ Record updated with file URLs successfully');
+              console.log(' Record updated with file URLs successfully');
             }
           }
         } catch (bgError) {
-          console.error('❌ Background file upload error:', bgError);
+          console.error(' Background file upload error:', bgError);
           // Don't throw - this is background operation
         }
       }).catch(err => {
-        console.error('❌ Background upload promise error:', err);
+        console.error(' Background upload promise error:', err);
       });
       
       // IMPORTANT: Return immediately after saving data
@@ -3204,7 +3238,7 @@ import AuthGuard from '../components/AuthGuard.astro';
       // Note: Form clearing is handled by button handler after successful save
 
     } catch (error: any) {
-      console.error('❌ Error in form submission:', error);
+      console.error(' Error in form submission:', error);
       // Re-throw error so button handler can catch it and reset button state
       throw new Error(error.message || 'An error occurred while submitting your order. Please try again.');
     }
@@ -3331,22 +3365,22 @@ import AuthGuard from '../components/AuthGuard.astro';
       // CRITICAL: Check if user is logged in before allowing form submission
       const authManager = window.globalAuthManager || window.simpleAuthManager;
       if (!authManager || !authManager.isUserLoggedIn()) {
-        alert('❌ Please log in to submit this form. You must be authenticated to place an order.');
+        alert(' Please log in to submit this form. You must be authenticated to place an order.');
         return;
       }
 
       // Enforce required field validation here too (generic message only)
       if (!validateFormFields()) {
-        console.log('❌ Customization form validation failed, blocking save');
+        console.log(' Customization form validation failed, blocking save');
         return;
       }
       
       const formData = new FormData(form);
       const data = Object.fromEntries(formData);
       
-      console.log('📝 Project requirements saved:', data);
-      console.log('📝 Form data keys:', Object.keys(data));
-      console.log('📝 Form data values:', Object.values(data));
+      console.log(' Project requirements saved:', data);
+      console.log(' Form data keys:', Object.keys(data));
+      console.log(' Form data values:', Object.values(data));
       
       // Get product details first
       const productName = document.getElementById('selected-product-name').textContent;
@@ -3390,15 +3424,15 @@ import AuthGuard from '../components/AuthGuard.astro';
             .select();
             
           if (error) {
-            console.error('❌ Form submit save failed:', error);
-            alert('❌ Form submit save failed: ' + error.message);
+            console.error(' Form submit save failed:', error);
+            alert(' Form submit save failed: ' + error.message);
           } else {
-            console.log('✅ Form submit save successful!', result);
-            alert('✅ Data saved successfully to Supabase!');
+            console.log(' Form submit save successful!', result);
+            alert(' Data saved successfully to Supabase!');
           }
         } catch (err) {
-          console.error('❌ Form submit save error:', err);
-          alert('❌ Form submit save error: ' + err.message);
+          console.error(' Form submit save error:', err);
+          alert(' Form submit save error: ' + err.message);
         }
       } else {
         console.log('🧪 Not Order Menu System, skipping database save');
@@ -3428,7 +3462,7 @@ import AuthGuard from '../components/AuthGuard.astro';
       
       try {
         // Save to database using the helper function
-        console.log('💾 Saving project form to database...');
+        console.log(' Saving project form to database...');
         
         // Determine product type from the visible product name to avoid ID mismatches
         const normalize = (s) => (s || '').toLowerCase();
@@ -3514,15 +3548,15 @@ import AuthGuard from '../components/AuthGuard.astro';
                   size: photo.size,
                   path: path
                 });
-                console.log(`✅ Photo ${i + 1} uploaded successfully:`, pub?.publicUrl);
+                console.log(` Photo ${i + 1} uploaded successfully:`, pub?.publicUrl);
               } else {
-                console.error(`❌ Error uploading photo ${i + 1}:`, upErr);
+                console.error(` Error uploading photo ${i + 1}:`, upErr);
               }
             }
             
             console.log('📸 Menu photos upload completed. URLs:', menuPhotosUrls);
           } catch (e) {
-            console.error('❌ Menu photos upload failed:', e);
+            console.error(' Menu photos upload failed:', e);
           }
         }
         
@@ -3554,19 +3588,19 @@ import AuthGuard from '../components/AuthGuard.astro';
         const result = await saveCustomizationForm(formData, productType);
         
         if (result.success) {
-          console.log('✅ Project form saved to Supabase database:', result.data);
+          console.log(' Project form saved to Supabase database:', result.data);
           
           // Show success message with database confirmation
-          alert(`✅ Project requirements saved to database successfully!\n\nRecord ID: ${result.data.id}\nProject: ${result.data.project_name}\nRestaurant: ${result.data.restaurant_name || 'N/A'}\nCuisine: ${result.data.cuisine_type || 'N/A'}\n\nOur team will contact you soon!`);
+          alert(` Project requirements saved to database successfully!\n\nRecord ID: ${result.data.id}\nProject: ${result.data.project_name}\nRestaurant: ${result.data.restaurant_name || 'N/A'}\nCuisine: ${result.data.cuisine_type || 'N/A'}\n\nOur team will contact you soon!`);
         } else {
-          console.error('❌ Error saving to database:', result.error);
+          console.error(' Error saving to database:', result.error);
           
           // Fallback to localStorage
         const existingRequirements = JSON.parse(localStorage.getItem('project-requirements') || '[]');
         existingRequirements.push(projectRequirements);
         localStorage.setItem('project-requirements', JSON.stringify(existingRequirements));
         
-          alert(`❌ Database save failed: ${result.error}\n\nData saved locally as backup. Our team will contact you soon.`);
+          alert(` Database save failed: ${result.error}\n\nData saved locally as backup. Our team will contact you soon.`);
         }
         
         // Clear URL parameters to show browse products section
@@ -3637,12 +3671,12 @@ import AuthGuard from '../components/AuthGuard.astro';
         setTimeout(() => {
           recentActivity.style.opacity = '1';
           recentActivity.style.transform = 'translateY(0)';
-          console.log('✅ Browse products section is now visible');
+          console.log(' Browse products section is now visible');
           console.log('Recent activity display style:', recentActivity.style.display);
           console.log('Recent activity class list:', recentActivity.classList.toString());
         }, 50);
       } else {
-        console.error('❌ Recent activity element not found!');
+        console.error(' Recent activity element not found!');
       }
     }, 350);
   }
@@ -3669,21 +3703,21 @@ import AuthGuard from '../components/AuthGuard.astro';
       e.preventDefault();
       e.stopPropagation();
       
-      console.log('🔍 Validating order-menu-form submission...');
-      console.log('🔍 menuPhotos variable:', menuPhotos);
-      console.log('🔍 menuPhotos type:', typeof menuPhotos);
-      console.log('🔍 menuPhotos length:', menuPhotos ? menuPhotos.length : 'undefined');
+      console.log(' Validating order-menu-form submission...');
+      console.log(' menuPhotos variable:', menuPhotos);
+      console.log(' menuPhotos type:', typeof menuPhotos);
+      console.log(' menuPhotos length:', menuPhotos ? menuPhotos.length : 'undefined');
       
       // Check menu photos validation - check both the array and the file input
       const menuPhotosInput = document.getElementById('menu-photos-upload');
       const hasMenuPhotos = (menuPhotos && menuPhotos.length > 0) || (menuPhotosInput && menuPhotosInput.files && menuPhotosInput.files.length > 0);
       
-      console.log('🔍 menuPhotos array length:', menuPhotos ? menuPhotos.length : 'undefined');
-      console.log('🔍 menuPhotosInput files length:', menuPhotosInput ? menuPhotosInput.files.length : 'undefined');
-      console.log('🔍 hasMenuPhotos:', hasMenuPhotos);
+      console.log(' menuPhotos array length:', menuPhotos ? menuPhotos.length : 'undefined');
+      console.log(' menuPhotosInput files length:', menuPhotosInput ? menuPhotosInput.files.length : 'undefined');
+      console.log(' hasMenuPhotos:', hasMenuPhotos);
       
       if (!hasMenuPhotos) {
-        console.log('❌ Menu photos validation failed - no photos uploaded');
+        console.log(' Menu photos validation failed - no photos uploaded');
         const errorDiv = document.getElementById('menu-photos-error');
         if (errorDiv) {
           errorDiv.classList.remove('hidden');
@@ -3705,16 +3739,16 @@ import AuthGuard from '../components/AuthGuard.astro';
       }
       
       // Validate form fields before submission
-      console.log('🔍 Running form field validation...');
+      console.log(' Running form field validation...');
       const formValidationResult = validateFormFields();
-      console.log('🔍 Form validation result:', formValidationResult);
+      console.log(' Form validation result:', formValidationResult);
       
       if (!formValidationResult) {
-        console.log('❌ Form validation failed - required fields missing');
+        console.log(' Form validation failed - required fields missing');
         return false;
       }
       
-      console.log('✅ All validations passed, proceeding with form submission');
+      console.log(' All validations passed, proceeding with form submission');
       
       // If all validations pass, manually trigger the form submission
       handleOrderMenuFormSubmission();
@@ -3739,7 +3773,7 @@ import AuthGuard from '../components/AuthGuard.astro';
     // Add event listener for proceed to form button
     const proceedBtn = document.getElementById('proceed-to-oms-form');
     if (proceedBtn) {
-      console.log('✅ Proceed to OMS form button found, adding event listener');
+      console.log(' Proceed to OMS form button found, adding event listener');
       proceedBtn.addEventListener('click', (e) => {
         e.preventDefault();
         console.log('🚀 Proceed to OMS form button clicked!');
@@ -3776,13 +3810,13 @@ import AuthGuard from '../components/AuthGuard.astro';
         }, 300);
       });
     } else {
-      console.log('❌ Proceed to OMS form button not found');
+      console.log(' Proceed to OMS form button not found');
     }
     
     // Add event listener for close button
     const closeBtn = document.getElementById('close-order-menu-form');
     if (closeBtn) {
-      console.log('✅ Global close button found, adding event listener');
+      console.log(' Global close button found, adding event listener');
       closeBtn.addEventListener('click', (e) => {
         console.log('🚀 Global close button clicked!');
         e.preventDefault();
@@ -3797,13 +3831,13 @@ import AuthGuard from '../components/AuthGuard.astro';
         showNoActivityMessage();
       });
     } else {
-      console.log('❌ Global close button not found');
+      console.log(' Global close button not found');
     }
     
     // Add event listener for cancel button
     const cancelBtn = document.getElementById('cancel-order-menu');
     if (cancelBtn) {
-      console.log('✅ Global cancel button found, adding event listener');
+      console.log(' Global cancel button found, adding event listener');
       cancelBtn.addEventListener('click', (e) => {
         console.log('🚀 Global cancel button clicked!');
         e.preventDefault();
@@ -3818,7 +3852,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         showNoActivityMessage();
       });
     } else {
-      console.log('❌ Global cancel button not found');
+      console.log(' Global cancel button not found');
     }
   });
 
@@ -3832,7 +3866,7 @@ import AuthGuard from '../components/AuthGuard.astro';
       
       // CRITICAL: Check if user is actually logged in before proceeding
       if (!authManager || !authManager.isUserLoggedIn()) {
-        console.log('❌ User not logged in - skipping auto-fill');
+        console.log(' User not logged in - skipping auto-fill');
         return false;
       }
       
@@ -3855,26 +3889,26 @@ import AuthGuard from '../components/AuthGuard.astro';
               phone: session.user.phone || currentUser?.phone,
               company_name: session.user.company_name || currentUser?.company_name
             };
-            console.log('✅ Using updated user data from sessionStorage:', currentUser);
+            console.log(' Using updated user data from sessionStorage:', currentUser);
           }
         }
       } catch (e) {
-        console.warn('⚠️ Could not read sessionStorage:', e);
+        console.warn(' Could not read sessionStorage:', e);
       }
       
       // Additional check: ensure we have valid user data
       if (!currentUser || !currentUser.email) {
-        console.log('❌ No valid user data found - skipping auto-fill');
+        console.log(' No valid user data found - skipping auto-fill');
         return false;
       }
       
       // Verify user is properly authenticated (not just cached data)
       if (!currentUser.id && !currentUser.user_id) {
-        console.log('❌ User lacks proper authentication ID - skipping auto-fill');
+        console.log(' User lacks proper authentication ID - skipping auto-fill');
         return false;
       }
       
-      console.log('✅ User is properly authenticated - proceeding with auto-fill');
+      console.log(' User is properly authenticated - proceeding with auto-fill');
       
       if (currentUser && currentUser.email) {
         console.log('📧 Auto-filling email:', currentUser.email);
@@ -3883,7 +3917,7 @@ import AuthGuard from '../components/AuthGuard.astro';
           field.value = currentUser.email;
           field.dispatchEvent(new Event('input', { bubbles: true }));
           field.dispatchEvent(new Event('change', { bubbles: true }));
-          console.log('✅ Filled email field:', field);
+          console.log(' Filled email field:', field);
         });
       }
       
@@ -3935,38 +3969,38 @@ import AuthGuard from '../components/AuthGuard.astro';
                 // Country code exists in dropdown, select it
                 phoneCountryCodeSelect.value = extractedCountryCode;
                 phoneInput.value = phoneNumber;
-                console.log('✅ Filled phone from auth: country code =', extractedCountryCode, ', number =', phoneNumber);
+                console.log(' Filled phone from auth: country code =', extractedCountryCode, ', number =', phoneNumber);
               } else {
                 // Country code doesn't exist in dropdown, default to +91 but keep the number
                 phoneCountryCodeSelect.value = '+91';
                 phoneInput.value = phoneNumber;
-                console.log('✅ Filled phone from auth with default country code +91, number =', phoneNumber);
+                console.log(' Filled phone from auth with default country code +91, number =', phoneNumber);
               }
             } else {
               // Couldn't parse, try to extract just digits
               phoneInput.value = phoneValue.replace(/\D/g, '');
               phoneCountryCodeSelect.value = '+91';
-              console.log('⚠️ Could not parse phone from auth, using all digits');
+              console.log(' Could not parse phone from auth, using all digits');
             }
           } else {
             // No country code prefix, assume it's just the number
             phoneInput.value = phoneValue.replace(/\D/g, '');
             phoneCountryCodeSelect.value = '+91';
-            console.log('✅ Filled phone number from auth without country code');
+            console.log(' Filled phone number from auth without country code');
           }
           
           phoneInput.dispatchEvent(new Event('input', { bubbles: true }));
           phoneInput.dispatchEvent(new Event('change', { bubbles: true }));
-          console.log('✅ Successfully filled phone from auth manager');
+          console.log(' Successfully filled phone from auth manager');
         } else {
-          console.warn('⚠️ Phone input or country code select not found, using fallback');
+          console.warn(' Phone input or country code select not found, using fallback');
           // Fallback: if elements not found, use old method
           const phoneFields = document.querySelectorAll('input[name="phone"], input[type="tel"]');
           phoneFields.forEach(field => {
             (field as HTMLInputElement).value = authPhone.toString().replace(/\D/g, '');
             field.dispatchEvent(new Event('input', { bubbles: true }));
             field.dispatchEvent(new Event('change', { bubbles: true }));
-            console.log('✅ Filled phone field (fallback):', field);
+            console.log(' Filled phone field (fallback):', field);
           });
         }
       }
@@ -3978,7 +4012,7 @@ import AuthGuard from '../components/AuthGuard.astro';
           field.value = currentUser.full_name;
           field.dispatchEvent(new Event('input', { bubbles: true }));
           field.dispatchEvent(new Event('change', { bubbles: true }));
-          console.log('✅ Filled contact person field:', field);
+          console.log(' Filled contact person field:', field);
         });
       }
 
@@ -3987,7 +4021,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         const { supabase } = await import('../lib/supabase');
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          console.log('🔍 Attempting to fetch user profile from Supabase...');
+          console.log(' Attempting to fetch user profile from Supabase...');
           
           // Check if profiles table exists first - fetch all phone-related fields
           const { data: profile, error: profileError } = await supabase
@@ -3997,13 +4031,13 @@ import AuthGuard from '../components/AuthGuard.astro';
             .single();
             
           if (profileError) {
-            console.log('⚠️ Profile fetch failed (this is normal if profiles table doesn\'t exist):', profileError.message);
+            console.log(' Profile fetch failed (this is normal if profiles table doesn\'t exist):', profileError.message);
             // Don't show this error to user - it's expected if profiles table doesn't exist
             return true;
           }
           
           if (profile) {
-            console.log('✅ Profile data found:', profile);
+            console.log(' Profile data found:', profile);
             
             // Fill email
             if (profile.email) {
@@ -4065,31 +4099,31 @@ import AuthGuard from '../components/AuthGuard.astro';
                         // Country code exists in dropdown, select it
                         phoneCountryCodeSelect.value = extractedCountryCode;
                         phoneInput.value = phoneNumber;
-                        console.log('✅ Filled phone: country code =', extractedCountryCode, ', number =', phoneNumber);
+                        console.log(' Filled phone: country code =', extractedCountryCode, ', number =', phoneNumber);
                       } else {
                         // Country code doesn't exist in dropdown, default to +91 but keep the number
                         phoneCountryCodeSelect.value = '+91';
                         phoneInput.value = phoneNumber;
-                        console.log('✅ Filled phone with default country code +91, number =', phoneNumber);
+                        console.log(' Filled phone with default country code +91, number =', phoneNumber);
                       }
                     } else {
                       // Couldn't parse, try to extract just digits
                       phoneInput.value = phoneValue.replace(/\D/g, '');
                       phoneCountryCodeSelect.value = '+91';
-                      console.log('⚠️ Could not parse phone, using all digits');
+                      console.log(' Could not parse phone, using all digits');
                     }
                   } else {
                     // No country code prefix, assume it's just the number
                     phoneInput.value = phoneValue.replace(/\D/g, '');
                     phoneCountryCodeSelect.value = '+91';
-                    console.log('✅ Filled phone number without country code');
+                    console.log(' Filled phone number without country code');
                   }
                   
                   phoneInput.dispatchEvent(new Event('input', { bubbles: true }));
                   phoneInput.dispatchEvent(new Event('change', { bubbles: true }));
-                  console.log('✅ Successfully filled phone from profile');
+                  console.log(' Successfully filled phone from profile');
                 } else {
-                  console.warn('⚠️ Phone input or country code select not found');
+                  console.warn(' Phone input or country code select not found');
                   // Fallback: if elements not found, use old method
                   document.querySelectorAll('input[name="phone"], input[type="tel"]').forEach((field) => {
                     (field as HTMLInputElement).value = profilePhone.toString().replace(/\D/g, '');
@@ -4099,7 +4133,7 @@ import AuthGuard from '../components/AuthGuard.astro';
                 }
               }, 100);
             } else {
-              console.log('⚠️ No phone number found in profile');
+              console.log(' No phone number found in profile');
             }
             
             // Fill full name / contact person
@@ -4113,7 +4147,7 @@ import AuthGuard from '../components/AuthGuard.astro';
           }
         }
       } catch (error) {
-        console.log('⚠️ Profile fetch error (this is normal):', error.message);
+        console.log(' Profile fetch error (this is normal):', error.message);
         // Don't show this error to user - it's expected if profiles table doesn't exist
       }
       
@@ -4121,7 +4155,7 @@ import AuthGuard from '../components/AuthGuard.astro';
       // Only contact details (email, phone) and contact person name are auto-filled
       // Other fields should be filled manually by the user
       
-      console.log('✅ Auto-fill completed with auth manager data');
+      console.log(' Auto-fill completed with auth manager data');
       return true;
     };
     
@@ -4137,7 +4171,7 @@ import AuthGuard from '../components/AuthGuard.astro';
           clearInterval(interval);
         if (attempts >= maxAttempts) {
           console.log('⏰ Auth manager timeout - user appears to be not logged in');
-          console.log('❌ No authenticated user found - forms will remain empty');
+          console.log(' No authenticated user found - forms will remain empty');
           return;
         }
           }
@@ -4340,17 +4374,17 @@ Status: Submitted
           });
         
         if (error) {
-          console.error('❌ Upload failed:', error);
+          console.error(' Upload failed:', error);
         } else {
           const { data } = supabase.storage.from('menu-photos').getPublicUrl(path);
-          console.log('✅ Upload successful:', data.publicUrl);
+          console.log(' Upload successful:', data.publicUrl);
           console.log('🎯 Check your Supabase Storage menu-photos bucket!');
         }
       } catch (e) {
-        console.error('❌ Test failed:', e);
+        console.error(' Test failed:', e);
       }
     } else {
-      console.log('❌ No files selected');
+      console.log(' No files selected');
     }
   };
 
@@ -4377,7 +4411,7 @@ Status: Submitted
       if (recentActivity) {
         recentActivity.style.display = 'block';
         recentActivity.classList.remove('hidden');
-        console.log('✅ Showing browse products section - no product selected');
+        console.log(' Showing browse products section - no product selected');
         // Always load recent activity on dashboard
         loadRecentActivity();
       }
@@ -4391,7 +4425,7 @@ Status: Submitted
       if (recentActivity) {
         recentActivity.style.display = 'none';
         recentActivity.classList.add('hidden');
-        console.log('✅ Hiding browse products section - product selected');
+        console.log(' Hiding browse products section - product selected');
       }
     }
     
@@ -4543,12 +4577,12 @@ Status: Submitted
         if (recentActivity) {
           recentActivity.style.display = 'block';
           recentActivity.classList.remove('hidden');
-          console.log('✅ Browse products section confirmed visible - no product selected');
+          console.log(' Browse products section confirmed visible - no product selected');
         }
       } else {
         if (recentActivity) {
           recentActivity.style.display = 'none';
-          console.log('✅ Browse products section confirmed hidden - product selected');
+          console.log(' Browse products section confirmed hidden - product selected');
         }
       }
     }, 1000);
@@ -4591,7 +4625,7 @@ Status: Submitted
   // Logout functionality removed (was in Quick Actions section)
   
   
-  console.log('✅ Dashboard script initialized with global auth manager');
+  console.log(' Dashboard script initialized with global auth manager');
 
   // Pincode-based autocomplete functionality
   const pincodeData = {
@@ -4852,7 +4886,7 @@ Status: Submitted
           
           await testDirectOrderCustomizationSave(data);
         } else {
-          console.error('❌ Form not found for test save');
+          console.error(' Form not found for test save');
         }
       });
     }
@@ -4897,15 +4931,15 @@ Status: Submitted
             .select();
             
           if (error) {
-            console.error('❌ Simple test failed:', error);
-            alert('❌ Simple test failed: ' + error.message);
+            console.error(' Simple test failed:', error);
+            alert(' Simple test failed: ' + error.message);
           } else {
-            console.log('✅ Simple test successful!', result);
-            alert('✅ Simple test successful! Data saved to database.');
+            console.log(' Simple test successful!', result);
+            alert(' Simple test successful! Data saved to database.');
           }
         } catch (err) {
-          console.error('❌ Simple test error:', err);
-          alert('❌ Simple test error: ' + err.message);
+          console.error(' Simple test error:', err);
+          alert(' Simple test error: ' + err.message);
         }
       });
     }
@@ -4913,11 +4947,11 @@ Status: Submitted
     // Function to find and setup form
     function setupForm() {
       const form = document.getElementById('requirements-form');
-      console.log('🔍 Form found:', !!form);
-      console.log('🔍 Form element:', form);
+      console.log(' Form found:', !!form);
+      console.log(' Form element:', form);
       
       if (form) {
-        console.log('✅ Form found, adding event listener...');
+        console.log(' Form found, adding event listener...');
         
         // Override the form submission completely
         form.addEventListener('submit', async function(e) {
@@ -4963,15 +4997,15 @@ Status: Submitted
               .select();
               
             if (error) {
-              console.error('❌ Force save failed:', error);
-              alert('❌ Save failed: ' + error.message);
+              console.error(' Force save failed:', error);
+              alert(' Save failed: ' + error.message);
             } else {
-              console.log('✅ Force save successful!', result);
-              alert('✅ Data saved successfully to order_customizations table!');
+              console.log(' Force save successful!', result);
+              alert(' Data saved successfully to order_customizations table!');
             }
           } catch (err) {
-            console.error('❌ Force save error:', err);
-            alert('❌ Save error: ' + err.message);
+            console.error(' Force save error:', err);
+            alert(' Save error: ' + err.message);
           }
         });
         
@@ -5014,41 +5048,41 @@ Status: Submitted
     });
     
     // Add direct click listener to Save and Make Payment button
-    console.log('🔍 Looking for save button...');
+    console.log(' Looking for save button...');
     
     // First try to find the button inside the order-menu-form
     const orderMenuForm = document.getElementById('order-menu-form');
     let targetButton = null;
     
     if (orderMenuForm) {
-      console.log('🔍 Order menu form found:', orderMenuForm);
+      console.log(' Order menu form found:', orderMenuForm);
       targetButton = orderMenuForm.querySelector('button[type="submit"]');
-      console.log('🔍 Save button in order menu form:', targetButton);
+      console.log(' Save button in order menu form:', targetButton);
     }
     
     // If not found, try to find by text content
     if (!targetButton) {
       const allButtons = document.querySelectorAll('button');
-      console.log('🔍 All buttons found:', allButtons.length);
+      console.log(' All buttons found:', allButtons.length);
       
       for (let button of allButtons) {
         if (button.textContent.includes('Save and Make Payment')) {
           // Check if this button is inside the order-menu-form
           if (orderMenuForm && orderMenuForm.contains(button)) {
             targetButton = button;
-            console.log('🔍 Found save button by text in order menu form:', targetButton);
+            console.log(' Found save button by text in order menu form:', targetButton);
             break;
           }
         }
       }
     }
     
-    console.log('🔍🔍🔍 SEARCHING FOR SAVE BUTTON 🔍🔍🔍');
-    console.log('🔍 Order menu form:', orderMenuForm);
-    console.log('🔍 Target button (initial):', targetButton);
+    console.log(' SEARCHING FOR SAVE BUTTON ');
+    console.log(' Order menu form:', orderMenuForm);
+    console.log(' Target button (initial):', targetButton);
     
     if (targetButton) {
-      console.log('✅✅✅ SAVE BUTTON FOUND! ✅✅✅');
+      console.log(' SAVE BUTTON FOUND! ');
       console.log('🔴 Save button element:', targetButton);
       console.log('🔴 Save button ID:', targetButton.id);
       console.log('🔴 Save button classes:', targetButton.className);
@@ -5069,24 +5103,24 @@ Status: Submitted
         e.stopPropagation();
         
         if (isSaving) {
-          console.log('⚠️⚠️⚠️ Save already in progress, ignoring click ⚠️⚠️⚠️');
-          alert('⚠️ Save is already in progress. Please wait...');
+          console.log(' Save already in progress, ignoring click ');
+          alert(' Save is already in progress. Please wait...');
           return;
         }
         
         // Run validation BEFORE setting isSaving flag
-        console.log('🔍🔍🔍 RUNNING VALIDATION FIRST 🔍🔍🔍');
+        console.log(' RUNNING VALIDATION FIRST ');
         const formValidationResult = validateFormFields();
-        console.log('🔍 Validation result:', formValidationResult);
+        console.log(' Validation result:', formValidationResult);
         
         if (!formValidationResult) {
-          console.log('❌❌❌ Validation failed, preventing save ❌❌❌');
-          alert('❌ Please fill in all required fields before saving.');
+          console.log(' Validation failed, preventing save ');
+          alert(' Please fill in all required fields before saving.');
           return; // Don't set isSaving flag if validation fails
         }
         
         // Only set isSaving flag after validation passes
-        console.log('✅ Setting isSaving flag to true');
+        console.log(' Setting isSaving flag to true');
         isSaving = true;
         
         // Disable button to prevent multiple clicks
@@ -5101,7 +5135,7 @@ Status: Submitted
         `;
         
         try {
-          console.log('✅✅✅ VALIDATION PASSED, CALLING handleOrderMenuFormSubmission() ✅✅✅');
+          console.log(' VALIDATION PASSED, CALLING handleOrderMenuFormSubmission() ');
           console.log('🕐 Save operation started at:', new Date().toISOString());
           
           const saveStartTime = Date.now();
@@ -5110,9 +5144,9 @@ Status: Submitted
           
           // Timeout warning after 30 seconds
           timeoutWarning = setTimeout(() => {
-            console.warn('⚠️ Save operation is taking longer than expected. Please wait...');
+            console.warn(' Save operation is taking longer than expected. Please wait...');
             const elapsed = Math.round((Date.now() - saveStartTime) / 1000);
-            console.warn(`⚠️ Elapsed time: ${elapsed} seconds`);
+            console.warn(` Elapsed time: ${elapsed} seconds`);
           }, 30000);
           
           try {
@@ -5124,8 +5158,8 @@ Status: Submitted
           if (timeoutWarning) clearTimeout(timeoutWarning);
             
             const elapsed = Math.round((Date.now() - saveStartTime) / 1000);
-            console.log('✅✅✅ handleOrderMenuFormSubmission() COMPLETED ✅✅✅');
-            console.log('✅✅✅ DATA SUCCESSFULLY SAVED TO SUPABASE ✅✅✅');
+            console.log(' handleOrderMenuFormSubmission() COMPLETED ');
+            console.log(' DATA SUCCESSFULLY SAVED TO SUPABASE ');
             console.log(`🕐 Save operation completed in ${elapsed} seconds`);
             console.log('🕐 Save operation completed at:', new Date().toISOString());
             
@@ -5137,22 +5171,22 @@ Status: Submitted
             clearFormFileFields();
             
             // Show success confirmation
-            console.log('✅ Button will be reset in finally block');
+            console.log(' Button will be reset in finally block');
           } catch (saveError: any) {
             // Clear timeout warning on error
             if (timeoutWarning) clearTimeout(timeoutWarning);
             
             const elapsed = Math.round((Date.now() - saveStartTime) / 1000);
-            console.error('❌ Save operation error:', saveError);
+            console.error(' Save operation error:', saveError);
             console.error(`🕐 Save operation failed after ${elapsed} seconds`);
             throw saveError;
           }
         } catch (err: any) {
-          console.error('❌❌❌ SAVE BUTTON ERROR ❌❌❌');
+          console.error(' SAVE BUTTON ERROR ');
           console.error('🕐 Error occurred at:', new Date().toISOString());
-          console.error('❌ Error object:', err);
-          console.error('❌ Error message:', err?.message || 'Unknown error');
-          console.error('❌ Error stack:', err?.stack);
+          console.error(' Error object:', err);
+          console.error(' Error message:', err?.message || 'Unknown error');
+          console.error(' Error stack:', err?.stack);
           
           // Show error message to user
           const errorMessage = err?.message || 'An error occurred while saving. Please try again.';
@@ -5162,7 +5196,7 @@ Status: Submitted
             const safeErrorMessage = errorMessage.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
             errorDiv.innerHTML = `
               <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-                <h4 class="text-red-800 font-semibold mb-2">❌ Error Saving Order</h4>
+                <h4 class="text-red-800 font-semibold mb-2"> Error Saving Order</h4>
                 <p class="text-red-700">${safeErrorMessage}</p>
                 <p class="text-red-600 text-sm mt-2">Please check the console for more details and try again.</p>
               </div>
@@ -5176,27 +5210,27 @@ Status: Submitted
             if (targetButton) {
               targetButton.disabled = false;
               targetButton.innerHTML = originalButtonText;
-              console.log('✅ Button state reset successfully');
+              console.log(' Button state reset successfully');
             } else {
-              console.error('❌ Target button not found during reset');
+              console.error(' Target button not found during reset');
             }
           } catch (resetError) {
-            console.error('❌ Error resetting button state:', resetError);
+            console.error(' Error resetting button state:', resetError);
             // Force reset as fallback - try multiple methods
             try {
               const fallbackBtn = document.getElementById('save-and-pay');
               if (fallbackBtn) {
                 fallbackBtn.disabled = false;
                 fallbackBtn.textContent = 'Save and Make Payment';
-                console.log('✅ Button reset via fallback method');
+                console.log(' Button reset via fallback method');
               }
             } catch (fallbackError) {
-              console.error('❌ Fallback reset also failed:', fallbackError);
+              console.error(' Fallback reset also failed:', fallbackError);
             }
           }
         }
       });
-      console.log('✅✅✅ CLICK EVENT LISTENER ATTACHED SUCCESSFULLY ✅✅✅');
+      console.log(' CLICK EVENT LISTENER ATTACHED SUCCESSFULLY ');
       
       // Test: Try to manually trigger click to verify button is accessible
       console.log('🧪 Testing button accessibility...');
@@ -5212,15 +5246,15 @@ Status: Submitted
       console.log('🧪 Test function available: window.testSaveButton()');
       
     } else {
-      console.error('❌❌❌ SAVE BUTTON NOT FOUND! ❌❌❌');
-      console.error('❌ Attempting fallback search...');
+      console.error(' SAVE BUTTON NOT FOUND! ');
+      console.error(' Attempting fallback search...');
       
       // Fallback: attach by explicit ID if present
       const fallbackBtn = document.getElementById('save-and-pay');
-      console.log('🔍 Fallback button search result:', fallbackBtn);
+      console.log(' Fallback button search result:', fallbackBtn);
       
       if (fallbackBtn) {
-        console.log('✅✅✅ FALLBACK BUTTON FOUND! ✅✅✅');
+        console.log(' FALLBACK BUTTON FOUND! ');
         console.log('🔴 Fallback button element:', fallbackBtn);
         console.log('🔴 Fallback button ID:', fallbackBtn.id);
         
@@ -5231,16 +5265,16 @@ Status: Submitted
           e.preventDefault();
           e.stopPropagation();
           if (isSaving) {
-            console.log('⚠️⚠️⚠️ Save already in progress, ignoring click ⚠️⚠️⚠️');
+            console.log(' Save already in progress, ignoring click ');
             return;
           }
           
           // Run validation BEFORE setting isSaving flag
-          console.log('🔍 Running validation before fallback save button submission...');
+          console.log(' Running validation before fallback save button submission...');
           const formValidationResult = validateFormFields();
           if (!formValidationResult) {
-            console.log('❌ Validation failed, preventing save');
-            alert('❌ Please fill in all required fields before saving.');
+            console.log(' Validation failed, preventing save');
+            alert(' Please fill in all required fields before saving.');
             return; // Don't set isSaving flag if validation fails
           }
           
@@ -5260,7 +5294,7 @@ Status: Submitted
           
           try {
             const fallbackStartTime = Date.now();
-            console.log('✅✅✅ FALLBACK VALIDATION PASSED, CALLING handleOrderMenuFormSubmission() ✅✅✅');
+            console.log(' FALLBACK VALIDATION PASSED, CALLING handleOrderMenuFormSubmission() ');
             console.log('🕐 Fallback save operation started at:', new Date().toISOString());
             
             let fallbackTimeoutWarning: NodeJS.Timeout | null = null;
@@ -5268,9 +5302,9 @@ Status: Submitted
             
             // Timeout warning after 30 seconds
             fallbackTimeoutWarning = setTimeout(() => {
-              console.warn('⚠️ Fallback save operation is taking longer than expected. Please wait...');
+              console.warn(' Fallback save operation is taking longer than expected. Please wait...');
               const elapsed = Math.round((Date.now() - fallbackStartTime) / 1000);
-              console.warn(`⚠️ Elapsed time: ${elapsed} seconds`);
+              console.warn(` Elapsed time: ${elapsed} seconds`);
             }, 30000);
             
             // Call the save operation directly without aggressive timeout
@@ -5281,7 +5315,7 @@ Status: Submitted
             if (fallbackTimeoutWarning) clearTimeout(fallbackTimeoutWarning);
             
             const fallbackElapsed = Math.round((Date.now() - fallbackStartTime) / 1000);
-            console.log('✅✅✅ FALLBACK handleOrderMenuFormSubmission() COMPLETED ✅✅✅');
+            console.log(' FALLBACK handleOrderMenuFormSubmission() COMPLETED ');
             console.log(`🕐 Fallback save operation completed in ${fallbackElapsed} seconds`);
             console.log('🕐 Fallback save operation completed at:', new Date().toISOString());
             
@@ -5294,11 +5328,11 @@ Status: Submitted
             // Clear timeout warning on error
             if (fallbackTimeoutWarning) clearTimeout(fallbackTimeoutWarning);
             
-            console.error('❌❌❌ FALLBACK SAVE BUTTON ERROR ❌❌❌');
+            console.error(' FALLBACK SAVE BUTTON ERROR ');
             console.error('🕐 Fallback error occurred at:', new Date().toISOString());
-            console.error('❌ Error object:', err);
-            console.error('❌ Error message:', err?.message || 'Unknown error');
-            console.error('❌ Error stack:', err?.stack);
+            console.error(' Error object:', err);
+            console.error(' Error message:', err?.message || 'Unknown error');
+            console.error(' Error stack:', err?.stack);
             
             // Show error in UI
             const errorDiv = document.getElementById('validation-errors');
@@ -5307,7 +5341,7 @@ Status: Submitted
               const safeErrorMessage = (err?.message || 'Unknown error').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
               errorDiv.innerHTML = `
                 <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <h4 class="text-red-800 font-semibold mb-2">❌ Error Saving Order</h4>
+                  <h4 class="text-red-800 font-semibold mb-2"> Error Saving Order</h4>
                   <p class="text-red-700">${safeErrorMessage}</p>
                   <p class="text-red-600 text-sm mt-2">Please check the console for more details and try again.</p>
                 </div>
@@ -5321,31 +5355,31 @@ Status: Submitted
               if (fallbackBtn) {
                 fallbackBtn.disabled = false;
                 fallbackBtn.innerHTML = originalButtonText;
-                console.log('✅ Fallback button state reset successfully');
+                console.log(' Fallback button state reset successfully');
               } else {
-                console.error('❌ Fallback button not found during reset');
+                console.error(' Fallback button not found during reset');
               }
             } catch (resetError) {
-              console.error('❌ Error resetting fallback button state:', resetError);
+              console.error(' Error resetting fallback button state:', resetError);
               // Force reset as fallback
               try {
                 const fallbackBtn2 = document.getElementById('save-and-pay');
                 if (fallbackBtn2) {
                   fallbackBtn2.disabled = false;
                   fallbackBtn2.textContent = 'Save and Make Payment';
-                  console.log('✅ Fallback button reset via alternative method');
+                  console.log(' Fallback button reset via alternative method');
                 }
               } catch (fallbackError2) {
-                console.error('❌ Alternative fallback reset also failed:', fallbackError2);
+                console.error(' Alternative fallback reset also failed:', fallbackError2);
               }
             }
           }
         });
-        console.log('✅✅✅ FALLBACK CLICK EVENT LISTENER ATTACHED SUCCESSFULLY ✅✅✅');
+        console.log(' FALLBACK CLICK EVENT LISTENER ATTACHED SUCCESSFULLY ');
       } else {
-        console.error('❌❌❌ FALLBACK BUTTON ALSO NOT FOUND! ❌❌❌');
-        console.error('❌ All save button search methods failed!');
-        alert('❌ Save button not found. Please refresh the page.');
+        console.error(' FALLBACK BUTTON ALSO NOT FOUND! ');
+        console.error(' All save button search methods failed!');
+        alert(' Save button not found. Please refresh the page.');
       }
     }
     
@@ -5358,10 +5392,10 @@ Status: Submitted
         console.log('🔴 Direct save button clicked!');
         
         // Run validation before submission
-        console.log('🔍 Running validation before direct save submission...');
+        console.log(' Running validation before direct save submission...');
         const formValidationResult = validateFormFields();
         if (!formValidationResult) {
-          console.log('❌ Validation failed, preventing direct save');
+          console.log(' Validation failed, preventing direct save');
           return;
         }
         
@@ -5369,8 +5403,8 @@ Status: Submitted
         try {
           await handleOrderMenuFormSubmission();
         } catch (err) {
-          console.error('❌ Direct save flow failed:', err);
-          alert('❌ Direct save failed. See console.');
+          console.error(' Direct save flow failed:', err);
+          alert(' Direct save failed. See console.');
         }
       });
     }
@@ -5422,14 +5456,14 @@ Status: Submitted
       console.log('🧪 Current user:', currentUser);
       
       if (!currentUser) {
-        console.error('❌ No user found for direct save test');
+        console.error(' No user found for direct save test');
         return;
       }
       
       // Check if Supabase is available
       if (!window.supabase) {
-        console.error('❌ Supabase not available for direct save test');
-        alert('❌ Supabase not available! Check console for details.');
+        console.error(' Supabase not available for direct save test');
+        alert(' Supabase not available! Check console for details.');
         return;
       }
       
@@ -5442,15 +5476,15 @@ Status: Submitted
           .limit(1);
         
         if (testError) {
-          console.error('❌ Supabase connection test failed:', testError);
-          alert('❌ Supabase connection failed: ' + testError.message);
+          console.error(' Supabase connection test failed:', testError);
+          alert(' Supabase connection failed: ' + testError.message);
           return;
         } else {
-          console.log('✅ Supabase connection test successful');
+          console.log(' Supabase connection test successful');
         }
       } catch (connError) {
-        console.error('❌ Supabase connection error:', connError);
-        alert('❌ Supabase connection error: ' + connError.message);
+        console.error(' Supabase connection error:', connError);
+        alert(' Supabase connection error: ' + connError.message);
         return;
       }
       
@@ -5487,15 +5521,15 @@ Status: Submitted
         .select();
         
       if (error) {
-        console.error('❌ Direct save test failed:', error);
-        console.error('❌ Error details:', JSON.stringify(error, null, 2));
+        console.error(' Direct save test failed:', error);
+        console.error(' Error details:', JSON.stringify(error, null, 2));
       } else {
-        console.log('✅ Direct save test successful!', result);
-        alert('✅ Data saved successfully to order_customizations table!');
+        console.log(' Direct save test successful!', result);
+        alert(' Data saved successfully to order_customizations table!');
       }
       
     } catch (err) {
-      console.error('❌ Direct save test error:', err);
+      console.error(' Direct save test error:', err);
     }
   }
 </script>

@@ -253,7 +253,7 @@ import AuthGuard from '../components/AuthGuard.astro';
       if (window.supabase && window.supabase.auth) {
         supabase = window.supabase;
         supabaseReady = true;
-        console.log('✅ Using global Supabase client from Layout');
+        console.log('Using global Supabase client from Layout');
         return true;
       }
       
@@ -263,14 +263,14 @@ import AuthGuard from '../components/AuthGuard.astro';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ';
         supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
         supabaseReady = true;
-        console.log('✅ Supabase client created directly');
+        console.log('Supabase client created directly');
         return true;
       }
       
-      console.log('⏳ Supabase not ready yet');
+      console.log('Supabase not ready yet');
       return false;
     } catch (error) {
-      console.error('❌ Error initializing Supabase:', error);
+      console.error('Error initializing Supabase:', error);
       return false;
     }
   };
@@ -279,18 +279,18 @@ import AuthGuard from '../components/AuthGuard.astro';
   const waitForSupabase = async (maxRetries = 10, delay = 500) => {
     for (let i = 0; i < maxRetries; i++) {
       if (supabaseReady && supabase) {
-        console.log('✅ Supabase is ready');
+        console.log('Supabase is ready');
         return true;
       }
       
-      console.log(`⏳ Waiting for Supabase... (${i + 1}/${maxRetries})`);
+      console.log(`Waiting for Supabase... (${i + 1}/${maxRetries})`);
       await new Promise(resolve => setTimeout(resolve, delay));
       
       // Try to initialize again
       initSupabase();
     }
     
-    console.error('❌ Supabase failed to initialize after retries');
+    console.error('Supabase failed to initialize after retries');
     return false;
   };
 
@@ -314,9 +314,9 @@ import AuthGuard from '../components/AuthGuard.astro';
     if (supabaseReady || retryCount >= maxRetries) {
       clearInterval(retryInterval);
       if (supabaseReady) {
-        console.log('✅ Supabase ready after retries');
+        console.log('Supabase ready after retries');
       } else {
-        console.error('❌ Supabase failed to initialize after all retries');
+        console.error('Supabase failed to initialize after all retries');
       }
     } else {
       retryCount++;
@@ -330,7 +330,7 @@ import AuthGuard from '../components/AuthGuard.astro';
       // Wait for Supabase to be ready
       const isReady = await waitForSupabase();
       if (!isReady) {
-        console.log('⏳ Supabase not ready yet, will retry...');
+        console.log('Supabase not ready yet, will retry...');
         setTimeout(checkAndSyncAuthentication, 1000);
         return;
       }
@@ -339,15 +339,15 @@ import AuthGuard from '../components/AuthGuard.astro';
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       
       if (authError || !user) {
-        console.log('❌ No Supabase authentication found');
+        console.log('No Supabase authentication found');
         
         // Check if user is logged in through global auth manager
         const authManager = window.globalAuthManager || window.simpleAuthManager;
         if (authManager && authManager.getCurrentUser) {
           const globalUser = authManager.getCurrentUser();
           if (globalUser) {
-            console.log('🔄 User found in global auth manager, attempting to sync with Supabase...');
-            console.log('👤 Global user:', globalUser);
+            console.log('User found in global auth manager, attempting to sync with Supabase...');
+            console.log(' Global user:', globalUser);
             
             // Show a message to the user
             showAuthSyncMessage(globalUser.email);
@@ -355,15 +355,15 @@ import AuthGuard from '../components/AuthGuard.astro';
           }
         }
         
-        console.log('ℹ️ No user found in any authentication system');
+        console.log(' No user found in any authentication system');
       } else {
-        console.log('✅ User authenticated via Supabase:', user.email);
+        console.log(' User authenticated via Supabase:', user.email);
         
         // Update the UI to show the user's email
         updateUserDisplay(user.email);
       }
     } catch (error) {
-      console.error('❌ Error checking authentication:', error);
+      console.error(' Error checking authentication:', error);
     }
   }
 
@@ -454,7 +454,7 @@ import AuthGuard from '../components/AuthGuard.astro';
       // Wait for Supabase to be ready
       const isReady = await waitForSupabase();
       if (!isReady) {
-        console.error('❌ Supabase not ready, cannot pre-fill form');
+        console.error(' Supabase not ready, cannot pre-fill form');
         const emailDisplay = document.getElementById('userEmailDisplay');
         if (emailDisplay) {
           emailDisplay.textContent = 'Database not ready';
@@ -463,7 +463,7 @@ import AuthGuard from '../components/AuthGuard.astro';
       }
 
       if (!supabase || !supabase.auth) {
-        console.error('❌ Supabase client or auth not available');
+        console.error(' Supabase client or auth not available');
         const emailDisplay = document.getElementById('userEmailDisplay');
         if (emailDisplay) {
           emailDisplay.textContent = 'Authentication error';
@@ -471,18 +471,18 @@ import AuthGuard from '../components/AuthGuard.astro';
         return;
       }
 
-      console.log('🔄 Getting user data...');
+      console.log(' Getting user data...');
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       
       if (authError || !user) {
-        console.log('❌ No Supabase auth, checking global auth manager...');
+        console.log(' No Supabase auth, checking global auth manager...');
         
         // Check if user is logged in through global auth manager
         const authManager = window.globalAuthManager || window.simpleAuthManager;
         if (authManager && authManager.getCurrentUser) {
           const globalUser = authManager.getCurrentUser();
           if (globalUser) {
-            console.log('✅ User found in global auth manager:', globalUser.email);
+            console.log(' User found in global auth manager:', globalUser.email);
             const emailDisplay = document.getElementById('userEmailDisplay');
             if (emailDisplay) {
               emailDisplay.textContent = globalUser.email || 'Not available';
@@ -492,7 +492,7 @@ import AuthGuard from '../components/AuthGuard.astro';
           }
         }
         
-        console.log('❌ No user found in any auth system');
+        console.log(' No user found in any auth system');
         const emailDisplay = document.getElementById('userEmailDisplay');
         if (emailDisplay) {
           emailDisplay.textContent = 'Not logged in';
@@ -501,7 +501,7 @@ import AuthGuard from '../components/AuthGuard.astro';
       }
 
       if (user) {
-        console.log('✅ User found via Supabase:', user.email);
+        console.log(' User found via Supabase:', user.email);
         const emailDisplay = document.getElementById('userEmailDisplay');
         if (emailDisplay) {
           emailDisplay.textContent = user.email || 'Not available';
@@ -509,7 +509,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         }
       }
     } catch (error) {
-      console.error('❌ Error pre-filling form:', error);
+      console.error(' Error pre-filling form:', error);
       const emailDisplay = document.getElementById('userEmailDisplay');
       if (emailDisplay) {
         emailDisplay.textContent = 'Error loading email';
@@ -563,18 +563,18 @@ import AuthGuard from '../components/AuthGuard.astro';
 
   async function loadMyTickets() {
     try {
-      console.log('🔄 Loading tickets...');
+      console.log(' Loading tickets...');
       
       // Wait for Supabase to be ready
       const isReady = await waitForSupabase();
       if (!isReady) {
-        console.error('❌ Supabase not ready');
+        console.error(' Supabase not ready');
         alert('Database connection error. Please refresh the page and try again.');
         return;
       }
 
       if (!supabase || !supabase.auth) {
-        console.error('❌ Supabase client or auth not available');
+        console.error(' Supabase client or auth not available');
         alert('Database connection error. Please refresh the page and try again.');
         return;
       }
@@ -583,12 +583,12 @@ import AuthGuard from '../components/AuthGuard.astro';
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       
       if (authError || !user) {
-        console.error('❌ Supabase auth error:', authError);
+        console.error(' Supabase auth error:', authError);
         alert('Please login to view your tickets. You need to be authenticated through Supabase.');
         return;
       }
 
-      console.log('👤 User authenticated via Supabase:', user.email);
+      console.log(' User authenticated via Supabase:', user.email);
 
       const { data: tickets, error } = await supabase
         .from('support_tickets')
@@ -597,12 +597,12 @@ import AuthGuard from '../components/AuthGuard.astro';
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('❌ Database error:', error);
+        console.error(' Database error:', error);
         alert('Error loading tickets: ' + error.message);
         return;
       }
 
-      console.log('✅ Tickets loaded:', tickets?.length || 0);
+      console.log(' Tickets loaded:', tickets?.length || 0);
 
       const ticketsList = document.getElementById('my-tickets-list');
       const noTickets = document.getElementById('no-tickets');
@@ -768,7 +768,7 @@ import AuthGuard from '../components/AuthGuard.astro';
 
   // Debug function to check Supabase status
   window.checkSupabaseStatus = () => {
-    console.log('🔍 Supabase Status Check:');
+    console.log(' Supabase Status Check:');
     console.log('- supabaseReady:', supabaseReady);
     console.log('- supabase client:', !!supabase);
     console.log('- window.supabase:', !!window.supabase);
@@ -776,9 +776,9 @@ import AuthGuard from '../components/AuthGuard.astro';
     console.log('- window.supabase.createClient:', !!(window.supabase && typeof window.supabase.createClient === 'function'));
     
     if (supabase && supabase.auth) {
-      console.log('✅ Supabase is ready and functional');
+      console.log(' Supabase is ready and functional');
     } else {
-      console.log('❌ Supabase is not ready');
+      console.log(' Supabase is not ready');
     }
   };
 
@@ -815,18 +815,18 @@ import AuthGuard from '../components/AuthGuard.astro';
         submitButton.textContent = 'Creating Ticket...';
         
         try {
-          console.log('🔄 Creating ticket...');
+          console.log(' Creating ticket...');
           
           // Wait for Supabase to be ready
           const isReady = await waitForSupabase();
           if (!isReady) {
-            console.error('❌ Supabase not ready');
+            console.error(' Supabase not ready');
             alert('Database is still loading. Please wait a moment and try again, or refresh the page.');
             return;
           }
 
           if (!supabase || !supabase.auth) {
-            console.error('❌ Supabase client or auth not available');
+            console.error(' Supabase client or auth not available');
             alert('Database connection error. Please refresh the page and try again.');
             return;
           }
@@ -834,9 +834,9 @@ import AuthGuard from '../components/AuthGuard.astro';
           // Additional check to ensure Supabase is fully initialized
           try {
             const { data: { session: testSession } } = await supabase.auth.getSession();
-            console.log('🔍 Supabase connection test:', testSession ? 'Connected' : 'No session');
+            console.log(' Supabase connection test:', testSession ? 'Connected' : 'No session');
           } catch (testError) {
-            console.error('❌ Supabase connection test failed:', testError);
+            console.error(' Supabase connection test failed:', testError);
             alert('Database connection test failed. Please refresh the page and try again.');
             return;
           }
@@ -845,8 +845,8 @@ import AuthGuard from '../components/AuthGuard.astro';
           const { data: { user }, error: authError } = await supabase.auth.getUser();
           
           if (authError || !user) {
-            console.error('❌ Supabase auth error:', authError);
-            console.log('🔍 Auth error details:', {
+            console.error(' Supabase auth error:', authError);
+            console.log(' Auth error details:', {
               error: authError,
               message: authError?.message,
               status: authError?.status
@@ -857,8 +857,8 @@ import AuthGuard from '../components/AuthGuard.astro';
             if (authManager && authManager.getCurrentUser) {
               const globalUser = authManager.getCurrentUser();
               if (globalUser) {
-                console.log('🔄 User found in global auth manager but not in Supabase');
-                console.log('👤 Global user:', globalUser);
+                console.log(' User found in global auth manager but not in Supabase');
+                console.log(' Global user:', globalUser);
                 
                 // Redirect to login page to ensure proper Supabase authentication
                 alert('Please login again to create a support ticket. Your session needs to be refreshed.');
@@ -871,19 +871,19 @@ import AuthGuard from '../components/AuthGuard.astro';
             return;
           }
 
-          console.log('👤 User authenticated via Supabase:', user.email);
-          console.log('👤 User ID:', user.id);
-          console.log('👤 User metadata:', user.user_metadata);
+          console.log(' User authenticated via Supabase:', user.email);
+          console.log(' User ID:', user.id);
+          console.log(' User metadata:', user.user_metadata);
           
           // Check if we have a valid session
           const { data: { session }, error: sessionError } = await supabase.auth.getSession();
           if (sessionError) {
-            console.error('❌ Session error:', sessionError);
+            console.error(' Session error:', sessionError);
           }
           console.log('🔐 Current session:', session ? 'Valid' : 'No session');
           
           if (!session) {
-            console.error('❌ No valid session found');
+            console.error(' No valid session found');
             alert('Your session has expired. Please login again to create a support ticket.');
             return;
           }
@@ -902,7 +902,7 @@ import AuthGuard from '../components/AuthGuard.astro';
           };
           
           // Debug log
-          console.log('📝 Creating ticket with data:', ticketData);
+          console.log(' Creating ticket with data:', ticketData);
           
           // Create ticket
           const { data: ticket, error } = await supabase
@@ -912,12 +912,12 @@ import AuthGuard from '../components/AuthGuard.astro';
             .single();
           
           if (error) {
-            console.error('❌ Database error:', error);
+            console.error(' Database error:', error);
             alert('Error creating ticket: ' + error.message + '\n\nPlease check the console for more details.');
             return;
           }
 
-          console.log('✅ Ticket created successfully:', ticket);
+          console.log(' Ticket created successfully:', ticket);
           
           alert(`Ticket created successfully! Ticket #${ticket.ticket_number}`);
           
@@ -926,7 +926,7 @@ import AuthGuard from '../components/AuthGuard.astro';
           showSuccessMessage(`Ticket #${ticket.ticket_number} created successfully!`);
           
         } catch (error) {
-          console.error('❌ Unexpected error:', error);
+          console.error(' Unexpected error:', error);
           alert('An unexpected error occurred. Please try again.\n\nError: ' + error.message);
         } finally {
           // Always reset button

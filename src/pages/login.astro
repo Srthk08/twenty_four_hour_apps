@@ -37,9 +37,6 @@ import Layout from '../layouts/Layout.astro';
           <!-- Success Message -->
           <div id="success-message" class="hidden p-4 bg-green-50 border border-green-200 rounded-lg">
             <div class="flex">
-              <svg class="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-              </svg>
               <span id="success-text" class="text-green-800">Login successful! Redirecting...</span>
             </div>
           </div>
@@ -232,6 +229,9 @@ import Layout from '../layouts/Layout.astro';
 
   // Show status message
   function showStatus(message, type = 'info') {
+    // Hide error message when showing status
+    errorMessage?.classList.add('hidden');
+    
     if (successText) {
       successText.textContent = message;
     }
@@ -376,7 +376,7 @@ import Layout from '../layouts/Layout.astro';
 
     // Hide previous errors and success messages
     errorMessage?.classList.add('hidden');
-      successMessage?.classList.remove('hidden');
+    successMessage?.classList.add('hidden');
 
     // Show loading state - center icon and hide text
     const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
@@ -390,6 +390,15 @@ import Layout from '../layouts/Layout.astro';
     `;
 
     try {
+        // CRITICAL: Clear both messages at the start of login attempt
+        // This prevents any previous state from showing
+        if (errorMessage) {
+          errorMessage.classList.add('hidden');
+        }
+        if (successMessage) {
+          successMessage.classList.add('hidden');
+        }
+        
         console.log('Attempting to sign in with Supabase:', email);
         
         // Sign in with Supabase directly
@@ -398,13 +407,39 @@ import Layout from '../layouts/Layout.astro';
           password,
         });
 
+        // CRITICAL: Check for error FIRST and handle it immediately
         if (error) {
           console.error('Supabase sign in error:', error);
+          // Explicitly hide success message before throwing
+          successMessage?.classList.add('hidden');
+          errorMessage?.classList.add('hidden');
+          // Just throw the error - let the catch block handle displaying it
           throw error;
         }
 
+        // Only proceed if there's no error AND we have a user
+        if (!data || !data.user) {
+          throw new Error('Sign in failed - no user data returned');
+        }
+
+        // At this point, we have a successful login
         if (data.user) {
           console.log('User signed in successfully:', data.user.email);
+          
+          // CRITICAL: Explicitly hide error message FIRST - ensure it's completely hidden
+          if (errorMessage) {
+            errorMessage.classList.add('hidden');
+          }
+          
+          // Set success message text
+          if (successText) {
+            successText.textContent = 'Login successful! Redirecting...';
+          }
+          
+          // Show success message ONLY (error is already hidden above)
+          if (successMessage) {
+            successMessage.classList.remove('hidden');
+          }
           
           // Store session in sessionStorage for fallback
           sessionStorage.setItem('simple-auth-session', JSON.stringify({
@@ -415,11 +450,6 @@ import Layout from '../layouts/Layout.astro';
           
           // Dispatch login event
           window.dispatchEvent(new CustomEvent('user-logged-in', { detail: data.user }));
-          
-      if (successText) {
-        successText.textContent = 'Welcome back! Signing you in...';
-      }
-      successMessage?.classList.remove('hidden');
 
           // Create basic user data immediately
           const userData = {
@@ -650,30 +680,47 @@ import Layout from '../layouts/Layout.astro';
     } catch (error: any) {
       console.error('Login error:', error);
       
-      // Show error message
-        let errorMessageText = 'An error occurred during sign in.';
-        
-        if (error.message) {
-          // Handle specific Supabase error messages
-          if (error.message.includes('Invalid login credentials')) {
-            errorMessageText = 'Invalid email or password.';
-          } else if (error.message.includes('Email not confirmed')) {
-            errorMessageText = 'Please check your email and confirm your account before signing in.';
-          } else if (error.message.includes('Too many requests')) {
-            errorMessageText = 'Too many login attempts. Please try again later.';
-          } else {
-            errorMessageText = error.message;
-          }
-        }
-        
-      if (errorText) {
-          errorText.textContent = errorMessageText;
+      // CRITICAL: ALWAYS hide success message FIRST - ensure it's completely hidden
+      if (successMessage) {
+        successMessage.classList.add('hidden');
       }
-      errorMessage?.classList.remove('hidden');
+      
+      // Determine error message text
+      let errorMessageText = 'An error occurred during sign in.';
+      
+      if (error && error.message) {
+        // Handle specific Supabase error messages
+        const errorMsg = error.message.toLowerCase();
+        if (errorMsg.includes('invalid login credentials') || 
+            errorMsg.includes('invalid email or password') ||
+            errorMsg.includes('invalid_credentials') ||
+            errorMsg.includes('email rate limit exceeded') ||
+            errorMsg.includes('invalid')) {
+          errorMessageText = 'Invalid email or password.';
+        } else if (errorMsg.includes('email not confirmed')) {
+          errorMessageText = 'Please check your email and confirm your account before signing in.';
+        } else if (errorMsg.includes('too many requests')) {
+          errorMessageText = 'Too many login attempts. Please try again later.';
+        } else {
+          errorMessageText = error.message;
+        }
+      }
+      
+      // Set error text BEFORE showing error message
+      if (errorText) {
+        errorText.textContent = errorMessageText;
+      }
+      
+      // Show error message ONLY (success is already hidden above)
+      if (errorMessage) {
+        errorMessage.classList.remove('hidden');
+      }
       
       // Reset button
-      submitButton.disabled = false;
-      submitButton.textContent = originalText;
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalText;
+      }
     }
   });
 </script>

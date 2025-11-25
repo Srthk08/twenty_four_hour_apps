@@ -1,46 +1,38 @@
-// Email Configuration - Multiple email service options for sending real notifications
-// This file provides configuration for different email services
-
 export interface EmailConfig {
   service: 'emailjs' | 'formspree' | 'custom';
   enabled: boolean;
   config: any;
 }
 
-// EmailJS Configuration
 export const emailjsConfig: EmailConfig = {
   service: 'emailjs',
-  enabled: false, // Set to true after setting up EmailJS
+  enabled: false,
   config: {
-    serviceId: 'YOUR_EMAILJS_SERVICE_ID', // Replace with your EmailJS service ID
-    templateId: 'YOUR_EMAILJS_TEMPLATE_ID', // Replace with your EmailJS template ID
-    userId: 'YOUR_EMAILJS_USER_ID', // Replace with your EmailJS user ID
+    serviceId: 'YOUR_EMAILJS_SERVICE_ID',
+    templateId: 'YOUR_EMAILJS_TEMPLATE_ID',
+    userId: 'YOUR_EMAILJS_USER_ID',
   }
 };
 
-// Formspree Configuration (Alternative free service)
 export const formspreeConfig: EmailConfig = {
   service: 'formspree',
-  enabled: false, // Set to true after setting up Formspree
+  enabled: false,
   config: {
-    endpoint: 'YOUR_FORMSPREE_ENDPOINT', // Replace with your Formspree endpoint
+    endpoint: 'YOUR_FORMSPREE_ENDPOINT',
   }
 };
 
-// Custom Email Service Configuration
 export const customEmailConfig: EmailConfig = {
   service: 'custom',
-  enabled: false, // Set to true after setting up custom email service
+  enabled: false,
   config: {
     apiUrl: 'YOUR_CUSTOM_EMAIL_API_URL',
     apiKey: 'YOUR_CUSTOM_EMAIL_API_KEY',
   }
 };
 
-// Active email configuration
-export const activeEmailConfig: EmailConfig = emailjsConfig; // Change this to use different service
+export const activeEmailConfig: EmailConfig = emailjsConfig;
 
-// Email template for support ticket updates
 export const emailTemplates = {
   supportTicketUpdate: {
     subject: 'Update on Your Support Ticket #{{ticketNumber}}',
@@ -71,7 +63,6 @@ This is an automated notification. Please do not reply to this email.
   }
 };
 
-// Helper function to send email using configured service
 export async function sendEmail(to: string, subject: string, body: string): Promise<boolean> {
   try {
     if (!activeEmailConfig.enabled) {
@@ -96,7 +87,6 @@ export async function sendEmail(to: string, subject: string, body: string): Prom
   }
 }
 
-// EmailJS implementation
 async function sendEmailViaEmailJS(to: string, subject: string, body: string): Promise<boolean> {
   try {
     if (typeof window === 'undefined' || !(window as any).emailjs) {
@@ -122,7 +112,6 @@ async function sendEmailViaEmailJS(to: string, subject: string, body: string): P
   }
 }
 
-// Formspree implementation
 async function sendEmailViaFormspree(to: string, subject: string, body: string): Promise<boolean> {
   try {
     const { endpoint } = activeEmailConfig.config;
@@ -152,7 +141,6 @@ async function sendEmailViaFormspree(to: string, subject: string, body: string):
   }
 }
 
-// Custom email service implementation
 async function sendEmailViaCustom(to: string, subject: string, body: string): Promise<boolean> {
   try {
     const { apiUrl, apiKey } = activeEmailConfig.config;

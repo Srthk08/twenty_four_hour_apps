@@ -62,7 +62,7 @@ import AuthGuard from '../components/AuthGuard.astro';
               const product = urlParams.get('product');
               
               if (order === 'success') {
-                console.log('✅ Order success detected, redirecting to congratulations page...');
+                console.log(' Order success detected, redirecting to congratulations page...');
                 window.location.href = '/order-success?product=' + (product || 'order-menu-system');
                 return;
               }
@@ -248,7 +248,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         return;
       }
       
-      console.log('📧 Loading orders for user email:', userEmail);
+      console.log(' Loading orders for user email:', userEmail);
       
       // Load project requirements as orders (filter by email if available)
       if (projectRequirements) {
@@ -337,7 +337,7 @@ import AuthGuard from '../components/AuthGuard.astro';
       // Sort newest first
       this.orders.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
       
-      console.log('✅✅✅ TOTAL ORDERS LOADED:', this.orders.length);
+      console.log(' TOTAL ORDERS LOADED:', this.orders.length);
       console.log('📋 Order IDs:', this.orders.map(o => o.orderId));
       console.log('📋 Order details:', this.orders.map(o => ({
         id: o.orderId,
@@ -354,13 +354,13 @@ import AuthGuard from '../components/AuthGuard.astro';
         supabase_cart_customizations: this.orders.filter(o => o.orderId?.startsWith('CART-')).length,
         supabase_customization_forms: this.orders.filter(o => o.orderId?.startsWith('CF-')).length
       };
-      console.log('📊 Orders breakdown by source:', ordersBySource);
+      console.log(' Orders breakdown by source:', ordersBySource);
     }
 
     async loadSupabaseOrders(userEmail) {
       try {
         const { supabase } = await import('../lib/supabase');
-        console.log('🔍 Loading Supabase orders for email:', userEmail);
+        console.log(' Loading Supabase orders for email:', userEmail);
         
         // Fetch order_customizations (Order Menu System submissions)
         // Try both 'email' and 'user_email' field names to handle schema variations
@@ -383,9 +383,9 @@ import AuthGuard from '../components/AuthGuard.astro';
               seenIds.add(cz.id);
             }
           });
-          console.log('✅ Found', customizationsEmail.length, 'orders using "email" field');
+          console.log(' Found', customizationsEmail.length, 'orders using "email" field');
         } else if (errorEmail) {
-          console.log('⚠️ Error querying with "email" field:', errorEmail.message);
+          console.log(' Error querying with "email" field:', errorEmail.message);
         }
         
         // Also try with 'user_email' field and combine results (case-insensitive)
@@ -402,19 +402,19 @@ import AuthGuard from '../components/AuthGuard.astro';
               seenIds.add(cz.id);
             }
           });
-          console.log('✅ Found', customizationsUserEmail.length, 'orders using "user_email" field');
+          console.log(' Found', customizationsUserEmail.length, 'orders using "user_email" field');
         } else if (errorUserEmail) {
-          console.log('⚠️ Error querying with "user_email" field:', errorUserEmail.message);
+          console.log(' Error querying with "user_email" field:', errorUserEmail.message);
         }
         
         // Set error only if both queries failed
         if (errorEmail && errorUserEmail) {
           customizationsError = errorUserEmail || errorEmail;
-          console.error('❌ Both queries failed for order_customizations');
+          console.error(' Both queries failed for order_customizations');
         }
         
         if (customizationsError) {
-          console.warn('⚠️ Error loading order_customizations, continuing with other sources...', customizationsError);
+          console.warn(' Error loading order_customizations, continuing with other sources...', customizationsError);
         }
         
         // Sort combined results by created_at
@@ -465,7 +465,7 @@ import AuthGuard from '../components/AuthGuard.astro';
           .order('updated_at', { ascending: false });
         
         if (cartsError) {
-          console.error('❌ Error loading cart_customizations:', cartsError);
+          console.error(' Error loading cart_customizations:', cartsError);
           throw cartsError;
         }
         
@@ -531,7 +531,7 @@ import AuthGuard from '../components/AuthGuard.astro';
           .order('created_at', { ascending: false });
         
         if (customFormsError) {
-          console.warn('⚠️ Error loading customization_forms:', customFormsError);
+          console.warn(' Error loading customization_forms:', customFormsError);
           // Don't throw - continue with other orders
         } else {
           console.log('📦 Processing', (customForms || []).length, 'customization_forms...');
@@ -613,7 +613,7 @@ import AuthGuard from '../components/AuthGuard.astro';
       loadingOrders?.classList.add('hidden');
 
       if (this.orders.length === 0) {
-        console.log('❌ No orders found, showing empty state');
+        console.log(' No orders found, showing empty state');
         emptyOrders?.classList.remove('hidden');
         ordersList?.classList.add('hidden');
         // Hide summaries when there are no orders
@@ -624,8 +624,8 @@ import AuthGuard from '../components/AuthGuard.astro';
         return;
       }
 
-      console.log('✅ Orders found, showing orders list');
-      console.log('✅ Removing hidden class from orders-list');
+      console.log(' Orders found, showing orders list');
+      console.log(' Removing hidden class from orders-list');
       emptyOrders?.classList.add('hidden');
       ordersList?.classList.remove('hidden');
       
@@ -636,25 +636,25 @@ import AuthGuard from '../components/AuthGuard.astro';
         ordersList.style.display = 'block';
         ordersList.style.visibility = 'visible';
         ordersList.style.opacity = '1';
-        console.log('✅ Orders list container is now visible');
-        console.log('✅ Orders list classes:', ordersList.className);
-        console.log('✅ Orders list display style:', ordersList.style.display);
+        console.log(' Orders list container is now visible');
+        console.log(' Orders list classes:', ordersList.className);
+        console.log(' Orders list display style:', ordersList.style.display);
       }
 
-      console.log('✅ Calling renderOrdersList() to render all orders...');
+      console.log(' Calling renderOrdersList() to render all orders...');
       this.renderOrdersList();
 
       // Verify orders were rendered (exclude the template itself)
       const renderedOrders = ordersList?.querySelectorAll('[id^="order-"]:not(#order-template)');
       const renderedCount = renderedOrders?.length || 0;
-      console.log('✅✅✅ RENDERED ORDERS COUNT:', renderedCount);
-      console.log('✅✅✅ Expected orders count:', this.orders.length);
-      console.log('✅✅✅ Total children in container:', ordersList?.children.length || 0);
+      console.log(' RENDERED ORDERS COUNT:', renderedCount);
+      console.log(' Expected orders count:', this.orders.length);
+      console.log(' Total children in container:', ordersList?.children.length || 0);
       
       if (renderedCount !== this.orders.length) {
-        console.error('❌❌❌ MISMATCH: Expected', this.orders.length, 'orders but only', renderedCount, 'were rendered!');
+        console.error(' MISMATCH: Expected', this.orders.length, 'orders but only', renderedCount, 'were rendered!');
       } else {
-        console.log('✅✅✅ SUCCESS: All', renderedCount, 'orders rendered correctly!');
+        console.log(' SUCCESS: All', renderedCount, 'orders rendered correctly!');
       }
 
       // Update orders summary
@@ -667,19 +667,19 @@ import AuthGuard from '../components/AuthGuard.astro';
     renderOrdersList() {
       const ordersListContainer = document.getElementById('orders-list');
       if (!ordersListContainer) {
-        console.error('❌ orders-list container not found!');
+        console.error(' orders-list container not found!');
         return;
       }
 
       // Get the template BEFORE clearing innerHTML
       let template = document.getElementById('order-template');
       if (!template) {
-        console.error('❌ Order template not found before clearing!');
+        console.error(' Order template not found before clearing!');
         // Try to wait a bit and retry (in case of timing issues)
         setTimeout(() => {
           template = document.getElementById('order-template');
           if (!template) {
-            console.error('❌ Order template still not found after retry!');
+            console.error(' Order template still not found after retry!');
             return;
           }
           // Retry rendering with the found template
@@ -693,7 +693,7 @@ import AuthGuard from '../components/AuthGuard.astro';
 
     renderOrdersListWithTemplate(template, ordersListContainer) {
       if (!template || !ordersListContainer) {
-        console.error('❌ Template or container not available!');
+        console.error(' Template or container not available!');
         return;
       }
 
@@ -709,13 +709,13 @@ import AuthGuard from '../components/AuthGuard.astro';
         const orderElement = this.createOrderElement(order, index, template);
         if (orderElement) {
           ordersListContainer.appendChild(orderElement);
-          console.log(`  ✅ Order ${index + 1} appended successfully`);
+          console.log(`   Order ${index + 1} appended successfully`);
         } else {
-          console.error(`  ❌ Failed to create element for order ${index + 1}`);
+          console.error(`   Failed to create element for order ${index + 1}`);
         }
       });
       
-      console.log('✅✅✅ Finished rendering all orders. Container now has', ordersListContainer.children.length, 'children');
+      console.log(' Finished rendering all orders. Container now has', ordersListContainer.children.length, 'children');
     }
 
     createOrderElement(order, index, template) {
@@ -723,8 +723,8 @@ import AuthGuard from '../components/AuthGuard.astro';
       if (!template) {
         template = document.getElementById('order-template');
         if (!template) {
-          console.error('❌ Order template not found when creating order element!');
-          console.error('❌ Attempted to create order:', index, order.orderId);
+          console.error(' Order template not found when creating order element!');
+          console.error(' Attempted to create order:', index, order.orderId);
           return null;
         }
       }
@@ -818,7 +818,7 @@ import AuthGuard from '../components/AuthGuard.astro';
       summaryTextEl.textContent = totalOrders === 1 ? 'order found' : 'orders found';
       amountEl.textContent = `₹${totalAmount.toLocaleString('en-IN')}`;
       
-      console.log('📊 Orders Summary:', {
+      console.log(' Orders Summary:', {
         totalOrders: totalOrders,
         totalAmount: totalAmount
       });

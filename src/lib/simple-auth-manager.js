@@ -1,5 +1,4 @@
-// Simple Authentication State Manager
-// This prevents reloads while maintaining login state
+// handles auth state without page reloads
 
 class SimpleAuthManager {
   constructor() {
@@ -9,10 +8,8 @@ class SimpleAuthManager {
   }
 
   init() {
-    // Check if user is already logged in
     this.checkExistingSession();
     
-    // Listen for login events
     window.addEventListener('user-logged-in', (e) => {
       this.handleLogin(e.detail);
     });
@@ -24,7 +21,6 @@ class SimpleAuthManager {
 
   checkExistingSession() {
     try {
-      // Check sessionStorage first (most recent)
       const sessionData = sessionStorage.getItem('simple-auth-session');
       if (sessionData && sessionData !== 'null' && sessionData !== '{}') {
         try {
@@ -32,16 +28,15 @@ class SimpleAuthManager {
           if (session && session.user && (session.access_token || session.user.email)) {
             this.isAuthenticated = true;
             this.currentUser = session.user;
-            console.log('✅ Existing session found in sessionStorage:', this.currentUser.email);
+            console.log('Session found:', this.currentUser.email);
             this.updateUI();
             return;
           }
         } catch (parseError) {
-          console.log('SessionStorage parse error, checking localStorage:', parseError);
+          console.log('Parse error, trying localStorage');
         }
       }
       
-      // Check localStorage as fallback (for deployment reliability)
       const localSessionData = localStorage.getItem('simple-auth-session');
       if (localSessionData && localSessionData !== 'null' && localSessionData !== '{}') {
         try {
@@ -49,18 +44,16 @@ class SimpleAuthManager {
           if (session && session.user && (session.access_token || session.user.email)) {
             this.isAuthenticated = true;
             this.currentUser = session.user;
-            console.log('✅ Existing session found in localStorage:', this.currentUser.email);
-            // Sync to sessionStorage for consistency
+            console.log('Session found in localStorage:', this.currentUser.email);
             sessionStorage.setItem('simple-auth-session', localSessionData);
             this.updateUI();
             return;
           }
         } catch (parseError) {
-          console.log('LocalStorage session parse error, checking user data:', parseError);
+          console.log('LocalStorage parse error');
         }
       }
       
-      // Check localStorage user data as final fallback
       const storedUser = localStorage.getItem('simple-auth-user');
       if (storedUser && storedUser !== 'null' && storedUser !== '{}') {
         try {
@@ -68,8 +61,7 @@ class SimpleAuthManager {
           if (user && user.email) {
             this.isAuthenticated = true;
             this.currentUser = user;
-            console.log('✅ Existing user found in localStorage:', this.currentUser.email);
-            // Create session data and sync to sessionStorage
+            console.log('User found:', this.currentUser.email);
             const sessionData = {
               user: user,
               access_token: 'simple-token-' + Date.now(),
@@ -80,13 +72,13 @@ class SimpleAuthManager {
             return;
           }
         } catch (parseError) {
-          console.log('LocalStorage user parse error:', parseError);
+          console.log('User parse error');
         }
       }
       
-      console.log('ℹ️ No existing session found');
+      console.log('No session found');
     } catch (error) {
-      console.error('Error checking existing session:', error);
+      console.error('Error checking session:', error);
     }
   }
 
@@ -94,34 +86,29 @@ class SimpleAuthManager {
     this.isAuthenticated = true;
     this.currentUser = userData;
     
-    // Add default role if not present
     if (!userData.role) {
-      userData.role = 'user'; // Default role for regular users
+      userData.role = 'user';
     }
     
-    // Store session in BOTH sessionStorage AND localStorage for deployment reliability
     const sessionData = {
       user: userData,
       access_token: 'simple-token-' + Date.now(),
       timestamp: Date.now()
     };
     
-    // Store in both storages to ensure persistence across redirects
     sessionStorage.setItem('simple-auth-session', JSON.stringify(sessionData));
     localStorage.setItem('simple-auth-user', JSON.stringify(userData));
     localStorage.setItem('simple-auth-session', JSON.stringify(sessionData));
     
-    // Clear cart data for new user to prevent cross-user contamination
     if (window.clearCartForNewUser) {
       window.clearCartForNewUser();
     }
     
-    // Also clear localStorage cart data
     localStorage.removeItem('cart-items');
     localStorage.removeItem('cart-requirements');
     localStorage.removeItem('user-cart-data');
     
-    console.log('✅ User logged in:', userData.email, 'and cart cleared');
+    console.log('User logged in:', userData.email);
     this.updateUI();
   }
 
@@ -129,42 +116,35 @@ class SimpleAuthManager {
     this.isAuthenticated = false;
     this.currentUser = null;
     
-    // Clear session from both storages
     sessionStorage.removeItem('simple-auth-session');
     localStorage.removeItem('simple-auth-user');
     
-    // Clear cart data to prevent cross-user contamination
     if (window.clearCartOnUserChange) {
       window.clearCartOnUserChange();
     }
     
-    // Also clear localStorage cart data
     localStorage.removeItem('cart-items');
     localStorage.removeItem('cart-requirements');
     localStorage.removeItem('user-cart-data');
     
-    console.log('✅ User logged out and cart cleared');
+    console.log('User logged out');
     this.updateUI();
   }
 
   updateUI() {
-    // Update header
     const authButtons = document.getElementById('auth-buttons');
     const userMenu = document.getElementById('user-menu');
     const mobileAuthButtons = document.getElementById('mobile-auth-buttons');
     const mobileUserMenu = document.getElementById('mobile-user-menu');
 
     if (this.isAuthenticated && this.currentUser) {
-      // User is logged in
       if (authButtons) authButtons.classList.add('hidden');
       if (userMenu) userMenu.classList.remove('hidden');
       if (mobileAuthButtons) mobileAuthButtons.classList.add('hidden');
       if (mobileUserMenu) mobileUserMenu.classList.remove('hidden');
 
-      // Update user info
       this.updateUserInfo();
     } else {
-      // User is not logged in
       if (authButtons) authButtons.classList.remove('hidden');
       if (userMenu) userMenu.classList.add('hidden');
       if (mobileAuthButtons) mobileAuthButtons.classList.remove('hidden');
@@ -173,14 +153,12 @@ class SimpleAuthManager {
   }
 
   updateUserInfo() {
-    // CRITICAL: Only update UI if user is properly authenticated
     if (!this.isAuthenticated || !this.currentUser) {
-      console.log('❌ User not authenticated - clearing UI elements');
+      console.log('User not authenticated');
       this.clearUserInfo();
       return;
     }
 
-    // Update header user info
     const userEmail = document.getElementById('user-email');
     const userName = document.getElementById('user-name');
     const userAvatar = document.getElementById('user-avatar');
@@ -191,7 +169,6 @@ class SimpleAuthManager {
     if (userAvatar) userAvatar.textContent = (this.currentUser.full_name || this.currentUser.email || 'U').charAt(0).toUpperCase();
     if (mobileUserEmail) mobileUserEmail.textContent = this.currentUser.email || '';
 
-    // Update dashboard user info
     const userWelcome = document.getElementById('user-welcome');
     const userFullName = document.getElementById('user-full-name');
     const userEmailDashboard = document.getElementById('user-email');
@@ -206,7 +183,6 @@ class SimpleAuthManager {
   }
 
   clearUserInfo() {
-    // Clear all user info elements when not authenticated
     const userEmail = document.getElementById('user-email');
     const userName = document.getElementById('user-name');
     const userAvatar = document.getElementById('user-avatar');
@@ -242,8 +218,6 @@ class SimpleAuthManager {
   }
 }
 
-// Create global instance
 window.simpleAuthManager = new SimpleAuthManager();
 
-// Export for use in other files
 export default window.simpleAuthManager;

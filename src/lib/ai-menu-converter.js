@@ -1,13 +1,9 @@
-// AI Menu Converter
-// This module handles the conversion of menu photos to text using AI
-
 export class AIMenuConverter {
   constructor(apiKey) {
     this.apiKey = apiKey;
     this.baseUrl = 'https://api.openai.com/v1';
   }
 
-  // Convert image to text using ChatGPT Vision API
   async convertImageToText(imageUrl, options = {}) {
     try {
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
@@ -66,11 +62,7 @@ export class AIMenuConverter {
     }
   }
 
-  // Convert image to text using alternative method (if ChatGPT is not available)
   async convertImageToTextAlternative(imageUrl) {
-    // This is a placeholder for alternative AI services
-    // You could integrate with Google Vision API, AWS Textract, etc.
-    
     return `Alternative AI Conversion Result:
     
     This is a placeholder for alternative AI conversion methods.
@@ -83,7 +75,6 @@ export class AIMenuConverter {
     The result would be the actual text extracted from the menu image.`;
   }
 
-  // Validate image before processing
   validateImage(imageUrl) {
     const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
     const url = new URL(imageUrl);
@@ -96,13 +87,9 @@ export class AIMenuConverter {
     return true;
   }
 
-  // Process menu image with error handling
   async processMenuImage(imageUrl, options = {}) {
     try {
-      // Validate image
       this.validateImage(imageUrl);
-      
-      // Convert to text
       const convertedText = await this.convertImageToText(imageUrl, options);
       
       return {
@@ -121,5 +108,4 @@ export class AIMenuConverter {
   }
 }
 
-// Default export
 export default AIMenuConverter;

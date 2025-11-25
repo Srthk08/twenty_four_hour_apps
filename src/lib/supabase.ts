@@ -1,55 +1,31 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Supabase configuration - you can either hardcode these values or use environment variables
 const SUPABASE_CONFIG = {
   url: 'https://lmrrdcaavwwletcjcpqv.supabase.co',
   anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtcnJkY2Fhdnd3bGV0Y2pjcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDQ0ODgsImV4cCI6MjA3MTA4MDQ4OH0.AU59Qfr6K9i880Gcn5y-3pjCf8PXsDIq4OI0-lPQVuQ'
 };
 
-// Get environment variables with fallbacks
 const getEnvVar = (key: string): string => {
-  // Try to get from import.meta.env (Astro) - this is the primary method
   if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) {
     return import.meta.env[key];
   }
   
-  // Try to get from process.env (Node.js) - for server-side
   if (typeof process !== 'undefined' && process.env && process.env[key]) {
     return process.env[key];
   }
   
-  // Try to get from window (browser) - for client-side fallback
   if (typeof window !== 'undefined' && window.__ENV__ && window.__ENV__[key]) {
     return window.__ENV__[key];
   }
   
-  // Return empty string if not found
   return '';
 };
 
-// Use environment variables if available, otherwise use hardcoded config
 export const supabaseUrl = getEnvVar('VITE_SUPABASE_URL') || SUPABASE_CONFIG.url;
 export const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY') || SUPABASE_CONFIG.anonKey;
 
-// Enhanced logging for debugging
-console.log('Environment Detection:', {
-  hasImportMeta: typeof import.meta !== 'undefined',
-  hasProcess: typeof process !== 'undefined',
-  hasWindow: typeof window !== 'undefined',
-  importMetaEnv: typeof import.meta !== 'undefined' ? Object.keys(import.meta.env || {}) : 'N/A',
-  processEnv: typeof process !== 'undefined' ? Object.keys(process.env || {}).filter(k => k.includes('SUPABASE')) : 'N/A'
-});
-
-console.log('Supabase Configuration:', {
-  url: supabaseUrl ? '✅ Set' : '❌ Missing',
-  key: supabaseAnonKey ? '✅ Set' : '❌ Missing',
-  source: getEnvVar('VITE_SUPABASE_URL') ? 'Environment Variables' : 'Hardcoded Config'
-});
-
-// Create Supabase client
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Types
 export interface Product {
   id: string;
   name: string;
@@ -128,7 +104,6 @@ export interface Profile {
   updated_at: string;
 }
 
-// Enhanced Auth System
 export class SupabaseAuth {
   private static instance: SupabaseAuth;
   private currentUser: Profile | null = null;
@@ -147,14 +122,12 @@ export class SupabaseAuth {
 
   private async initializeAuth() {
     try {
-      // Get initial session
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         this.currentSession = session;
         await this.loadUserProfile(session.user.id);
       }
 
-      // Listen for auth changes
       supabase.auth.onAuthStateChange(async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
         
@@ -202,12 +175,10 @@ export class SupabaseAuth {
     }
   }
 
-  // Sign Up with enhanced profile creation
   async signUp(email: string, password: string, userData: Partial<Profile>) {
     try {
       console.log('Signing up user:', email);
 
-      // Create user in Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -228,7 +199,6 @@ export class SupabaseAuth {
       if (authData.user) {
         console.log('User created in auth:', authData.user.id);
 
-        // Create profile in profiles table
         const { error: profileError } = await supabase
           .from('profiles')
           .insert({
@@ -246,12 +216,10 @@ export class SupabaseAuth {
 
         if (profileError) {
           console.error('Profile creation error:', profileError);
-          // Try to delete the auth user if profile creation fails
           await supabase.auth.admin.deleteUser(authData.user.id);
           throw profileError;
         }
 
-        // Log user activity
         await this.logUserActivity(authData.user.id, 'user_signup', {
           email: email,
           full_name: userData.full_name
@@ -268,7 +236,6 @@ export class SupabaseAuth {
     }
   }
 
-  // Sign In with enhanced session management
   async signIn(email: string, password: string) {
     try {
       console.log('Signing in user:', email);
@@ -286,13 +253,8 @@ export class SupabaseAuth {
       if (data.user) {
         console.log('User signed in:', data.user.email);
         
-        // Load user profile
         await this.loadUserProfile(data.user.id);
-        
-        // Update login information
         await this.updateLoginInfo(data.user.id);
-        
-        // Log user activity
         await this.logUserActivity(data.user.id, 'user_login', {
           email: email,
           ip_address: await this.getClientIP()
@@ -309,11 +271,9 @@ export class SupabaseAuth {
     }
   }
 
-  // Sign Out with cleanup
   async signOut() {
     try {
       if (this.currentUser) {
-        // Log sign out activity
         await this.logUserActivity(this.currentUser.id, 'user_logout', {
           email: this.currentUser.email
         });
@@ -336,7 +296,6 @@ export class SupabaseAuth {
     }
   }
 
-  // Get current user profile
   async getCurrentUser(): Promise<Profile | null> {
     try {
       if (this.currentUser) {
@@ -356,7 +315,6 @@ export class SupabaseAuth {
     }
   }
 
-  // Check if user is authenticated
   async isAuthenticated(): Promise<boolean> {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -367,7 +325,6 @@ export class SupabaseAuth {
     }
   }
 
-  // Update user profile
   async updateProfile(updates: Partial<Profile>): Promise<Profile> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -392,10 +349,7 @@ export class SupabaseAuth {
         throw error;
       }
 
-      // Update local user data
       this.currentUser = data;
-
-      // Log profile update activity
       await this.logUserActivity(user.id, 'profile_updated', {
         updated_fields: Object.keys(updates)
       });
@@ -408,7 +362,6 @@ export class SupabaseAuth {
     }
   }
 
-  // Change password
   async changePassword(currentPassword: string, newPassword: string) {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -418,7 +371,6 @@ export class SupabaseAuth {
 
       console.log('Changing password for user:', user.email);
 
-      // Update password in Supabase Auth
       const { error } = await supabase.auth.updateUser({
         password: newPassword
       });
@@ -428,7 +380,6 @@ export class SupabaseAuth {
         throw error;
       }
 
-      // Log password change activity
       await this.logUserActivity(user.id, 'password_changed', {
         email: user.email
       });
@@ -440,7 +391,6 @@ export class SupabaseAuth {
     }
   }
 
-  // Reset password
   async resetPassword(email: string) {
     try {
       console.log('Sending password reset for:', email);
@@ -461,7 +411,6 @@ export class SupabaseAuth {
     }
   }
 
-  // Get user profile by ID
   async getUserProfile(userId: string): Promise<Profile | null> {
     try {
       const { data, error } = await supabase
@@ -482,7 +431,6 @@ export class SupabaseAuth {
     }
   }
 
-  // Get all users (admin only)
   async getAllUsers(): Promise<Profile[]> {
     try {
       const { data, error } = await supabase
@@ -502,7 +450,6 @@ export class SupabaseAuth {
     }
   }
 
-  // Log user activity
   private async logUserActivity(userId: string, action: string, details: Record<string, any> = {}) {
     try {
       const { error } = await supabase
@@ -523,10 +470,8 @@ export class SupabaseAuth {
     }
   }
 
-  // Update login information
   private async updateLoginInfo(userId: string) {
     try {
-      // Get current login count first
       const { data: currentProfile } = await supabase
         .from('profiles')
         .select('login_count')
@@ -553,17 +498,14 @@ export class SupabaseAuth {
     }
   }
 
-  // Get client IP address (basic implementation)
   private async getClientIP(): Promise<string | null> {
     try {
-      // This is a basic implementation - in production you'd want to get the real IP
       return '127.0.0.1';
     } catch (error) {
       return null;
     }
   }
 
-  // Get user dashboard data
   async getUserDashboardData(): Promise<any> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -589,7 +531,6 @@ export class SupabaseAuth {
     }
   }
 
-  // Get user sessions
   async getUserSessions(): Promise<any[]> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -615,7 +556,6 @@ export class SupabaseAuth {
     }
   }
 
-  // Get user activity log
   async getUserActivityLog(limit: number = 50): Promise<any[]> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -643,10 +583,8 @@ export class SupabaseAuth {
   }
 }
 
-// Create singleton instance
 export const supabaseAuth = SupabaseAuth.getInstance();
 
-// Legacy functions for backward compatibility
 export const signUp = async (email: string, password: string, userData: Partial<Profile>) => {
   return await supabaseAuth.signUp(email, password, userData);
 };
@@ -659,7 +597,6 @@ export const signOut = async () => {
   return await supabaseAuth.signOut();
 };
 
-// Product helpers
 export const getProducts = async () => {
   try {
     const { data, error } = await supabase
@@ -702,7 +639,6 @@ export const getProductBySlug = async (slug: string) => {
   }
 };
 
-// Cart helpers
 export const getCartItems = async (userId: string) => {
   const { data, error } = await supabase
     .from('cart_items')
@@ -751,7 +687,6 @@ export const clearCart = async (userId: string) => {
   if (error) throw error;
 };
 
-// Order helpers
 export const createOrder = async (userId: string, cartItems: CartItem[], totalAmount: number) => {
   const { data: order, error: orderError } = await supabase
     .from('orders')
@@ -803,7 +738,6 @@ export const getUserOrders = async (userId: string) => {
   return data;
 };
 
-// Get user profile from profiles table
 export const getUserProfile = async (userId: string) => {
   try {
     const { data, error } = await supabase
@@ -824,7 +758,6 @@ export const getUserProfile = async (userId: string) => {
   }
 };
 
-// Update user profile
 export const updateUserProfile = async (updates: any) => {
   try {
     const { data: { user } } = await supabase.auth.getUser();

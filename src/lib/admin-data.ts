@@ -1,9 +1,5 @@
-// Admin Data Store - Centralized data management for admin panel
-// Now fully integrated with Supabase for real-time data management
-
 import { supabase } from './supabase';
 
-// Re-export interfaces for backward compatibility
 export interface AdminUser {
   id: string;
   email: string;
@@ -83,12 +79,10 @@ export interface AdminStats {
   pendingPayments: number;
 }
 
-// Enhanced Admin Data Store Class - Now using Supabase
 export class AdminDataStore {
   private static instance: AdminDataStore;
 
   private constructor() {
-    // Initialize admin data store
   }
 
   public static getInstance(): AdminDataStore {
@@ -98,7 +92,6 @@ export class AdminDataStore {
     return AdminDataStore.instance;
   }
 
-  // User Management - Now using Supabase
   async getUsers(): Promise<AdminUser[]> {
     try {
       const { data, error } = await supabase
@@ -215,7 +208,6 @@ export class AdminDataStore {
     }
   }
 
-  // Order Management - Now using Supabase
   async getOrders(): Promise<AdminOrder[]> {
     try {
       const { data, error } = await supabase
@@ -231,7 +223,6 @@ export class AdminDataStore {
         return [];
       }
 
-      // Transform data to match AdminOrder interface
       return (data || []).map(order => ({
         id: order.id,
         order_number: order.order_number,
@@ -333,7 +324,6 @@ export class AdminDataStore {
     }
   }
 
-  // Revenue Management - Now using Supabase
   async getRevenue(): Promise<AdminRevenue[]> {
     try {
       const { data, error } = await supabase
@@ -399,7 +389,6 @@ export class AdminDataStore {
     }
   }
 
-  // Support Ticket Management - Now using Supabase
   async getSupportTickets(): Promise<SupportTicket[]> {
     try {
       const { data, error } = await supabase
@@ -489,10 +478,8 @@ export class AdminDataStore {
     }
   }
 
-  // Statistics - Now using Supabase
   async getStats(): Promise<AdminStats> {
     try {
-      // Get dashboard data from view
       const { data: dashboardData, error: dashboardError } = await supabase
         .from('admin_dashboard_data')
         .select('*')
@@ -503,7 +490,6 @@ export class AdminDataStore {
         return this.getDefaultStats();
       }
 
-      // Get additional stats
       const [orders, revenue, tickets] = await Promise.all([
         this.getOrders(),
         this.getRevenue(),
@@ -555,7 +541,6 @@ export class AdminDataStore {
     };
   }
 
-  // Search and Filter - Now using Supabase
   async searchUsers(query: string): Promise<AdminUser[]> {
     try {
       const { data, error } = await supabase
@@ -697,16 +682,12 @@ export class AdminDataStore {
     }
   }
 
-  // Export functionality
   exportOrdersToCSV(): string {
-    // This would need to be implemented based on your CSV export requirements
     return 'CSV export functionality to be implemented';
   }
 
-  // Clear all data (admin only)
   async clearAllData(): Promise<boolean> {
     try {
-      // This is a dangerous operation - should only be available to super admins
       const { error } = await supabase.rpc('clear_all_data');
       
       if (error) {
@@ -721,7 +702,6 @@ export class AdminDataStore {
     }
   }
 
-  // Admin-specific functions
   async getAdminUsers(): Promise<any[]> {
     try {
       const { data, error } = await supabase.rpc('get_admin_users');
@@ -747,7 +727,7 @@ export class AdminDataStore {
           target_type: targetType,
           target_id: targetId,
           details: details || {},
-          ip_address: '127.0.0.1', // Will be updated with real IP in production
+          ip_address: '127.0.0.1',
           user_agent: navigator.userAgent
         });
 
@@ -764,5 +744,4 @@ export class AdminDataStore {
   }
 }
 
-// Export singleton instance
 export const adminDataStore = AdminDataStore.getInstance();

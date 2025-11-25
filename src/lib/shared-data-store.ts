@@ -1,5 +1,4 @@
-// Shared Data Store - Connects User Interface with Admin Panel
-// This store maintains real-time data synchronization between user actions and admin visibility
+// shared data store for user/admin sync
 
 export interface UserOrder {
   id: string;
@@ -87,7 +86,6 @@ export interface UserAccount {
   updatedAt: string;
 }
 
-// Shared Data Store Class
 export class SharedDataStore {
   private static instance: SharedDataStore;
   private orders: UserOrder[] = [];
@@ -107,7 +105,6 @@ export class SharedDataStore {
     return SharedDataStore.instance;
   }
 
-  // Load data from localStorage
   private loadFromStorage(): void {
     try {
       const storedOrders = localStorage.getItem('shared-orders');
@@ -124,7 +121,6 @@ export class SharedDataStore {
     }
   }
 
-  // Save data to localStorage
   private saveToStorage(): void {
     try {
       localStorage.setItem('shared-orders', JSON.stringify(this.orders));
@@ -136,7 +132,6 @@ export class SharedDataStore {
     }
   }
 
-  // Sync with simple-auth users
   private syncWithSimpleAuth(): void {
     try {
       const authUsers = localStorage.getItem('simple-auth-users');
@@ -169,7 +164,6 @@ export class SharedDataStore {
     }
   }
 
-  // Order Management
   public createOrder(orderData: Omit<UserOrder, 'id' | 'orderNumber' | 'createdAt' | 'updatedAt' | 'timeline'>): UserOrder {
     const order: UserOrder = {
       ...orderData,
@@ -221,7 +215,6 @@ export class SharedDataStore {
     return this.orders.filter(order => order.userId === userId);
   }
 
-  // Support Ticket Management
   public createSupportTicket(ticketData: Omit<UserSupportTicket, 'id' | 'ticketNumber' | 'createdAt' | 'updatedAt'>): UserSupportTicket {
     const ticket: UserSupportTicket = {
       ...ticketData,
@@ -253,20 +246,16 @@ export class SharedDataStore {
   public updateTicket(ticketId: string, updates: Partial<UserSupportTicket> & { adminReply?: AdminReply }): boolean {
     const ticket = this.supportTickets.find(t => t.id === ticketId);
     if (ticket) {
-      // Update status
       if (updates.status) {
         ticket.status = updates.status;
       }
       
-      // Add admin reply if provided
       if (updates.adminReply) {
         if (!ticket.adminReplies) {
           ticket.adminReplies = [];
         }
         ticket.adminReplies.push(updates.adminReply);
         ticket.lastResponseAt = new Date().toISOString();
-        
-        // Send email notification to user
         this.sendTicketUpdateNotification(ticket, updates.adminReply, updates.status);
       }
       
@@ -277,10 +266,8 @@ export class SharedDataStore {
     return false;
   }
 
-  // Send email notification to user when admin replies
   private sendTicketUpdateNotification(ticket: UserSupportTicket, adminReply: AdminReply, newStatus?: string): void {
     try {
-      // Create notification data
       const notification = {
         to: ticket.customerEmail,
         subject: `Update on Your Support Ticket #${ticket.ticketNumber}`,
@@ -290,13 +277,8 @@ export class SharedDataStore {
         status: newStatus || ticket.status
       };
 
-      // Store notification in localStorage
       this.storeNotification(notification);
-      
-      // Show browser notification if supported
       this.showBrowserNotification(ticket, adminReply, newStatus);
-      
-      // Send real email notification using EmailJS
       this.sendRealEmailNotification(ticket, adminReply, newStatus);
       
       console.log(`Notification sent to ${ticket.customerEmail} for ticket #${ticket.ticketNumber}`);
@@ -305,18 +287,13 @@ export class SharedDataStore {
     }
   }
 
-  // Send real email using configured email service
   private async sendRealEmailNotification(ticket: UserSupportTicket, adminReply: AdminReply, newStatus?: string): Promise<void> {
     try {
-      // Import email configuration dynamically to avoid circular dependencies
       const { sendEmail, emailTemplates } = await import('./email-config');
-      
-      // Create email content using template
       const template = emailTemplates.supportTicketUpdate;
       let subject = template.subject;
       let body = template.body;
       
-      // Replace template variables
       const variables = {
         '{{ticketNumber}}': ticket.ticketNumber,
         '{{customerName}}': ticket.customerName,
@@ -332,21 +309,18 @@ export class SharedDataStore {
         body = body.replace(key, value);
       });
       
-      // Send email using configured service
       const emailSent = await sendEmail(ticket.customerEmail, subject, body);
       
       if (emailSent) {
-        console.log('Real email sent successfully via configured email service');
+        console.log('Email sent');
       } else {
-        console.log('Email service not configured, falling back to localStorage notifications');
+        console.log('Email service not configured');
       }
     } catch (error) {
-      console.error('Error sending real email:', error);
-      // Fallback to localStorage notifications only
+      console.error('Error sending email:', error);
     }
   }
 
-  // Create notification message
   private createNotificationMessage(ticket: UserSupportTicket, adminReply: AdminReply, newStatus?: string): string {
     let message = `Hello ${ticket.customerName},\n\n`;
     
@@ -365,13 +339,11 @@ export class SharedDataStore {
     return message;
   }
 
-  // Store notification in localStorage
   private storeNotification(notification: any): void {
     try {
       const notifications = JSON.parse(localStorage.getItem('user-notifications') || '[]');
       notifications.unshift(notification);
       
-      // Keep only last 50 notifications
       if (notifications.length > 50) {
         notifications.splice(50);
       }
@@ -382,7 +354,6 @@ export class SharedDataStore {
     }
   }
 
-  // Show browser notification
   private showBrowserNotification(ticket: UserSupportTicket, adminReply: AdminReply, newStatus?: string): void {
     if ('Notification' in window && Notification.permission === 'granted') {
       const title = `Ticket #${ticket.ticketNumber} Updated`;
@@ -396,7 +367,6 @@ export class SharedDataStore {
     }
   }
 
-  // Get notifications for a specific user
   public getUserNotifications(userEmail: string): any[] {
     try {
       const notifications = JSON.parse(localStorage.getItem('user-notifications') || '[]');
@@ -407,7 +377,6 @@ export class SharedDataStore {
     }
   }
 
-  // Mark notification as read
   public markNotificationAsRead(notificationId: string): void {
     try {
       const notifications = JSON.parse(localStorage.getItem('user-notifications') || '[]');
@@ -433,7 +402,6 @@ export class SharedDataStore {
     return this.supportTickets.filter(ticket => ticket.status === status);
   }
 
-  // Payment Management
   public createPayment(paymentData: Omit<UserPayment, 'id' | 'createdAt'>): UserPayment {
     const payment: UserPayment = {
       ...paymentData,
@@ -464,7 +432,6 @@ export class SharedDataStore {
     return this.payments.filter(payment => payment.status === status);
   }
 
-  // User Management
   public createUser(userData: Omit<UserAccount, 'id' | 'createdAt' | 'updatedAt'>): UserAccount {
     const user: UserAccount = {
       ...userData,
@@ -511,7 +478,6 @@ export class SharedDataStore {
     return false;
   }
 
-  // Statistics
   public getStats() {
     const now = new Date();
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -533,7 +499,6 @@ export class SharedDataStore {
     };
   }
 
-  // Clear all data
   public clearAllData(): void {
     this.orders = [];
     this.supportTickets = [];
@@ -542,7 +507,6 @@ export class SharedDataStore {
     this.saveToStorage();
   }
 
-  // Export data for admin
   public exportOrdersToCSV(): string {
     if (this.orders.length === 0) return "No orders to export";
     
@@ -561,5 +525,4 @@ export class SharedDataStore {
   }
 }
 
-// Export singleton instance
 export const sharedDataStore = SharedDataStore.getInstance();
