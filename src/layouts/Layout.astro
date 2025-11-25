@@ -1242,9 +1242,10 @@ document.addEventListener('DOMContentLoaded', () => {
       // Handle page visibility changes
       document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
-          document.title = '👋 Come back soon! - DevExpress';
+          const originalTitle = document.title.replace('Come back soon! - ', '');
+          document.title = 'Come back soon! - ' + originalTitle;
         } else {
-          document.title = document.title.replace('👋 Come back soon! - ', '');
+          document.title = document.title.replace('Come back soon! - ', '');
         }
       });
 
